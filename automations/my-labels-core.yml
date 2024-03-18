@@ -68,20 +68,66 @@
   aliases: []
 #
 ##### actions: labels
+# The actions: labels have not been formally defined
 -
   name: 'actions:dependabot'
   color: '50790C'
   description: 'Action changes or updates made by dependabot'
   aliases: []
 #
+##### group: labels
+# The group: labels have not been formally defined
+-
+  name: 'group:builders'
+  color: '50790C'
+  description: 'Actions in the ''builders'' group'
+  aliases: []
+-
+  name: 'group:git'
+  color: '50790C'
+  description: 'Actions in the ''git'' group'
+  aliases: []
+-
+  name: 'group:github'
+  color: '50790C'
+  description: 'Actions in the ''github'' group'
+  aliases: []
+-
+  name: 'group:releases'
+  color: '50790C'
+  description: 'Actions in the ''releases'' group'
+  aliases: []
+-
+  name: 'group:utilities'
+  color: '50790C'
+  description: 'Actions in the ''utilities'' group'
+  aliases: []
+#
 ##### impacts: labels
+# The impacts: labels have not been formally defined
 -
   name: 'impacts:actions'
   color: '5F9188'
   description: 'Impacting GitHub actions'
   aliases: []
+-
+  name: 'impacts:examples'
+  color: '5F9188'
+  description: 'Impacting example actions and/or workflows'
+  aliases: []
+-
+  name: 'impacts:repo'
+  color: '5F9188'
+  description: 'Impacting the ''.gitHub'' directory'
+  aliases: []
+-
+  name: 'impacts:workflows'
+  color: '5F9188'
+  description: 'Impacting GitHub workflows'
+  aliases: []
 #
 ##### priority: labels
+# The priority: labels have not been formally defined
 -
   name: 'priority:critical'
   color: '7c0a02'
