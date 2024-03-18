@@ -1,0 +1,55 @@
+name-template: 'Actions Monorepo v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+version-template: '$MAJOR.$MINOR.$PATCH'
+filter-by-commitish: true
+commitish: main
+template: |
+ GitHub Actions Monorepo, version $RESOLVED_VERSION
+ 
+ #### New Actions
+ - New actions here
+ 
+ #### Updated Actions
+ - Updated actions here
+ 
+ 
+ ## Changes
+ 
+ $CHANGES
+  
+ **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+branches:
+  - main
+
+categories:
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+    collapse-after: 5
+  - title: 'New Features'
+    labels:
+      - 'enhancement'
+    collapse-after: 10
+  - title: 'Documentation'
+    labels:
+      - 'documentation'
+    collapse-after: 5
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
+
+version-resolver:
+  major:
+    labels:
+      - 'version:major'
+  minor:
+    labels:
+      - 'version:minor'
+  patch:
+    labels:
+      - 'version:patch'
+  default: 'patch'
+
+exclude-labels:
+  - 'skip-changelog'

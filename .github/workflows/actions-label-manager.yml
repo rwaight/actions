@@ -1,0 +1,134 @@
+# This workflow runs the 'Export label config' and 'Sync labels' actions and includes user input
+name: Label Manager
+run-name: Actions Monorepo Label Manager - ${{ github.event_name }}
+on: 
+  # You can run this with every event, but it's better to run it only when you actually need it.
+  workflow_dispatch:
+    inputs:
+      export_labels:
+        description: 'Export labels from repo'
+        required: true
+        default: false
+        type: boolean
+      sync_labels:
+        description: 'Sync labels from config files'
+        required: true
+        default: false
+        type: boolean
+      debug_output:
+        description: 'Debug output'
+        required: true
+        default: false
+        type: boolean
+  schedule:
+    - cron: '0 10 1 */6 *'  # once every six months, at 10:00 on the first of the month
+
+jobs:
+  # Run export-label-config once every six months, at 10:00 on the first of the month
+  export-labels:
+    name: Export repo label configuration
+    runs-on: ubuntu-latest
+    if: | 
+      (github.repository_owner == 'rwaight') && ( 
+      (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
+      (github.event_name=='workflow_dispatch' && inputs.export_labels==true)
+      )
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        
+      - name: Export label config using rwaight/actions/github/export-label-config
+        #uses: rwaight/actions/github/export-label-config@v1   # can use version specific or main
+        uses: rwaight/actions/github/export-label-config@main  # can use version specific or main
+        with:
+          # This is needed if you're dealing with private repos.
+          #token: ${{ secrets.MY_ACTIONS_TOKEN }}
+          #token: ${{ secrets.GITHUB_TOKEN }}
+          # Set 'raw-result' to `true` if you want to get the raw API reponse. Defaults to `false`.
+          raw-result: false
+          # By default every label entry will have an `aliases` property set to an empty array.
+          # It's for EndBug/label-sync, if you don't want it you can set this to `false`
+          add-aliases: true
+
+      - name: Run workflow debug
+        id: run-workflow-debug
+        if: env.MY_WORKFLOW_DEBUG=='true'
+        run: |
+          echo "workflow debug was set to true... you should probably put something here for debug purposes. "
+          echo ""
+          echo "The GitHub event_name is: ${{ github.event_name }}"
+          echo "The GitHub ref is: ${{ github.ref }}"
+          echo "The GitHub ref_name is: ${{ github.ref_name }}"
+          echo ""
+          echo "For more information, see the GitHub Actions Contexts docs, which are located at: "
+          echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
+          echo "The 'run-workflow-debug' step is now complete. "
+        continue-on-error: true
+
+  # Run sync-label, but only when the user sets 'sync_labels' to true
+  sync-labels:
+    name: Sync labels from config files
+    runs-on: ubuntu-latest
+    # may need to tune the scope of ther job permissions, see:
+    #   https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idpermissions
+    permissions: write-all
+    if: | 
+      (github.repository_owner == 'rwaight') && 
+      (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+
+      - name: Sync labels using rwaight/actions/github/label-sync
+        #uses: rwaight/actions/github/label-sync@v1 # can use version specific or main
+        uses: rwaight/actions/github/label-sync@main # can use version specific or main
+        with:
+          config-file: |
+            https://raw.githubusercontent.com/rwaight/actions/main/automations/my-labels-core.yml
+            https://raw.githubusercontent.com/rwaight/actions/main/automations/my-labels-versioning.yml
+          ##  automations/my-labels-core.yml
+          ##  automations/my-labels-versioning.yml
+          #
+          # The 'request-token' parameter is needed so the remote config-file values can be accessed
+          #request-token: ${{ secrets.MY_ACTIONS_TOKEN }}
+          request-token: ${{ secrets.GITHUB_TOKEN }}
+          # If you want to delete any additional label, set this to true
+          delete-other-labels: true
+          # If you want the action just to show you the preview of the changes, without actually editing the labels, set this to true
+          dry-run: false
+          # You can change the token used to change the labels, this is the default one
+          #token: ${{ secrets.MY_ACTIONS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run workflow debug
+        id: run-workflow-debug
+        if: env.MY_WORKFLOW_DEBUG=='true'
+        run: |
+          echo "workflow debug was set to true... you should probably put something here for debug purposes. "
+          echo ""
+          echo "The GitHub event_name is: ${{ github.event_name }}"
+          echo "The GitHub ref is: ${{ github.ref }}"
+          echo "The GitHub ref_name is: ${{ github.ref_name }}"
+          echo ""
+          echo "For more information, see the GitHub Actions Contexts docs, which are located at: "
+          echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
+          echo "The 'run-workflow-debug' step is now complete. "
+        continue-on-error: true
+
+  # Run the 'not-repo-owner' job if the repository_owner is not correct
+  not-repo-owner:
+    name: Print a random note
+    runs-on: ubuntu-latest
+    if: (github.repository_owner != 'rwaight')
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      - name: Print a message based on a condition
+        id: print-message
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo ""
