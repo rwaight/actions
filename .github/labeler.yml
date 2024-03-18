@@ -9,8 +9,7 @@ actions:autorelease:
 documentation:
 - all:
   - changed-files:
-    - any-glob-to-any-file: ['**/docs/*','examples/**']
-    - any-glob-to-any-file: '**/*.md'
+    - any-glob-to-any-file: ['**/*.md','**/docs/*','examples/**']
     - all-globs-to-all-files: '!CHANGELOG.md'
 
 # Add 'group:builders' label to any file changes within the 'builders' folder
