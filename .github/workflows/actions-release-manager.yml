@@ -32,6 +32,11 @@ on:
         required: true
         default: false
         type: boolean
+      # is_prerelease:
+      #   description: 'Is this a pre-release'
+      #   required: true
+      #   default: false
+      #   type: boolean
 
 jobs:
   # run 'update-release-draft', but only: manual (workflow_dispatch); or closed pull_request; 
@@ -47,6 +52,7 @@ jobs:
     #    #(github.event_name=='push' && github.ref == 'refs/heads/main')
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      #IS_PRERELEASE: ${{ inputs.is_prerelease || 'false' }}
     steps:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
@@ -55,6 +61,7 @@ jobs:
 
       - name: Get the current value of my_custom_version
         id: get-my-custom-version
+        continue-on-error: true
         run: |
           echo "starting the 'get-my-custom-version' step "
           MY_CUSTOM_VERSION=$(jq --raw-output .my_custom_version my-custom-variables.json)
@@ -139,7 +146,10 @@ jobs:
           echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r \".[].tagName\"' ... "
           gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
           echo ""
-          latest_release=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+          ##latest_release=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+          echo "not excluding pre-releases at this time. "
+          echo "::notice::Pre-releases are being included in this workflow"
+          latest_release=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName")
           echo "The latest release version of this repo is \`$latest_release\`"
           echo "The latest release version of this repo is \`$latest_release\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
@@ -157,15 +167,20 @@ jobs:
         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
         with:
           config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
+          #prerelease: ${{ env.IS_PRERELEASE }}
+          prerelease: true
+          include-pre-releases: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ##GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Provide output from release-drafter
         # Run this step if the 'id' output was set in the 'draft-release' step
         if: ${{ steps.draft-release.outputs.id }}
         id: print-release-drafter-outputs
         run: |
+         echo "::notice::The release-drafter step is including pre-releases. "
          echo "The release drafter step outputs are: "
          echo "id: ${{ steps.draft-release.outputs.id }}" 
          echo "name: ${{ steps.draft-release.outputs.name }}" 
@@ -262,14 +277,24 @@ jobs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
+            if [ '${{ env.MY_WORKFLOW_DEBUG }}' == 'true' ]; then
+              echo "VERSION is: $VERSION "
+              echo "RE is     : $RE "
+              echo "MAJOR is  : $MAJOR "
+              echo "MINOR is  : $MINOR "
+              echo "PATCH is  : $PATCH "
+              echo "PRERELEASE: $PRERELEASE"
+            fi
           else
             echo "::error::Version '$VERSION' is not in a valid format" && exit 1
           fi
 
           if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
           if [[ -f $GITHUB_OUTPUT ]]; then
+            echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
             echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
             echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+            echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
             echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
           else
             echo "::set-output name=major-ref::v$MAJOR"
@@ -280,59 +305,83 @@ jobs:
       - name: Check output from get-release-version
         id: check-get-release-version
         env:
+          FULL_VERSION: ${{ steps.get-release-version.outputs.full-version-ref }}
           MAJOR_REF: ${{ steps.get-release-version.outputs.major-ref }}
           MINOR_REF: ${{ steps.get-release-version.outputs.minor-ref }}
-          RELEASE_VERSION: ${GITHUB_REF#refs/*/}
+          PATCH_REF: ${{ steps.get-release-version.outputs.patch-ref }}
+          IS_PRERELEASE: ${{ steps.get-release-version.outputs.is-prerelease }}
         run: |
-          echo "## RELEASE_VERSION variables"
-          echo ${{ env.RELEASE_VERSION }}
-          echo $RELEASE_VERSION
-          echo ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
-          echo ""
-          echo "## MY_REF variables"
-          echo ${{ env.MY_REF }}
-          echo $MY_REF
-          echo ${{ steps.release-vars-output.outputs.MY_REF }}
+          echo "## get-release-version outputs"
+          echo "Full version: ${{ env.FULL_VERSION }} "
+          echo "Major ref   : ${{ env.MAJOR_REF }} "
+          echo "Minor ref   : ${{ env.MINOR_REF }} "
+          echo "Patch ref   : ${{ env.PATCH_REF }} "
+          echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
           echo ""
 
       - name: Set MY_REF and RELEASE_VERSION environmental variable and output
         id: release-vars-output
         run: |
+          echo "## deprecate this step in favor of the 'get-release-version' step "
           echo "MY_REF=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
           echo "MY_REF=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+          echo "deprecate this step in favor of the 'get-release-version' step "
 
-      - name: Check output of MY_REF and RELEASE_VERSION
+      - name: Check output from release-vars-output
         env:
           MY_REF: ${{ steps.release-vars-output.outputs.MY_REF }}
           RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
         run: |
           echo "## RELEASE_VERSION variables"
-          echo ${{ env.RELEASE_VERSION }}
-          echo $RELEASE_VERSION
-          echo ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+          echo "curly brackets with env:  ${{ env.RELEASE_VERSION }} "
+          echo "bash env (dollar sign) :  $RELEASE_VERSION "
+          echo "github steps output    :  ${{ steps.release-vars-output.outputs.RELEASE_VERSION }} "
           echo ""
           echo "## MY_REF variables"
-          echo ${{ env.MY_REF }}
-          echo $MY_REF
-          echo ${{ steps.release-vars-output.outputs.MY_REF }}
+          echo "curly brackets with env:  ${{ env.MY_REF }} "
+          echo "bash env (dollar sign) :  $MY_REF "
+          echo "github steps output    :  ${{ steps.release-vars-output.outputs.MY_REF }} "
           echo ""
+          echo "deprecate the 'release-vars-output' step in favor of the 'get-release-version' step "
 
       - name: This should run when there are tags pushed
         if: github.ref_type == 'tag'
         run: |
-          echo "The ref_type is: ${{ github.ref_type }}"
-          echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
-          echo "GitHub ref: ${{ github.ref }}"
-          echo "GitHub ref_name: ${{ github.ref_name }}"
-          echo "GitHub ref_type: ${{ github.ref_type }}"
+          echo "## GitHub context information "
+          echo ""
+          echo "### GitHub dot "
+          echo "dot ref_type:  ${{ github.ref_type }} "
+          echo "dot ref     :  ${{ github.ref }} "
+          echo "dot ref_name:  ${{ github.ref_name }} "
+          echo ""
+          echo "### GitHub dot event dot release"
+          echo "event dot release dot "
+          echo "    tag_name: ${{ github.event.release.tag_name }} "
+          echo ""
 
       - name: This should run when a release is published
         if: ${{ github.event.release.tag_name }}
         run: |
-          echo "The ref_type is: ${{ github.ref_type }}"
-          echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
+          echo "## GitHub context information "
+          echo ""
+          echo "### GitHub dot "
+          echo "dot ref_type:  ${{ github.ref_type }} "
+          echo ""
+          echo "### GitHub dot event dot release"
+          echo "event dot release dot "
+          echo "    created_at: ${{ github.event.release.created_at }} "
+          echo "    draft     : ${{ github.event.release.draft }} "
+          echo "    id        : ${{ github.event.release.id }} "
+          echo "    name      : ${{ github.event.release.name }} "
+          echo "    tag_name  : ${{ github.event.release.tag_name }} "
+          echo "    prerelease: ${{ github.event.release.prerelease }} "
+          echo "    url       : ${{ github.event.release.url }} "
+          echo ""
+          echo "For more information, see the GitHub Webhook events docs, which are located at: "
+          echo "https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=published#release"
+          echo ""
 
       - name: Run workflow debug
         id: run-workflow-debug
@@ -350,16 +399,19 @@ jobs:
         continue-on-error: true
 
       - name: Prerelease notice
-        if: fromJSON(steps.get-release-version.outputs.is-prerelease)
+        #if: fromJSON(steps.get-release-version.outputs.is-prerelease)
+        if: github.event.release.prerelease == true
         run: |
-          echo "::notice::Pre-release version detected, not moving ref  ${{ steps.get-release-version.outputs.major-ref }}"
+          echo "::notice::Pre-release version detected, not moving ref ${{ steps.get-release-version.outputs.major-ref }}"
 
-      - name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+      - name: Update major and minor release tags for ${{ steps.get-release-version.outputs.full-version-ref }}
+        #old-name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
         id: release-tag-updater
         #uses: rwaight/actions/releases/release-tag-updater@v1 # can use version specific or main
         uses: rwaight/actions/releases/release-tag-updater@main # can use version specific or main
         with:
-          tag: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+          #tag: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+          tag: ${{ steps.get-release-version.outputs.full-version-ref }}
           prefix-regex: 'v?'
           fail-on-non-semver-tag: true # default is false
           update-major: true
