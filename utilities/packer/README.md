@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run packer build action
-        uses: rwaight/actions/builders/packer@v1
+        uses: rwaight/actions/utilities/packer@v1
         with:
           templateFile: 'packer-template.json'
           varFile: 'packer-vars.json'

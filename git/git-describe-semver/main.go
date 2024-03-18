@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/choffmeister/git-describe-semver/cmd"
+	"github.com/rwaight/actions/git/git-describe-semver/cmd"
 )
 
 // nolint: gochecknoglobals
