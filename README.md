@@ -1,4 +1,4 @@
-# GitHub Actions
+# GitHub Actions Monorepo
 
 A collection of GitHub actions to run from your own GitHub repo.
 
