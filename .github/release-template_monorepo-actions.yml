@@ -28,10 +28,6 @@ categories:
     labels:
       - 'enhancement'
     collapse-after: 10
-  - title: 'Workflow Updates'
-    labels:
-      - 'impacts:workflows'
-    collapse-after: 3
   - title: 'Repo Updates'
     labels:
       - 'impacts:repo'
