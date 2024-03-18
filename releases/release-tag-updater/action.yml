@@ -1,0 +1,71 @@
+name: Release Tag Updater
+description: A GitHub action that automatically updates "running release" major and major.minor tags.
+author: ser.soft GmbH
+inputs:
+  tag:
+    description: The tag to use for generating the other tags. If not set, the action will attempt to parse it from $GITHUB_REF.
+    required: false
+  prefix-regex:
+    description: The regex that is used to match allowed tag prefixes.
+    required: false
+    default: 'v?'
+  suffix-regex:
+    description: The regex that is used to match allowed tag suffixes.
+    required: false
+  fail-on-non-semver-tag:
+    description: Whether the action should fail on non-semver compatible tags.
+    required: true
+    default: 'false'
+  skip-repo-setup:
+    description: Whether the repository setup should be skipped (setting user.name and user.email).
+    required: true
+    default: 'false'
+  update-major:
+    description: Whether the major tag should be updated.
+    required: true
+    default: 'true'
+  update-minor:
+    description: Whether the major.minor tag should be updated.
+    required: true
+    default: 'true'
+  create-release:
+    description: Whether a corresponding github release should be created.
+    required: true
+    default: 'true'
+  create-release-as-draft:
+    description: Whether to create the github releases as draft.
+    required: true
+    default: 'false'
+  major-release-title:
+    description: The title of the major release (${version} is replaced by the tag name).
+    required: false
+    default: ${version} Major Release Track
+  major-release-body:
+    description: The body of the major release (${version} is replaced by the tag name).
+    required: false
+    default: This release tracks the latest ${version} major release (${version}.x.y).
+  minor-release-title:
+    description: The title of the minor release (${version} is replaced by the tag name).
+    required: false
+    default: ${version} Minor Release Track
+  minor-release-body:
+    description: The body of the minor release (${version} is replaced by the tag name).
+    required: false
+    default: This release tracks the latest ${version} minor release (${version}.x).
+  update-full-release:
+    description: Whether to update the full release (for `tag`) to mark it as latest release.
+    required: true
+    default: 'false'
+  github-token:
+    description: The token with which to authenticate against GitHub. Only required if releases should be created.
+    required: false
+    default: ${{ github.token }}
+  dry-run:
+    description: '<TEST ONLY> Whether the commands should only be printed but not actually run. Only used in test.'
+    required: false
+runs:
+  using: node20
+  main: dist/index.js
+branding:
+  color: gray-dark
+  icon: tag

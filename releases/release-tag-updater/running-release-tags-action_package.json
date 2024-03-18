@@ -1,0 +1,42 @@
+{
+  "name": "running-release-tags-action",
+  "version": "3.0.0",
+  "description": "A GitHub action that automatically updates \"running release\" major and major.minor tags.",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "pack": "rm -rf dist && ncc build lib/main.js -o dist --license license.txt --target es2022"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sersoft-gmbh/running-release-tags-action.git"
+  },
+  "keywords": [
+    "Release",
+    "SemVer"
+  ],
+  "author": "ser.soft GmbH",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/sersoft-gmbh/running-release-tags-action/issues"
+  },
+  "homepage": "https://github.com/sersoft-gmbh/running-release-tags-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^5.1.1",
+    "@actions/io": "^1.1.3"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.2",
+    "@types/node": "^20.6.2",
+    "@vercel/ncc": "^0.38.0",
+    "typescript": "^5.2.2"
+  }
+}
