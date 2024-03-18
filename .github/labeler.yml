@@ -1,0 +1,56 @@
+
+# Examples from https://github.com/actions/labeler?tab=readme-ov-file#basic-examples
+
+# Add 'documentation' label to any file changes within 'docs' or 'examples' folders
+documentation:
+- changed-files:
+  - any-glob-to-any-file: ['**/docs/*','examples/**']
+  - any-glob-to-any-file: '**/*.md'
+
+# Add 'group:builders' label to any file changes within the 'builders' folder
+group:builders:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'builders/**'
+
+# Add 'group:git' label to any file changes within the 'git' folder
+group:git:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'git/**'
+
+# Add 'group:github' label to any file changes within the 'github' folder
+group:github:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'github/**'
+
+# Add 'group:releases' label to any file changes within the 'releases' folder
+group:releases:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'releases/**'
+
+# Add 'group:utilities' label to any file changes within the 'utilities' folder
+group:utilities:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'utilities/**'
+
+# Add 'impacts:actions' label to any file changes within the grouped actions folders
+impacts:actions:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: ['builders/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
+
+# Add 'impacts:repo' label to any file changes within the '.github' folder
+impacts:repo:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: '.github/**'
+
+# Add 'impacts:workflows' label to any file changes within the '.github/workflows' folder
+impacts:workflows:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**'

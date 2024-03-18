@@ -11,6 +11,7 @@
   aliases: []
 #
 ##### version: labels
+# The version: labels have not been formally defined
 -
   name: 'skip-changelog'
   color: '415259'
