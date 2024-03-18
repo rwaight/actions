@@ -17,8 +17,9 @@ The actions should have their `branding` section updated according to the [updat
 
 The following actions are pending import to this repo:
 - **github**
-    - [`agilepathway/label-checker` action](https://github.com/agilepathway/label-checker)
-    - [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
+    - None at this time.
+- **utilities**
+    - None at this time.
 
 #### Other actions to review
 
