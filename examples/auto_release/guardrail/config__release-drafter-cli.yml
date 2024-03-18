@@ -1,0 +1,7 @@
+_extends: guardrail:.github/release-drafter.yml
+name-template: 'cli-v$RESOLVED_VERSION'
+tag-template: 'cli-v$RESOLVED_VERSION'
+tag-prefix: cli-v
+include-paths:
+  - "modules/cli/src/main/"
+  - "project/src/main/scala/modules/cli.scala"
