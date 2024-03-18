@@ -1,0 +1,32 @@
+name: Other Request
+description: You have a request that does not fall under any other category
+title: "[Other] "
+labels: ["help wanted"]
+#assignees:
+#  - octocat
+body:
+
+  - type: markdown
+    attributes:
+      value: |
+        **Do not include sensitive data in this request.** 
+        
+        If you have questions, provide them in detail in this issue.
+
+  - type: input
+    id: other_request_synopsis
+    attributes:
+      label: Other request synopsis
+      description: Provide a brief summary of your idea
+      placeholder: ex. We should always have second breakfast
+    validations:
+      required: false
+
+  - type: textarea
+    id: other_request_requirements
+    attributes:
+      label: Other request requirements
+      description: Define precisely what you think should be accomplished
+      placeholder: ex. 1) Tool must be able to do A; 2) Tool must be able to do B
+    validations:
+      required: false
