@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/choffmeister/git-describe-semver/internal"
+	"github.com/rwaight/actions/git/git-describe-semver/internal"
 	"github.com/go-git/go-git/v5"
 )
 

@@ -8,7 +8,7 @@ The [`choffmeister/git-describe-semver`](https://github.com/choffmeister/git-des
 
 ## Updates to the action
 
-None at this time.
+The `action.yaml` file has been overhauled to use either `curl` or the GitHub CLI to attempt to download the latest package of `git-describe-semver` from the repo.  Also, a `gh-debug` input has been added, which can be used to provide "debug" information when the action is called.
 
 ## git-describe-semver
 

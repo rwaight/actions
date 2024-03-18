@@ -1,38 +1,420 @@
 name: 'Git describe semver'
-description: ''
+description: 'A command similar to ''git describe --tags'' that produces semver compatible versions that follow to semver sorting rules.'
+branding:
+  icon: 'git-commit'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
 inputs:
+  version:
+    description: 'The version of Git describe semver to use'
+    default: 'latest'
+  dir:
+    description: 'Git worktree directory'
+    #default: '.'
+    default: '' # note # the github action output is failing without a proper default, might need to set this back to '.'
   fallback:
-    description: 'fallback'
+    description: 'Fallback to given tag name if no tag is available'
     default: 'v0.0.0'
   drop-prefix:
-    description: 'drop-prefix'
-    default: 'false'
+    description: 'Drop any present prefix (like v) from the output'
+    #default: 'false'
+    default: ''
   prerelease-prefix:
-    description: 'prerelease-suffix'
-    default: 'dev'
+    description: 'Adds a dash-separated suffix to the prerelease part'
+    #default: 'dev'
+    default: ''
   prerelease-suffix:
-    description: 'prerelease-suffix'
+    description: 'Suffix to add to prereleases'
     default: ''
   prerelease-timestamped:
     description: 'prerelease-timestamped'
+    #default: 'false'
+    default: ''
+  gh-token:
+    description: 'an input for the GITHUB_TOKEN'
+    #default: ''
+    default: ${{ github.token }}
+  gh-debug:
+    description: 'if debug information should be provided'
     default: 'false'
 outputs:
   version:
-    description: 'version'
+    description: 'The version output from the updated action configuration'
     value: ${{ steps.git-describe-semver.outputs.version }}
+  version-original:
+    description: 'The version output from the original action configuration'
+    value: ${{ steps.original-git-describe-semver.outputs.version }}
 runs:
   using: 'composite'
   steps:
-    - uses: docker://ghcr.io/choffmeister/git-describe-semver:latest
-      id: git-describe-semver
-      with:
-        args: >-
-          --fallback="${{ inputs.fallback }}"
-          --drop-prefix="${{ inputs.drop-prefix }}"
-          --prerelease-prefix="${{ inputs.prerelease-prefix }}"
-          --prerelease-suffix="${{ inputs.prerelease-suffix }}"
-          --prerelease-timestamped="${{ inputs.prerelease-timestamped }}"
-          --format="version=<version>"
-          $GITHUB_OUTPUT
-    - run: echo ${{ steps.git-describe-semver.outputs.version }}
+    - name: Download the latest release using curl
+      if: inputs.version == 'latest'
+      #if: inputs.version == 'latest' && ${{ inputs.gh-token }} != ''
+      id: download-latest-curl
+      continue-on-error: true
+      run: |
+        cd /tmp
+        CURL_RELEASE_API="https://api.github.com/repos/rwaight/actions/releases/latest"
+        echo "Using curl to get information about the latest release of git-describe-semver."
+        BROWSER_DL_URL=$(curl --silent -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ inputs.gh-token }}" \
+         -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_RELEASE_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .browser_download_url')
+        CURL_ASSET_URL=$(curl --silent -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ inputs.gh-token }}" \
+         -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_RELEASE_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .url')
+        CURL_ASSET_ID=$(curl --silent -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ inputs.gh-token }}" \
+         -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_RELEASE_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .id')
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The variables are: "
+            echo "BROWSER_DL_URL: $BROWSER_DL_URL "
+            echo "CURL_ASSET_URL: $CURL_ASSET_URL "
+            echo " CURL_ASSET_ID: $CURL_ASSET_ID  "
+            echo "Going to download the file using the CURL_ASSET_URL variable... "
+        fi
+        curl --silent -L -H "Accept: application/octet-stream" -H "Authorization: Bearer ${{ inputs.gh-token }}" \
+         -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_ASSET_URL" | tar xz
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The file should have been downloaded and extracted... "
+            echo "Running ls on the current directory... "
+            ls -l
+            echo "Moving git-describe-semver to /usr/local/bin"
+        fi
+        mv git-describe-semver /usr/local/bin
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then echo "The 'download-latest-curl' step is now done."; fi
       shell: bash
+      # end of step 'download-latest-curl'
+    - name: Download the latest release using the GitHub CLI
+      if: inputs.version == 'latest' && steps.download-latest-curl.outcome == 'failure'
+      id: download-latest-gh-cli
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+      run: |
+        echo "The step 'download-latest-curl' must have failed, running step 'download-latest-gh-cli'... "
+        cd /tmp
+        GH_RELEASE_API="/repos/rwaight/actions/releases/latest"
+        GH_ASSET_URL=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "$GH_RELEASE_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .url')
+        GH_ASSET_ID=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "$GH_RELEASE_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .id')
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The variables are: "
+            echo "GH_ASSET_URL: $GH_ASSET_URL "
+            echo " GH_ASSET_ID: $GH_ASSET_ID  "
+            echo "Going to download the file using the asset file ID of $GH_ASSET_ID "
+        fi
+        gh api -H "Accept: application/octet-stream" -H "X-GitHub-Api-Version: 2022-11-28" \
+         /repos/rwaight/actions/releases/assets/$GH_ASSET_ID | tar xz
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The file should have been downloaded and extracted... "
+            echo "Running ls on the current directory... "
+            ls -l
+            echo "Moving git-describe-semver to /usr/local/bin"
+        fi
+        mv git-describe-semver /usr/local/bin
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then echo "The 'download-latest-gh-cli' step is now done."; fi
+      shell: bash
+      # end of step 'download-latest-gh-cli'
+    - name: Final attempt to download the latest release
+      if: inputs.version == 'latest' && steps.download-latest-curl.outcome == 'failure' && steps.download-latest-gh-cli.outcome == 'failure'
+      id: download-latest-final-attempt
+      #continue-on-error: true
+      run: |
+        echo "The steps download-latest-curl and download-latest-gh-cli must have failed ... "
+        cd /tmp
+        echo "This will probably fail and will need to be updated to use the new API requirements or use the GitHub CLI..."
+        URL=$(curl -fsSL https://api.github.com/repos/rwaight/actions/releases/latest | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .browser_download_url')
+        curl -fsSL "$URL" | tar xz
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "Running ls on the current directory... "
+            ls -la
+        fi
+        mv git-describe-semver /usr/local/bin
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then echo "This step is now done."; fi
+      shell: bash
+      # end of step 'download-latest-final-attempt'
+    - name: Download a specific version (${{ inputs.version }}) using curl
+      if: inputs.version != 'latest'
+      id: download-specific-curl
+      continue-on-error: true
+      run: |
+        cd /tmp
+        VERSION="$(echo ${{ inputs.version }} | sed 's#^v##')"
+        CURL_TAG_API="https://api.github.com/repos/rwaight/actions/releases/tags/v$VERSION"
+        echo "Using curl to get information about the ${{ inputs.version }} version of git-describe-semver."
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then echo "The CURL_TAG_API is $CURL_TAG_API "; fi
+        BROWSER_DL_URL=$(curl --silent -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ inputs.gh-token }}" \
+         -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_TAG_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .browser_download_url')
+        CURL_ASSET_URL=$(curl --silent -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ inputs.gh-token }}" \
+         -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_TAG_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .url')
+        CURL_ASSET_ID=$(curl --silent -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ inputs.gh-token }}" \
+         -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_TAG_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .id')
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The variables are: "
+            echo "BROWSER_DL_URL: $BROWSER_DL_URL "
+            echo "CURL_ASSET_URL: $CURL_ASSET_URL "
+            echo " CURL_ASSET_ID: $CURL_ASSET_ID  "
+            echo "Going to download the file using the CURL_ASSET_URL variable... "
+        fi
+        curl --silent -L -H "Accept: application/octet-stream" -H "Authorization: Bearer ${{ inputs.gh-token }}" \
+         -H "X-GitHub-Api-Version: 2022-11-28" "$CURL_ASSET_URL" | tar xz
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The file should have been downloaded and extracted... "
+            echo "Running ls on the current directory... "
+            ls -l
+            echo "Moving git-describe-semver to /usr/local/bin"
+        fi
+        mv git-describe-semver /usr/local/bin
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then echo "This step is now done."; fi
+      shell: bash
+      # end of step 'download-specific-curl'
+    - name: Download a specific version (${{ inputs.version }}) using the GitHub CLI
+      if: inputs.version != 'latest' && steps.download-specific-curl.outcome == 'failure'
+      id: download-specific-gh-cli
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+      run: |
+        echo "The step download-specific-curl must have failed... "
+        cd /tmp
+        VERSION="$(echo ${{ inputs.version }} | sed 's#^v##')"
+        GH_TAG_API="/repos/rwaight/actions/releases/tags/v$VERSION"
+        echo "Using the GitHub CLI to get information about version $VERSION of git-describe-semver."
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then echo "The GH_TAG_API is $GH_TAG_API "; fi
+        GH_ASSET_URL=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "$GH_TAG_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .url')
+        GH_ASSET_ID=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "$GH_TAG_API" \
+         | jq -r '.assets[] | select(.name|(test ("git-describe-semver") and test("linux_amd64\\.tar\\.gz$"))) | .id')
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The variables are: "
+            echo "GH_ASSET_URL: $GH_ASSET_URL "
+            echo " GH_ASSET_ID: $GH_ASSET_ID  "
+            echo "Going to download the file using the asset file ID of $GH_ASSET_ID "
+        fi
+        gh api -H "Accept: application/octet-stream" -H "X-GitHub-Api-Version: 2022-11-28" \
+         /repos/rwaight/actions/releases/assets/$GH_ASSET_ID | tar xz
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The file should have been downloaded and extracted... "
+            echo "Running ls on the current directory... "
+            ls -l
+            echo "Moving git-describe-semver to /usr/local/bin"
+        fi
+        mv git-describe-semver /usr/local/bin
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then echo "This step is now done."; fi
+      shell: bash
+      # end of step 'download-specific-gh-cli'
+    - name: Final attempt to download a specific version (${{ inputs.version }})
+      if: inputs.version != 'latest' && steps.download-specific-curl.outcome == 'failure' && steps.download-specific-gh-cli.outcome == 'failure'
+      id: download-specific-final-attempt
+      #continue-on-error: true
+      run: |
+        echo "The steps download-specific-curl and download-specific-gh-cli must have failed... "
+        cd /tmp
+        echo "This will probably fail and will need to be updated to use the new API requirements or use the GitHub CLI..."
+        VERSION="$(echo ${{ inputs.version }} | sed 's#^v##')"
+        URL="https://github.com/rwaight/actions/releases/download/v${VERSION}/git-describe-semver_${VERSION}_linux_amd64.tar.gz"
+        curl -fsSL "$URL" | tar xz
+        echo "Running ls on the current directory... "
+        ls -la
+        mv git-describe-semver /usr/local/bin
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then echo "This step is now done."; fi
+      shell: bash
+      # end of step 'download-specific-final-attempt'
+    - name: Configure the options to use with git-describe-semver
+      id: configure-command-options
+      run: |
+        echo "need to set the options that will be used when running git-describe-semver, instead of using them all below"
+        ## the double number signs below are for line spacing and readability only
+        ##
+        OPTIONS=""
+        ##
+        ## inputs.dir
+        if [ '${{ inputs.dir }}' == '' ]; then
+            echo "The 'dir' input was not set, not adding it to the command options. "
+        elif [ '${{ inputs.dir }}' == '.' ]; then
+            OPTIONS+=" --dir='${{ inputs.dir }}'"
+        else
+            OPTIONS+=" --dir='${{ inputs.dir }}'"
+        fi
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The OPTIONS variable is currently set to: "
+            echo "$OPTIONS"
+        fi
+        ##
+        ## inputs.fallback
+        if [ '${{ inputs.fallback }}' == '' ]; then
+            echo "The 'fallback' input was not set, not adding it to the command options. "
+        elif [ '${{ inputs.fallback }}' == 'v0.0.0' ]; then
+            OPTIONS+=" --fallback='${{ inputs.fallback }}'"
+        else
+            OPTIONS+=" --fallback='${{ inputs.fallback }}'"
+        fi
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The OPTIONS variable is currently set to: "
+            echo "$OPTIONS"
+        fi
+        ##
+        ## inputs.drop-prefix
+        if [ '${{ inputs.drop-prefix }}' == '' ]; then
+            echo "The 'drop-prefix' input was not set, not adding it to the command options. "
+        elif [ '${{ inputs.drop-prefix }}' == 'false' ]; then
+            OPTIONS+=" --drop-prefix='${{ inputs.drop-prefix }}'"
+        elif [ '${{ inputs.drop-prefix }}' == 'true' ]; then
+            OPTIONS+=" --drop-prefix='${{ inputs.drop-prefix }}'"
+        else
+            #####OPTIONS+=" --drop-prefix='${{ inputs.drop-prefix }}'"
+            echo "else ... The 'drop-prefix' input was not set, not adding it to the command options. "
+        fi
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The OPTIONS variable is currently set to: "
+            echo "$OPTIONS"
+        fi
+        ##
+        ## inputs.prerelease-prefix
+        if [ '${{ inputs.prerelease-prefix }}' == '' ]; then
+            echo "The 'prerelease-prefix' input was not set, not adding it to the command options. "
+        elif [ '${{ inputs.prerelease-prefix }}' != '' ]; then
+            OPTIONS+=" --prerelease-prefix='${{ inputs.prerelease-prefix }}'"
+        else
+            #####OPTIONS+=" --prerelease-prefix='${{ inputs.prerelease-prefix }}'"
+            echo "else ... The 'prerelease-prefix' input was not set, not adding it to the command options. "
+        fi
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The OPTIONS variable is currently set to: "
+            echo "$OPTIONS"
+        fi
+        ##
+        ## inputs.prerelease-suffix
+        if [ '${{ inputs.prerelease-suffix }}' == '' ]; then
+            echo "The 'prerelease-suffix' input was not set, not adding it to the command options. "
+        elif [ '${{ inputs.prerelease-suffix }}' != '' ]; then
+            OPTIONS+=" --prerelease-suffix='${{ inputs.prerelease-suffix }}'"
+        else
+            #####OPTIONS+=" --prerelease-suffix='${{ inputs.prerelease-suffix }}'"
+            echo "else ... The 'prerelease-suffix' input was not set, not adding it to the command options. "
+        fi
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The OPTIONS variable is currently set to: "
+            echo "$OPTIONS"
+        fi
+        ##
+        ## inputs.prerelease-timestamped
+        if [ '${{ inputs.prerelease-timestamped }}' == '' ]; then
+            echo "The 'prerelease-timestamped' input was not set, not adding it to the command options. "
+        elif [ '${{ inputs.prerelease-timestamped }}' == 'false' ]; then
+            OPTIONS+=" --prerelease-timestamped='${{ inputs.prerelease-timestamped }}'"
+        elif [ '${{ inputs.prerelease-timestamped }}' == 'true' ]; then
+            OPTIONS+=" --prerelease-timestamped='${{ inputs.prerelease-timestamped }}'"
+        else
+            #####OPTIONS+=" --prerelease-timestamped='${{ inputs.prerelease-timestamped }}'"
+            echo "else ... The 'prerelease-timestamped' input was not set to a valid value, not adding it to the command options. "
+        fi
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "The OPTIONS variable is currently set to: "
+            echo "$OPTIONS"
+        fi
+        ##
+        echo "OPTIONS=$OPTIONS" >> $GITHUB_ENV
+      shell: bash
+      # end of step 'configure-command-options'
+    - name: Run original-git-describe-semver
+      id: original-git-describe-semver
+      run: |
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "Going to run the original git-describe-semver command "
+            echo ""
+        fi
+        echo "running 'git-describe-semver' and sending it to GITHUB_OUTPUT"
+        git-describe-semver \
+          --dir="${{ inputs.dir }}" \
+          --fallback="${{ inputs.fallback }}" \
+          --drop-prefix="${{ inputs.drop-prefix }}" \
+          --prerelease-prefix="${{ inputs.prerelease-prefix }}" \
+          --prerelease-suffix="${{ inputs.prerelease-suffix }}" \
+          --prerelease-timestamped="${{ inputs.prerelease-timestamped }}" \
+          --format="version=<version>" \
+          $GITHUB_OUTPUT
+        echo "the step 'original-git-describe-semver' has finished. "
+      shell: bash
+      # end of step 'original-git-describe-semver'
+    - name: Echo the output from the original-git-describe-semver
+      id: print-original-git-describe-semver
+      run: echo ${{ steps.original-git-describe-semver.outputs.version }}
+      shell: bash
+      # end of step 'print-original-git-describe-semver'
+    - name: Run git-describe-semver
+      id: git-describe-semver
+      run: |
+        if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+            echo "Going to run git-describe-semver with the following options: "
+            echo "$OPTIONS"
+            echo ""
+        fi
+        echo "running 'git-describe-semver' and sending it to GITHUB_OUTPUT"
+        git-describe-semver \
+          "$OPTIONS" \ 
+          --format="version=<version>" \
+          $GITHUB_OUTPUT
+        echo "running again to get the version"
+        gitversion=$(git-describe-semver "$OPTIONS" --format="version=<version>")
+        echo "version=$gitversion" >> $GITHUB_OUTPUT
+        echo "the step 'git-describe-semver' has finished. "
+      shell: bash
+      # end of step 'git-describe-semver'
+    - name: Echo the output from the git-describe-semver step
+      id: print-git-describe-semver
+      run: echo ${{ steps.git-describe-semver.outputs.version }}
+      shell: bash
+      # end of step 'print-git-describe-semver'
+
+# original 'git-describe-semver' step
+#     #
+#     # original 'git-describe-semver' step
+#     # - name: Run git-describe-semver
+#     #   id: git-describe-semver
+#     #   run: |
+#     #     git-describe-semver \
+#     #       --dir="${{ inputs.dir }}" \
+#     #       --fallback="${{ inputs.fallback }}" \
+#     #       --drop-prefix="${{ inputs.drop-prefix }}" \
+#     #       --prerelease-prefix="${{ inputs.prerelease-prefix }}" \
+#     #       --prerelease-suffix="${{ inputs.prerelease-suffix }}" \
+#     #       --prerelease-timestamped="${{ inputs.prerelease-timestamped }}" \
+#     #       --format="version=<version>" \
+#     #       $GITHUB_OUTPUT
+#     #   shell: bash
+#     #   # end of step 'git-describe-semver'
+#     # original 'git-describe-semver' step
+#     #
+# original 'git-describe-semver' step
+
+# old v1 'git-describe-semver' step
+#     # old v1 'git-describe-semver' step
+#     # - name: Run git-describe-semver
+#     #   id: git-describe-semver
+#     #   run: |
+#     #     if [ '${{ inputs.gh-debug }}' == 'true' ]; then
+#     #         echo "Going to run git-describe-semver with the following options: "
+#     #         echo "$OPTIONS"
+#     #         echo ""
+#     #     fi
+#     #     git-describe-semver \
+#     #       "$OPTIONS" \
+#     #       --format="version=<version>" \
+#     #       >> $GITHUB_OUTPUT
+#     #   shell: bash
+#     #   # use the following if the above output does not work
+#     #     # #gitversion=$(git-describe-semver "$OPTIONS" --format="version=<version>")
+#     #     # #echo "$gitversion" >> $GITHUB_OUTPUT
+#     #   # end of step 'git-describe-semver'
+#     # old v1 'git-describe-semver' step
+# old v1 'git-describe-semver' step
+
+# # May need to switch to the Dockerfile, if we are unable to publish the package
+# runs:
+#   using: 'docker'
+#   image: 'Dockerfile'

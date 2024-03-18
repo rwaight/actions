@@ -1,4 +1,4 @@
-module github.com/choffmeister/git-describe-semver
+module github.com/rwaight/actions/git/git-describe-semver
 
 go 1.19
 

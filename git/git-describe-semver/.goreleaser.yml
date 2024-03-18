@@ -1,5 +1,6 @@
 # This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
+project_name: git-describe-semver
 before:
   hooks:
     - go mod tidy
@@ -13,34 +14,56 @@ builds:
     goarch:
       - amd64
       - arm64
+    id: "git-describe-semver"
+release:
+  # https://goreleaser.com/customization/release/#github
+  # Repo in which the release will be created.
+  # Default is extracted from the origin remote URL or empty if its private hosted.
+  github:
+    owner: rwaight
+    name: actions
+  # 'draft' - If set to true, will not auto-publish the release. Available only for GitHub and Gitea.
+  draft: true
+  # 'replace_existing_draft' - Whether to remove existing draft releases with the same name before creating a new one.
+  # Only effective if `draft` is set to true. Available only for GitHub. Since: v1.11
+  #replace_existing_draft: true
+  replace_existing_draft: false
+  # 'mode' - What to do with the release notes in case there the release already exists.
+  mode: append
+  # 'make_latest' - If set to false, will NOT mark the release as "latest".
+  make_latest: true
+  # 'name_template' - You can change the name of the release.
+  name_template: 'Actions Monorepo v{{.Version}}'
+  # '.github/release-template_monorepo-actions.yml' is set to 'Actions Monorepo v$RESOLVED_VERSION'
 dockers:
   - image_templates:
-      - "ghcr.io/choffmeister/{{ .ProjectName }}:{{ .Version }}-amd64"
-      - "ghcr.io/choffmeister/{{ .ProjectName }}:latest-amd64"
+      - "ghcr.io/rwaight/actions/{{ .ProjectName }}:{{ .Version }}-amd64"
+      - "ghcr.io/rwaight/actions/{{ .ProjectName }}:latest-amd64"
     use: buildx
     goarch: amd64
     dockerfile: Dockerfile
     build_flag_templates:
       - "--platform=linux/amd64"
   - image_templates:
-      - "ghcr.io/choffmeister/{{ .ProjectName }}:{{ .Version }}-arm64v8"
-      - "ghcr.io/choffmeister/{{ .ProjectName }}:latest-arm64v8"
+      - "ghcr.io/rwaight/actions/{{ .ProjectName }}:{{ .Version }}-arm64v8"
+      - "ghcr.io/rwaight/actions/{{ .ProjectName }}:latest-arm64v8"
     use: buildx
     goarch: arm64
     dockerfile: Dockerfile
     build_flag_templates:
       - "--platform=linux/arm64/v8"
 docker_manifests:
-  - name_template: ghcr.io/choffmeister/{{ .ProjectName }}:{{ .Version }}
+  - name_template: ghcr.io/rwaight/actions/{{ .ProjectName }}:{{ .Version }}
     image_templates:
-      - ghcr.io/choffmeister/{{ .ProjectName }}:{{ .Version }}-amd64
-      - ghcr.io/choffmeister/{{ .ProjectName }}:{{ .Version }}-arm64v8
-  - name_template: ghcr.io/choffmeister/{{ .ProjectName }}:latest
+      - ghcr.io/rwaight/actions/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/rwaight/actions/{{ .ProjectName }}:{{ .Version }}-arm64v8
+  - name_template: ghcr.io/rwaight/actions/{{ .ProjectName }}:latest
     image_templates:
-      - ghcr.io/choffmeister/{{ .ProjectName }}:latest-amd64
-      - ghcr.io/choffmeister/{{ .ProjectName }}:latest-arm64v8
+      - ghcr.io/rwaight/actions/{{ .ProjectName }}:latest-amd64
+      - ghcr.io/rwaight/actions/{{ .ProjectName }}:latest-arm64v8
 checksum:
-  name_template: 'checksums.txt'
+  #name_template: 'checksums.txt'
+  name_template: 'git-describe-semver_checksums.txt'
 snapshot:
   name_template: "0.0.0-dev"
 changelog:
