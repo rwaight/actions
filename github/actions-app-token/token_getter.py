@@ -74,7 +74,9 @@ class GitHubApp(GitHub):
             "iss": self.app_id
         }
         with open(self.path, 'rb') as key_file:
-            private_key = default_backend().load_pem_private_key(key_file.read(), None)
+            # this fails #private_key = default_backend().load_pem_private_key(key_file.read(), None)
+            private_key = default_backend().load_pem_private_key(key_file.read(), password=None, backend=default_backend())
+            #private_key = default_backend().load_pem_private_key(key_file.read(), None, backend=default_backend())
             return jwt.encode(payload, private_key, algorithm='RS256')
     
     def get_installation_id(self):
@@ -149,4 +151,7 @@ if __name__ == '__main__':
     assert token, 'Token not returned!'
 
     print(f"::add-mask::{token}")
-    print(f"::set-output name=app_token::{token}")
+    # the 'set-output- command is deprecated
+    #print(f"::set-output name=app_token::{token}")
+    # try to use 'option 2' as mentioned in the README for this action
+    print(f"app_token={token} >> $GITHUB_OUTPUT")
