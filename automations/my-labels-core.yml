@@ -1,0 +1,128 @@
+## Core GitHub Labels
+##
+## Note: When planning to migrate an old label to a new label,
+##       you should first add the old label to the 'aliases'
+##       section of the new label, then run label sync, and then
+##       you can comment out the old label. Once the old label
+##       has been migrated to the new label, across all repos,
+##       it can then be deleted in this file.
+#
+##### default GitHub labels
+# The following labels were part of GitHub repos by default
+-
+  name: 'bug'
+  color: 'd73a4a'
+  description: 'Something is not working'
+  aliases: []
+-
+  name: 'documentation'
+  color: '0075ca'
+  description: 'Improvements or additions to documentation'
+  aliases: []
+-
+  name: 'duplicate'
+  color: 'cfd3d7'
+  description: 'This issue or pull request already exists'
+  aliases: []
+-
+  name: 'enhancement'
+  color: 'a2eeef'
+  description: 'New feature or request'
+  aliases: []
+-
+  name: 'good first issue'
+  color: '7057ff'
+  description: 'Good for newcomers'
+  aliases: []
+-
+  name: 'help wanted'
+  color: '008672'
+  description: 'Extra attention is needed'
+  aliases: []
+-
+  name: 'invalid'
+  color: 'e4e669'
+  description: 'This does not seem right'
+  aliases: []
+-
+  name: 'question'
+  color: 'd876e3'
+  description: 'Further information is requested'
+  aliases: []
+-
+  name: 'wontfix'
+  color: 'ffffff'
+  description: 'This will not be worked on'
+  aliases: []
+#
+##### extra ungrouped labels
+-
+  name: 'blocked'
+  color: 'B60205'
+  description: 'Unable to complete due to some sort of restriction'
+  aliases: []
+-
+  name: 'discuss'
+  color: '095057'
+  description: 'Requires additional discussion before this can be moved forward in the process.'
+  aliases: []
+#
+##### actions: labels
+-
+  name: 'actions:dependabot'
+  color: '50790C'
+  description: 'Action changes or updates made by dependabot'
+  aliases: []
+#
+##### impacts: labels
+-
+  name: 'impacts:actions'
+  color: '5F9188'
+  description: 'Impacting GitHub actions'
+  aliases: []
+#
+##### priority: labels
+-
+  name: 'priority:critical'
+  color: '7c0a02'
+  description: 'Determined to be critical priority'
+  aliases: []
+-
+  name: 'priority:high'
+  color: 'b22222'
+  description: 'Determined to be high priority'
+  aliases: []
+-
+  name: 'priority:medium'
+  color: 'E88A1A'
+  description: 'Determined to be medium priority'
+  aliases: []
+-
+  name: 'priority:low'
+  color: 'F1BC31'
+  description: 'Determined to be low priority'
+  aliases: []
+-
+  name: 'priority:none'
+  color: 'F9D0C4'
+  description: 'Determined to have no priority; none at all.'
+  aliases: []
+-
+  name: 'triage:priority-needed'
+  color: 'E17668'
+  description: 'Need to have the priority determined'
+  aliases: []
+#
+##### triage: labels
+# The triage: labels have not been formally defined
+-
+  name: 'triage:needs-assigned'
+  color: 'E17668'
+  description: 'Needs to be assigned'
+  aliases: []
+-
+  name: 'triage:stale'
+  color: '7E782E'
+  description: 'Issues that have not been updated in a set amount of time'
+  aliases: []
+#
