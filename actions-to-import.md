@@ -28,6 +28,8 @@ The following actions should be reviewed as candidates to import to this repo:
     - [`mdomke/git-semver`](https://github.com/mdomke/git-semver)
     - [`actions-ecosystem/action-get-latest-tag`](https://github.com/actions-ecosystem/action-get-latest-tag)
     - [`WyriHaximus/github-action-get-previous-tag`](https://github.com/WyriHaximus/github-action-get-previous-tag)
+    - [`WyriHaximus/github-action-next-semvers`](https://github.com/WyriHaximus/github-action-next-semvers)
+    - [`phish108/autotag-action`](https://github.com/phish108/autotag-action)
 - **github**
     - [`actions-cool/issues-helper`](https://github.com/actions-cool/issues-helper)
     - [`Ismoh-Games/find-linked-issues`](https://github.com/Ismoh-Games/find-linked-issues)

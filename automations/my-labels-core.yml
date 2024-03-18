@@ -70,6 +70,11 @@
 ##### actions: labels
 # The actions: labels have not been formally defined
 -
+  name: 'actions:autorelease'
+  color: 'baa938'
+  description: 'This is an automatically-created PR to trigger a release'
+  aliases: []
+-
   name: 'actions:dependabot'
   color: '50790C'
   description: 'Action changes or updates made by dependabot'
