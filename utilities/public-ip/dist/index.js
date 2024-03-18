@@ -2737,20 +2737,30 @@
     function run() {
         return __awaiter(this, void 0, void 0, function* () {
             const maxRetries = parseInt(core.getInput("maxRetries"), 10);
-            const http = new http_client_1.HttpClient("haythem/public-ip", undefined, {
+            const http = new http_client_1.HttpClient("rwaight/actions/utilities/public-ip", undefined, {
                 allowRetries: true,
                 maxRetries: maxRetries
             });
-            try {
-                const ipv4 = yield http.getJson("https://api.ipify.org?format=json");
-                const ipv6 = yield http.getJson("https://api64.ipify.org?format=json");
-                core.setOutput("ipv4", ipv4.result.ip);
-                core.setOutput("ipv6", ipv6.result.ip);
-                core.info(`ipv4: ${ipv4.result.ip}`);
-                core.info(`ipv6: ${ipv6.result.ip}`);
-            }
-            catch (error) {
-                core.setFailed(error === null || error === void 0 ? void 0 : error.message);
+            let numTries = 0;
+            let success = false;
+            while (!success && numTries < maxRetries) {
+                try {
+                    core.info(`Attempt: ${numTries + 1} of ${maxRetries}`);
+                    const ipv4 = yield http.getJson("https://api.ipify.org?format=json");
+                    const ipv6 = yield http.getJson("https://api64.ipify.org?format=json");
+                    core.setOutput("ipv4", ipv4.result.ip);
+                    core.setOutput("ipv6", ipv6.result.ip);
+                    core.info(`ipv4: ${ipv4.result.ip}`);
+                    core.info(`ipv6: ${ipv6.result.ip}`);
+                    success = true;
+                }
+                catch (error) {
+                    core.debug(`Error: ${error === null || error === void 0 ? void 0 : error.message}.`);
+                    if (numTries == maxRetries - 1) {
+                        core.setFailed(error === null || error === void 0 ? void 0 : error.message);
+                    }
+                }
+                numTries++;
             }
         });
     }
