@@ -48,6 +48,7 @@ impacts:repo:
 - any:
   - changed-files:
     - any-glob-to-any-file: '.github/**'
+    - any-glob-to-any-file: '!.github/workflows/**'
 
 # Add 'impacts:workflows' label to any file changes within the '.github/workflows' folder
 impacts:workflows:
