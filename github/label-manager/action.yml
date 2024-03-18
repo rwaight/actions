@@ -1,0 +1,16 @@
+name: "Issue Label Manager Action"
+description: "Will update repo's labels based on data in JSON file located at $REPO/.github/labels.json"
+author: "Benjamin Lannon <benjamin@lannonbr.com>"
+runs:
+  using: "node16"
+  main: "lib/index.js"
+branding:
+  icon: "upload"
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+inputs:
+  delete:
+    description: "Will not delete any existing labels and will only modify / create them"
+    required: false
+    default: 'false'

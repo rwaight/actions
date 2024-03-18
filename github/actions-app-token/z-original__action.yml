@@ -1,0 +1,19 @@
+name: 'Get an app token in an Actions workflow.'
+description: Useful for remedying the problem of restricted access tokens, especially on PRs from forks.
+author: Hamel Husain
+inputs:
+  APP_PEM:
+    description: a base64 encoded string version of your PEM file used to authenticate as a GitHub App.  You can apply this encoding in the terminal `cat key.pem | base64`
+    required: true
+  APP_ID:
+    description: you GITHUB App ID.
+    required: true
+outputs:
+  app_token:
+    description: The installation access token for the GitHub App corresponding to and the current repository.
+branding:
+  color: 'white'
+  icon: 'unlock'
+runs:
+  using: 'docker'
+  image: 'docker://docker.elastic.co/docs/app-token'

@@ -1,0 +1,37 @@
+name: 'Find Comment'
+description: 'Find an issue or pull request comment'
+branding:
+  icon: 'search'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+inputs:
+  token:
+    description: 'GITHUB_TOKEN or a repo scoped PAT.'
+    default: ${{ github.token }}
+  repository:
+    description: 'The full name of the repository containing the issue or pull request.'
+    default: ${{ github.repository }}
+  issue-number:
+    description: 'The number of the issue or pull request in which to search.'
+  comment-author:
+    description: 'The GitHub user name of the comment author.'
+  body-includes:
+    description: 'A string to search for in the body of comments.'
+  body-regex:
+    description: 'A regular expression to search for in the body of comments.'
+  direction:
+    description: 'Search direction, specified as `first` or `last`'
+    default: first
+  nth:
+    description: '0-indexed number, specifying which comment to return if multiple are found'
+    default: 0
+outputs:
+  comment-id:
+    description: 'The id of the matching comment found.'
+  comment-body:
+    description: 'The body of the matching comment found.'
+  comment-author:
+    description: 'The author of the matching comment found.'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
