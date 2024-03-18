@@ -32,6 +32,11 @@ on:
         required: true
         default: false
         type: boolean
+      # is_prerelease:
+      #   description: 'Is this a pre-release'
+      #   required: true
+      #   default: false
+      #   type: boolean
 
 jobs:
   # run 'update-release-draft', but only: manual (workflow_dispatch); or closed pull_request; 
@@ -47,6 +52,7 @@ jobs:
     #    #(github.event_name=='push' && github.ref == 'refs/heads/main')
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      #IS_PRERELEASE: ${{ inputs.is_prerelease || 'false' }}
     steps:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
@@ -140,7 +146,10 @@ jobs:
           echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r \".[].tagName\"' ... "
           gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
           echo ""
-          latest_release=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+          ##latest_release=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+          echo "not excluding pre-releases at this time. "
+          echo "::notice::Pre-releases are being included in this workflow"
+          latest_release=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName")
           echo "The latest release version of this repo is \`$latest_release\`"
           echo "The latest release version of this repo is \`$latest_release\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
@@ -158,6 +167,9 @@ jobs:
         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
         with:
           config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
+          #prerelease: ${{ env.IS_PRERELEASE }}
+          prerelease: true
+          include-pre-releases: true
         env:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ##GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
@@ -168,6 +180,7 @@ jobs:
         if: ${{ steps.draft-release.outputs.id }}
         id: print-release-drafter-outputs
         run: |
+         echo "::notice::The release-drafter step is including pre-releases. "
          echo "The release drafter step outputs are: "
          echo "id: ${{ steps.draft-release.outputs.id }}" 
          echo "name: ${{ steps.draft-release.outputs.name }}" 
