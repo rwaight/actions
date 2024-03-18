@@ -52,6 +52,18 @@ branding:
   # fork: https://github.com/rwaight/github-action-brandings
 ```
 
+#### Copying documentation in place
+
+When importing a new action, `cd` into the directory then run the following commands to keep an original copy of specific files:
+```bash
+# cd into the directory
+cd example-action
+# rename the '.github' directory
+mv .github __dot_github
+# copy and rename the '.md' file(s)
+for f in *.md; do cp "$f" "example-action__$f"; done
+```
+
 #### Documentation for imported actions
 
 The source actions repository README should be **renamed** to `<reponame>__README.md` and a new README should be created, using the following as a template:
