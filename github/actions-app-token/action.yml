@@ -12,8 +12,24 @@ outputs:
   app_token:
     description: The installation access token for the GitHub App corresponding to and the current repository.
 branding:
-  color: 'white'
   icon: 'unlock'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+
+## this works, but the container is old and needs to be updated
+##runs:
+##  using: 'docker'
+##  image: 'docker://docker.elastic.co/docs/app-token'
+
+# this does not fail when building the container each time, however
+# it is not working as it is not passing the token at the end
 runs:
   using: 'docker'
-  image: 'docker://docker.elastic.co/docs/app-token'
+  #image: 'Dockerfile'
+  image: 'prebuild.Dockerfile'
+
+# this will require login to ghcr.io before, using docker/login-action
+#runs:
+#  using: 'docker'
+#  image: 'docker://ghcr.io/rwaight/actions/github/actions-app-token:latest'
