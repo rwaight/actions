@@ -1,0 +1,166 @@
+name: Release
+
+run-name: "Release${{ inputs.module && inputs.version && format(' ({0} {1})', inputs.module, inputs.version) || (inputs.module && format(' ({0})', inputs.module)) || format(' (auto: {0})', github.ref_name) }}"
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      module:
+        type: choice
+        description: Which module to release
+        options:
+          - From Tag
+          - core
+          - java-async-http
+          - java-dropwizard
+          - java-spring-mvc
+          - java-support
+          - scala-akka-http
+          - scala-dropwizard
+          - scala-http4s
+          - scala-support
+          - cli
+      version:
+        type: input
+        description: 'What version to use (default: derive from git)'
+
+jobs:
+  publish:
+    name: 'Publish release'
+    runs-on: ubuntu-20.04
+    steps:
+      - name: 'Extract project from tag'
+        id: set-project-from-tag
+        run: |
+          module="${{ github.event.inputs.module }}"
+          if [ -z "$module" ] || [ "$module" = "From Tag" ]; then
+            module="$(echo "$GITHUB_REF" | sed 's~^refs/tags/\(.*\)-v[0-9\.]\+\(-M[0-9]\+\|-RC[0-9]\+\)\?$~\1~')"
+            echo "extract project: ${GITHUB_REF}, ${module}"
+          else
+            echo "Using supplied module: $module"
+          fi
+          echo "module=$module" >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 14
+      - name: 'Print versions'
+        run: |
+          java -version
+          gpg --version
+      - name: 'Publish artifacts [core]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'core' }}
+        run: sbt 'show version' "project guardrail-core" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [java-async-http]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'java-async-http' }}
+        run: sbt 'show version' "project guardrail-java-async-http" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [java-dropwizard]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'java-dropwizard' }}
+        run: sbt 'show version' "project guardrail-java-dropwizard" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [java-spring-mvc]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'java-spring-mvc' }}
+        run: sbt 'show version' "project guardrail-java-spring-mvc" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [java-support]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'java-support' }}
+        run: sbt 'show version' "project guardrail-java-support" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [scala-akka-http]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'scala-akka-http' }}
+        run: sbt 'show version' "project guardrail-scala-akka-http" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [scala-dropwizard]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'scala-dropwizard' }}
+        run: sbt 'show version' "project guardrail-scala-dropwizard" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [scala-http4s]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'scala-http4s' }}
+        run: sbt 'show version' "project guardrail-scala-http4s" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [scala-support]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'scala-support' }}
+        run: sbt 'show version' "project guardrail-scala-support" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Publish artifacts [cli]'
+        if: ${{ steps.set-project-from-tag.outputs.module == 'cli' }}
+        run: sbt 'show version' "project guardrail-cli" clean compile versionCheck test ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GUARDRAIL_RELEASE_MODULE: ${{ steps.set-project-from-tag.outputs.module }}
+          GUARDRAIL_RELEASE_VERSION: ${{ github.event.inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

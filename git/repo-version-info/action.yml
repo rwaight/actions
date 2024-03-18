@@ -1,0 +1,110 @@
+name: 'Repo version info'
+description: 'Provide version information from a git repo'
+author: 'rwaight'
+branding:
+  icon: 'info'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+
+inputs:
+  gh-token:
+    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI.'
+    required: false
+    default: ${{ github.token }}
+  my_workflow_debug:
+    description: 'Determine if the workflow should run debug tasks, defaults to false'
+    required: false
+    default: 'false'
+
+outputs:
+  latest-release:
+    description: "The latest version found with `gh release`."
+    value: ${{ steps.releases-with-gh-cli.outputs.latest-release }}
+  latest-tag:
+    description: "The latest tag found with `git`."
+    value: ${{ steps.repo-tags-with-git.outputs.latest-tag }}
+
+runs:
+  using: "composite"
+  # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+  steps:
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::This action supports Linux only"
+        exit 1
+
+    - name: Greet the triggering_actor
+      if: inputs.my_workflow_debug=='true'
+      shell: bash
+      run: echo Hello ${{ github.triggering_actor }}, the my_workflow_debug variable is set to true.
+
+    - name: Get the repo tags information with git
+      id: repo-tags-with-git
+      shell: bash
+      run: |
+        echo "Using git to print tag information"
+        echo "running 'git describe --tags' ... "
+        git describe --tags
+        echo ""
+        echo "running 'git tag -l | tail -1' ... "
+        git tag -l | tail -1
+        echo ""
+        echo "running 'git tag --sort=committerdate | grep -E '[0-9]' | tail -1 | cut -b 2-7' ... "
+        echo "this will remove the 'v' prefix"
+        git tag --sort=committerdate | grep -E '[0-9]' | tail -1 | cut -b 2-7
+        echo ""
+        echo "running 'git tag --sort=-taggerdate | tail -1' ... "
+        git tag --sort=-taggerdate | tail -1
+        echo ""
+        echo "running 'git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1' ... "
+        git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1
+        echo ""
+        echo "running 'git describe --tags \`git rev-list --tags --max-count=1\`' ... "
+        git describe --tags `git rev-list --tags --max-count=1`
+        echo ""
+        echo "running 'git describe --abbrev=0 --tags' ... "
+        git describe --abbrev=0 --tags
+        echo ""
+        echo "capturing the latest-tag from git "
+        latest_tag=$(git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1)
+        echo "The latest tag in this repo is \`$latest_tag\`"
+        echo "latest-tag=${latest_tag}" >> "$GITHUB_OUTPUT"
+        echo "latest-tag=${latest_tag}" >> $GITHUB_ENV
+        echo ""
+        echo "The 'repo-tags-with-git' step is complete."
+
+    - name: Get the repo release information with the GitHub CLI
+      id: releases-with-gh-cli
+      shell: bash
+      run: |
+        echo "Using the GitHub CLI to print release information"
+        echo "See https://cli.github.com/manual/gh_release_list for information about the command. "
+        echo "running 'gh release list' ... "
+        gh release list
+        echo ""
+        echo "running 'gh release list --exclude-drafts' ... "
+        gh release list --exclude-drafts
+        echo ""
+        echo "running 'gh release list --exclude-drafts --exclude-pre-releases' ... "
+        gh release list --exclude-drafts --exclude-pre-releases
+        echo ""
+        echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1' ... "
+        gh release list --exclude-drafts --exclude-pre-releases --limit 1
+        echo ""
+        echo "To learn more about using the GitHub CLI with workflows... "
+        echo "See https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows "
+        echo ""
+        echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r \".[].tagName\"' ... "
+        gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
+        echo ""
+        echo "capturing the latest-release from the GitHub CLI "
+        latest_release=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+        echo "The latest release version of this repo is \`$latest_release\`"
+        echo "latest-release=${latest_release}" >> "$GITHUB_OUTPUT"
+        echo "latest-release=${latest_release}" >> $GITHUB_ENV
+        echo ""
+        echo "The 'releases-with-gh-cli' step is complete."
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}

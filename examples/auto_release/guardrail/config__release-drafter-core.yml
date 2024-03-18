@@ -1,0 +1,7 @@
+_extends: guardrail:.github/release-drafter.yml
+name-template: 'core-v$RESOLVED_VERSION'
+tag-template: 'core-v$RESOLVED_VERSION'
+tag-prefix: core-v
+include-paths:
+  - "modules/core/src/main/"
+  - "project/src/main/scala/modules/core.scala"
