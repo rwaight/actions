@@ -1,0 +1,22 @@
+# from https://github.com/chuhlomin/ip/pull/2/files
+# found in: https://github.com/chuhlomin/render-template/issues/5#issuecomment-1141204548
+name: pull_request
+
+on: pull_request
+
+jobs:
+  json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Render template
+        uses: chuhlomin/render-template@v1.5
+        with:
+          template: template.json
+          result_path: rendered_template.json
+          vars_path: vars.yml
+
+      - name: Check rendered template
+        run: cat rendered_template.json

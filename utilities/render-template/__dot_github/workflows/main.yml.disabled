@@ -1,0 +1,37 @@
+name: main
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DOCKER_IMAGE: chuhlomin/render-template
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build and push Docker image
+        uses: chuhlomin/actions/docker-build-push@main
+        with:
+          username: chuhlomin
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: ${{ env.DOCKER_IMAGE }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+            ${{ env.DOCKER_IMAGE }}:latest
+
+      - name: Test action
+        uses: ./ # Uses an action in the root directory
+        id: render
+        with:
+          template: ./testdata/template.txt
+          vars: |
+            name: world
+
+      - name: Get `result` output
+        run: echo "${{ steps.render.outputs.result }}"

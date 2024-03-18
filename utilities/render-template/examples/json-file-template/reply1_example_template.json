@@ -1,0 +1,5 @@
+{
+    "delete_me_comment0": "from https://github.com/chuhlomin/ip/pull/2/files",
+    "delete_me_comment1": "found in: https://github.com/chuhlomin/render-template/issues/5#issuecomment-1141204548",
+    "hello": "{{ .name }}"
+}
