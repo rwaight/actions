@@ -1,0 +1,22 @@
+name: GitHub ProjectV2 Automation
+on:
+  issues:
+    types: [labeled,unlabeled]
+
+jobs:
+  sync_issues_with_table:
+    runs-on: ubuntu-latest
+    name: Sync issues with a GitHub Project (Project V2)
+    steps:
+      - name: Sync issues with GitHub Projects V2
+        uses: rwaight/actions/github/projectnext-label-assigner@main
+        id: sync_with_projects
+        with:
+          config: |
+            [
+              {"label": "label1", "projectNumber": 1}
+            ]
+        env:
+          GRAPHQL_API_BASE: 'https://api.github.com'
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
