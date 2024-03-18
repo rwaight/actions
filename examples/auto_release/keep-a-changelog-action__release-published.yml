@@ -1,0 +1,58 @@
+# from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/release-published.yml
+
+on:
+  release:
+    types: [published]
+
+
+name: '[autorelease] Release published'
+
+permissions:
+  contents: write
+
+jobs:
+  update-ref:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get release version
+      id: get-release-version
+      run: |
+        VERSION="${{ github.event.release.tag_name }}"
+
+        RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        if [[ $VERSION =~ $RE ]]; then
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PATCH="${BASH_REMATCH[3]}"
+          PRERELEASE="${BASH_REMATCH[4]}"
+        else
+          echo "::error::Version '$VERSION' is not in a valid format" && exit 1
+        fi
+
+        if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+        if [[ -f $GITHUB_OUTPUT ]]; then
+          echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+        else
+          echo "::set-output name=major-ref::v$MAJOR"
+          echo "::set-output name=is-prerelease::$pre"
+        fi
+
+    - name: Prerelease
+      if: fromJSON(steps.get-release-version.outputs.is-prerelease)
+      run: |
+        echo "::notice::Pre-release version detected, not moving ref  ${{ steps.get-release-version.outputs.major-ref }}"
+
+    - name: Update release tag
+      if: ${{ ! fromJSON(steps.get-release-version.outputs.is-prerelease) }}
+      run: |        
+        git config user.name "${GITHUB_ACTOR}"
+        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+        git tag -fa ${{ steps.get-release-version.outputs.major-ref }} -m "Update ${{ steps.get-release-version.outputs.major-ref }} tag"
+        git push origin ${{ steps.get-release-version.outputs.major-ref }} --force
+        echo "::notice::Updated ref ${{ steps.get-release-version.outputs.major-ref }}"
