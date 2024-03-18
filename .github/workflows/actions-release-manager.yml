@@ -1,0 +1,200 @@
+# This workflow runs specific workflows based on condition and/or user input:
+# 'Release Drafter' and 'Update Tags on Release'
+name: Release Manager
+run-name: Actions Monorepo Release Manager
+on:
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
+  # push:  # 'on push' is used by: 'update-release-draft'
+  #   branches: [main]
+  pull_request:
+    # 'on pull_request' is used by: 'update-release-draft' (closed)
+    types: [closed]
+    branches: [main]
+  release:
+    # 'on release' is used by: 'update-tags-on-release' (published)
+    types: [published]
+  # 'on workflow_dispatch' is used conditionally by different jobs
+  workflow_dispatch:
+    inputs:
+      update_release_draft:
+        description: 'Update release draft'
+        required: true
+        default: false
+        type: boolean
+      debug_output:
+        description: 'Debug output'
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  # run 'update-release-draft', but only: manual (workflow_dispatch); or closed pull_request; 
+  update-release-draft:
+    name: Update release draft
+    runs-on: ubuntu-latest
+    if: | 
+      (github.repository_owner == 'rwaight') && ( 
+      (github.event_name=='workflow_dispatch' && inputs.update_release_draft==true) ||
+      (github.event.pull_request.merged == true)
+      )
+    # previously, when including 'push' to 'main' caused two release drafts to be created
+    #    #(github.event_name=='push' && github.ref == 'refs/heads/main')
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      # (Optional) GitHub Enterprise requires GHE_HOST variable set
+      #- name: Set GHE_HOST
+      #  run: |
+      #    echo "GHE_HOST=${GITHUB_SERVER_URL##https:\/\/}" >> $GITHUB_ENV
+
+      # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
+      - name: Run rwaight/actions/releases/release-drafter
+        #uses: rwaight/actions/releases/release-drafter@v1
+        uses: rwaight/actions/releases/release-drafter@main
+        id: run-release-drafter
+        # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
+        with:
+          config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
+
+      - name: Provide output from release-drafter
+        # Run this step if the 'id' output was set in the 'run-release-drafter' step
+        if: ${{ steps.run-release-drafter.outputs.id }}
+        id: print-release-drafter-outputs
+        run: |
+         echo "The release drafter step outputs are: "
+         echo "id: ${{ steps.run-release-drafter.outputs.id }}" 
+         echo "name: ${{ steps.run-release-drafter.outputs.name }}" 
+         echo "tag_name: ${{ steps.run-release-drafter.outputs.tag_name }}" 
+         echo ""
+         echo "URLs: "
+         echo "html_url: ${{ steps.run-release-drafter.outputs.html_url }}" 
+         echo "upload_url: ${{ steps.run-release-drafter.outputs.upload_url }}" 
+         echo ""
+         echo "Version Info: "
+         echo "major_version: ${{ steps.run-release-drafter.outputs.major_version }}" 
+         echo "minor_version: ${{ steps.run-release-drafter.outputs.minor_version }}" 
+         echo "patch_version: ${{ steps.run-release-drafter.outputs.patch_version }}" 
+         echo "resolved_version: ${{ steps.run-release-drafter.outputs.resolved_version }}" 
+         echo ""
+         echo "body: "
+         echo "${{ steps.run-release-drafter.outputs.body }}"
+         echo " === end of body === "
+         echo ""
+         echo "The 'print-release-drafter-outputs' step is now complete. "
+
+      - name: Run workflow debug
+        id: run-workflow-debug
+        if: env.MY_WORKFLOW_DEBUG=='true'
+        run: |
+          echo "workflow debug was set to true... you should probably put something here for debug purposes. "
+          echo ""
+          echo "The GitHub event_name is: ${{ github.event_name }}"
+          echo "The GitHub ref is: ${{ github.ref }}"
+          echo "The GitHub ref_name is: ${{ github.ref_name }}"
+          echo ""
+          echo "For more information, see the GitHub Actions Contexts docs, which are located at: "
+          echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
+          echo "The 'run-workflow-debug' step is now complete. "
+        continue-on-error: true
+
+
+  # run 'update-tags-on-release', but only when a release is published
+  update-tags-on-release:
+    name: Update major and minor tags on release
+    runs-on: ubuntu-latest
+    outputs:
+      RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+    if: | 
+      (github.repository_owner == 'rwaight') &&
+      (github.event_name=='release' && github.event.action=='published')
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      - name: Check-out the repository under GITHUB_WORKSPACE
+        uses: actions/checkout@v4
+
+      - name: Set MY_REF and RELEASE_VERSION environmental variable and output
+        id: release-vars-output
+        run: |
+          echo "MY_REF=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+          echo "MY_REF=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+      - name: Check output of MY_REF and RELEASE_VERSION
+        env:
+          MY_REF: ${{ steps.release-vars-output.outputs.MY_REF }}
+          RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+        run: |
+          echo "## RELEASE_VERSION variables"
+          echo ${{ env.RELEASE_VERSION }}
+          echo $RELEASE_VERSION
+          echo ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+          echo ""
+          echo "## MY_REF variables"
+          echo ${{ env.MY_REF }}
+          echo $MY_REF
+          echo ${{ steps.release-vars-output.outputs.MY_REF }}
+          echo ""
+
+      - name: This should run when there are tags pushed
+        if: github.ref_type == 'tag'
+        run: |
+          echo "The ref_type is: ${{ github.ref_type }}"
+          echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
+          echo "GitHub ref: ${{ github.ref }}"
+          echo "GitHub ref_name: ${{ github.ref_name }}"
+          echo "GitHub ref_type: ${{ github.ref_type }}"
+
+      - name: This should run when a release is published
+        if: ${{ github.event.release.tag_name }}
+        run: |
+          echo "The ref_type is: ${{ github.ref_type }}"
+          echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
+
+      - name: Run workflow debug
+        id: run-workflow-debug
+        if: env.MY_WORKFLOW_DEBUG=='true'
+        run: |
+          echo "workflow debug was set to true... you should probably put something here for debug purposes. "
+          echo ""
+          echo "The GitHub event_name is: ${{ github.event_name }}"
+          echo "The GitHub ref is: ${{ github.ref }}"
+          echo "The GitHub ref_name is: ${{ github.ref_name }}"
+          echo ""
+          echo "For more information, see the GitHub Actions Contexts docs, which are located at: "
+          echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
+          echo "The 'run-workflow-debug' step is now complete. "
+        continue-on-error: true
+
+      - name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+        id: release-tag-updater
+        #uses: rwaight/actions/releases/release-tag-updater@v1 # can use version specific or main
+        uses: rwaight/actions/releases/release-tag-updater@main # can use version specific or main
+        with:
+          tag: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+          prefix-regex: 'v?'
+          fail-on-non-semver-tag: true # default is false
+          update-major: true
+          update-minor: true
+          skip-repo-setup: true # default is false
+          create-release: false # default is true
+        #if: github.event.release.prerelease == false
+        if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
+
+  # Run the 'not-repo-owner' job if the repository_owner is not correct
+  not-repo-owner:
+    name: Print a random note
+    runs-on: ubuntu-latest
+    if: (github.repository_owner != 'rwaight')
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      - name: Print a message based on a condition
+        id: print-message
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo ""

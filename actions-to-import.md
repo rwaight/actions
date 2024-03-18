@@ -2,6 +2,8 @@
 
 The following actions should be copied/imported to this repo:
 - **github**
+    - [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
+    - [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
     - [`imjohnbo/issue-bot` action](https://github.com/imjohnbo/issue-bot)
     - [`imjohnbo/extract-issue-template-fields` action](https://github.com/imjohnbo/extract-issue-template-fields)
     - [`agilepathway/label-checker` action](https://github.com/agilepathway/label-checker)
