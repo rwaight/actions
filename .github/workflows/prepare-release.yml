@@ -1,0 +1,129 @@
+# from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/prepare-release.yml
+name: '[autorelease] Prepare release PR'
+run-name: 'Prepare release PR - ${{ inputs.release-type }}'
+
+on: 
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: 'Release type'
+        type: choice
+        required: true
+        options:
+          - major
+          - minor
+          - patch
+          - premajor
+          - preminor
+          - prepatch
+          - prerelease
+        default: patch
+      preid:
+        description: 'Pre-release identifier (only for pre-release builds)'
+        required: false
+
+permissions:
+  contents: read
+  #contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  changelog:
+    name: Update changelog and create PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      # not configuring releasebot at this time
+      #     releasebot info:
+      #       https://github.com/apps/conventional-release-bot
+      #       
+      # - uses: tibdex/github-app-token@v2
+      #   id: generate-token
+      #   with:
+      #     app_id: ${{ secrets.RELEASEBOT_APP_ID }}
+      #     private_key: ${{ secrets.RELEASEBOT_PRIVATE_KEY }}
+
+      # https://github.com/actions/create-github-app-token
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      - name: 'Ensure actions:autorelease label exists'
+        run: |
+          LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="actions:autorelease")')
+          if [[ -z "$LABEL" ]]; then
+            echo "Creating 'actions:autorelease' label"
+            gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="actions:autorelease" -f color="baa938" -f description="This is an automatically-created PR to trigger a release"
+          else
+            echo "the 'actions:autorelease' label exists"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get latest release info
+        id: query-release-info
+        #uses: ./
+        #uses: release-flow/keep-a-changelog-action@v3
+        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        with:
+          command: query
+          #version: ${{ github.event.inputs.release-type }}
+          version: latest
+
+      - name: Display release info
+        run: |
+          echo "$Version: {{ steps.query-release-info.outputs.version }}"
+          echo "$Date: {{ steps.query-release-info.outputs.release-date }}"
+          echo "${{ steps.query-release-info.outputs.release-notes }}"
+
+      - name: Update changelog
+        id: update-changelog
+        #uses: ./
+        #uses: release-flow/keep-a-changelog-action@v3
+        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        with:
+          command: bump
+          version: ${{ github.event.inputs.release-type }}
+          preid: ${{ github.event.inputs.preid }}
+
+      - name: Create Pull Request
+        id: create-release-pr
+        #uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e
+        with:
+          commit-message: 'chore: Update changelog for release ${{ steps.update-changelog.outputs.version }}'
+          #committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' # this is the default
+          #committer: 'releasebot <noreply@github.com>'
+          #committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' # this is the default
+          branch: 'autorelease/${{ steps.update-changelog.outputs.version }}'
+          title: '[autorelease] Release ${{ steps.update-changelog.outputs.version }}'
+          # Be careful of newlines here. We need to use the literal block chomping style (|) so that the
+          # contents of the release notes don't get chomped. See https://yaml-multiline.info/
+          body: |
+            **This PR was created automatically by the rw-actions-bot**
+
+            **:warning: Approving this PR will trigger a workflow that generates a draft release. You need to publish this release when you are happy with it.**
+
+            The changes in this PR prepare for release ${{ steps.update-changelog.outputs.version }}. The release notes are:
+
+            ---
+
+            ${{ steps.update-changelog.outputs.release-notes }}
+          labels: actions:autorelease, version:${{ github.event.inputs.release-type }}
+          #token: ${{ steps.generate-token.outputs.token }}
+          #token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Output summary
+        run: |
+          echo "::notice title=Release PR Prepared::A release PR has been created, please merge it to continue with the release process: ${{ steps.create-release-pr.outputs.pull-request-url }}"

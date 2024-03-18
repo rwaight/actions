@@ -44,3 +44,11 @@ In order to push changes to the actions, so that any downstream workflows can us
    1.  Be cerain that you have signed and verified the tag before proceeding
    2.  Push the **signed and verified** tag with `git push -f origin v1.1.1`
 10. Ask `@rwaight` why this is not part of a GitHub workflow (or a composite action) in this repo... because it should be
+
+
+#### Notes about reducing time spent on the release process
+
+There are a few things to consider when attempting to reduce the time spent on the release process.
+- Keeping a changelog or other documentation for the changes made, without having to look through PRs
+- Keeping the **major** and **minor** tags updated when a new version is released
+- Using automation but [now allowing automation to push to protected branches](https://github.com/orgs/community/discussions/25305)

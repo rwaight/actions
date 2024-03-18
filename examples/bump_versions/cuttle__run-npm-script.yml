@@ -1,0 +1,32 @@
+# from https://github.com/cuttle-cards/cuttle/blob/1288fd06235a975e77b9ecc53b728831a30f253f/.github/workflows/run-npm-script.yml
+
+name: Run NPM Script
+
+on:
+  workflow_call:
+    inputs:
+      label:
+        required: true
+        type: string
+      script:
+        required: true
+        type: string
+
+jobs:
+  run_npm_script:
+    name: 'Run NPM Script'
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout and node setup are shared in both `pr-actions.yml` and `run-npm-script.yml`
+      # If you change one, please change the other
+      - name: git checkout
+        uses: actions/checkout@v3
+      - name: set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.18'
+          cache: 'npm'
+      - name: install node modules
+        run: npm ci
+      - name: ${{ inputs.label }}
+        run: ${{ inputs.script }}

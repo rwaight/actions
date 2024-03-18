@@ -6,13 +6,6 @@ commitish: main
 template: |
  GitHub Actions Monorepo, version $RESOLVED_VERSION
  
- #### New Actions
- - New actions here
- 
- #### Updated Actions
- - Updated actions here
- 
- 
  ## Changes
  
  $CHANGES
@@ -23,19 +16,32 @@ branches:
   - main
 
 categories:
+  - title: 'Actions Updates'
+    labels:
+      - 'impacts:actions'
+    collapse-after: 10
   - title: '🐛 Bug Fixes'
     labels:
       - 'bug'
-    collapse-after: 5
+    collapse-after: 3
   - title: 'New Features'
     labels:
       - 'enhancement'
     collapse-after: 10
+  - title: 'Workflow Updates'
+    labels:
+      - 'impacts:workflows'
+    collapse-after: 3
+  - title: 'Repo Updates'
+    labels:
+      - 'impacts:repo'
+    collapse-after: 3
   - title: 'Documentation'
     labels:
       - 'documentation'
     collapse-after: 5
 
+category-template: "### $TITLE"
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
 
@@ -53,3 +59,4 @@ version-resolver:
 
 exclude-labels:
   - 'skip-changelog'
+  - 'actions:autorelease'

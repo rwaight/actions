@@ -1,0 +1,96 @@
+# This workflow currently runs the 'labeler' and 'stale' actions
+name: Issue and PR Manager
+run-name: Actions Monorepo Triage Manager - ${{ github.event_name }}
+on:
+  issues:
+    # 'on issues' is used by: 'add-to-project' (opened, transferred)
+    types:
+      - opened
+      # - labeled # consider using 'labeled' if auto assignments are configured with the 'actions/add-to-project' action
+      - transferred
+  pull_request:
+    # 'on pull_request' is used by: 'pr-labeler'
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      triage_issues:
+        description: 'Check for stale issues and PRs'
+        required: true
+        default: false
+        type: boolean
+      debug_output:
+        description: 'Debug output'
+        required: true
+        default: false
+        type: boolean
+  # 'on schedule' is used by: 'triage-issue-and-pr'
+  schedule:
+    - cron: '15 14 * * 2' # At 2:15pm UTC every Tuesday, used by 'triage-issue-and-pr'
+
+
+jobs:
+  pr-labeler:
+    name: Label pull requests
+    runs-on: ubuntu-latest
+    if: | 
+      (github.repository_owner == 'rwaight') && (github.event_name == 'pull_request')
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Run actions/labeler
+        uses: actions/labeler@v5
+
+
+  # Run 'Triage Issues and PRs', but only: At 2:15pm UTC every Tuesday; or manual (workflow_dispatch)
+  triage-issue-and-pr:
+    name: Run the GitHub actions/stale action
+    if: | 
+      (github.repository_owner == 'rwaight') && ( 
+      (github.event_name=='schedule' && github.event.schedule=='15 14 * * 2') || 
+      (github.event_name=='workflow_dispatch' && inputs.triage_issues==true)
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    # From GitHub: https://github.com/marketplace/actions/close-stale-issues
+    # See https://github.com/actions/stale#readme for configuration options
+    steps:
+      - name: Triage issues using actions/stale
+        uses: actions/stale@v8
+        with:
+          days-before-close: -1 # do not close issues or PRs
+          days-before-issue-stale: 90
+          stale-issue-label: 'triage:stale'
+          stale-issue-message: >-
+            This issue has not been updated in a while and is being labeled as `triage:stale`.
+
+            It would be helpful to take a look at the issue and confirm it is still relevant.
+          #days-before-issue-close: -1 # do not close issues when deployed to production
+          #close-issue-message: 'This issue has not been updated in a while and is being closed.'
+          days-before-pr-stale: 21
+          stale-pr-label: 'triage:stale'
+          stale-pr-message: >-
+            This Pull Request (PR) has not been updated in a while and is being labeled as `triage:stale`.
+
+            It would be helpful to review the PR and confirm it is still relevant.
+          remove-stale-when-updated: true
+          labels-to-remove-when-unstale: 'triage:stale'
+          operations-per-run: 100
+          #repo-token: ${{ secrets.MY_ACTIONS_TOKEN }}
+
+
+  # Run the 'not-repo-owner' job if the repository_owner is not correct
+  not-repo-owner:
+    name: Print a random note
+    runs-on: ubuntu-latest
+    if: (github.repository_owner != 'rwaight')
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      - name: Print a message based on a condition
+        id: print-message
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo ""
