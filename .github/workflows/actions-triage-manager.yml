@@ -38,6 +38,9 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+
       - name: Run actions/labeler
         uses: actions/labeler@v5
 

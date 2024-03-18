@@ -1,4 +1,4 @@
-
+# This configuration is used in the 'label-manager' workflow
 # Examples from https://github.com/actions/labeler?tab=readme-ov-file#basic-examples
 
 # Add 'documentation' label to any file changes within 'docs' or 'examples' folders
@@ -43,12 +43,12 @@ impacts:actions:
   - changed-files:
     - any-glob-to-any-file: ['builders/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
 
-# Add 'impacts:repo' label to any file changes within the '.github' folder
+# Add 'impacts:repo' label to file changes within the '.github' folder EXCEPT for the workflows sub-folder
 impacts:repo:
 - any:
   - changed-files:
     - any-glob-to-any-file: '.github/**'
-    - any-glob-to-any-file: '!.github/workflows/**'
+    - all-globs-to-all-files: '!.github/workflows/**'
 
 # Add 'impacts:workflows' label to any file changes within the '.github/workflows' folder
 impacts:workflows:

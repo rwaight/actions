@@ -1,5 +1,6 @@
 # This workflow runs specific workflows based on condition and/or user input:
 # 'Release Drafter' and 'Update Tags on Release'
+# The 'prepare-release' workflow should be moved into this workflow
 name: Release Manager
 run-name: Actions Monorepo Release Manager
 on:

@@ -1,4 +1,5 @@
 # from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/pr-merged.yml
+# this workflow creates a draft release, it is ALMOST a duplicate of the 'release-drafter' job in the 'release-manager' workflow
 name: '[autorelease] PR merged'
 run-name: '[autorelease] PR merged'
 
@@ -16,7 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout files from commit tree
+      uses: actions/checkout@v4
 
     - name: Get release version
       id: get-release-version
