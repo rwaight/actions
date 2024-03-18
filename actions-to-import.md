@@ -3,10 +3,8 @@
 The following actions should be copied/imported to this repo:
 - **github**
     - [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
-    - [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
     - [`imjohnbo/issue-bot` action](https://github.com/imjohnbo/issue-bot)
     - [`imjohnbo/extract-issue-template-fields` action](https://github.com/imjohnbo/extract-issue-template-fields)
-    - [`agilepathway/label-checker` action](https://github.com/agilepathway/label-checker)
     - [`c-py/action-dotenv-to-setenv`](https://github.com/c-py/action-dotenv-to-setenv)
     - [`robvanderleek/create-issue-branch` action](https://github.com/robvanderleek/create-issue-branch)
 - **utilities**
@@ -14,6 +12,13 @@ The following actions should be copied/imported to this repo:
     - [`jakejarvis/s3-sync-action`](https://github.com/jakejarvis/s3-sync-action)
 
 The actions should have their `branding` section updated according to the [update standards](#update-standards-for-imported-actions) listed below.
+
+##### Actions pending import
+
+The following actions are pending import to this repo:
+- **github**
+    - [`agilepathway/label-checker` action](https://github.com/agilepathway/label-checker)
+    - [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
 
 #### Other actions to review
 
