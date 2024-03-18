@@ -23,9 +23,9 @@ on:
         required: true
         default: false
         type: boolean
-  # 'on schedule' is used by: 'triage-issue-and-pr'
+  # 'on schedule' is used by: 'stale-issue-and-pr'
   schedule:
-    - cron: '15 14 * * 2' # At 2:15pm UTC every Tuesday, used by 'triage-issue-and-pr'
+    - cron: '15 14 * * 2' # At 2:15pm UTC every Tuesday, used by 'stale-issue-and-pr'
 
 
 jobs:
@@ -46,8 +46,8 @@ jobs:
 
 
   # Run 'Triage Issues and PRs', but only: At 2:15pm UTC every Tuesday; or manual (workflow_dispatch)
-  triage-issue-and-pr:
-    name: Run the GitHub actions/stale action
+  stale-issue-and-pr:
+    name: Check for stale issues and PRs
     if: | 
       (github.repository_owner == 'rwaight') && ( 
       (github.event_name=='schedule' && github.event.schedule=='15 14 * * 2') || 

@@ -1,11 +1,17 @@
 # This configuration is used in the 'label-manager' workflow
 # Examples from https://github.com/actions/labeler?tab=readme-ov-file#basic-examples
 
+actions:autorelease:
+- any:
+  - head-branch: ['^autorelease','autorelease']
+
 # Add 'documentation' label to any file changes within 'docs' or 'examples' folders
 documentation:
-- changed-files:
-  - any-glob-to-any-file: ['**/docs/*','examples/**']
-  - any-glob-to-any-file: '**/*.md'
+- all:
+  - changed-files:
+    - any-glob-to-any-file: ['**/docs/*','examples/**']
+    - any-glob-to-any-file: '**/*.md'
+    - all-globs-to-all-files: '!CHANGELOG.md'
 
 # Add 'group:builders' label to any file changes within the 'builders' folder
 group:builders:
@@ -45,7 +51,7 @@ impacts:actions:
 
 # Add 'impacts:repo' label to file changes within the '.github' folder EXCEPT for the workflows sub-folder
 impacts:repo:
-- any:
+- all:
   - changed-files:
     - any-glob-to-any-file: '.github/**'
     - all-globs-to-all-files: '!.github/workflows/**'
