@@ -1,4 +1,5 @@
 # from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/prepare-release.yml
+# this should be moved into the 'release-manager' workflow
 name: '[autorelease] Prepare release PR'
 run-name: 'Prepare release PR - ${{ inputs.release-type }}'
 
@@ -93,6 +94,7 @@ jobs:
         uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
         with:
           command: bump
+          keep-unreleased-section: true
           version: ${{ github.event.inputs.release-type }}
           preid: ${{ github.event.inputs.preid }}
 
