@@ -55,6 +55,7 @@ jobs:
 
       - name: Get the current value of my_custom_version
         id: get-my-custom-version
+        continue-on-error: true
         run: |
           echo "starting the 'get-my-custom-version' step "
           MY_CUSTOM_VERSION=$(jq --raw-output .my_custom_version my-custom-variables.json)
@@ -158,8 +159,9 @@ jobs:
         with:
           config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ##GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Provide output from release-drafter
         # Run this step if the 'id' output was set in the 'draft-release' step
