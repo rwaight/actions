@@ -8,24 +8,44 @@ branding:
   # fork: https://github.com/rwaight/github-action-brandings
 
 inputs:
-  gh-token:
-    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
-    required: true
-    default: ${{ github.token }}
-  gh-setup:
-    description: 'Determine if the action should setup git with `git config`, defaults to false. '
+  author_name:
+    description: 'The name of the user that will be displayed as the author of the commit.'
     required: false
-    default: 'false'
-  gh-user-name:
-    description: 'The GitHub user name for committing changes to the JSON vars file. '
+  author_email:
+    description: 'The email of the user that will be displayed as the author of the commit.'
     required: false
-    #   keep 'github-actions[bot]' as default
-    default: 'github-actions[bot]'
-  gh-user-email:
-    description: 'The GitHub user email for committing changes to the JSON vars file. '
+  committer_name:
+    description: 'The name of the custom committer you want to use.'
     required: false
-    #   keep '<41898282+github-actions[bot]@users.noreply.github.com>' as default
-    default: '<41898282+github-actions[bot]@users.noreply.github.com>'
+  committer_email:
+    description: 'The email of the custom committer you want to use.'
+    required: false
+  # cwd:
+  #   description: 'The directory where your repository is located. You should use actions/checkout first to set it up'
+  #   required: false
+  #   default: '.'
+  default_author:
+    description: 'How the action should fill missing author name or email.'
+    required: false
+    default: 'github_actor'
+  # gh-token:
+  #   description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
+  #   required: true
+  #   default: ${{ github.token }}
+  # gh-setup:
+  #   description: 'Determine if the action should setup git with `git config`, defaults to false. '
+  #   required: false
+  #   default: 'false'
+  # gh-user-name:
+  #   description: 'The GitHub user name for committing changes to the JSON vars file. '
+  #   required: false
+  #   #   keep 'github-actions[bot]' as default
+  #   default: 'github-actions[bot]'
+  # gh-user-email:
+  #   description: 'The GitHub user email for committing changes to the JSON vars file. '
+  #   required: false
+  #   #   keep '<41898282+github-actions[bot]@users.noreply.github.com>' as default
+  #   default: '<41898282+github-actions[bot]@users.noreply.github.com>'
   json-vars-file:
     description: 'The JSON vars file, including the relative path in the repo. '
     required: true
@@ -56,7 +76,7 @@ outputs:
     value: ${{ steps.get-current-version.outputs.old-json-version }}
   new-json-version:
     description: "The new version in the JSON file. "
-    value: ${{ steps.template-example-output.outputs.my_action_output }}
+    value: ${{ steps.get-updated-version.outputs.new-json-version }}
 
 runs:
   using: "composite"
@@ -92,38 +112,50 @@ runs:
         ## Print the inputs if inputs.my_action_debug=='true'
         ## the double number signs below are for line spacing and readability only
         ##
-        echo "gh-token SHOULD BE MASKED, but is set to ${{ inputs.gh-token }} "
+        echo "starting the 'debug-print-inputs' step. "
+        echo ""
+        echo "author_name is    :  ${{ inputs.author_name }} "
+        echo "author_email is   :  ${{ inputs.author_email }} "
+        echo "committer_name is :  ${{ inputs.committer_name }} "
+        echo "committer_email is:  ${{ inputs.committer_email }} "
+        ##echo "cwd is            :  ${{ inputs.cwd }} "
+        echo "default_author is :  ${{ inputs.default_author }} "
         echo "json-vars-file is :  ${{ inputs.json-vars-file }} "
         echo "json-vars-field is:  ${{ inputs.json-vars-field }} "
         echo "release-type is   :  ${{ inputs.release-type }} "
         echo "my_action_debug is:  ${{ inputs.my_action_debug }} "
         ##
+        echo "completing the 'debug-print-inputs' step. "
 
 # migrate files from 'rw-updates-202403-v2' to this action
 
-    - name: Checkout '${{ inputs.json-vars-file }}' from the commit tree
-      uses: actions/checkout@v4
-      with:
-        fetch-tags: true
-        token: ${{ inputs.gh-token }}
-        sparse-checkout: |
-          .github
-          ${{ inputs.json-vars-file }}
-        #sparse-checkout-cone-mode: true
-        sparse-checkout-cone-mode: false
+    # Require the checkout action runs before this action is called
+    # - name: Checkout '${{ inputs.json-vars-file }}' from the commit tree
+    #   uses: actions/checkout@v4
+    #   with:
+    #     fetch-tags: true
+    #     token: ${{ inputs.gh-token }}
+    #     sparse-checkout: |
+    #       .github
+    #       ${{ inputs.json-vars-file }}
+    #     #sparse-checkout-cone-mode: true
+    #     sparse-checkout-cone-mode: false
 
     - name: Get the current value of the ${{ inputs.json-vars-field }} version field
       id: get-current-version
       shell: bash
       run: |
-        ## Get the current value of ${{ inputs.json-vars-field }}
+        ## Get the current value of ${{ env.json_vars_field }}
         ## the double number signs below are for line spacing and readability only
         ##
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
             echo "starting the 'get-current-version' step. "
-            echo "the syntax is 'MY_CUSTOM_VERSION=$(jq --raw-output .my_custom_version my-custom-variables.json)' "
+            echo "json_vars_file is :  ${{ env.json_vars_file }} "
+            echo "json_vars_field is:  ${{ env.json_vars_field }} "
+            echo ""
+            echo "the syntax is 'MY_CUSTOM_VERSION=$(jq --raw-output .my_custom_field my-custom-variables.json)' "
         fi
-        current_json_version=$(jq --raw-output .${{ inputs.json-vars-field }} ${{ inputs.json-vars-file }})
+        current_json_version=$(jq --raw-output .${{ env.json_vars_field }} ${{ env.json_vars_file }})
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
             echo "current_json_version: $current_json_version"
             echo "writing the 'current_json_version' to the environment and GitHub output"
@@ -136,6 +168,9 @@ runs:
         echo "old-json-version=$current_json_version" >> $GITHUB_ENV
         echo "old-json-version=$current_json_version" >> "$GITHUB_OUTPUT"
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'get-current-version' step. "; fi
+      env:
+        json_vars_file: ${{ inputs.json-vars-file }}
+        json_vars_field: ${{ inputs.json-vars-field }}
 
     - name: Validate the current json version
       id: validate-current-version
@@ -234,8 +269,8 @@ runs:
         echo "current-release-version=${current_release_version}" >> "$GITHUB_OUTPUT"
         echo "current-release-version=${current_release_version}" >> $GITHUB_ENV
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'get-current-release' step. "; fi
-      env:
-        GH_TOKEN: ${{ inputs.gh-token }}
+      #env:
+      #  GH_TOKEN: ${{ inputs.gh-token }}
 
     - name: Compare the current json version to the current release version
       id: compare-current-versions
@@ -409,62 +444,205 @@ runs:
         current_json_version: ${{ steps.get-current-version.outputs.old-json-version }}
         next_release_version: ${{ steps.set-next-release.outputs.next-release-version }}
 
-    - name: Set up git config
-      id: set-up-git
-      if: |
-        inputs.gh-setup == 'true' && 
-        ( '${{ steps.compare-current-json-to-next-release.outputs.does_current_match_next }}' != 'true' )
+    - name: Skip bumping the current json version
+      id: skip-bumping-current-json-version
+      if: ( '${{ steps.compare-current-json-to-next-release.outputs.does_current_match_next }}' == 'true' )
       shell: bash
       run: |
+        ## Skip bumping the current json version
+        ## the double number signs below are for line spacing and readability only
+        ##
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
-            echo "starting the 'set-up-git' step. "
-            echo "git_user_name is :  ${{ env.git_user_name }} "
-            echo "git_user_email is:  ${{ env.git_user_email }} "
+            echo "starting the 'skip-bumping-current-json-version' step. "
         fi
-        git --version
-        git config user.name "${{ env.git_user_name }}"
-        git config user.email "${{ env.git_user_email }}"
-        git status
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'set-up-git' step. "; fi
-      env:
-        git_user_name: ${{ inputs.gh-user-name }}
-        git_user_email: ${{ inputs.gh-user-email }}
+        echo "This action will not bump the current JSON version since it already matches the next release version. "
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'skip-bumping-current-json-version' step. "; fi
+      env: 
+        current_and_next_match: ${{ steps.compare-current-json-to-next-release.outputs.does_current_match_next }}
+
+    # Require the proper checkout action to be run before this action is called
+    # https://github.com/actions/checkout/?tab=readme-ov-file#push-a-commit-using-the-built-in-token
+    # - name: Set up git config
+    #   id: set-up-git
+    #   if: |
+    #     inputs.gh-setup == 'true' && 
+    #     ( '${{ steps.compare-current-json-to-next-release.outputs.does_current_match_next }}' != 'true' )
+    #   shell: bash
+    #   run: |
+    #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+    #         echo "starting the 'set-up-git' step. "
+    #         echo "git_user_name is :  ${{ env.git_user_name }} "
+    #         echo "git_user_email is:  ${{ env.git_user_email }} "
+    #     fi
+    #     git --version
+    #     git config user.name "${{ env.git_user_name }}"
+    #     git config user.email "${{ env.git_user_email }}"
+    #     git status
+    #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'set-up-git' step. "; fi
+    #   env:
+    #     git_user_name: ${{ inputs.gh-user-name }}
+    #     git_user_email: ${{ inputs.gh-user-email }}
 
     - name: Bump the current json version
       id: bump-current-json-version
       if: ( '${{ steps.compare-current-json-to-next-release.outputs.does_current_match_next }}' != 'true' )
       shell: bash
       run: |
-        echo "Here is where we should see if my_custom_version matches the latest tag ... "
-        echo ""
-        echo "we can update my_custom_version, if it matches the latest tag"
-        echo "https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
-        latest_release=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
-        echo "the latest release version is $latest_release"
-        echo "the value of my_custom_version set in my-custom-variables.json is $MY_CUSTOM_VERSION"
+        ## Bump the current json version
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'bump-current-json-version' step. "
+            echo "json_vars_file is      :  ${{ env.json_vars_file }} "
+            echo "json_vars_field is     :  ${{ env.json_vars_field }} "
+            echo "next_release_version is:  ${{ env.next_release_version }} "
+            echo ""
+            echo "::group::printing the syntax to set the '${{ env.json_vars_field }}' field to ${{ env.next_release_version }} ... "
+            ## tmp=$(mktemp)
+            ## jq '.my_custom_version = "my-new-value"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
+            echo "tmp=\$(mktemp)"
+            echo "jq '.my_custom_version = \"my-new-value\"' my-custom-variables.json > \"\$tmp\" && mv \"\$tmp\" my-custom-variables.json\" "
+            echo ""
+            echo "special thanks to whoever posted the commands on stackoverflow... "
+            echo " https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
+            echo ""
+            echo "::endgroup::"
+        fi
         tmp=$(mktemp)
-        jq '.my_custom_version = "ami-02d8sdfsdf"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
+        jq '.${{ env.json_vars_field }} = "${{ env.next_release_version }}"' ${{ env.json_vars_file }} > "$tmp" && mv "$tmp" ${{ env.json_vars_file }}
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "going to check the version in the JSON file "
+        fi
+        ##
+        check_json_version=$(jq --raw-output .${{ env.json_vars_field }} ${{ env.json_vars_file }})
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "check_json_version: $check_json_version"
+        fi
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'bump-current-json-version' step. "; fi
+      env:
+        json_vars_file: ${{ inputs.json-vars-file }}
+        json_vars_field: ${{ inputs.json-vars-field }}
+        next_release_version: ${{ steps.set-next-release.outputs.next-release-version }}
 
-    - name: Skip bumping the current json version
-      id: skip-bumping-current-json-version
-      if: ( '${{ steps.compare-current-json-to-next-release.outputs.does_current_match_next }}' == 'true' )
+    - name: Get the updated value of the ${{ inputs.json-vars-field }} version field
+      id: get-updated-version
       shell: bash
       run: |
-        echo "Here is where we should see if my_custom_version matches the latest tag ... "
+        ## Get the updated value of the ${{ inputs.json-vars-field }} version field
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'get-updated-version' step. "
+            echo "json_vars_file is :  ${{ env.json_vars_file }} "
+            echo "json_vars_field is:  ${{ env.json_vars_field }} "
+            echo ""
+            echo "the syntax is 'MY_CUSTOM_VERSION=$(jq --raw-output .my_custom_field my-custom-variables.json)' "
+        fi
+        updated_json_version=$(jq --raw-output .${{ env.json_vars_field }} ${{ env.json_vars_file }})
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "updated_json_version: $updated_json_version"
+            echo "writing the 'updated_json_version' to the environment and GitHub output"
+        fi
+        ##
+        echo "updated_json_version=$updated_json_version" >> $GITHUB_ENV
+        echo "updated_json_version=$updated_json_version" >> "$GITHUB_OUTPUT"
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "writing $updated_json_version to the 'new-json-version' GitHub output"
+        fi
+        echo "new-json-version=$updated_json_version" >> $GITHUB_ENV
+        echo "new-json-version=$updated_json_version" >> "$GITHUB_OUTPUT"
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "checking to see if the updated_json_version matches the next_release_version "
+        fi
+        if [ '$updated_json_version' == '${{ env.next_release_version }}' ]; then
+            echo "the 'updated_json_version' is set to '$updated_json_version' and matches "
+            echo "  the 'next_release_version' which is set to '${{ env.next_release_version }}'. "
+            next_and_updated_match=true
+        else
+            echo "the 'updated_json_version' is set to '$updated_json_version' and DOES NOT MATCH "
+            echo "  the 'next_release_version' which is set to '${{ env.next_release_version }}'. "
+            next_and_updated_match=false
+        fi
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "setting the value of 'does_next_match_updated' to '${next_and_updated_match}' and sending it to GitHub output"
+        fi
+        echo "does_next_match_updated=${next_and_updated_match}" >> "$GITHUB_OUTPUT"
+        echo "does_next_match_updated=${next_and_updated_match}" >> $GITHUB_ENV
+        #
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'get-updated-version' step. "; fi
+      env:
+        json_vars_file: ${{ inputs.json-vars-file }}
+        json_vars_field: ${{ inputs.json-vars-field }}
+        next_release_version: ${{ steps.set-next-release.outputs.next-release-version }}
+
+    - name: Commit the changes to the '${{ inputs.json-vars-file }}' file
+      id: commit-json-version-changes
+      # probably want to only try to commit changes if 'does_next_match_updated' is 'true'
+      #if: ( '${{ steps.get-updated-version.outputs.does_next_match_updated }}' == 'true' )
+      #uses: stefanzweifel/git-auto-commit-action@v4
+      #uses: EndBug/add-and-commit@v9
+      uses: rwaight/actions/git/add-and-commit@main
+      with:
+        add: ${{ inputs.json-vars-file }}
+        author_name: ${{ inputs.author_name }}
+        author_email: ${{ inputs.author_email }}
+        commit: --signoff
+        committer_name: ${{ inputs.committer_name }}
+        committer_email: ${{ inputs.committer_email }}
+        default_author: ${{ inputs.default_author }}
+        message: '[bump-json-version] Bump ${{ inputs.json-vars-field }} to ${{ steps.set-next-release.outputs.next-release-version }}'
+        # options below are for 'stefanzweifel/git-auto-commit-action'
+        #commit_message: Bump ${{ inputs.json-vars-field }} to ${{ steps.set-next-release.outputs.next-release-version }}
+        #commit_options: '--signoff'
+        #file_pattern: ${{ inputs.json-vars-file }}
+        #branch: '${{ github.ref_name }}'
+        #create_branch: false
+        #commit_user_name: ${{ inputs.gh-user-name }}
+        #commit_user_email: ${{ inputs.gh-user-email }}
+
+    - name: Debug | Print the outputs
+      if: inputs.my_action_debug=='true'
+      id: debug-print-outputs
+      shell: bash
+      run: | 
+        ## Print the outputs if inputs.my_action_debug=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'debug-print-outputs' step. "
         echo ""
+        echo "Current release and old JSON version information: "
+        echo "old-json-version is       :  ${{ env.old-json-version }} "
+        echo "current-release-version is:  ${{ env.current-release-version }} "
+        echo ""
+        echo "Next release and new JSON version information: "
+        echo "next-release-version is   :  ${{ env.next-release-version }} "
+        echo "new-json-version is       :  ${{ env.new-json-version }} "
+        echo ""
+        echo "Version match results: "
+        echo "do_current_versions_match is:  ${{ env.do_current_versions_match }} "
+        echo "does_current_match_next is  :  ${{ env.does_current_match_next }} "
+        echo "does_next_match_updated is  :  ${{ env.does_next_match_updated }} "
+        echo ""
+        ##
+        echo "completing the 'debug-print-outputs' step. "
+      env:
+        current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
+        next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
+        old-json-version: ${{ steps.get-current-version.outputs.old-json-version }}
+        new-json-version: ${{ steps.get-updated-version.outputs.new-json-version }}
+        do_current_versions_match: ${{ steps.compare-current-versions.outputs.do_current_versions_match }}
+        does_current_match_next: ${{ steps.compare-current-json-to-next-release.outputs.does_current_match_next }}
+        does_next_match_updated: ${{ steps.get-updated-version.outputs.does_next_match_updated }}
 
-    - name: Bump my_custom_version if it matches the latest tag 
-      id: bump-versions-maybe-this-is-duplicate
-      shell: bash
-      run: |
-        echo "Here are commands to bump the version with bash ... "
-        echo "$version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1'
-
-    - name: sadf
-      id: update-json-version
-      shell: bash
-      run: |
-        echo "special thanks to this person on stack overflow ... "
-        echo "https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
-        tmp=$(mktemp)
-        jq '.my_custom_version = "ami-02d8sdfsdf"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
+    # - name: Modify a JSON key value in place
+    #   id: update-json-in-place
+    #   shell: bash
+    #   run: |
+    #     echo "special thanks to this person on stack overflow ... "
+    #     echo "https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
+    #     tmp=$(mktemp)
+    #     jq '.my_custom_version = "ami-02d8sdfsdf"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
