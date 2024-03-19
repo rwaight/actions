@@ -16,9 +16,12 @@ The actions should have their `branding` section updated according to the [updat
 ##### Actions pending import
 
 The following actions are pending import to this repo:
+- **git**
+    - [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
 - **github**
-    - [`agilepathway/label-checker` action](https://github.com/agilepathway/label-checker)
-    - [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
+    - None at this time.
+- **utilities**
+    - None at this time.
 
 #### Other actions to review
 
@@ -30,7 +33,6 @@ The following actions should be reviewed as candidates to import to this repo:
     - [`InsonusK/get-latest-release`](https://github.com/InsonusK/get-latest-release)
     - [`cardinalby/git-get-release-action`](https://github.com/cardinalby/git-get-release-action)
 - **git**
-    - [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
     - [`mdomke/git-semver`](https://github.com/mdomke/git-semver)
     - [`actions-ecosystem/action-get-latest-tag`](https://github.com/actions-ecosystem/action-get-latest-tag)
     - [`WyriHaximus/github-action-get-previous-tag`](https://github.com/WyriHaximus/github-action-get-previous-tag)

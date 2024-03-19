@@ -103,6 +103,11 @@
   description: 'Actions in the ''releases'' group'
   aliases: []
 -
+  name: 'group:test'
+  color: '50790C'
+  description: 'Actions in the ''test'' group'
+  aliases: []
+-
   name: 'group:utilities'
   color: '50790C'
   description: 'Actions in the ''utilities'' group'

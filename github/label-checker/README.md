@@ -58,8 +58,8 @@ Using this action is as simple as:
        steps:
          - name: Check for versioning labels
            #uses: docker://agilepathway/pull-request-label-checker:latest
-           #uses: rwaight/actions/github/label-sync@main # can use version specific or main
-           uses: rwaight/actions/github/label-sync@v1
+           #uses: rwaight/actions/github/label-checker@main # can use version specific or main
+           uses: rwaight/actions/github/label-checker@v1
            with:
              one_of: major,minor,patch
              repo_token: ${{ secrets.GITHUB_TOKEN }}
