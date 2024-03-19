@@ -169,7 +169,7 @@ jobs:
           config-name: release-template_monorepo-actions.yml # located in .github/ in default branch
           #prerelease: ${{ env.IS_PRERELEASE }}
           prerelease: true
-          include-pre-releases: true
+          #include-pre-releases: true
         env:
           #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ##GITHUB_TOKEN: ${{ secrets.MY_ACTIONS_TOKEN }}
