@@ -1,0 +1,187 @@
+name: 'Check semver labels'
+description: 'Check a pull request for semver labels using the label-checker action'
+author: 'rwaight'
+branding:
+  icon: 'check-square'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+
+inputs:
+  gh-token:
+    description: >
+      GITHUB_TOKEN or a repo scoped Personal Access Token (PAT), may be needed for the GitHub CLI.
+      See this link for an example of how to set this token:
+      https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#example-passing-github_token-as-an-input
+    required: true
+    default: ${{ github.token }}
+  allow-failure:
+    description: 'The allow_failure input for the label-checker action'
+    required: false
+    default: ''
+  semver-fallback:
+    description: 'A fallback label to add/remove to the pull request if the proper version label is missing, defaults to triage:version-needed'
+    required: false
+    default: 'triage:version-needed'
+  semver-prefix:
+    description: 'The prefix for the semver labels used in the repo'
+    required: false
+    default: 'version:'
+  # one_of:
+  #   description: 'The one_of input for the label-checker action'
+  #   required: false
+  #   default: ''
+  # none_of:
+  #   description: 'The none_of input for the label-checker action'
+  #   required: false
+  #   default: ''
+  # all_of:
+  #   description: 'The all_of input for the label-checker action'
+  #   required: false
+  #   default: ''
+  # any_of:
+  #   description: 'The any_of input for the label-checker action'
+  #   required: false
+  #   default: ''
+  # github_enterprise_graphql_url:
+  #   description: >
+  #     Only provide this if you are using GitHub Enterprise.
+  #     For GitHub Enterprise Cloud enter `https://api.github.com/graphql` as the value.
+  #     For Github Enterprise Server enter `http(s)://<hostname>/api/graphql` as the value.
+  #   required: false
+  #   default: ''
+  # prefix_mode:
+  #   description: 'The prefix_mode input for the label-checker action, defaults to true'
+  #   required: false
+  #   default: 'true'
+  my_action_debug:
+    description: 'Determine if the workflow should run debug tasks, defaults to false'
+    required: false
+    default: 'false'
+
+runs:
+  using: "composite"
+  # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+  steps:
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::This action supports Linux only"
+        exit 1
+
+    - name: Greet the triggering_actor
+      if: inputs.my_action_debug=='true'
+      shell: bash
+      run: echo Hello ${{ github.triggering_actor }}, the my_action_debug variable is set to true.
+
+    - name: Debug | Print the inputs
+      if: inputs.my_action_debug=='true'
+      id: debug-print-inputs
+      shell: bash
+      run: | 
+        ## Print the inputs if inputs.my_action_debug=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'debug-print-inputs' step. "
+        echo ""
+        ##echo "one_of is     :  ${{ inputs.one_of }} "
+        ##echo "none_of is    :  ${{ inputs.none_of }} "
+        ##echo "all_of is     :  ${{ inputs.all_of }} "
+        ##echo "any_of is     :  ${{ inputs.any_of }} "
+        ##echo "prefix_mode is:  ${{ inputs.prefix_mode }} "
+        echo "allow-failure is  :  ${{ inputs.allow-failure }} "
+        echo "semver-prefix is  :  ${{ inputs.semver-prefix }} "
+        echo "semver-fallback is:  ${{ inputs.semver-fallback }} "
+        echo "my_action_debug is:  ${{ inputs.my_action_debug }} "
+        echo ""
+        ##
+        echo "completing the 'debug-print-inputs' step. "
+
+    - name: Ensure the ${{ inputs.semver-fallback }} label exists
+      id: ensure-alternate-label-exists
+      shell: bash
+      run: |
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'ensure-alternate-label-exists' step. "
+        fi
+        LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="${{ env.semver-fallback }}")')
+        if [[ -z "$LABEL" ]]; then
+          echo "Creating '${{ env.semver-fallback }}' label"
+          gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="${{ env.semver-fallback }}" -f color="baa938" -f description="Need to have the version determined"
+        else
+          echo "the '${{ env.semver-fallback }}' label exists"
+        fi
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh-token }}
+        semver-fallback: ${{ inputs.semver-fallback }}
+
+    - name: Check for semantic version labels
+      uses: rwaight/actions/github/label-checker@main # can use version specific or main
+      #uses: rwaight/actions/github/label-checker@v1
+      id: check-semver-labels
+      with:
+        prefix_mode: true
+        one_of: "${{ inputs.semver-prefix }}"
+        #none_of: "skip-changelog"
+        allow_failure: ${{ inputs.allow-failure }}
+        repo_token: ${{ inputs.gh-token }}
+
+    - name: Apply the '${{ inputs.semver-fallback }}' label to a pull request
+      uses: actions/github-script@v6
+      if: steps.check-semver-labels.outputs.label_check != 'success'
+      with:
+        github-token: ${{ inputs.gh-token }}
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ['${{ inputs.semver-fallback }}']
+          })
+
+    - name: Remove the '${{ inputs.semver-fallback }}' label from a pull request
+      uses: actions/github-script@v6
+      if: |
+        steps.check-semver-labels.outputs.label_check == 'success' && 
+        contains(github.event.pull_request.labels.*.name, '${{ inputs.semver-fallback }}')
+      with:
+        github-token: ${{ inputs.gh-token }}
+        script: |
+          github.rest.issues.removeLabel({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            name: '${{ inputs.semver-fallback }}'
+          })
+
+    # Fail the workflow because the proper version label has not been applied
+    - name: Error - Missing proper '${{ inputs.semver-prefix }}' label
+      id: labeler-force-failure
+      if: steps.check-semver-labels.outputs.label_check != 'success'
+      shell: bash
+      run: |
+        echo "Running 'check-semver-labels' failed! The outcome was ${{ steps.check-semver-labels.outputs.label_check }} ."
+        echo ""
+        echo "::group::check-semver-labels information"
+        echo "The pull request must have one of the '${{ inputs.semver-prefix }}' labels applied. "
+        echo "::endgroup::"
+        ##
+        echo "::error file=actions-triage-manager.yml::check-semver-labels error"
+        exit 1
+
+    - name: Debug | Action complete
+      if: inputs.my_action_debug=='true'
+      id: debug-action-complete
+      shell: bash
+      run: | 
+        ## Print a notice that the action has finished
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'debug-action-complete' step. "
+        echo ""
+        echo "The 'check-semver-labels' action is on the last step. "
+        echo ""
+        ##
+        echo "completing the 'debug-action-complete' step. "
