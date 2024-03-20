@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/agilepathway/label-checker/internal/error/panic"
-	"github.com/agilepathway/label-checker/internal/github/pullrequest"
+	"github.com/rwaight/actions/github/label-checker/internal/error/panic"
+	"github.com/rwaight/actions/github/label-checker/internal/github/pullrequest"
 )
 
 // Action encapsulates the Label Checker GitHub Action.

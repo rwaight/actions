@@ -4,8 +4,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/agilepathway/label-checker/internal/error/panic"
-	"github.com/agilepathway/label-checker/internal/slice"
+	"github.com/rwaight/actions/github/label-checker/internal/error/panic"
+	"github.com/rwaight/actions/github/label-checker/internal/slice"
 )
 
 // Labels represents a collection of GitHub labels, e.g. all the labels in a pull request

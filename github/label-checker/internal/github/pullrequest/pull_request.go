@@ -6,7 +6,7 @@ package pullrequest
 import (
 	"context"
 
-	"github.com/agilepathway/label-checker/internal/error/panic"
+	"github.com/rwaight/actions/github/label-checker/internal/error/panic"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
