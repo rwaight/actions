@@ -2,6 +2,8 @@
 name: Label Manager
 run-name: Actions Monorepo Label Manager - ${{ github.event_name }}
 on: 
+  repository_dispatch:
+    types: [export-labels,sync-labels]
   # You can run this with every event, but it's better to run it only when you actually need it.
   workflow_dispatch:
     inputs:
@@ -29,14 +31,22 @@ jobs:
     name: Export repo label configuration
     runs-on: ubuntu-latest
     if: | 
-      (github.repository_owner == 'rwaight') && ( 
       (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
       (github.event_name=='workflow_dispatch' && inputs.export_labels==true) || 
+      (github.event_name=='repository_dispatch' && github.event.action=='export-labels') || 
+      (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
       (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
-      )
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
     steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 0
+
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
         
@@ -76,12 +86,20 @@ jobs:
     #   https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idpermissions
     permissions: write-all
     if: | 
-      (github.repository_owner == 'rwaight') && 
+      (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
       (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
     needs: [export-labels]
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
     steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 0
+
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
 
@@ -120,17 +138,3 @@ jobs:
           echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
           echo "The 'run-workflow-debug' step is now complete. "
         continue-on-error: true
-
-  # Run the 'not-repo-owner' job if the repository_owner is not correct
-  not-repo-owner:
-    name: Print a random note
-    runs-on: ubuntu-latest
-    if: (github.repository_owner != 'rwaight')
-    env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
-    steps:
-      - name: Print a message based on a condition
-        id: print-message
-        run: |
-          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          echo ""
