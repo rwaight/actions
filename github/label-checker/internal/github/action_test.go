@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/agilepathway/label-checker/internal/error/panic"
+	"github.com/rwaight/actions/github/label-checker/internal/error/panic"
 )
 
 //nolint:gochecknoglobals
