@@ -2,7 +2,6 @@
 
 The following actions should be copied/imported to this repo:
 - **github**
-    - [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
     - [`imjohnbo/issue-bot` action](https://github.com/imjohnbo/issue-bot)
     - [`imjohnbo/extract-issue-template-fields` action](https://github.com/imjohnbo/extract-issue-template-fields)
     - [`c-py/action-dotenv-to-setenv`](https://github.com/c-py/action-dotenv-to-setenv)
@@ -19,7 +18,7 @@ The following actions are pending import to this repo:
 - **git**
     - [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
 - **github**
-    - None at this time.
+    - [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
 - **utilities**
     - None at this time.
 
