@@ -1,0 +1,5 @@
+# from https://github.com/influxdata/flux/blob/master/.github/semantic.yml
+
+# docs: https://github.com/probot/semantic-pull-requests#configuration
+# Always validate the PR title AND all the commits
+titleAndCommits: true
