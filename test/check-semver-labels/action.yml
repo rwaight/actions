@@ -123,7 +123,7 @@ runs:
       id: check-semver-labels
       with:
         prefix_mode: true
-        one_of: "${{ inputs.semver-prefix }}"
+        one_of: ${{ inputs.semver-prefix }}
         #none_of: "skip-changelog"
         allow_failure: ${{ inputs.allow-failure }}
         repo_token: ${{ inputs.gh-token }}
