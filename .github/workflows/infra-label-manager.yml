@@ -189,7 +189,7 @@ jobs:
     timeout-minutes: 5
     if: | 
       (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
-    needs: [export-labels]
+    needs: [dispatch-export-labels-2]
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
       #DISPATCH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
