@@ -105,14 +105,11 @@ runs:
       run: |
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
             echo "starting the 'ensure-alternate-label-exists' step. "
-            echo "  attempting to login using 'gh auth login' "
+            echo "  checking the auth status using 'gh auth status' "
             echo "  if authentication fails, read through the documentation "
-            echo "  link to docs: https://cli.github.com/manual/gh_auth_login "
-        fi
-        gh auth login
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
-            echo "  this step has completed the 'gh auth login' command, checking auth status "
+            echo "  link to docs: https://cli.github.com/manual/gh_auth_status "
             gh auth status
+            echo "  review the output from the auth status command above"
         fi
         LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="${{ env.semver-fallback }}")')
         if [[ -z "$LABEL" ]]; then
@@ -122,10 +119,6 @@ runs:
           echo "the '${{ env.semver-fallback }}' label exists"
         fi
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
-            echo "  attempting to logout using 'gh auth logout' "
-        fi
-        gh auth logout
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
       env:
         #GITHUB_TOKEN: ${{ inputs.gh-token }}
