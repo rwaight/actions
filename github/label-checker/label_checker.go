@@ -4,7 +4,7 @@ package main
 import (
 	"os"
 
-	"github.com/rwaight/actions/label-checker/internal/github"
+	"github.com/rwaight/actions/github/label-checker/internal/github"
 )
 
 func main() {
