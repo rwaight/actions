@@ -1,0 +1,87 @@
+# from https://github.com/pnp/powerfx-samples/blob/main/.github/ISSUE_TEMPLATE/bug-report.yml
+
+name: Bug or error report
+description: Report an anomaly or unexpected behavior with a sample from this repository.
+labels: ['triage:needs-assigned', 'bug']
+
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thanks for taking the time to fill out this bug report! Use the sections below to submit a bug **only** if it's related to the actions or workflows in this repo. 
+      
+      - Follow the guidance from **pnp** on [How To Create Good Issues](https://github.com/pnp/powerfx-samples/wiki/How-to-Create-Good-Issues).
+      - All bug reports are welcome - we want to fix them!
+      - This repo is maintained by volunteers. Please be courteous and patient. 🙂
+      - Remember to include sufficient details and context.
+      - If you have multiple questions, suggestions, or bugs, please submit them in separate issues.
+      
+      Please provide the following details about the issue you encountered.
+
+- type: dropdown
+  id: impacted-compontent
+  attributes:
+    label: What compontent is impacted by this problem?
+    multiple: false
+    options:
+      - actions
+      - assets
+      - docs
+      - repo
+      - workflows
+      - other
+  validations:
+    required: true
+
+- type: dropdown
+  id: impacted-action-category
+  attributes:
+    label: What action category (group) is impacted by this problem?
+    multiple: false
+    options:
+      - builders
+      - composite
+      - git
+      - github
+      - releases
+      - test
+      - utilities
+  validations:
+    required: false
+
+- type: markdown
+  attributes:
+    value: |
+      Provide a clear & concise description of what the bug is. Please the guidance from **pnp** on [How To Create Good Issues](https://github.com/pnp/powerfx-samples/wiki/How-to-Create-Good-Issues) which explains how to apply formatting, adding references & resources, screenshots, etc. 
+      
+      **Do not attach ZIP files** of your code or compiled projects - instead, please publish your code to a public GitHub repo & post a link to it.
+
+- type: textarea
+  id: what-happened
+  attributes:
+    label: What happened?
+    description: Describe the observed behavior
+    placeholder: Tell us what you see!
+  validations:
+    required: true
+
+- type: textarea
+  id: steps
+  attributes:
+    label: Steps to reproduce
+    description: How do you reproduce this? Please provide as much step-by-step detail as possible.
+    value: |
+      1.
+      2.
+      3.
+  validations:
+    required: true
+
+- type: textarea
+  id: expected
+  attributes:
+    label: Expected behavior
+    description: What did you expect to happen when the reproduce steps are followed?
+    placeholder: Tell us what you expected to see!
+  validations:
+    required: true
