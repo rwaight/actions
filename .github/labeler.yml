@@ -36,6 +36,12 @@ group:releases:
   - changed-files:
     - any-glob-to-any-file: 'releases/**'
 
+# Add 'group:test' label to any file changes within the 'test' folder
+group:test:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'test/**'
+
 # Add 'group:utilities' label to any file changes within the 'utilities' folder
 group:utilities:
 - any:
