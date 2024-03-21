@@ -98,6 +98,7 @@ runs:
         ##
         echo "completing the 'debug-print-inputs' step. "
 
+    # We may want to assume the declared 'fallback' label already exists in the repo
     - name: Ensure the ${{ inputs.semver-fallback }} label exists
       id: ensure-alternate-label-exists
       shell: bash
@@ -115,6 +116,7 @@ runs:
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
       env:
         GITHUB_TOKEN: ${{ inputs.gh-token }}
+        GH_TOKEN: ${{ inputs.gh-token }}
         semver-fallback: ${{ inputs.semver-fallback }}
 
     - name: Check for semantic version labels
