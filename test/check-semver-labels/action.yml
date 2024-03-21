@@ -59,6 +59,14 @@ inputs:
     required: false
     default: 'false'
 
+outputs:
+  semver-check-results:
+    description: "The output from the 'semver-labels-check' step. "
+    value: ${{ steps.semver-labels-check.outputs.label_check }}
+  fallback-check-results:
+    description: "The output from the 'fallback-label-check' step. "
+    value: ${{ steps.fallback-label-check.outputs.label_check }}
+
 runs:
   using: "composite"
   # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
@@ -105,18 +113,44 @@ runs:
       run: |
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
             echo "starting the 'ensure-alternate-label-exists' step. "
-            echo "  checking the auth status using 'gh auth status' "
-            echo "  if authentication fails, read through the documentation "
-            echo "  link to docs: https://cli.github.com/manual/gh_auth_status "
-            gh auth status
-            echo "  review the output from the auth status command above"
+            echo "  the value of 'semver-fallback' is '${{ env.semver-fallback }}'. "
+            ## delete before publishing ##echo ""
+            ## delete before publishing ##echo "  checking the auth status using 'gh auth status' "
+            ## delete before publishing ##echo "    if authentication fails, read through the documentation "
+            ## delete before publishing ##echo "    link to docs: https://cli.github.com/manual/gh_auth_status "
+            ## delete before publishing ##gh auth status
+            ## delete before publishing ##echo "    review the output from the auth status command above"
         fi
-        LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="${{ env.semver-fallback }}")')
+        ##
+        ## delete before publishing ##echo "first-debug-output-complete"
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            ## delete before publishing ## #echo "  running 'gh label list' with the '--json name' and --jq '.name' options "
+            ## delete before publishing ## #gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.name'
+            ## delete before publishing ## #echo "  running 'gh label list' with the '--json name' option -- setting the output as gh_label_1_result "
+            ## delete before publishing ## #gh_label_1_result=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.name')
+            ## delete before publishing ## #echo "    gh_label_1_result was set to '${gh_label_1_result}' . "
+            echo ""
+            echo "  running 'gh label list' with the '--jq' option "
+            gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name'
+            echo "  running 'gh label list' with the '--jq' option -- setting the output as gh_label_2_result "
+            gh_label_2_result=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
+            echo "    gh_label_2_result was set to '${gh_label_2_result}' . "
+            echo "  check the results of the outputs above"
+        fi
+        ##
+        echo "second-debug-output-complete"
+        ## delete before publishing ## #LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="${{ env.semver-fallback }}")')
+        LABEL=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "  the value of LABEL is '${LABEL}', going to test the conditional. "
+        fi
+        ##
         if [[ -z "$LABEL" ]]; then
           echo "Creating '${{ env.semver-fallback }}' label"
-          gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="${{ env.semver-fallback }}" -f color="baa938" -f description="Need to have the version determined"
+          ## delete before publishing ## #gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="${{ env.semver-fallback }}" -f color="baa938" -f description="Need to have the version determined"
+          gh label create "${{ env.semver-fallback }}" --description "Need to have the version determined" --color BAA938
         else
-          echo "the '${{ env.semver-fallback }}' label exists"
+          echo "  'ensure-alternate-label-exists' - the '${{ env.semver-fallback }}' label exists"
         fi
         ##
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
@@ -128,7 +162,7 @@ runs:
     - name: Check for semantic version labels
       uses: rwaight/actions/github/label-checker@main # can use version specific or main
       #uses: rwaight/actions/github/label-checker@v1
-      id: check-semver-labels
+      id: semver-labels-check
       with:
         prefix_mode: true
         one_of: ${{ inputs.semver-prefix }}
@@ -136,9 +170,54 @@ runs:
         allow_failure: ${{ inputs.allow-failure }}
         repo_token: ${{ inputs.gh-token }}
 
-    - name: Apply the '${{ inputs.semver-fallback }}' label to a pull request
+    - name: Debug | Print the output from 'semver-labels-check'
+      if: inputs.my_action_debug=='true'
+      id: debug-semver-labels-check
+      shell: bash
+      run: | 
+        ## Print the output from 'semver-labels-check' if inputs.my_action_debug=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'debug-semver-labels-check' step. "
+        echo ""
+        echo "  The output from the 'semver-labels-check' step is below: "
+        echo "    ${{ steps.semver-labels-check.outputs.label_check }} "
+        echo "    Check the output above. "
+        ##
+        echo "completing the 'debug-semver-labels-check' step. "
+
+    - name: Check for the fallback label
+      uses: rwaight/actions/github/label-checker@main # can use version specific or main
+      #uses: rwaight/actions/github/label-checker@v1
+      id: fallback-label-check
+      with:
+        prefix_mode: false
+        one_of: ${{ inputs.semver-fallback }}
+        allow_failure: ${{ inputs.allow-failure }}
+        repo_token: ${{ inputs.gh-token }}
+
+    - name: Debug | Print the output from 'fallback-label-check'
+      if: inputs.my_action_debug=='true'
+      id: debug-fallback-label-check
+      shell: bash
+      run: | 
+        ## Print the output from 'fallback-label-check' if inputs.my_action_debug=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'debug-fallback-label-check' step. "
+        echo ""
+        echo "  The output from the 'fallback-label-check' step is below: "
+        echo "    ${{ steps.fallback-label-check.outputs.label_check }} "
+        echo "    Check the output above. "
+        ##
+        echo "completing the 'debug-fallback-label-check' step. "
+
+    - name: Apply the '${{ inputs.semver-fallback }}' label
+      # the semver label did not exist AND the fallback label did not exist
       uses: actions/github-script@v6
-      if: steps.check-semver-labels.outputs.label_check != 'success'
+      if: |
+        steps.semver-labels-check.outputs.label_check != 'success' &&
+        steps.fallback-label-check.outputs.label_check != 'success'
       with:
         github-token: ${{ inputs.gh-token }}
         script: |
@@ -149,11 +228,13 @@ runs:
             labels: ['${{ inputs.semver-fallback }}']
           })
 
-    - name: Remove the '${{ inputs.semver-fallback }}' label from a pull request
+    - name: Remove the '${{ inputs.semver-fallback }}' label
+      # the semver label did exist and the fallback label did exist
       uses: actions/github-script@v6
+      continue-on-error: true
       if: |
-        steps.check-semver-labels.outputs.label_check == 'success' && 
-        contains(github.event.pull_request.labels.*.name, '${{ inputs.semver-fallback }}')
+        steps.semver-labels-check.outputs.label_check == 'success' &&
+        steps.fallback-label-check.outputs.label_check == 'success'
       with:
         github-token: ${{ inputs.gh-token }}
         script: |
@@ -164,19 +245,21 @@ runs:
             name: '${{ inputs.semver-fallback }}'
           })
 
-    # Fail the workflow because the proper version label has not been applied
     - name: Error - Missing proper '${{ inputs.semver-prefix }}' label
+      # Fail the workflow because the proper version label has not been applied
       id: labeler-force-failure
-      if: steps.check-semver-labels.outputs.label_check != 'success'
+      if: | 
+        steps.semver-labels-check.outputs.label_check != 'success' && 
+        inputs.allow-failure=='true'
       shell: bash
       run: |
-        echo "Running 'check-semver-labels' failed! The outcome was ${{ steps.check-semver-labels.outputs.label_check }} ."
+        echo "Running 'semver-labels-check' failed! The outcome was ${{ steps.semver-labels-check.outputs.label_check }} ."
         echo ""
-        echo "::group::check-semver-labels information"
+        echo "::group::semver-labels-check information"
         echo "The pull request must have one of the '${{ inputs.semver-prefix }}' labels applied. "
         echo "::endgroup::"
         ##
-        echo "::error file=actions-triage-manager.yml::check-semver-labels error"
+        echo "::error file=action.yml,title=Check semver labels::semver-labels-check error"
         exit 1
 
     - name: Debug | Action complete
@@ -189,7 +272,13 @@ runs:
         ##
         echo "starting the 'debug-action-complete' step. "
         echo ""
-        echo "The 'check-semver-labels' action is on the last step. "
+        echo "  The 'Check semver labels' action is on the last step. "
         echo ""
+        echo "  The output from the 'semver-labels-check' step is: "
+        echo "    ${{ steps.semver-labels-check.outputs.label_check }} "
+        echo ""
+        echo "  The output from the 'fallback-label-check' step is: "
+        echo "    ${{ steps.fallback-label-check.outputs.label_check }} "
+        echo "    Check the output above. "
         ##
         echo "completing the 'debug-action-complete' step. "
