@@ -27,33 +27,6 @@ inputs:
     description: 'The prefix for the semver labels used in the repo'
     required: false
     default: 'version:'
-  # one_of:
-  #   description: 'The one_of input for the label-checker action'
-  #   required: false
-  #   default: ''
-  # none_of:
-  #   description: 'The none_of input for the label-checker action'
-  #   required: false
-  #   default: ''
-  # all_of:
-  #   description: 'The all_of input for the label-checker action'
-  #   required: false
-  #   default: ''
-  # any_of:
-  #   description: 'The any_of input for the label-checker action'
-  #   required: false
-  #   default: ''
-  # github_enterprise_graphql_url:
-  #   description: >
-  #     Only provide this if you are using GitHub Enterprise.
-  #     For GitHub Enterprise Cloud enter `https://api.github.com/graphql` as the value.
-  #     For Github Enterprise Server enter `http(s)://<hostname>/api/graphql` as the value.
-  #   required: false
-  #   default: ''
-  # prefix_mode:
-  #   description: 'The prefix_mode input for the label-checker action, defaults to true'
-  #   required: false
-  #   default: 'true'
   my_action_debug:
     description: 'Determine if the workflow should run debug tasks, defaults to false'
     required: false
@@ -93,11 +66,6 @@ runs:
         ##
         echo "starting the 'debug-print-inputs' step. "
         echo ""
-        ##echo "one_of is     :  ${{ inputs.one_of }} "
-        ##echo "none_of is    :  ${{ inputs.none_of }} "
-        ##echo "all_of is     :  ${{ inputs.all_of }} "
-        ##echo "any_of is     :  ${{ inputs.any_of }} "
-        ##echo "prefix_mode is:  ${{ inputs.prefix_mode }} "
         echo "allow-failure is  :  ${{ inputs.allow-failure }} "
         echo "semver-prefix is  :  ${{ inputs.semver-prefix }} "
         echo "semver-fallback is:  ${{ inputs.semver-fallback }} "
@@ -106,7 +74,6 @@ runs:
         ##
         echo "completing the 'debug-print-inputs' step. "
 
-    # We may want to assume the declared 'fallback' label already exists in the repo
     - name: Ensure the ${{ inputs.semver-fallback }} label exists
       id: ensure-alternate-label-exists
       shell: bash
@@ -114,43 +81,25 @@ runs:
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
             echo "starting the 'ensure-alternate-label-exists' step. "
             echo "  the value of 'semver-fallback' is '${{ env.semver-fallback }}'. "
-            ## delete before publishing ##echo ""
-            ## delete before publishing ##echo "  checking the auth status using 'gh auth status' "
-            ## delete before publishing ##echo "    if authentication fails, read through the documentation "
-            ## delete before publishing ##echo "    link to docs: https://cli.github.com/manual/gh_auth_status "
-            ## delete before publishing ##gh auth status
-            ## delete before publishing ##echo "    review the output from the auth status command above"
-        fi
-        ##
-        ## delete before publishing ##echo "first-debug-output-complete"
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
-            ## delete before publishing ## #echo "  running 'gh label list' with the '--json name' and --jq '.name' options "
-            ## delete before publishing ## #gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.name'
-            ## delete before publishing ## #echo "  running 'gh label list' with the '--json name' option -- setting the output as gh_label_1_result "
-            ## delete before publishing ## #gh_label_1_result=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.name')
-            ## delete before publishing ## #echo "    gh_label_1_result was set to '${gh_label_1_result}' . "
             echo ""
-            echo "  running 'gh label list' with the '--jq' option "
+            echo "  running 'gh label list' to check for the ${{ env.semver-fallback }} label "
             gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name'
-            echo "  running 'gh label list' with the '--jq' option -- setting the output as gh_label_2_result "
-            gh_label_2_result=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
-            echo "    gh_label_2_result was set to '${gh_label_2_result}' . "
-            echo "  check the results of the outputs above"
+            echo "  running 'gh label list' with the '--jq' option -- setting the output as gh_label_result "
+            gh_label_result=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
+            echo "    gh_label_result was set to '${gh_label_result}' . "
+            echo ""
         fi
         ##
-        echo "second-debug-output-complete"
-        ## delete before publishing ## #LABEL=$(gh api repos/$GITHUB_REPOSITORY/labels --jq '.[] | select(.name=="${{ env.semver-fallback }}")')
         LABEL=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
-            echo "  the value of LABEL is '${LABEL}', going to test the conditional. "
+            echo "  the value of LABEL is '${LABEL}'. "
         fi
         ##
         if [[ -z "$LABEL" ]]; then
-          echo "Creating '${{ env.semver-fallback }}' label"
-          ## delete before publishing ## #gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="${{ env.semver-fallback }}" -f color="baa938" -f description="Need to have the version determined"
+          echo "  fallback label not found, attempting to create the '${{ env.semver-fallback }}' label"
           gh label create "${{ env.semver-fallback }}" --description "Need to have the version determined" --color BAA938
         else
-          echo "  'ensure-alternate-label-exists' - the '${{ env.semver-fallback }}' label exists"
+          echo "  step 'ensure-alternate-label-exists' - the '${{ env.semver-fallback }}' label exists"
         fi
         ##
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
