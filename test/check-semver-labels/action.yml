@@ -128,7 +128,7 @@ runs:
         gh auth logout
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
       env:
-        GITHUB_TOKEN: ${{ inputs.gh-token }}
+        #GITHUB_TOKEN: ${{ inputs.gh-token }}
         GH_TOKEN: ${{ inputs.gh-token }}
         semver-fallback: ${{ inputs.semver-fallback }}
 
