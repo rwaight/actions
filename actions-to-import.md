@@ -62,12 +62,15 @@ branding:
 
 When importing a new action, `cd` into the directory then run the following commands to keep an original copy of specific files:
 ```bash
+import=example-action
 # cd into the directory
-cd example-action
+cd $import
 # rename the '.github' directory
 mv .github __dot_github
 # copy and rename the '.md' file(s)
-for f in *.md; do cp "$f" "example-action__$f"; done
+for f in *.md; do cp "$f" "${import}__$f"; done
+# copy and rename the '.yml' file(s)
+for f in *.yml; do cp "$f" "${import}__$f"; done
 ```
 
 #### Documentation for imported actions
