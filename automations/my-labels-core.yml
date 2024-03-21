@@ -88,6 +88,11 @@
   description: 'Actions in the ''builders'' group'
   aliases: []
 -
+  name: 'group:composite'
+  color: '50790C'
+  description: 'Actions in the ''composite'' group'
+  aliases: []
+-
   name: 'group:git'
   color: '50790C'
   description: 'Actions in the ''git'' group'
