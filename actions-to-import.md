@@ -6,6 +6,8 @@ The following actions should be copied/imported to this repo:
     - [`imjohnbo/extract-issue-template-fields` action](https://github.com/imjohnbo/extract-issue-template-fields)
     - [`c-py/action-dotenv-to-setenv`](https://github.com/c-py/action-dotenv-to-setenv)
     - [`robvanderleek/create-issue-branch` action](https://github.com/robvanderleek/create-issue-branch)
+- **releases**
+    - [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
 - **utilities**
     - [`imjohnbo/action-to-mermaid`](https://github.com/imjohnbo/action-to-mermaid)
     - [`jakejarvis/s3-sync-action`](https://github.com/jakejarvis/s3-sync-action)
@@ -16,9 +18,9 @@ The actions should have their `branding` section updated according to the [updat
 
 The following actions are pending import to this repo:
 - **git**
-    - [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
+    - [`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request)
 - **github**
-    - [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
+    - None at this time.
 - **utilities**
     - None at this time.
 
