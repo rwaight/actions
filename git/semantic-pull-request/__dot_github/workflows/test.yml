@@ -1,0 +1,37 @@
+name: 'Test'
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: yarn install
+      - run: yarn lint && yarn test
+
+  dist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with: 
+          fetch-depth: 0
+      - name: Check if `dist/` has been modified.
+        run: |
+          set -eux
+
+          if [ $(git diff origin/main --name-only -- 'dist/**' | wc -l) -gt 0 ]
+          then
+            echo "Please do not update 'dist/'. CI will update it automatically on merge."
+            exit 1
+          fi
