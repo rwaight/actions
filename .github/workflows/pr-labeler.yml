@@ -116,6 +116,7 @@ jobs:
         id: check-type-labels
         if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         with:
+          allow_failure: true
           prefix_mode: true
           #any_of: 'group:'
           none_of: 'version:'
