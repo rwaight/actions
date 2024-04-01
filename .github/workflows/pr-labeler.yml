@@ -31,8 +31,103 @@ jobs:
           echo "This workflow will now exit. "
           exit 0
 
+      - name: Autorelease | Check 'autorelease' branch
+        id: check-autorelease-branch
+        if: contains('refs/heads/autorelease', github.ref)
+        #if: ${{ contains('refs/heads/autorelease', github.ref) }}
+        # if: | 
+        #   contains('
+        #     refs/heads/autorelease
+        #     refs/heads/production
+        #   ', github.ref)
+        run: |
+          ## The head branch should be named autorelease/<version>
+          if ! [[ "${{ github.event.pull_request.head.ref }}" =~ ^autorelease\/[A-Za-z0-9.+-]+$ ]]; then
+            echo "::error::Invalid autorelease branch '${{ github.event.pull_request.head.ref }}'"
+            exit 1
+          fi
+          VERSION=$(echo "${{ github.event.pull_request.head.ref }}" | awk -F/ '{print $2}')
+          echo "VERSION=$VERSION"
+          ## Ensure the version number in the branch name is in a valid format
+          RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+          if [[ $VERSION =~ $RE ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+          else
+            echo "::error::Version '$VERSION' is not in a valid format" && exit 1
+          fi
+          echo "The 'check-autorelease-branch' step has completed. "
+
+      - name: Print a note about non autorelease branches
+        id: check-other-branches
+        #if: steps.check-autorelease-branch.outcome == 'skipped'
+        if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        run: |
+          echo "This branch is not an 'autorelease' branch, skipping the autorelease steps. "
+
+      # Create a GitHub App Token from actions/create-github-app-token
+      # https://github.com/actions/create-github-app-token
+      - name: Create an App Token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
-      - name: Run actions/labeler
+      - name: Apply non-versioning labels
+        id: label-pull-request
         uses: actions/labeler@v5
+        with:
+          repo-token: ${{ steps.app-token.outputs.token }}
+
+      - name: Autorelease | Check for semantic version labels
+        uses: rwaight/actions/test/check-semver-labels@main
+        id: check-semver-labels
+        #if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
+        if: contains('refs/heads/autorelease', github.ref)
+        with:
+          gh-token: ${{ steps.app-token.outputs.token }}
+          allow-failure: true
+          #allow-failure: false
+          semver-fallback: 'triage:version-needed'
+          semver-prefix: 'version:'
+          my_action_debug: true
+
+      - name: Autorelease | Evaluate check-semver-labels step
+        # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
+        if: |
+          steps.check-semver-labels.outcome != 'skipped' && 
+          steps.check-semver-labels.outputs.label_check != 'success'
+        run: |
+          echo "::error::Missing the proper version label in autorelease PR ${{ github.event.number }}"
+          exit 1
+
+      - name: Check for type labels
+        uses: rwaight/actions/github/label-checker@main # can use version specific or main
+        #uses: rwaight/actions/github/label-checker@v1 # can use version specific or main
+        id: check-type-labels
+        if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        with:
+          prefix_mode: true
+          #any_of: 'group:'
+          none_of: 'version:'
+          one_of: 'type:'
+          repo_token: ${{ steps.app-token.outputs.token }}
+
+      - name: Evaluate check-type-labels step
+        #if: steps.check-type-labels.outputs.label_check != 'success'
+        if: |
+          steps.check-type-labels.outcome != 'skipped' && 
+          steps.check-type-labels.outputs.label_check != 'success'
+        run: |
+          echo "::error::Missing the proper type label in PR ${{ github.event.number }}'"
+          exit 1
