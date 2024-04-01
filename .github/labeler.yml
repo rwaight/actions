@@ -54,6 +54,12 @@ impacts:actions:
   - changed-files:
     - any-glob-to-any-file: ['builders/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
 
+# Add 'impacts:assets' label to any file changes within the grouped actions folders
+impacts:assets:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'assets/**'
+
 # Add 'impacts:repo' label to file changes within the '.github' folder EXCEPT for the workflows sub-folder
 impacts:repo:
 - all:
