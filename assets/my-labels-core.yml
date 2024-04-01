@@ -208,7 +208,7 @@
 -
   name: 'type:style'
   color: '3580BA'
-  description: 'Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)'
+  description: 'Changes that do not affect the meaning of the code (white-space, formatting, missing colons, etc)'
   aliases: []
 -
   name: 'type:refactor'
@@ -233,7 +233,7 @@
 -
   name: 'type:ci'
   color: '3580BA'
-  description: 'Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)'
+  description: 'Changes to our CI configuration files and scripts (example scopes: Travis, Circle, SauceLabs)'
   aliases: []
 -
   name: 'type:chore'
