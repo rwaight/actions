@@ -44,11 +44,11 @@ jobs:
           # If you want to use a config file, you can put its path or URL here, multiple files are also allowed (more info in the paragraphs below)
           config-file: .github/labels.yml
           # as URL:
-          config-file: https://raw.githubusercontent.com/rwaight/actions/main/automations/my-labels-core.yml
+          config-file: https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
           # as multiple:
           config-file: |
-            https://raw.githubusercontent.com/rwaight/actions/main/automations/my-labels-core.yml
-            https://raw.githubusercontent.com/rwaight/actions/main/automations/my-labels-versioning.yml
+            https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
+            https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-versioning.yml
             .github/labels.yml
 
           # If you want to use a source repo, you can put is name here (only the owner/repo format is accepted)
