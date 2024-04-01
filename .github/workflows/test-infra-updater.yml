@@ -1,0 +1,203 @@
+# This IS A TEST workflow to run other workflows based on changes within the repo
+name: Infra Updater
+run-name: Run updater on ${{ github.event_name }}
+on: 
+  push:
+    branches: # 'on push' to 'main' is used by: 'dispatch-label-manager'
+      - main
+    #paths:
+    #  - 'assets/my-labels-*.yml'
+  pull_request:
+    branches: [ main ]
+    #paths:
+    #  - 'assets/my-labels-*.yml'
+    types: [ closed ]
+
+env:
+  MY_WORKFLOW_DEBUG: 'true'
+
+jobs:
+  paths-filter:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.merged == true ||
+      github.event_name=='push'
+    outputs:
+      added: ${{ steps.filter-changes.outputs.added }}
+      deleted: ${{ steps.filter-changes.outputs.deleted }}
+      modified: ${{ steps.filter-changes.outputs.modified }}
+      #### specific files and/or directories
+      archive: ${{ steps.filter-changes.outputs.archive }}
+      assets: ${{ steps.filter-changes.outputs.assets }}
+      label_assets: ${{ steps.filter-changes.outputs.label_assets }}
+      markdown: ${{ steps.filter-changes.outputs.markdown }}
+      workflows: ${{ steps.filter-changes.outputs.workflows }}
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter 
+        uses: rwaight/actions/github/paths-filter@main
+        id: filter
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            added:
+              - added: '**'
+            deleted:
+              - deleted: '**'
+            modified:
+              - modified: '**'
+            archive:
+              - 'archive/**'
+            assets:
+              - added|deleted|modified: 'assets/**'
+            label_assets:
+              - added|deleted|modified: 'assets/my-labels-*.yml'
+            markdown:
+              - added|modified: '*.md'
+            workflows:
+              - added|deleted|modified: '.github/workflows/**'
+          list-files: 'json'
+
+      - name: Debug | Output the filter matches
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: | 
+          echo "::group::Count of matching files"
+          echo "## the count of matches"
+          echo ""
+          echo "added_count is:  ${{ env.added_count }} "
+          echo "deleted_count is:  ${{ env.deleted_count }} "
+          echo "modified_count is:  ${{ env.modified_count }} "
+          #### specific files and/or directories
+          echo "archive_count is:  ${{ env.archive_count }} "
+          echo "assets_count is:  ${{ env.assets_count }} "
+          echo "label_assets_count is:  ${{ env.label_assets_count }} "
+          echo "markdown_count is:  ${{ env.markdown_count }} "
+          echo "workflows_count is:  ${{ env.workflows_count }} "
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "::group:: string stating either 'true' or 'false' "
+          echo ""
+          echo "added is:  ${{ env.added }} "
+          echo "deleted is:  ${{ env.deleted }} "
+          echo "modified is:  ${{ env.modified }} "
+          echo ""
+          echo "  #### specific files and/or directories "
+          echo "archive is:  ${{ env.archive }} "
+          echo "assets is:  ${{ env.assets }} "
+          echo "label_assets is:  ${{ env.label_assets }} "
+          echo "markdown is:  ${{ env.markdown }} "
+          echo "workflows is:  ${{ env.workflows }} "
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "now the JSON objects are going to be printed... maybe... "
+          echo ""
+          echo "::group::Added files"
+          echo "## Added files"
+          echo "${{ env.added_files }}"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "::group::Deleted files"
+          echo "## Deleted files"
+          echo "${{ env.deleted_files }}"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "::group::Modified files"
+          echo "## Modified files"
+          echo "${{ env.modified_files }}"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          #
+        env:
+          # string stating either 'true' or 'false'
+          added: ${{ steps.filter-changes.outputs.added }}
+          deleted: ${{ steps.filter-changes.outputs.deleted }}
+          modified: ${{ steps.filter-changes.outputs.modified }}
+          #### specific files and/or directories
+          archive: ${{ steps.filter-changes.outputs.archive }}
+          assets: ${{ steps.filter-changes.outputs.assets }}
+          label_assets: ${{ steps.filter-changes.outputs.label_assets }}
+          markdown: ${{ steps.filter-changes.outputs.markdown }}
+          workflows: ${{ steps.filter-changes.outputs.workflows }}
+          #
+          # the count of matches
+          added_count: ${{ steps.filter-changes.outputs.added_count }}
+          deleted_count: ${{ steps.filter-changes.outputs.deleted_count }}
+          modified_count: ${{ steps.filter-changes.outputs.modified_count }}
+          #### specific files and/or directories
+          archive_count: ${{ steps.filter-changes.outputs.archive_count }}
+          assets_count: ${{ steps.filter-changes.outputs.assets_count }}
+          label_assets_count: ${{ steps.filter-changes.outputs.label_assets_count }}
+          markdown_count: ${{ steps.filter-changes.outputs.markdown_count }}
+          workflows_count: ${{ steps.filter-changes.outputs.workflows_count }}
+          #
+          # JSON object with files changed
+          added_files: ${{ toJson(steps.filter-changes.outputs.added_files) }}
+          deleted_files: ${{ toJson(steps.filter-changes.outputs.deleted_files) }}
+          modified_files: ${{ toJson(steps.filter-changes.outputs.modified_files) }}
+          #### specific files and/or directories
+          archive_files: ${{ toJson(steps.filter-changes.outputs.archive_files) }}
+          assets_files: ${{ toJson(steps.filter-changes.outputs.assets_files) }}
+          label_assets_files: ${{ toJson(steps.filter-changes.outputs.label_assets_files) }}
+          markdown_files: ${{ toJson(steps.filter-changes.outputs.markdown_files) }}
+          workflows_files: ${{ toJson(steps.filter-changes.outputs.workflows_files) }}
+
+      # run only if 'workflows' files were changed
+      - name: workflow changes
+        if: steps.filter-changes.outputs.workflows == 'true'
+        run: echo "Workflow files were changed"
+
+      # run only if 'workflows' files were NOT changed
+      - name: not workflow changes
+        if: steps.filter-changes.outputs.workflows != 'true'
+        run: echo "workflow files were NOT changed"
+
+  call-dispatch-label-manager:
+    name: Run Infra Labeler
+    uses: rwaight/actions/.github/workflows/infra-label-manager.yml
+    if: ${{ needs.paths-filter.outputs.label_assets == 'true' }}
+    needs: [paths-filter]
+    with:
+      export_labels: true
+      sync_labels: true
+      debug_output: true
+    secrets: inherit
+
+  print-info:
+    name: Print paths-filter output and GitHub context
+    #if: env.MY_WORKFLOW_DEBUG=='true'
+    needs: [paths-filter]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug | Output the runner environment and GitHub context
+        if: ${{ needs.paths-filter.outputs.label_assets == 'true' }}
+        run: | 
+          echo "the label_assets output from the paths-filter job was set to true "
+
+      - name: Debug | Output the runner environment and GitHub context
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: | 
+          echo "::group::Runner Environment"
+          echo "## Runner Environment"
+          env | sort
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "::group::GitHub context"
+          echo "## GitHub context"
+          echo "$GITHUB_CONTEXT"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
