@@ -31,22 +31,23 @@ jobs:
     strategy:
       matrix:
         repo: 
-          - 'rwaight/actions'
+          #- 'rwaight/actions'
           - 'rwaight/test-actions'
           - 'rwaight/rwaight.github.io'
           #- 'rwaight/hosts'
           #- 'rwaight/WindowsAutomation'
           #- 'rwaight/actions-run-markserv'
-        include:
-          - repo: 'rwaight/actions'
-            export: true
-            sync: true
-          - repo: 'rwaight/test-actions'
-            export: true
-            sync: true
-          - repo: 'rwaight/rwaight.github.io'
-            export: true
-            sync: true
+        # this job does not need to use the client-payload option
+        # include:
+        #   - repo: 'rwaight/actions'
+        #     export: true
+        #     sync: true
+        #   - repo: 'rwaight/test-actions'
+        #     export: true
+        #     sync: true
+        #   - repo: 'rwaight/rwaight.github.io'
+        #     export: true
+        #     sync: true
     timeout-minutes: 5
     permissions:
       #actions: write
@@ -80,15 +81,15 @@ jobs:
           # create a token for all repositories in the current owner's installation
           owner: ${{ github.repository_owner }}
 
-      - name: Send '${{ env.EVENT }}' dispatch, with client-payload, to ${{ matrix.repo }}
-        id: call-export-labels-1a
-        continue-on-error: true
-        uses: rwaight/actions/github/repository-dispatch@main
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          repository: ${{ matrix.repo }}
-          event-type: ${{ env.EVENT }}
-          client-payload: '{"export": "${{ matrix.export }}"}'
+      # - name: Send '${{ env.EVENT }}' dispatch, with client-payload, to ${{ matrix.repo }}
+      #   id: call-export-labels-1a
+      #   continue-on-error: true
+      #   uses: rwaight/actions/github/repository-dispatch@main
+      #   with:
+      #     token: ${{ steps.app-token.outputs.token }}
+      #     repository: ${{ matrix.repo }}
+      #     event-type: ${{ env.EVENT }}
+      #     client-payload: '{"export": "${{ matrix.export }}"}'
 
       - name: Send '${{ env.EVENT }}' dispatch, WITHOUT client-payload, to ${{ matrix.repo }}
         id: call-export-labels-1b
@@ -133,7 +134,7 @@ jobs:
     strategy:
       matrix:
         repo: 
-          - 'actions'
+          #- 'actions'
           - 'test-actions'
           - 'rwaight.github.io'
           #- 'hosts'
@@ -217,7 +218,7 @@ jobs:
     strategy:
       matrix:
         repo: 
-          - 'actions'
+          #- 'actions'
           - 'test-actions'
           - 'rwaight.github.io'
           #- 'hosts'
