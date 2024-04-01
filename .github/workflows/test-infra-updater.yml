@@ -164,7 +164,7 @@ jobs:
 
   call-dispatch-label-manager:
     name: Run Infra Labeler
-    uses: rwaight/actions/.github/workflows/infra-label-manager.yml
+    uses: rwaight/actions/.github/workflows/infra-label-manager.yml@main
     if: ${{ needs.paths-filter.outputs.label_assets == 'true' }}
     needs: [paths-filter]
     with:
