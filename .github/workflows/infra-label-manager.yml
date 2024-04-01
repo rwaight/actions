@@ -163,8 +163,9 @@ jobs:
           echo "This workflow will now exit. "
           exit 0
 
+      # Create a GitHub App Token from actions/create-github-app-token
       # https://github.com/actions/create-github-app-token
-      - name: Creating a GitHub App Token from actions/create-github-app-token
+      - name: Create an App Token for ${{ matrix.repo }}
         #uses: actions/create-github-app-token@v1
         uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
         id: app-token
@@ -174,6 +175,7 @@ jobs:
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
           # create a token for all repositories in the current owner's installation
           owner: ${{ github.repository_owner }}
+          repositories: "${{ matrix.repo }}"
 
       - name: Send 'export-labels' dispatch to ${{ env.OWNER }}/${{ env.REPO }}
         id: call-export-labels
