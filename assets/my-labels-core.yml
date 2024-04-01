@@ -187,3 +187,62 @@
   description: 'Issues that have not been updated in a set amount of time'
   aliases: []
 #
+##### type: labels
+# The type: labels follow the default types specified in commitizen/conventional-commit-types
+# See: https://github.com/commitizen/conventional-commit-types/blob/v3.0.0/index.json
+-
+  name: 'type:feat'
+  color: '3580BA'
+  description: 'A new feature'
+  aliases: []
+-
+  name: 'type:fix'
+  color: '3580BA'
+  description: 'A bug fix'
+  aliases: []
+-
+  name: 'type:docs'
+  color: '3580BA'
+  description: 'Documentation only changes'
+  aliases: []
+-
+  name: 'type:style'
+  color: '3580BA'
+  description: 'Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)'
+  aliases: []
+-
+  name: 'type:refactor'
+  color: '3580BA'
+  description: 'A code change that neither fixes a bug nor adds a feature'
+  aliases: []
+-
+  name: 'type:perf'
+  color: '3580BA'
+  description: 'A code change that improves performance'
+  aliases: []
+-
+  name: 'type:test'
+  color: '3580BA'
+  description: 'Adding missing tests or correcting existing tests'
+  aliases: []
+-
+  name: 'type:build'
+  color: '3580BA'
+  description: 'Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)'
+  aliases: []
+-
+  name: 'type:ci'
+  color: '3580BA'
+  description: 'Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)'
+  aliases: []
+-
+  name: 'type:chore'
+  color: '3580BA'
+  description: 'Other changes that do not modify src or test files'
+  aliases: []
+-
+  name: 'type:revert'
+  color: '3580BA'
+  description: 'Reverts a previous commit'
+  aliases: []
+#
