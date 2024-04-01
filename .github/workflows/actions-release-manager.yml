@@ -54,6 +54,14 @@ jobs:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
       #IS_PRERELEASE: ${{ inputs.is_prerelease || 'false' }}
     steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 0
+
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
         with:
