@@ -1,0 +1,67 @@
+# This workflow currently runs the 'stale-issue-and-pr' action
+name: Triage stale records
+run-name: Triage stale issues and PRs - ${{ github.event_name }}
+on:
+  workflow_dispatch:
+    inputs:
+      triage_issues:
+        description: 'Check for stale issues and PRs'
+        required: true
+        default: false
+        type: boolean
+      debug_output:
+        description: 'Debug output'
+        required: true
+        default: false
+        type: boolean
+  # 'on schedule' is used by: 'stale-issue-and-pr'
+  schedule:
+    - cron: '15 14 * * 2' # At 2:15pm UTC every Tuesday, used by 'stale-issue-and-pr'
+
+
+jobs:
+  # Run 'Triage Issues and PRs', but only: At 2:15pm UTC every Tuesday; or manual (workflow_dispatch)
+  stale-issue-and-pr:
+    name: Check for stale issues and PRs
+    if: | 
+      (github.event_name=='schedule' && github.event.schedule=='15 14 * * 2') || 
+      (github.event_name=='workflow_dispatch' && inputs.triage_issues==true)
+    runs-on: ubuntu-latest
+    # https://github.com/actions/stale?tab=readme-ov-file#recommended-permissions
+    permissions:
+      issues: write
+      pull-requests: write
+    # From GitHub: https://github.com/marketplace/actions/close-stale-issues
+    # See https://github.com/actions/stale#readme for configuration options
+    steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 0
+
+      - name: Triage issues using actions/stale
+        uses: actions/stale@v8
+        with:
+          days-before-close: -1 # do not close issues or PRs
+          days-before-issue-stale: 90
+          stale-issue-label: 'triage:stale'
+          stale-issue-message: >-
+            This issue has not been updated in a while and is being labeled as `triage:stale`.
+
+            It would be helpful to take a look at the issue and confirm it is still relevant.
+          #days-before-issue-close: -1 # do not close issues when deployed to production
+          #close-issue-message: 'This issue has not been updated in a while and is being closed.'
+          days-before-pr-stale: 21
+          stale-pr-label: 'triage:stale'
+          stale-pr-message: >-
+            This Pull Request (PR) has not been updated in a while and is being labeled as `triage:stale`.
+
+            It would be helpful to review the PR and confirm it is still relevant.
+          remove-stale-when-updated: true
+          labels-to-remove-when-unstale: 'triage:stale'
+          operations-per-run: 100
+          #repo-token: ${{ secrets.MY_ACTIONS_TOKEN }}
+
