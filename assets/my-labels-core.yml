@@ -126,6 +126,11 @@
   description: 'Impacting GitHub actions'
   aliases: []
 -
+  name: 'impacts:assets'
+  color: '5F9188'
+  description: 'Impacting the ''assets'' directory'
+  aliases: []
+-
   name: 'impacts:examples'
   color: '5F9188'
   description: 'Impacting example actions and/or workflows'
