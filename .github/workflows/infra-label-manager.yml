@@ -89,7 +89,7 @@ jobs:
           client-payload: '{"export": "${{ matrix.export }}"}'
 
       - name: Send '${{ env.EVENT }}' dispatch, WITHOUT client-payload, to ${{ matrix.repo }}
-        id: call-export-labels-1a
+        id: call-export-labels-1b
         continue-on-error: true
         uses: rwaight/actions/github/repository-dispatch@main
         with:
