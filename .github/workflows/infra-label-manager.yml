@@ -77,6 +77,8 @@ jobs:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          # create a token for all repositories in the current owner's installation
+          owner: ${{ github.repository_owner }}
 
       - name: Send '${{ env.EVENT }}' dispatch, with client-payload, to ${{ matrix.repo }}
         id: call-export-labels-1a
@@ -169,6 +171,8 @@ jobs:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          # create a token for all repositories in the current owner's installation
+          owner: ${{ github.repository_owner }}
 
       - name: Send '${{ env.EVENT }}' dispatch to ${{ env.OWNER }}/${{ env.REPO }}
         id: call-export-labels-2
@@ -256,6 +260,8 @@ jobs:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          # create a token for all repositories in the current owner's installation
+          owner: ${{ github.repository_owner }}
 
       - name: Print note about adding the dispatch 'type' to the matrix
         #if: (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
