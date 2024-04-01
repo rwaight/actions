@@ -167,6 +167,8 @@ jobs:
     uses: rwaight/actions/.github/workflows/infra-label-manager.yml@main
     if: ${{ needs.paths-filter.outputs.label_assets == 'true' }}
     needs: [paths-filter]
+    permissions:
+      contents: write
     with:
       export_labels: true
       sync_labels: true
