@@ -26,6 +26,8 @@ jobs:
       added: ${{ steps.filter-changes.outputs.added }}
       deleted: ${{ steps.filter-changes.outputs.deleted }}
       modified: ${{ steps.filter-changes.outputs.modified }}
+      ## all changes
+      changes: ${{ steps.filter-changes.outputs.changes }}
       #### specific files and/or directories
       archive: ${{ steps.filter-changes.outputs.archive }}
       assets: ${{ steps.filter-changes.outputs.assets }}
@@ -37,14 +39,37 @@ jobs:
     steps:
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        # with:
+        #   fetch-depth: 0
 
-      - name: Filter 
+      - name: Output the GitHub context
+        #if: env.MY_WORKFLOW_DEBUG=='true'
+        run: | 
+          echo ""
+          echo "::group::GitHub context"
+          echo ""
+          echo "## GitHub context"
+          echo "$GITHUB_CONTEXT"
+          echo ""
+          echo "::endgroup::"
+          echo ""
+          echo "get the second-last commit ID"
+          echo "$GITHUB_CONTEXT"| jq '.event.commits[].id' | tail -2 | head -1 |sed 's/\"//g'
+          echo ""
+          echo "get the event pull_request head sha "
+          echo "${{ github.event.pull_request.head.sha }}"
+          echo ""
+          echo ""
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
+
+      - name: Filter changes
         uses: rwaight/actions/github/paths-filter@main
         id: filter
         with:
-          base: ${{ github.ref }}
+          # should not need to use base##base: ${{ github.ref }}
+          #ref: ${{ github.ref }}
           filters: |
             added:
               - added: '**'
