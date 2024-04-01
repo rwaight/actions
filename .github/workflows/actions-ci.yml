@@ -12,6 +12,14 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 0
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
