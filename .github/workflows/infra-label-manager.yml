@@ -48,6 +48,9 @@ jobs:
             export: true
             sync: true
     timeout-minutes: 5
+    permissions:
+      #actions: write
+      contents: write
     if: | 
       (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
       (github.event_name=='workflow_dispatch' && inputs.export_labels==true) || 
@@ -75,14 +78,25 @@ jobs:
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
 
-      - name: Send '${EVENT}' dispatch, with client-payload, to ${{ matrix.repo }}
-        id: call-export-labels-1
+      - name: Send '${{ env.EVENT }}' dispatch, with client-payload, to ${{ matrix.repo }}
+        id: call-export-labels-1a
+        continue-on-error: true
         uses: rwaight/actions/github/repository-dispatch@main
         with:
           token: ${{ steps.app-token.outputs.token }}
           repository: ${{ matrix.repo }}
-          event-type: ${EVENT}
+          event-type: ${{ env.EVENT }}
           client-payload: '{"export": "${{ matrix.export }}"}'
+
+      - name: Send '${{ env.EVENT }}' dispatch, WITHOUT client-payload, to ${{ matrix.repo }}
+        id: call-export-labels-1a
+        continue-on-error: true
+        uses: rwaight/actions/github/repository-dispatch@main
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: ${{ matrix.repo }}
+          event-type: ${{ env.EVENT }}
+          ##client-payload: '{"export": "${{ matrix.export }}"}'
 
       # - name: Send dispatch to ${{ matrix.repo }}
       #   id: call-export-labels-1
@@ -91,7 +105,7 @@ jobs:
       #       curl -H "Accept: application/vnd.github.everest-preview+json" \
       #       -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
       #       --request POST \
-      #       --data '{"event_type": \"${EVENT}\", "client_payload": { "export": "${{ matrix.export }}" }}' https://api.github.com/repos/${{ matrix.repo }}/dispatches
+      #       --data '{"event_type": \"${{ env.EVENT }}\", "client_payload": { "export": "${{ matrix.export }}" }}' https://api.github.com/repos/${{ matrix.repo }}/dispatches
 
       - name: Debug | Output the runner environment and GitHub context
         #if: env.MY_WORKFLOW_DEBUG=='true'
@@ -124,6 +138,9 @@ jobs:
           #- 'WindowsAutomation'
           #- 'actions-run-markserv'
     timeout-minutes: 5
+    permissions:
+      #actions: write
+      contents: write
     if: | 
       (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
       (github.event_name=='workflow_dispatch' && inputs.export_labels==true) || 
@@ -153,22 +170,22 @@ jobs:
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
 
-      - name: Send '${EVENT}' dispatch to ${{ matrix.repo }}
+      - name: Send '${{ env.EVENT }}' dispatch to ${{ env.OWNER }}/${{ env.REPO }}
         id: call-export-labels-2
         uses: rwaight/actions/github/repository-dispatch@main
         with:
           token: ${{ steps.app-token.outputs.token }}
-          # the 'REPO' variable is defined in the 'ENV' above #repository: ${OWNER}/${{ matrix.repo }}
-          repository: ${OWNER}/${REPO}
-          event-type: ${EVENT}
+          # the 'REPO' variable is defined in the 'ENV' above #repository: ${{ env.OWNER }}/${{ matrix.repo }}
+          repository: ${{ env.OWNER }}/${{ env.REPO }}
+          event-type: ${{ env.EVENT }}
 
       # - name: Send dispatch to ${{ matrix.repo }}
       #   continue-on-error: true
       #   id: call-export-labels-2
       #   run: |
-      #     curl -d "{\"event_type\": \"${EVENT}\"}" -H "Content-Type: application/json" \
+      #     curl -d "{\"event_type\": \"${{ env.EVENT }}\"}" -H "Content-Type: application/json" \
       #     -H "Authorization: token ${{ steps.app-token.outputs.token }}" \ 
-      #     -H "Accept: application/vnd.github.everest-preview+json" "https://api.github.com/repos/${OWNER}/${REPO}/dispatches"
+      #     -H "Accept: application/vnd.github.everest-preview+json" "https://api.github.com/repos/${{ env.OWNER }}/${{ env.REPO }}/dispatches"
 
       - name: Debug | Output the runner environment and GitHub context
         #if: env.MY_WORKFLOW_DEBUG=='true'
@@ -205,6 +222,9 @@ jobs:
         # add 'types' to dispatch test 2 above
         #types: [export-labels,sync-labels]
     timeout-minutes: 5
+    permissions:
+      #actions: write
+      contents: write
     if: | 
       (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
     needs: [dispatch-export-labels-2]
@@ -243,15 +263,15 @@ jobs:
         run: |
           echo "::notice::The 'sync-labels' event could be added to the dispatch 'type' as a matrix item..."
 
-      - name: Send '${EVENT}' dispatch to ${{ matrix.repo }}
+      - name: Send '${{ env.EVENT }}' dispatch to ${{ matrix.repo }}
         #if: (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
         id: call-sync-labels
         uses: rwaight/actions/github/repository-dispatch@main
         with:
           token: ${{ steps.app-token.outputs.token }}
-          # the 'REPO' variable is defined in the 'ENV' above #repository: ${OWNER}/${{ matrix.repo }}
-          repository: ${OWNER}/${REPO}
-          event-type: ${EVENT}
+          # the 'REPO' variable is defined in the 'ENV' above #repository: ${{ env.OWNER }}/${{ matrix.repo }}
+          repository: ${{ env.OWNER }}/${{ env.REPO }}
+          event-type: ${{ env.EVENT }}
 
       # - name: Send dispatch to ${{ matrix.repo }}
       #   #if: (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
@@ -260,9 +280,9 @@ jobs:
       #   run: |
       #     echo "::notice::The 'sync-labels' event could be added to the dispatch 'type' as a matrix item..."
       #     echo "attempting to run the curl command"
-      #     curl -d "{\"event_type\": \"${EVENT}\"}" -H "Content-Type: application/json" \
+      #     curl -d "{\"event_type\": \"${{ env.EVENT }}\"}" -H "Content-Type: application/json" \
       #     -H "Authorization: token ${{ steps.app-token.outputs.token }}" \ 
-      #     -H "Accept: application/vnd.github.everest-preview+json" "https://api.github.com/repos/${OWNER}/${REPO}/dispatches"
+      #     -H "Accept: application/vnd.github.everest-preview+json" "https://api.github.com/repos/${{ env.OWNER }}/${{ env.REPO }}/dispatches"
 
       - name: Debug | Output the runner environment and GitHub context
         #if: env.MY_WORKFLOW_DEBUG=='true'
