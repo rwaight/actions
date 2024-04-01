@@ -5,6 +5,13 @@ on:
   pull_request:
     # 'on pull_request' is used by: 'pr-labeler'
     branches: [main]
+    types:
+      - opened
+      - reopened
+      - labeled
+      - unlabeled
+      - ready_for_review
+      - review_requested
   # workflow_dispatch:
   #   inputs:
   #     debug_output:
