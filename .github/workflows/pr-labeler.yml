@@ -21,6 +21,7 @@ jobs:
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
+      issues: write
       pull-requests: write
     steps:
       - name: Exit workflow in forked repo
@@ -102,15 +103,6 @@ jobs:
           semver-prefix: 'version:'
           my_action_debug: true
 
-      - name: Autorelease | Evaluate check-semver-labels step
-        # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
-        if: |
-          steps.check-semver-labels.outcome != 'skipped' && 
-          steps.check-semver-labels.outputs.label_check != 'success'
-        run: |
-          echo "::error::Missing the proper version label in autorelease PR ${{ github.event.number }}"
-          exit 1
-
       - name: Check for type labels
         uses: rwaight/actions/github/label-checker@main # can use version specific or main
         #uses: rwaight/actions/github/label-checker@v1 # can use version specific or main
@@ -122,6 +114,61 @@ jobs:
           none_of: 'version:'
           one_of: 'type:'
           repo_token: ${{ steps.app-token.outputs.token }}
+
+      # reserve for future use
+      # # look for a comment 
+      # - name: Find Comment
+      #   uses: rwaight/actions/github/find-comment@main
+      #   id: find-labeler-comment
+      #   continue-on-error: true
+      #   with:
+      #     #issue-number: ${{ github.event.number }}
+      #     issue-number: ${{ github.event.pull_request.number }}
+      #     comment-author: 'rw-actions-bot[bot]'
+      #     body-includes: The PR labeler checks
+
+      - name: Generate comment template for failed checks
+        # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
+        id: comment-template
+        uses: rwaight/actions/utilities/render-template@main
+        if: |
+          steps.check-type-labels.outcome != 'skipped' && 
+          steps.check-type-labels.outputs.label_check != 'success'
+        with:
+          #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
+          #template: assets/pr-labeler/comment-checks-failed.md
+          template: assets/pr-labeler/comment-checks-failed.md
+          vars: |
+            foo: this
+            foo2: ${{ github.event.number }}
+            foo3: ${{ steps.check-type-labels.outputs.label_check }}
+            bar: that
+            bar2: ${{ github.event.pull_request.number }}
+            bar3: ${{ steps.check-semver-labels.outputs.label_check }}
+
+      - name: Create comment
+        id: comment-on-pr
+        uses: rwaight/actions/github/create-or-update-comment@main
+        if: |
+          steps.check-type-labels.outcome != 'skipped' && 
+          steps.check-type-labels.outputs.label_check != 'success'
+        with:
+          issue-number: ${{ github.event.number }}
+          body: ${{ steps.comment-template.outputs.result }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Output comment ID
+        run: |
+          echo "Comment ID - ${{ steps.comment-on-pr.outputs.comment-id }}"
+
+      - name: Autorelease | Evaluate check-semver-labels step
+        # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
+        if: |
+          steps.check-semver-labels.outcome != 'skipped' && 
+          steps.check-semver-labels.outputs.label_check != 'success'
+        run: |
+          echo "::error::Missing the proper version label in autorelease PR ${{ github.event.number }}"
+          exit 1
 
       - name: Evaluate check-type-labels step
         #if: steps.check-type-labels.outputs.label_check != 'success'
