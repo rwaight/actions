@@ -18,7 +18,7 @@ The actions should have their `branding` section updated according to the [updat
 
 The following actions are pending import to this repo:
 - **git**
-    - [`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request)
+    - None at this time.
 - **github**
     - None at this time.
 - **utilities**
