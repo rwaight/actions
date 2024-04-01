@@ -13,12 +13,10 @@ None at this time.
 
 ## Paths Changes Filter
 
-[GitHub Action](https://github.com/features/actions) that enables conditional execution of workflow steps and jobs, based on the files modified by pull request, on a feature
-branch, or by the recently pushed commits.
+[GitHub Action](https://github.com/features/actions) that enables conditional execution of workflow steps and jobs, based on the files modified by pull request, on a feature branch, or by the recently pushed commits.
 
 Run slow tasks like integration tests or deployments only for changed components. It saves time and resources, especially in monorepo setups.
-GitHub workflows built-in [path filters](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onpushpull_requestpaths)
-don't allow this because they don't work on a level of individual jobs or steps.
+GitHub workflows built-in [path filters](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onpushpull_requestpaths) don't allow this because they don't work on a level of individual jobs or steps.
 
 
 ### Supported workflows
