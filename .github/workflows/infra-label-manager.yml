@@ -25,108 +25,108 @@ on:
 
 jobs:
   # Run export-label-config once every six months, at 10:00 on the first of the month
-  dispatch-export-labels-1:
-    name: Dispatch export labels (test 1) on ${{ matrix.repo }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        repo: 
-          #- 'rwaight/actions'
-          - 'rwaight/test-actions'
-          - 'rwaight/rwaight.github.io'
-          #- 'rwaight/hosts'
-          #- 'rwaight/WindowsAutomation'
-          #- 'rwaight/actions-run-markserv'
-        # this job does not need to use the client-payload option
-        # include:
-        #   - repo: 'rwaight/actions'
-        #     export: true
-        #     sync: true
-        #   - repo: 'rwaight/test-actions'
-        #     export: true
-        #     sync: true
-        #   - repo: 'rwaight/rwaight.github.io'
-        #     export: true
-        #     sync: true
-    timeout-minutes: 5
-    permissions:
-      #actions: write
-      contents: write
-    if: | 
-      (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
-      (github.event_name=='workflow_dispatch' && inputs.export_labels==true) || 
-      (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
-    env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
-      #DISPATCH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      EVENT: export-labels
-    steps:
-      - name: Exit workflow in forked repo
-        id: check-repo-owner
-        if: (github.repository_owner != 'rwaight')
-        run: |
-          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          echo "This workflow will now exit. "
-          exit 0
+  # dispatch-export-labels-1:
+  #   name: Dispatch export labels (test 1) on ${{ matrix.repo }}
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       repo: 
+  #         #- 'rwaight/actions'
+  #         - 'rwaight/test-actions'
+  #         - 'rwaight/rwaight.github.io'
+  #         #- 'rwaight/hosts'
+  #         #- 'rwaight/WindowsAutomation'
+  #         #- 'rwaight/actions-run-markserv'
+  #       # this job does not need to use the client-payload option
+  #       # include:
+  #       #   - repo: 'rwaight/actions'
+  #       #     export: true
+  #       #     sync: true
+  #       #   - repo: 'rwaight/test-actions'
+  #       #     export: true
+  #       #     sync: true
+  #       #   - repo: 'rwaight/rwaight.github.io'
+  #       #     export: true
+  #       #     sync: true
+  #   timeout-minutes: 5
+  #   permissions:
+  #     #actions: write
+  #     contents: write
+  #   if: | 
+  #     (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
+  #     (github.event_name=='workflow_dispatch' && inputs.export_labels==true) || 
+  #     (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
+  #   env:
+  #     MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+  #     #DISPATCH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     EVENT: export-labels
+  #   steps:
+  #     - name: Exit workflow in forked repo
+  #       id: check-repo-owner
+  #       if: (github.repository_owner != 'rwaight')
+  #       run: |
+  #         echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+  #         echo "This workflow will now exit. "
+  #         exit 0
 
-      # https://github.com/actions/create-github-app-token
-      - name: Creating a GitHub App Token from actions/create-github-app-token
-        #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
-        id: app-token
-        with:
-          # required
-          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
-          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
-          # create a token for all repositories in the current owner's installation
-          owner: ${{ github.repository_owner }}
+  #     # https://github.com/actions/create-github-app-token
+  #     - name: Creating a GitHub App Token from actions/create-github-app-token
+  #       #uses: actions/create-github-app-token@v1
+  #       uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+  #       id: app-token
+  #       with:
+  #         # required
+  #         app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+  #         private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+  #         # create a token for all repositories in the current owner's installation
+  #         owner: ${{ github.repository_owner }}
 
-      # - name: Send '${{ env.EVENT }}' dispatch, with client-payload, to ${{ matrix.repo }}
-      #   id: call-export-labels-1a
-      #   continue-on-error: true
-      #   uses: rwaight/actions/github/repository-dispatch@main
-      #   with:
-      #     token: ${{ steps.app-token.outputs.token }}
-      #     repository: ${{ matrix.repo }}
-      #     event-type: ${{ env.EVENT }}
-      #     client-payload: '{"export": "${{ matrix.export }}"}'
+  #     # - name: Send '${{ env.EVENT }}' dispatch, with client-payload, to ${{ matrix.repo }}
+  #     #   id: call-export-labels-1a
+  #     #   continue-on-error: true
+  #     #   uses: rwaight/actions/github/repository-dispatch@main
+  #     #   with:
+  #     #     token: ${{ steps.app-token.outputs.token }}
+  #     #     repository: ${{ matrix.repo }}
+  #     #     event-type: ${{ env.EVENT }}
+  #     #     client-payload: '{"export": "${{ matrix.export }}"}'
 
-      - name: Send '${{ env.EVENT }}' dispatch, WITHOUT client-payload, to ${{ matrix.repo }}
-        id: call-export-labels-1b
-        continue-on-error: true
-        uses: rwaight/actions/github/repository-dispatch@main
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          repository: ${{ matrix.repo }}
-          event-type: ${{ env.EVENT }}
-          ##client-payload: '{"export": "${{ matrix.export }}"}'
+  #     - name: Send '${{ env.EVENT }}' dispatch, WITHOUT client-payload, to ${{ matrix.repo }}
+  #       id: call-export-labels-1b
+  #       continue-on-error: true
+  #       uses: rwaight/actions/github/repository-dispatch@main
+  #       with:
+  #         token: ${{ steps.app-token.outputs.token }}
+  #         repository: ${{ matrix.repo }}
+  #         event-type: ${{ env.EVENT }}
+  #         ##client-payload: '{"export": "${{ matrix.export }}"}'
 
-      # - name: Send dispatch to ${{ matrix.repo }}
-      #   id: call-export-labels-1
-      #   continue-on-error: true
-      #   run: |
-      #       curl -H "Accept: application/vnd.github.everest-preview+json" \
-      #       -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
-      #       --request POST \
-      #       --data '{"event_type": \"${{ env.EVENT }}\", "client_payload": { "export": "${{ matrix.export }}" }}' https://api.github.com/repos/${{ matrix.repo }}/dispatches
+  #     # - name: Send dispatch to ${{ matrix.repo }}
+  #     #   id: call-export-labels-1
+  #     #   continue-on-error: true
+  #     #   run: |
+  #     #       curl -H "Accept: application/vnd.github.everest-preview+json" \
+  #     #       -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
+  #     #       --request POST \
+  #     #       --data '{"event_type": \"${{ env.EVENT }}\", "client_payload": { "export": "${{ matrix.export }}" }}' https://api.github.com/repos/${{ matrix.repo }}/dispatches
 
-      - name: Debug | Output the runner environment and GitHub context
-        #if: env.MY_WORKFLOW_DEBUG=='true'
-        run: | 
-          echo "::group::Runner Environment"
-          echo "## Runner Environment"
-          env | sort
-          echo "\n"
-          echo "::endgroup::"
-          echo ""
-          echo "::group::GitHub context"
-          echo "## GitHub context"
-          echo "$GITHUB_CONTEXT"
-          echo "\n"
-          echo "::endgroup::"
-          echo ""
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
+  #     - name: Debug | Output the runner environment and GitHub context
+  #       #if: env.MY_WORKFLOW_DEBUG=='true'
+  #       run: | 
+  #         echo "::group::Runner Environment"
+  #         echo "## Runner Environment"
+  #         env | sort
+  #         echo "\n"
+  #         echo "::endgroup::"
+  #         echo ""
+  #         echo "::group::GitHub context"
+  #         echo "## GitHub context"
+  #         echo "$GITHUB_CONTEXT"
+  #         echo "\n"
+  #         echo "::endgroup::"
+  #         echo ""
+  #       env:
+  #         GITHUB_CONTEXT: ${{ toJson(github) }}
 
   dispatch-export-labels-2:
     name: Dispatch export labels (test 2) on ${{ matrix.repo }}
