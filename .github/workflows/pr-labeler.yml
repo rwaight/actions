@@ -150,6 +150,89 @@ jobs:
           one_of: 'type:'
           repo_token: ${{ steps.app-token.outputs.token }}
 
+      - name: Evaluate the check-${{ env.GHA_LABEL_SCOPE }}-labels results
+        # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
+        id: eval-check-label-results
+        run: |
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "Running the 'eval-check-label-results' step. "
+          ##
+          test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels
+          echo "test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels" >> $GITHUB_ENV
+          echo "test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels" >> "$GITHUB_OUTPUT"
+          ##
+          if [ '${{ env.GHA_LABEL_SCOPE }}' == 'semver' ]; then
+              echo "The label scope is 'semver'. "
+              label_check=${{ steps.check-semver-labels.outputs.label_check }}
+              echo "label_check=${{ steps.check-semver-labels.outputs.label_check }}" >> $GITHUB_ENV
+              echo "label_check=${{ steps.check-semver-labels.outputs.label_check }}" >> "$GITHUB_OUTPUT"
+              step_outcome=${{ steps.check-semver-labels.outcome }}
+              echo "step_outcome=${{ steps.check-semver-labels.outcome }}" >> $GITHUB_ENV
+              echo "step_outcome=${{ steps.check-semver-labels.outcome }}" >> "$GITHUB_OUTPUT"
+          ##
+          elif [ '${{ env.GHA_LABEL_SCOPE }}' == 'type' ]; then
+              echo "The label scope is 'type'. "
+              label_check=${{ steps.check-type-labels.outputs.label_check }}
+              echo "label_check=${{ steps.check-type-labels.outputs.label_check }}" >> $GITHUB_ENV
+              echo "label_check=${{ steps.check-type-labels.outputs.label_check }}" >> "$GITHUB_OUTPUT"
+              step_outcome=${{ steps.check-type-labels.outcome }}
+              echo "step_outcome=${{ steps.check-type-labels.outcome }}" >> $GITHUB_ENV
+              echo "step_outcome=${{ steps.check-type-labels.outcome }}" >> "$GITHUB_OUTPUT"
+          else
+              echo "::error::Unable to set 'label_check' and 'step_outcome' variables, exiting. "
+              exit 1
+          fi
+          ##
+          if [ '${{ env.MY_WORKFLOW_DEBUG }}' == 'true' ]; then
+              echo "debug and verbose info... "
+              echo ""
+              echo "the '${{ env.test_name }}' step info... "
+              echo "  label_check:  ${{ env.label_check }} "
+              echo "  step_outcome: ${{ env.step_outcome }} "
+              echo ""
+              echo "going to evaluate the outcome of the check labels steps..."
+              echo "learn more at: "
+              echo "https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context"
+              echo ""
+          fi
+          ##
+          echo "checking the contains autorelease ..."
+          echo "${{ contains('refs/heads/autorelease', github.ref) }} "
+          echo "look above, what is that?"
+          echo ""
+          echo "checking the NOT contains autorelease ..."
+          echo "${{ ! contains('refs/heads/autorelease', github.ref) }} "
+          echo "look above, what is that?"
+          echo ""
+          ##
+          if [ '${{ env.step_outcome }}' == 'success' ]; then
+              echo "The '${{ env.test_name }}' step was successful. "
+              echo "Setting EVAL_OUTCOME to 'success' ... "
+              echo "EVAL_OUTCOME=success" >> $GITHUB_ENV
+              echo "EVAL_OUTCOME=success" >> "$GITHUB_OUTPUT"
+          ##
+          elif [ '${{ env.step_outcome }}' == 'skipped' ]; then
+              echo "The '${{ env.test_name }}' step was skipped. "
+              echo "Setting EVAL_OUTCOME to 'skipped' ... "
+              echo "EVAL_OUTCOME=skipped" >> $GITHUB_ENV
+              echo "EVAL_OUTCOME=skipped" >> "$GITHUB_OUTPUT"
+          ##
+          elif [ '${{ env.step_outcome }}' == 'failure' ]; then
+              echo "The '${{ env.test_name }}' step failed. "
+              echo "Setting EVAL_OUTCOME to 'failure' ... "
+              echo "EVAL_OUTCOME=failure" >> $GITHUB_ENV
+              echo "EVAL_OUTCOME=failure" >> "$GITHUB_OUTPUT"
+          ##
+          else
+              echo "The else condition ran when evaluating the '${{ env.test_name }}' step, assuming failure. "
+              echo "Setting EVAL_OUTCOME to 'failure' ... "
+              echo "EVAL_OUTCOME=failure" >> $GITHUB_ENV
+              echo "EVAL_OUTCOME=failure" >> "$GITHUB_OUTPUT"
+          fi
+          ##
+          echo "The 'eval-check-label-results' step has finished. "
+
       # reserve for future use
       # # look for a comment 
       # - name: Find Comment
