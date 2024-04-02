@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>create-pull-request GitHub action</title>
+</head>
+
+<body>
+    <!-- partial:index.partial.html -->
+    <div id="graph-container"></div>
+    <!-- partial -->
+    <script src='https://cdn.jsdelivr.net/npm/@gitgraph/js'></script>
+    <script>
+        const graphContainer = document.getElementById("graph-container");
+
+        const customTemplate = GitgraphJS.templateExtend(GitgraphJS.TemplateName.Metro, {
+            commit: {
+                message: {
+                    displayAuthor: false,
+                    displayHash: false,
+                },
+            },
+        });
+
+        // Instantiate the graph.
+        const gitgraph = GitgraphJS.createGitgraph(graphContainer, {
+            template: customTemplate,
+            orientation: "vertical-reverse"
+        });
+
+        const main = gitgraph.branch("main");
+        main.commit("Last commit on base");
+        const localMain = gitgraph.branch("<#1> main (local)");
+        localMain.commit({
+            subject: "<uncommitted changes>",
+            body: "Changes to the local base during the workflow",
+        })
+        const remotePatch = gitgraph.branch("create-pull-request/patch");
+        remotePatch.merge({
+            branch: localMain,
+            commitOptions: {
+                subject: "[create-pull-request] automated change",
+                body: "Changes pushed to create the remote branch",
+            },
+        });
+        main.commit("New commit on base");
+
+        const localMain2 = gitgraph.branch("<#2> main (local)");
+        localMain2.commit({
+            subject: "<uncommitted changes>",
+            body: "Changes to the updated local base during the workflow",
+        })
+        remotePatch.merge({
+            branch: localMain2,
+            commitOptions: {
+                subject: "[create-pull-request] automated change",
+                body: "Changes force pushed to update the remote branch",
+            },
+        });
+
+        main.merge(remotePatch);
+
+    </script>
+
+</body>
+
+</html>
