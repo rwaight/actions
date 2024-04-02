@@ -5,6 +5,13 @@ on:
   pull_request:
     # 'on pull_request' is used by: 'pr-labeler'
     branches: [main]
+    types:
+      - opened
+      - reopened
+      - labeled
+      - unlabeled
+      - ready_for_review
+      - review_requested
   # workflow_dispatch:
   #   inputs:
   #     debug_output:
@@ -32,8 +39,9 @@ jobs:
           echo "This workflow will now exit. "
           exit 0
 
-      - name: Autorelease | Check 'autorelease' branch
-        id: check-autorelease-branch
+      - name: Autorelease | Set the label scope to 'semver'
+        #name: Autorelease | Check 'autorelease' branch
+        id: set-label-scope-semver
         if: contains('refs/heads/autorelease', github.ref)
         #if: ${{ contains('refs/heads/autorelease', github.ref) }}
         # if: | 
@@ -42,6 +50,11 @@ jobs:
         #     refs/heads/production
         #   ', github.ref)
         run: |
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "Setting GHA_LABEL_SCOPE to 'semver' ... "
+          echo "GHA_LABEL_SCOPE=semver" >> $GITHUB_ENV
+          ##
           ## The head branch should be named autorelease/<version>
           if ! [[ "${{ github.event.pull_request.head.ref }}" =~ ^autorelease\/[A-Za-z0-9.+-]+$ ]]; then
             echo "::error::Invalid autorelease branch '${{ github.event.pull_request.head.ref }}'"
@@ -59,14 +72,35 @@ jobs:
           else
             echo "::error::Version '$VERSION' is not in a valid format" && exit 1
           fi
-          echo "The 'check-autorelease-branch' step has completed. "
+          echo "The 'set-label-scope-semver' step has completed. "
 
-      - name: Print a note about non autorelease branches
-        id: check-other-branches
-        #if: steps.check-autorelease-branch.outcome == 'skipped'
+      - name: Set the label scope to 'type'
+        id: set-label-scope-type
         if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         run: |
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "Setting GHA_LABEL_SCOPE to 'type' ... "
+          echo "GHA_LABEL_SCOPE=type" >> $GITHUB_ENV
+          ##
           echo "This branch is not an 'autorelease' branch, skipping the autorelease steps. "
+
+      - name: Ensure the label scope has been determined
+        id: check-label-scope
+        run: |
+          ## the double number signs below are for line spacing and readability only
+          ##
+          if [ '${{ env.GHA_LABEL_SCOPE }}' == 'semver' ]; then
+              echo "The label scope is 'semver'. "
+          ##
+          elif [ '${{ env.GHA_LABEL_SCOPE }}' == 'type' ]; then
+              echo "The label scope is 'type'. "
+          else
+              echo "::error::The label scope was not determined for PR ${{ github.event.number }}, exiting. "
+              exit 1
+          fi
+          echo "The 'check-label-scope' step has completed. "
+
 
       # Create a GitHub App Token from actions/create-github-app-token
       # https://github.com/actions/create-github-app-token
@@ -109,72 +143,120 @@ jobs:
         id: check-type-labels
         if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         with:
+          allow_failure: true
           prefix_mode: true
           #any_of: 'group:'
           none_of: 'version:'
           one_of: 'type:'
           repo_token: ${{ steps.app-token.outputs.token }}
 
-      # reserve for future use
-      # # look for a comment 
-      # - name: Find Comment
-      #   uses: rwaight/actions/github/find-comment@main
-      #   id: find-labeler-comment
-      #   continue-on-error: true
-      #   with:
-      #     #issue-number: ${{ github.event.number }}
-      #     issue-number: ${{ github.event.pull_request.number }}
-      #     comment-author: 'rw-actions-bot[bot]'
-      #     body-includes: The PR labeler checks
+      - name: Write the check-${{ env.GHA_LABEL_SCOPE }}-labels results to the environment
+        # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
+        id: write-results
+        run: |
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "Running the 'write-results' step. "
+          ##
+          test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels
+          echo "test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels" >> $GITHUB_ENV
+          echo "test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels" >> "$GITHUB_OUTPUT"
+          ##
+          if [ '${{ env.GHA_LABEL_SCOPE }}' == 'semver' ]; then
+              echo "The label scope is 'semver'. "
+              label_check=${{ steps.check-semver-labels.outputs.label_check }}
+              echo "label_check=${{ steps.check-semver-labels.outputs.label_check }}" >> $GITHUB_ENV
+              echo "label_check=${{ steps.check-semver-labels.outputs.label_check }}" >> "$GITHUB_OUTPUT"
+              step_outcome=${{ steps.check-semver-labels.outcome }}
+              echo "step_outcome=${{ steps.check-semver-labels.outcome }}" >> $GITHUB_ENV
+              echo "step_outcome=${{ steps.check-semver-labels.outcome }}" >> "$GITHUB_OUTPUT"
+          ##
+          elif [ '${{ env.GHA_LABEL_SCOPE }}' == 'type' ]; then
+              echo "The label scope is 'type'. "
+              label_check=${{ steps.check-type-labels.outputs.label_check }}
+              echo "label_check=${{ steps.check-type-labels.outputs.label_check }}" >> $GITHUB_ENV
+              echo "label_check=${{ steps.check-type-labels.outputs.label_check }}" >> "$GITHUB_OUTPUT"
+              step_outcome=${{ steps.check-type-labels.outcome }}
+              echo "step_outcome=${{ steps.check-type-labels.outcome }}" >> $GITHUB_ENV
+              echo "step_outcome=${{ steps.check-type-labels.outcome }}" >> "$GITHUB_OUTPUT"
+          else
+              echo "::error::Unable to set 'label_check' and 'step_outcome' variables, exiting. "
+              exit 1
+          fi
+          ##
+          if [ '${{ env.MY_WORKFLOW_DEBUG }}' == 'true' ]; then
+              echo "debug and verbose info... "
+              echo ""
+              echo "the '${{ env.test_name }}' step info... "
+              echo "  label_check:  ${{ env.label_check }} "
+              echo "  step_outcome: ${{ env.step_outcome }} "
+              echo ""
+              echo "going to evaluate the outcome of the check labels steps..."
+              echo "learn more at: "
+              echo "https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context"
+              echo ""
+          fi
+          ##
+          echo "checking the contains autorelease ..."
+          echo "${{ contains('refs/heads/autorelease', github.ref) }} "
+          echo "look above, what is that?"
+          echo ""
+          echo "checking the NOT contains autorelease ..."
+          echo "${{ ! contains('refs/heads/autorelease', github.ref) }} "
+          echo "look above, what is that?"
+          echo ""
+          ##
+          echo "The 'write-results' step has finished. "
 
-      - name: Generate comment template for failed checks
+      # look for a comment 
+      - name: Find Comment
+        uses: rwaight/actions/github/find-comment@main
+        id: find-comment
+        #continue-on-error: true
+        with:
+          #issue-number: ${{ github.event.number }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'rw-actions-bot[bot]'
+          body-includes: The PR labeler checks
+
+      - name: Generate comment template
         # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
         uses: rwaight/actions/utilities/render-template@main
-        if: |
-          steps.check-type-labels.outcome != 'skipped' && 
-          steps.check-type-labels.outputs.label_check != 'success'
+        if: steps.write-results.outcome != 'skipped'
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
-          #template: assets/pr-labeler/comment-checks-failed.md
-          template: assets/pr-labeler/comment-checks-failed.md
+          #template: assets/pr-labeler/comment-checks-failure.md
+          template: assets/pr-labeler/comment-checks-${{ steps.write-results.outputs.label_check }}.md
           vars: |
             foo: this
-            foo2: ${{ github.event.number }}
-            foo3: ${{ steps.check-type-labels.outputs.label_check }}
             bar: that
-            bar2: ${{ github.event.pull_request.number }}
-            bar3: ${{ steps.check-semver-labels.outputs.label_check }}
+            event_number: ${{ github.event.number }}
+            label_check: ${{ steps.write-results.outputs.label_check }}
+            label_scope: ${{ env.GHA_LABEL_SCOPE }}
+            step_outcome: ${{ steps.write-results.outputs.step_outcome }}
+            test_name: ${{ env.test_name }}
 
-      - name: Create comment
+      - name: Create or update comment
         id: comment-on-pr
         uses: rwaight/actions/github/create-or-update-comment@main
-        if: |
-          steps.check-type-labels.outcome != 'skipped' && 
-          steps.check-type-labels.outputs.label_check != 'success'
+        if: steps.write-results.outcome != 'skipped'
         with:
-          issue-number: ${{ github.event.number }}
           body: ${{ steps.comment-template.outputs.result }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          issue-number: ${{ github.event.number }}
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Output comment ID
         run: |
           echo "Comment ID - ${{ steps.comment-on-pr.outputs.comment-id }}"
 
-      - name: Autorelease | Evaluate check-semver-labels step
+      - name: Fail workflow if proper '${{ env.GHA_LABEL_SCOPE }}' label was not set
         # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
         if: |
-          steps.check-semver-labels.outcome != 'skipped' && 
-          steps.check-semver-labels.outputs.label_check != 'success'
+          steps.write-results.outputs.step_outcome != 'skipped' && 
+          steps.write-results.outputs.label_check != 'success'
         run: |
-          echo "::error::Missing the proper version label in autorelease PR ${{ github.event.number }}"
-          exit 1
-
-      - name: Evaluate check-type-labels step
-        #if: steps.check-type-labels.outputs.label_check != 'success'
-        if: |
-          steps.check-type-labels.outcome != 'skipped' && 
-          steps.check-type-labels.outputs.label_check != 'success'
-        run: |
-          echo "::error::Missing the proper type label in PR ${{ github.event.number }}'"
+          echo "::error::Missing the proper '${{ env.GHA_LABEL_SCOPE }}' label in PR ${{ github.event.number }}"
           exit 1
