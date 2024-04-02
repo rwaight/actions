@@ -39,8 +39,9 @@ jobs:
           echo "This workflow will now exit. "
           exit 0
 
-      - name: Autorelease | Check 'autorelease' branch
-        id: check-autorelease-branch
+      - name: Autorelease | Set the label scope to 'semver'
+        #name: Autorelease | Check 'autorelease' branch
+        id: set-label-scope-semver
         if: contains('refs/heads/autorelease', github.ref)
         #if: ${{ contains('refs/heads/autorelease', github.ref) }}
         # if: | 
@@ -49,6 +50,11 @@ jobs:
         #     refs/heads/production
         #   ', github.ref)
         run: |
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "Setting GHA_LABEL_SCOPE to 'semver' ... "
+          echo "GHA_LABEL_SCOPE=semver" >> $GITHUB_ENV
+          ##
           ## The head branch should be named autorelease/<version>
           if ! [[ "${{ github.event.pull_request.head.ref }}" =~ ^autorelease\/[A-Za-z0-9.+-]+$ ]]; then
             echo "::error::Invalid autorelease branch '${{ github.event.pull_request.head.ref }}'"
@@ -66,14 +72,35 @@ jobs:
           else
             echo "::error::Version '$VERSION' is not in a valid format" && exit 1
           fi
-          echo "The 'check-autorelease-branch' step has completed. "
+          echo "The 'set-label-scope-semver' step has completed. "
 
-      - name: Print a note about non autorelease branches
-        id: check-other-branches
-        #if: steps.check-autorelease-branch.outcome == 'skipped'
+      - name: Set the label scope to 'type'
+        id: set-label-scope-type
         if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         run: |
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "Setting GHA_LABEL_SCOPE to 'type' ... "
+          echo "GHA_LABEL_SCOPE=type" >> $GITHUB_ENV
+          ##
           echo "This branch is not an 'autorelease' branch, skipping the autorelease steps. "
+
+      - name: Ensure the label scope has been determined
+        id: check-label-scope
+        run: |
+          ## the double number signs below are for line spacing and readability only
+          ##
+          if [ '${{ env.GHA_LABEL_SCOPE }}' == 'semver' ]; then
+              echo "The label scope is 'semver'. "
+          ##
+          elif [ '${{ env.GHA_LABEL_SCOPE }}' == 'type' ]; then
+              echo "The label scope is 'type'. "
+          else
+              echo "::error::The label scope was not determined for PR ${{ github.event.number }}, exiting. "
+              exit 1
+          fi
+          echo "The 'check-label-scope' step has completed. "
+
 
       # Create a GitHub App Token from actions/create-github-app-token
       # https://github.com/actions/create-github-app-token
@@ -144,8 +171,8 @@ jobs:
           steps.check-type-labels.outputs.label_check != 'success'
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
-          #template: assets/pr-labeler/comment-checks-failed.md
-          template: assets/pr-labeler/comment-checks-failed.md
+          #template: assets/pr-labeler/comment-checks-failure.md
+          template: assets/pr-labeler/comment-checks-failure.md
           vars: |
             foo: this
             foo2: ${{ github.event.number }}
