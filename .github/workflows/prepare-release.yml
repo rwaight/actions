@@ -78,7 +78,7 @@ jobs:
             echo "the 'actions:autorelease' label exists"
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Get latest release info
