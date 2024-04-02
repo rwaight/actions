@@ -150,13 +150,13 @@ jobs:
           one_of: 'type:'
           repo_token: ${{ steps.app-token.outputs.token }}
 
-      - name: Evaluate the check-${{ env.GHA_LABEL_SCOPE }}-labels results
+      - name: Write the check-${{ env.GHA_LABEL_SCOPE }}-labels results to the environment
         # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
-        id: eval-check-label-results
+        id: write-results
         run: |
           ## the double number signs below are for line spacing and readability only
           ##
-          echo "Running the 'eval-check-label-results' step. "
+          echo "Running the 'write-results' step. "
           ##
           test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels
           echo "test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels" >> $GITHUB_ENV
@@ -206,93 +206,57 @@ jobs:
           echo "look above, what is that?"
           echo ""
           ##
-          if [ '${{ env.step_outcome }}' == 'success' ]; then
-              echo "The '${{ env.test_name }}' step was successful. "
-              echo "Setting EVAL_OUTCOME to 'success' ... "
-              echo "EVAL_OUTCOME=success" >> $GITHUB_ENV
-              echo "EVAL_OUTCOME=success" >> "$GITHUB_OUTPUT"
-          ##
-          elif [ '${{ env.step_outcome }}' == 'skipped' ]; then
-              echo "The '${{ env.test_name }}' step was skipped. "
-              echo "Setting EVAL_OUTCOME to 'skipped' ... "
-              echo "EVAL_OUTCOME=skipped" >> $GITHUB_ENV
-              echo "EVAL_OUTCOME=skipped" >> "$GITHUB_OUTPUT"
-          ##
-          elif [ '${{ env.step_outcome }}' == 'failure' ]; then
-              echo "The '${{ env.test_name }}' step failed. "
-              echo "Setting EVAL_OUTCOME to 'failure' ... "
-              echo "EVAL_OUTCOME=failure" >> $GITHUB_ENV
-              echo "EVAL_OUTCOME=failure" >> "$GITHUB_OUTPUT"
-          ##
-          else
-              echo "The else condition ran when evaluating the '${{ env.test_name }}' step, assuming failure. "
-              echo "Setting EVAL_OUTCOME to 'failure' ... "
-              echo "EVAL_OUTCOME=failure" >> $GITHUB_ENV
-              echo "EVAL_OUTCOME=failure" >> "$GITHUB_OUTPUT"
-          fi
-          ##
-          echo "The 'eval-check-label-results' step has finished. "
+          echo "The 'write-results' step has finished. "
 
-      # reserve for future use
-      # # look for a comment 
-      # - name: Find Comment
-      #   uses: rwaight/actions/github/find-comment@main
-      #   id: find-labeler-comment
-      #   continue-on-error: true
-      #   with:
-      #     #issue-number: ${{ github.event.number }}
-      #     issue-number: ${{ github.event.pull_request.number }}
-      #     comment-author: 'rw-actions-bot[bot]'
-      #     body-includes: The PR labeler checks
+      # look for a comment 
+      - name: Find Comment
+        uses: rwaight/actions/github/find-comment@main
+        id: find-comment
+        #continue-on-error: true
+        with:
+          #issue-number: ${{ github.event.number }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'rw-actions-bot[bot]'
+          body-includes: The PR labeler checks
 
-      - name: Generate comment template for failed checks
+      - name: Generate comment template
         # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
         uses: rwaight/actions/utilities/render-template@main
-        if: |
-          steps.check-type-labels.outcome != 'skipped' && 
-          steps.check-type-labels.outputs.label_check != 'success'
+        if: steps.write-results.outcome != 'skipped'
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
           #template: assets/pr-labeler/comment-checks-failure.md
-          template: assets/pr-labeler/comment-checks-failure.md
+          template: assets/pr-labeler/comment-checks-${{ steps.write-results.outputs.label_check }}.md
           vars: |
             foo: this
-            foo2: ${{ github.event.number }}
-            foo3: ${{ steps.check-type-labels.outputs.label_check }}
             bar: that
-            bar2: ${{ github.event.pull_request.number }}
-            bar3: ${{ steps.check-semver-labels.outputs.label_check }}
+            event_number: ${{ github.event.number }}
+            label_check: ${{ steps.write-results.outputs.label_check }}
+            label_scope: ${{ env.GHA_LABEL_SCOPE }}
+            step_outcome: ${{ steps.write-results.outputs.step_outcome }}
+            test_name: ${{ env.test_name }}
 
-      - name: Create comment
+      - name: Create or update comment
         id: comment-on-pr
         uses: rwaight/actions/github/create-or-update-comment@main
-        if: |
-          steps.check-type-labels.outcome != 'skipped' && 
-          steps.check-type-labels.outputs.label_check != 'success'
+        if: steps.write-results.outcome != 'skipped'
         with:
-          issue-number: ${{ github.event.number }}
           body: ${{ steps.comment-template.outputs.result }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          issue-number: ${{ github.event.number }}
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Output comment ID
         run: |
           echo "Comment ID - ${{ steps.comment-on-pr.outputs.comment-id }}"
 
-      - name: Autorelease | Evaluate check-semver-labels step
+      - name: Fail workflow if proper '${{ env.GHA_LABEL_SCOPE }}' label was not set
         # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
         if: |
-          steps.check-semver-labels.outcome != 'skipped' && 
-          steps.check-semver-labels.outputs.label_check != 'success'
+          steps.write-results.outputs.step_outcome != 'skipped' && 
+          steps.write-results.outputs.label_check != 'success'
         run: |
-          echo "::error::Missing the proper version label in autorelease PR ${{ github.event.number }}"
-          exit 1
-
-      - name: Evaluate check-type-labels step
-        #if: steps.check-type-labels.outputs.label_check != 'success'
-        if: |
-          steps.check-type-labels.outcome != 'skipped' && 
-          steps.check-type-labels.outputs.label_check != 'success'
-        run: |
-          echo "::error::Missing the proper type label in PR ${{ github.event.number }}'"
+          echo "::error::Missing the proper '${{ env.GHA_LABEL_SCOPE }}' label in PR ${{ github.event.number }}"
           exit 1
