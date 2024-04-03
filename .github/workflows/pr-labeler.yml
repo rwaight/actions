@@ -65,6 +65,8 @@ jobs:
           echo "The 'check-repo-owner' step is finishing and this workflow will now exit. "
           exit 0
         # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Exit workflow if called by 'rw-actions-bot[bot]'
         id: check-actions-bot
@@ -76,10 +78,13 @@ jobs:
           echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
           exit 0
         # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Check to see if any labels have been set
         id: check-for-any-labels
-        if: github.event.issue.labels.length == 0
+        #if: github.event.issue.labels.length == 0
+        if: github.event.pull_request.labels.length == 0
         run: |
           echo "At the time this step has started, no labels have been set in the PR. "
           echo "Might consider reducing how often this workflow is called... "
@@ -88,8 +93,8 @@ jobs:
       - name: Autorelease | Set the label scope to 'semver'
         #name: Autorelease | Check 'autorelease' branch
         id: set-label-scope-semver
-        if: contains('refs/heads/autorelease', github.ref)
-        #if: ${{ contains('refs/heads/autorelease', github.ref) }}
+        #if: contains('refs/heads/autorelease', github.ref)
+        if: ${{ contains('refs/heads/autorelease', github.ref) }}
         # if: | 
         #   contains('
         #     refs/heads/autorelease
@@ -150,7 +155,8 @@ jobs:
 
       - name: Check to see if any '${{ env.GHA_LABEL_SCOPE }}:' labels have been set
         id: check-for-scope-labels
-        if: ${{ !contains(github.event.issue.labels.*.name, '${{ env.GHA_LABEL_SCOPE }}:') }}
+        #if: ${{ !contains(github.event.issue.labels.*.name, '${{ env.GHA_LABEL_SCOPE }}:') }}
+        if: ${{ !contains(github.event.pull_request.labels.*.name, '${{ env.GHA_LABEL_SCOPE }}:') }}
         run: |
           echo "At the time this step has started, no '${{ env.GHA_LABEL_SCOPE }}' labels have been added to the PR"
           echo "The 'check-for-scope-labels' step has completed. "
