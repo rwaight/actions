@@ -36,6 +36,11 @@ jobs:
     # the 'if' statement below is not needed at this time, but would be if the 'on' section above changes
     if: github.event_name == 'pull_request'
     permissions:
+      # the `actions: write` permission might need to be added if
+      #   the `gh run cancel` does not work
+      # OR might need to include `gh run watch ${{ github.run_id }}` 
+      #   if issuing `gh run cancel` does not exit the workflow
+      #actions: write
       contents: read
       issues: write
       pull-requests: write
@@ -59,6 +64,7 @@ jobs:
           gh run cancel ${{ github.run_id }}
           echo "The 'check-repo-owner' step is finishing and this workflow will now exit. "
           exit 0
+        # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
 
       - name: Exit workflow if called by 'rw-actions-bot[bot]'
         id: check-actions-bot
@@ -69,6 +75,7 @@ jobs:
           gh run cancel ${{ github.run_id }}
           echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
           exit 0
+        # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
 
       - name: Check to see if any labels have been set
         id: check-for-any-labels
