@@ -20,6 +20,14 @@ on:
   #       default: false
   #       type: boolean
 
+# https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-or-runs-for-the-current-workflow
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  #https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-on-specific-branches
+  #cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
+
 jobs:
   pr-labeler:
     name: Label pull request ${{ github.event.number }}
@@ -30,6 +38,12 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
+    # # https://docs.github.com/en/actions/using-jobs/using-concurrency
+    # # can also configure concurrency within the job
+    # concurrency:
+    #   # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-or-runs-for-the-current-workflow
+    #   group: ${{ github.workflow }}-${{ github.ref }}
+    #   cancel-in-progress: true
     steps:
       - name: Exit workflow in forked repo
         id: check-repo-owner
