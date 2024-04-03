@@ -40,7 +40,7 @@ jobs:
       #   the `gh run cancel` does not work
       # OR might need to include `gh run watch ${{ github.run_id }}` 
       #   if issuing `gh run cancel` does not exit the workflow
-      #actions: write
+      actions: write
       contents: read
       issues: write
       pull-requests: write
@@ -55,6 +55,10 @@ jobs:
       #   need to issue 'gh run cancel ${{ github.run_id }}'
       #   and might need to change 'exit 0' to 'exit 1' or a non-zero numerical value
       # https://github.com/orgs/community/discussions/82744#discussioncomment-8718646
+      - name: Checkout using built-in token
+        if: (github.repository_owner != 'rwaight') || ${{ github.actor == 'rw-actions-bot[bot]' }}
+        uses: actions/checkout@v4
+
       - name: Exit workflow in forked repo
         id: check-repo-owner
         if: (github.repository_owner != 'rwaight')
