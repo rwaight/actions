@@ -24,7 +24,8 @@ on:
 concurrency:
   # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-or-runs-for-the-current-workflow
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  #cancel-in-progress: true
+  cancel-in-progress: ${{ github.actor != 'rw-actions-bot[bot]' }}
   #https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-on-specific-branches
   #cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
 
@@ -50,8 +51,24 @@ jobs:
         if: (github.repository_owner != 'rwaight')
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          echo "This workflow will now exit. "
+          echo "The 'check-repo-owner' step is finishing and this workflow will now exit. "
           exit 0
+
+      - name: Exit workflow if called by 'rw-actions-bot[bot]'
+        id: check-actions-bot
+        if: ${{ github.actor == 'rw-actions-bot[bot]' }}
+        run: |
+          echo "This workflow was called by the 'rw-actions-bot[bot]' but should not run. "
+          echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
+          exit 0
+
+      - name: Check to see if any labels have been set
+        id: check-for-any-labels
+        if: github.event.issue.labels.length == 0
+        run: |
+          echo "At the time this step has started, no labels have been set in the PR. "
+          echo "Might consider reducing how often this workflow is called... "
+          echo "The 'check-for-any-labels' step has completed. "
 
       - name: Autorelease | Set the label scope to 'semver'
         #name: Autorelease | Check 'autorelease' branch
@@ -98,6 +115,7 @@ jobs:
           echo "GHA_LABEL_SCOPE=type" >> $GITHUB_ENV
           ##
           echo "This branch is not an 'autorelease' branch, skipping the autorelease steps. "
+          echo "The 'set-label-scope-type' step has completed. "
 
       - name: Ensure the label scope has been determined
         id: check-label-scope
@@ -115,6 +133,12 @@ jobs:
           fi
           echo "The 'check-label-scope' step has completed. "
 
+      - name: Check to see if any '${{ env.GHA_LABEL_SCOPE }}:' labels have been set
+        id: check-for-scope-labels
+        if: ${{ !contains(github.event.issue.labels.*.name, '${{ env.GHA_LABEL_SCOPE }}:') }}
+        run: |
+          echo "At the time this step has started, no '${{ env.GHA_LABEL_SCOPE }}' labels have been added to the PR"
+          echo "The 'check-for-scope-labels' step has completed. "
 
       # Create a GitHub App Token from actions/create-github-app-token
       # https://github.com/actions/create-github-app-token
