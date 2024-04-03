@@ -46,11 +46,17 @@ jobs:
     #   group: ${{ github.workflow }}-${{ github.ref }}
     #   cancel-in-progress: true
     steps:
+      # Issuing 'exit 0' does not force the workflow to exit early
+      #   need to issue 'gh run cancel ${{ github.run_id }}'
+      #   and might need to change 'exit 0' to 'exit 1' or a non-zero numerical value
+      # https://github.com/orgs/community/discussions/82744#discussioncomment-8718646
       - name: Exit workflow in forked repo
         id: check-repo-owner
         if: (github.repository_owner != 'rwaight')
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
+          gh run cancel ${{ github.run_id }}
           echo "The 'check-repo-owner' step is finishing and this workflow will now exit. "
           exit 0
 
@@ -59,6 +65,8 @@ jobs:
         if: ${{ github.actor == 'rw-actions-bot[bot]' }}
         run: |
           echo "This workflow was called by the 'rw-actions-bot[bot]' but should not run. "
+          echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
+          gh run cancel ${{ github.run_id }}
           echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
           exit 0
 
