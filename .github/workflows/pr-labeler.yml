@@ -57,6 +57,7 @@ jobs:
       # https://github.com/orgs/community/discussions/82744#discussioncomment-8718646
       - name: Checkout using built-in token
         if: (github.repository_owner != 'rwaight') || ${{ github.actor == 'rw-actions-bot[bot]' }}
+        #if: (github.repository_owner != 'rwaight')
         uses: actions/checkout@v4
 
       - name: Exit workflow in forked repo
@@ -67,6 +68,7 @@ jobs:
           echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
           gh run cancel ${{ github.run_id }}
           echo "The 'check-repo-owner' step is finishing and this workflow will now exit. "
+          gh run watch ${{ github.run_id }}
           exit 0
         # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
         env:
@@ -80,6 +82,7 @@ jobs:
           echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
           gh run cancel ${{ github.run_id }}
           echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
+          gh run watch ${{ github.run_id }}
           exit 0
         # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
         env:
@@ -92,6 +95,8 @@ jobs:
         run: |
           echo "At the time this step has started, no labels have been set in the PR. "
           echo "Might consider reducing how often this workflow is called... "
+          echo "the github.event.pull_request.labels.length is ${{ github.event.pull_request.labels.length }} "
+          echo ""
           echo "The 'check-for-any-labels' step has completed. "
 
       - name: Autorelease | Set the label scope to 'semver'
