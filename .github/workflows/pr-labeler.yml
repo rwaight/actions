@@ -112,6 +112,8 @@ jobs:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          # create a token for all repositories in the current owner's installation
+          owner: ${{ github.repository_owner }}
 
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
