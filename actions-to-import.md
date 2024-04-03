@@ -3,11 +3,17 @@
 The following actions should be copied/imported to this repo:
 - **github**
     - [`imjohnbo/issue-bot` action](https://github.com/imjohnbo/issue-bot)
+        - GitHub Actions powered Issue Bot
     - [`imjohnbo/extract-issue-template-fields` action](https://github.com/imjohnbo/extract-issue-template-fields)
+        - Extract issue template fields with GitHub Actions
     - [`c-py/action-dotenv-to-setenv`](https://github.com/c-py/action-dotenv-to-setenv)
+        - GitHub Action to export a dotenv file to environment variables (via set-env)
     - [`robvanderleek/create-issue-branch` action](https://github.com/robvanderleek/create-issue-branch)
+        - GitHub App/Action that automates the creation of issue branches
 - **releases**
-    - [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
+    - [`cycjimmy/semantic-release-action`](https://github.com/cycjimmy/semantic-release-action)
+        - GitHub Action for Semantic Release
+        - Uses [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
 - **utilities**
     - [`imjohnbo/action-to-mermaid`](https://github.com/imjohnbo/action-to-mermaid)
     - [`jakejarvis/s3-sync-action`](https://github.com/jakejarvis/s3-sync-action)
@@ -18,9 +24,11 @@ The actions should have their `branding` section updated according to the [updat
 
 The following actions are pending import to this repo:
 - **git**
-    - [`release-flow/keep-a-changelog-action`](https://github.com/release-flow/keep-a-changelog-action)
+    - None at this time.
 - **github**
-    - [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request)
+    - None at this time.
+- **releases**
+    - [`cycjimmy/semantic-release-action`](https://github.com/cycjimmy/semantic-release-action)
 - **utilities**
     - None at this time.
 
@@ -28,23 +36,43 @@ The following actions are pending import to this repo:
 
 The following actions should be reviewed as candidates to import to this repo:
 - **releases**
+    - [`huggingface/semver-release-action`](https://github.com/huggingface/semver-release-action)
+        - Github Action to release projects using Semantic Release.
+        - Uses [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
     - [`K-Phoen/semver-release-action`](https://github.com/K-Phoen/semver-release-action/)
+        - GitHub Action to automatically create SemVer compliant releases based on PR labels.
         - Based on the [`github_tag_and_release.yml`](https://github.com/agilepathway/label-checker/blob/master/.github/workflows/github_tag_and_release.yml) workflow
     - [`phish108/release-check`](https://github.com/phish108/release-check)
+        - Check if a push or pull request should trigger a release.
     - [`InsonusK/get-latest-release`](https://github.com/InsonusK/get-latest-release)
+        - Get latest release, include all types of release
     - [`cardinalby/git-get-release-action`](https://github.com/cardinalby/git-get-release-action)
+        - Github Action that allows you to get release information by release id, tag, commit SHA (current commit or specified).
 - **git**
     - [`mdomke/git-semver`](https://github.com/mdomke/git-semver)
+        - Semantic Versioning with git tags
     - [`actions-ecosystem/action-get-latest-tag`](https://github.com/actions-ecosystem/action-get-latest-tag)
+        - GitHub Action to get a latest Git tag
     - [`WyriHaximus/github-action-get-previous-tag`](https://github.com/WyriHaximus/github-action-get-previous-tag)
+        - Get the previous tag
     - [`WyriHaximus/github-action-next-semvers`](https://github.com/WyriHaximus/github-action-next-semvers)
+        - Github Action that output the next version for major, minor, and patch version based on the given semver version.
     - [`phish108/autotag-action`](https://github.com/phish108/autotag-action)
+        - A lightning fast autotagger for semver tagging in github actions
+    - [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
+        - Semver versioning based on the git history and commit messages of your repository.
+    - [`auguwu/git-tag-action`](https://github.com/auguwu/git-tag-action)
+        - GitHub action to split your Git release tag into SemVer 2.0 parts
 - **github**
     - [`actions-cool/issues-helper`](https://github.com/actions-cool/issues-helper)
+        - A GitHub Action easily helps you automatically manage issues.
     - [`Ismoh-Games/find-linked-issues`](https://github.com/Ismoh-Games/find-linked-issues)
+        - Marketplace action for finding the linked issues of a pull request.
 - **utilities**
     - [`EndBug/version-check`](https://github.com/EndBug/version-check)
+        - An action that allows you to check whether your npm package version has been updated
     - [`technote-space/package-version-check-action`](https://github.com/technote-space/package-version-check-action)
+        - GitHub Actions to check package version before publish
 
 
 ## Update standards for imported actions
