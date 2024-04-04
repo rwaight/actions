@@ -14,8 +14,21 @@ jobs:
     name: test-semantic-latest
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      # Create a GitHub App Token from actions/create-github-app-token
+      # https://github.com/actions/create-github-app-token
+      - name: Create an App Token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      - name: Checkout files from commit tree
         uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Semantic Release
         #uses: rwaight/actions/releases/semantic-release-action@main
@@ -23,6 +36,7 @@ jobs:
         id: semantic
         with:
           dry_run: true
+          tag_format: custom-v${version}
           branches: |
             [
               '+([0-9])?(.{+([0-9]),x}).x',
@@ -46,12 +60,13 @@ jobs:
           #extends: |
           #  @semantic-release-monorepo
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN || 'asdf1234' }}
 
       - name: Test Outputs
         #if: steps.semantic.outputs.new_release_published == 'true'
-        if: steps.semantic.outputs.new_release_published == 'false'
+        #if: steps.semantic.outputs.new_release_published == 'false'
         run: |
           echo "the order of output is, new release: full version, major, minor, patch "
           echo ${{ steps.semantic.outputs.new_release_version }}
@@ -73,6 +88,7 @@ jobs:
         with:
           semantic_version: 15
           dry_run: true
+          tag_format: custom-v${version}
           branches: |
             [
               'main',
@@ -87,7 +103,7 @@ jobs:
           #  @semantic-release-monorepo
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN || 'asdf1234' }}
 
       - name: Test Outputs
         #if: steps.semantic.outputs.new_release_published == 'true'

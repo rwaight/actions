@@ -5,8 +5,8 @@
       {"name": "beta", "prerelease": true},
       {"name": "alpha", "prerelease": true}
     ],
-    "debug": "true",
-    "dryRun": "true",
+    "debug": true,
+    "dryRun": true,
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
@@ -16,7 +16,12 @@
           "changelogFile": "CHANGELOG.md"
         }
       ],
-      "@semantic-release/npm",
+      [
+        "@semantic-release/npm", 
+        {
+          "npmPublish": false
+        }
+      ],
       "@semantic-release/github",
       [
         "@semantic-release/git",
