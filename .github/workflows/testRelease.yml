@@ -42,8 +42,8 @@ jobs:
           extra_plugins: |
             @semantic-release/git
             @semantic-release/changelog
-          extends: |
-            @semantic-release-monorepo
+          #extends: |
+          #  @semantic-release-monorepo
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -82,8 +82,8 @@ jobs:
           extra_plugins: |
             @semantic-release/git@7
             @semantic-release/changelog@3
-          extends: |
-            @semantic-release-monorepo
+          #extends: |
+          #  @semantic-release-monorepo
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
