@@ -40,7 +40,7 @@ jobs:
       #   the `gh run cancel` does not work
       # OR might need to include `gh run watch ${{ github.run_id }}` 
       #   if issuing `gh run cancel` does not exit the workflow
-      #actions: write
+      actions: write
       contents: read
       issues: write
       pull-requests: write
@@ -55,7 +55,13 @@ jobs:
       #   need to issue 'gh run cancel ${{ github.run_id }}'
       #   and might need to change 'exit 0' to 'exit 1' or a non-zero numerical value
       # https://github.com/orgs/community/discussions/82744#discussioncomment-8718646
-      - name: Exit workflow in forked repo
+      - name: Forked repo | checkout using built-in token
+        if: (github.repository_owner != 'rwaight')
+        # Save this in case we want to exit the workflow if it is called by 'rw-actions-bot[bot]'
+        #if: (github.repository_owner != 'rwaight') || ${{ github.actor == 'rw-actions-bot[bot]' }}
+        uses: actions/checkout@v4
+
+      - name: Forked repo | Exit workflow early in forked repo
         id: check-repo-owner
         if: (github.repository_owner != 'rwaight')
         run: |
@@ -63,33 +69,43 @@ jobs:
           echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
           gh run cancel ${{ github.run_id }}
           echo "The 'check-repo-owner' step is finishing and this workflow will now exit. "
+          gh run watch ${{ github.run_id }}
           exit 0
         # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
 
-      - name: Exit workflow if called by 'rw-actions-bot[bot]'
-        id: check-actions-bot
-        if: ${{ github.actor == 'rw-actions-bot[bot]' }}
-        run: |
-          echo "This workflow was called by the 'rw-actions-bot[bot]' but should not run. "
-          echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
-          gh run cancel ${{ github.run_id }}
-          echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
-          exit 0
-        # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
+      # # Save this in case we want to exit the workflow if it is called by 'rw-actions-bot[bot]'
+      # - name: Exit workflow if called by 'rw-actions-bot[bot]'
+      #   id: check-actions-bot
+      #   if: ${{ github.actor == 'rw-actions-bot[bot]' }}
+      #   run: |
+      #     echo "This workflow was called by the 'rw-actions-bot[bot]' but should not run. "
+      #     echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
+      #     gh run cancel ${{ github.run_id }}
+      #     echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
+      #     gh run watch ${{ github.run_id }}
+      #     exit 0
+      #   # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
 
       - name: Check to see if any labels have been set
         id: check-for-any-labels
-        if: github.event.issue.labels.length == 0
+        #if: github.event.issue.labels.length == 0
+        if: github.event.pull_request.labels.length == 0
         run: |
           echo "At the time this step has started, no labels have been set in the PR. "
           echo "Might consider reducing how often this workflow is called... "
+          echo "the github.event.pull_request.labels.length is ${{ github.event.pull_request.labels.length }} "
+          echo ""
           echo "The 'check-for-any-labels' step has completed. "
 
       - name: Autorelease | Set the label scope to 'semver'
         #name: Autorelease | Check 'autorelease' branch
         id: set-label-scope-semver
-        if: contains('refs/heads/autorelease', github.ref)
-        #if: ${{ contains('refs/heads/autorelease', github.ref) }}
+        #if: contains('refs/heads/autorelease', github.ref)
+        if: ${{ contains('refs/heads/autorelease', github.ref) }}
         # if: | 
         #   contains('
         #     refs/heads/autorelease
@@ -150,7 +166,8 @@ jobs:
 
       - name: Check to see if any '${{ env.GHA_LABEL_SCOPE }}:' labels have been set
         id: check-for-scope-labels
-        if: ${{ !contains(github.event.issue.labels.*.name, '${{ env.GHA_LABEL_SCOPE }}:') }}
+        #if: ${{ !contains(github.event.issue.labels.*.name, '${{ env.GHA_LABEL_SCOPE }}:') }}
+        if: ${{ !contains(github.event.pull_request.labels.*.name, '${{ env.GHA_LABEL_SCOPE }}:') }}
         run: |
           echo "At the time this step has started, no '${{ env.GHA_LABEL_SCOPE }}' labels have been added to the PR"
           echo "The 'check-for-scope-labels' step has completed. "
