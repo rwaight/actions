@@ -1,7 +1,8 @@
 {
     "branches": [
-      "main", 
-      {"name": "beta", "prerelease": true}, 
+      "main",
+      "feat-add-semantic-release-config", 
+      {"name": "beta", "prerelease": true},
       {"name": "alpha", "prerelease": true}
     ],
     "debug": "true",
