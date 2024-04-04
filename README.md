@@ -22,6 +22,35 @@ The actions are currently organized by the following categories:
 └── utilities
 ```
 
+#### Category Overview
+
+Before the first official release, the categories will be changed to align with the GitHub Actions categories. They will use the category list from https://github.com/marketplace?category=&type=actions:
+
+```markdown
+**Categories**
+API management
+Chat
+Code quality
+Code review
+Continuous integration
+Dependency management
+Deployment
+Deployment Protection Rules
+IDES
+Learning
+Localization
+Mobile
+Monitoring
+Project management
+Publishing
+Recently added
+Security
+Support
+Testing
+Utilities
+```
+
+
 #### Actions by category
 
 Here is a current list of actions by category

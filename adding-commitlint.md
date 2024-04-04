@@ -14,6 +14,16 @@ module.exports = {
 }
 ```
 
+#### Enforcing good git hygiene
+
+Part of ensuring proper commit messages (and pull requests) will help with automating releases.  For example, the [semantic release](https://github.com/semantic-release/semantic-release) tool can be used in a GitHub action, via [this semantic-release-action](https://github.com/cycjimmy/semantic-release-action).
+
+Here are some other write-ups on the topic:
+- https://www.vantage-ai.com/blog/how-to-enforce-good-pull-requests-on-github
+- https://hugooodias.medium.com/the-anatomy-of-a-perfect-pull-request-567382bb6067
+
+
+
 #### Resources
 commitlint guide links:
 - [Guide: Getting started](https://commitlint.js.org/guides/getting-started.html)
