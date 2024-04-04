@@ -1,0 +1,67 @@
+name: 'Action For Semantic Release'
+description: 'GitHub Action for Semantic Release'
+author: 'cycjimmy'
+branding:
+  icon: 'package'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+inputs:
+  semantic_version:
+    required: false
+    description: 'Specify specifying version range for semantic-release. If no version range is specified, latest version will be used by default'
+  branches:
+    required: false
+    description: 'The branches on which releases should happen. It will override the branches attribute in your configuration file. Support for semantic-release above v16. See https://semantic-release.gitbook.io/semantic-release/usage/configuration#branches for more information.'
+  branch:
+    required: false
+    description: 'The branch on which releases should happen. It will override the branch attribute in your configuration file. If the attribute is not configured on both sides, the default is master. Support for semantic-release older than v16.'
+  extra_plugins:
+    required: false
+    description: 'Extra plugins for pre-install. You can also specify specifying version range for the extra plugins if you prefer.'
+  dry_run:
+    required: false
+    description: 'Whether to run semantic release in `dry-run` mode. It will override the dryRun attribute in your configuration file'
+  ci:
+    required: false
+    description: 'Whether to run semantic release with CI support (default: true). It will override the ci attribute in your configuration file'
+  extends:
+    required: false
+    description: 'One or several sharable configurations, https://semantic-release.gitbook.io/semantic-release/usage/configuration#extends'
+  working_directory:
+    required: false
+    description: 'Specify another working directory for semantic release. Default one is provided by github.'
+  tag_format:
+    required: false
+    description: 'The default tag format on semantic-release is v{version}. You can override that behavior using this option.'
+  repository_url:
+    required: false
+    description: 'The Git repository url. If no repository url specified, current repository will be used by default.'
+outputs:
+  new_release_published:
+    description: 'Whether a new release was published'
+  new_release_version:
+    description: 'Version of the new release'
+  new_release_major_version:
+    description: 'Major version of the new release'
+  new_release_minor_version:
+    description: 'Minor version of the new release'
+  new_release_patch_version:
+    description: 'Patch version of the new release'
+  new_release_channel:
+    description: 'The distribution channel on which the last release was initially made available (undefined for the default distribution channel).'
+  new_release_notes:
+    description: 'The release notes for the new release.'
+  new_release_git_head:
+    description: 'The sha of the last commit being part of the new release.'
+  new_release_git_tag:
+    description: 'The Git tag associated with the new release.'
+  last_release_version:
+    description: 'Version of the previous release, if there was one.'
+  last_release_git_head:
+    description: 'The sha of the last commit being part of the last release, if there was one.'
+  last_release_git_tag:
+    description: 'The Git tag associated with the last release, if there was one.'
+runs:
+  using: 'node20'
+  main: 'index.js'
