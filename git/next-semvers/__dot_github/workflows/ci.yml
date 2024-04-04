@@ -1,0 +1,133 @@
+name: Continuous Integration
+env:
+  DOCKER_IMAGE: wyrihaximusgithubactions/next-semvers
+  DOCKER_BUILDKIT: 1
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  composer-install:
+    runs-on: ubuntu-latest
+    container:
+      image: wyrihaximusnet/php:8.2-nts-alpine-slim-dev-root
+    steps:
+      - uses: actions/checkout@v1
+      - name: Cache composer packages
+        uses: actions/cache@v1
+        with:
+          path: ./vendor/
+          key: ${{ hashFiles('**/composer.json') }}-${{ hashFiles('**/composer.lock') }}
+      - name: Install Dependencies
+        run: composer install --ansi --no-progress --no-interaction --prefer-dist -o
+  qa:
+    strategy:
+      fail-fast: false
+      matrix:
+        qa: [cs, stan, psalm, unit, composer-require-checker, composer-unused]
+    needs: composer-install
+    runs-on: ubuntu-latest
+    container:
+      image: wyrihaximusnet/php:8.2-nts-alpine-slim-dev-root
+    steps:
+      - uses: actions/checkout@v1
+      - name: Cache composer packages
+        uses: actions/cache@v1
+        with:
+          path: ./vendor/
+          key: ${{ hashFiles('**/composer.json') }}-${{ hashFiles('**/composer.lock') }}
+      - name: Install Dependencies
+        run: (test -f vendor && true ) || composer install --ansi --no-progress --no-interaction --prefer-dist -o
+      - run: make ${{ matrix.qa }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  generate-ref:
+    name: Generate Ref
+    runs-on: ubuntu-latest
+    outputs:
+      REF: ${{ steps.generate-ref.outputs.ref }}
+    steps:
+      - uses: actions/checkout@v1
+      - id: generate-ref
+        name: Generate Ref
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ] ; then
+            ref=$(php -r "echo str_replace('/', '-SLASH-', '${{ github.event.pull_request.head.ref }}');")
+            echo "$ref"
+            printf "ref=%s" $ref >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "${GITHUB_REF##*/}"
+          echo "ref=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+  lint-dockerfile:
+    name: Lint Dockerfile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Lint Dockerfile
+        uses: docker://hadolint/hadolint:latest-debian
+        with:
+          entrypoint: hadolint
+          args: Dockerfile-build
+  build-docker-image:
+    name: Build Docker image
+    needs:
+      - generate-ref
+      - lint-dockerfile
+      - qa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: docker version
+      - run: docker images
+      - run: docker build --no-cache -t "${DOCKER_IMAGE}:${REF}" . -f Dockerfile-build --target=runtime
+        env:
+          REF: ${{ needs.generate-ref.outputs.ref }}
+      - run: docker tag "${DOCKER_IMAGE}:${REF}" "${DOCKER_IMAGE}:sha-${GITHUB_SHA}"
+        env:
+          REF: ${{ needs.generate-ref.outputs.ref }}
+      - run: docker run -v /tmp/trivy:/var/lib/trivy -v /var/run/docker.sock:/var/run/docker.sock -t aquasec/trivy:latest --cache-dir /var/lib/trivy image --exit-code 1 --no-progress --format table $(echo "${DOCKER_IMAGE}:${REF}")
+        env:
+          REF: ${{ needs.generate-ref.outputs.ref }}
+      - run: docker images
+      - name: Login to Docker Hub
+        if: contains(github.ref, 'dependabot') == false
+        env:
+          DOCKER_USER: ${{ secrets.HUB_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.HUB_PASSCODE }}
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | \
+          docker login \
+            --username "${{ secrets.DOCKER_USER }}" \
+            --password-stdin
+      - name: Push branch image to Docker Hub
+        if: contains(github.ref, 'dependabot') == false
+        run: docker push "${DOCKER_IMAGE}:${REF}"
+        env:
+          REF: ${{ needs.generate-ref.outputs.ref }}
+      - name: Push commit sha image to Docker Hub
+        if: contains(github.ref, 'dependabot') == false
+        run: docker push "${DOCKER_IMAGE}:sha-${GITHUB_SHA}"
+  function-test:
+    name: Functional Testing
+    needs:
+      - build-docker-image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: sed -i $(echo "s/master/sha-$GITHUB_SHA/g") Dockerfile
+      - name: 'Get Previous tag'
+        id: semvers
+        uses: ./
+        with:
+          version: v1.1.1
+      - name: Print Output
+        run: |
+          echo "${{ steps.semvers.outputs.v_patch }}"
+          echo "${{ steps.semvers.outputs.patch }}"
+          echo "${{ steps.semvers.outputs.v_minor }}"
+          echo "${{ steps.semvers.outputs.minor }}"
+          echo "${{ steps.semvers.outputs.major }}"
+          echo "${{ steps.semvers.outputs.v_major }}"
+          echo "${{ toJSON(steps.semvers.outputs) }}"

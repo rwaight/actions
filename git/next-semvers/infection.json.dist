@@ -1,0 +1,24 @@
+{
+    "timeout": 120,
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "logs": {
+        "text": "infection-log.txt"
+    },
+     "mutators": {
+         "@default": true,
+         "ConcatOperandRemoval": {
+             "ignore": [
+                 "WyriHaximus\\Github\\Actions\\NextSemVers\\Next::run"
+             ]
+         },
+         "Throw_": {
+             "ignore": [
+                 "WyriHaximus\\Github\\Actions\\NextSemVers\\Next::run"
+             ]
+         }
+     }
+}

@@ -1,0 +1,31 @@
+name: 'Next SemVers'
+description: 'Output the next version for major, minor, and patch version based on the given semver version'
+branding:
+  icon: 'clock'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+inputs:
+  version:
+    description: 'A SemVer version'
+    required: true
+  strict:
+    description: 'Strict version validation, when turned off, the version is suffixed with `.0` until it contains 3 x `.`.'
+    default: "true"
+    required: false
+outputs:
+  major:
+    description: 'Next Major Version'
+  minor:
+    description: 'Next Minor Version'
+  patch:
+    description: 'Next Patch Version'
+  v_major:
+    description: 'Next Major Version (prefixed with v)'
+  v_minor:
+    description: 'Next Minor Version (prefixed with v)'
+  v_patch:
+    description: 'Next Patch Version (prefixed with v)'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

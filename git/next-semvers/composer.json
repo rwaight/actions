@@ -1,0 +1,44 @@
+{
+  "name": "void/void",
+  "description": "void",
+  "license": "MIT",
+  "require": {
+    "php": "^8.2",
+    "nikolaposa/version": "^4.1",
+    "wyrihaximus/constants": "^1.6"
+  },
+  "require-dev": {
+    "wyrihaximus/test-utilities": "^5.2.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "WyriHaximus\\Github\\Actions\\NextSemVers\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WyriHaximus\\Tests\\Github\\Actions\\NextSemVers\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "infection/extension-installer": true,
+      "ergebnis/composer-normalize": true,
+      "icanhazstring/composer-unused": true
+    },
+    "platform": {
+      "php": "8.2.13"
+    },
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "composer normalize || true"
+    ],
+    "post-update-cmd": [
+      "composer normalize || true"
+    ]
+  }
+}
