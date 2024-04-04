@@ -324,6 +324,18 @@ jobs:
         run: |
           echo "Comment ID - ${{ steps.comment-on-pr.outputs.comment-id }}"
 
+      - name: Check Semantic Release
+        #uses: rwaight/actions/releases/semantic-release-action@main
+        uses: ./releases/semantic-release-action
+        with:
+          branch: main
+          extra_plugins: |
+            @semantic-release/git
+            @semantic-release/changelog
+          dry_run: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Fail workflow if proper '${{ env.GHA_LABEL_SCOPE }}' label was not set
         # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
         if: |
