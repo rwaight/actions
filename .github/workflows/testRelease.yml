@@ -1,0 +1,96 @@
+name: Test Release
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+
+  schedule:
+    - cron: 0 2 * * 0
+
+jobs:
+  test-semantic-latest:
+    name: test-semantic-latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Semantic Release
+        #uses: rwaight/actions/releases/semantic-release-action@main
+        uses: ./releases/semantic-release-action
+        id: semantic
+        with:
+          dry_run: true
+          branches: |
+            [
+              '+([0-9])?(.{+([0-9]),x}).x',
+              'master',
+              'main',
+              'next',
+              'next-major',
+              {
+                name: 'beta',
+                prerelease: true
+              },
+              {
+                name: 'alpha',
+                prerelease: true
+              }
+            ]
+          extra_plugins: |
+            @semantic-release/git
+            @semantic-release/changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Test Outputs
+        #if: steps.semantic.outputs.new_release_published == 'true'
+        if: steps.semantic.outputs.new_release_published == 'false'
+        run: |
+          echo "the order of output is, new release: full version, major, minor, patch "
+          echo ${{ steps.semantic.outputs.new_release_version }}
+          echo ${{ steps.semantic.outputs.new_release_major_version }}
+          echo ${{ steps.semantic.outputs.new_release_minor_version }}
+          echo ${{ steps.semantic.outputs.new_release_patch_version }}
+
+  test-semantic-v15:
+    name: test-semantic-v15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Semantic Release
+        #uses: rwaight/actions/releases/semantic-release-action@main
+        uses: ./releases/semantic-release-action
+        id: semantic
+        with:
+          semantic_version: 15
+          dry_run: true
+          branches: |
+            [
+              'main',
+              {name: 'beta', prerelease: true},
+              {name: 'alpha', prerelease: true}
+            ]
+          branch: main
+          extra_plugins: |
+            @semantic-release/git@7
+            @semantic-release/changelog@3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Test Outputs
+        #if: steps.semantic.outputs.new_release_published == 'true'
+        if: steps.semantic.outputs.new_release_published == 'false'
+        run: |
+          echo "the order of output is, new release: full version, major, minor, patch "
+          echo ${{ steps.semantic.outputs.new_release_version }}
+          echo ${{ steps.semantic.outputs.new_release_major_version }}
+          echo ${{ steps.semantic.outputs.new_release_minor_version }}
+          echo ${{ steps.semantic.outputs.new_release_patch_version }}
+
