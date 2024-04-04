@@ -1,6 +1,7 @@
 # from https://github.com/release-flow/keep-a-changelog-action/blob/v3.0.0/.github/workflows/prepare-release.yml
 # this should be moved into the 'release-manager' workflow
-name: '[autorelease] Prepare release PR'
+name: 'Test - Prepare release PR'
+#name: '[autorelease] Prepare release PR'
 run-name: 'Prepare release PR - ${{ inputs.release-type }}'
 
 on: 
@@ -83,9 +84,11 @@ jobs:
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Get latest release info
         id: query-latest-release
+        continue-on-error: true
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
-        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
@@ -104,9 +107,11 @@ jobs:
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Get unreleased changes release info
         id: query-unreleased-changes
+        continue-on-error: true
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
-        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
@@ -125,9 +130,11 @@ jobs:
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Get latest-or-unreleased changes release info
         id: query-latest-or-unreleased-changes
+        continue-on-error: true
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
-        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
@@ -153,7 +160,8 @@ jobs:
         id: update-changelog
         #uses: ./
         #uses: release-flow/keep-a-changelog-action@v3
-        uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        uses: rwaight/actions/git/keep-a-changelog-action@main
         #uses: release-flow/keep-a-changelog-action@v3.0.0
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/bump.md
