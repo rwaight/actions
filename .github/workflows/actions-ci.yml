@@ -8,6 +8,7 @@ on: [push, pull_request]
 jobs:
   commitlint:
     runs-on: ubuntu-22.04
+    if: (github.repository_owner == 'rwaight')
     permissions:
       contents: write
       pull-requests: write
@@ -17,8 +18,10 @@ jobs:
         if: (github.repository_owner != 'rwaight')
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          echo "This workflow will now exit. "
-          exit 0
+          echo "This workflow will now fail and exit. "
+          echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
+          exit 1
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
 
       - uses: actions/checkout@v4
         with:
@@ -29,19 +32,30 @@ jobs:
 
       # https://commitlint.js.org/guides/getting-started.html
       - name: Install commitlint
+        id: install-commitlint
         run: |
           echo "starting commitlint installation. "
           npm install conventional-changelog-conventionalcommits
           npm install commitlint@latest
           npm install --save-dev @commitlint/{cli,config-conventional}
           echo "commitlint has been installed"
-          echo "creating 'commitlint.config.js' to use the conventional configuration. "
-          echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.js
-          echo "the 'commitlint.config.js' file has been created. "
-          
+        # old commands to create the default commitlint configuration
+          # echo "creating 'commitlint.config.js' to use the conventional configuration. "
+          # echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.js
+          # echo "the 'commitlint.config.js' file has been created. "
+
+      # https://commitlint.js.org/guides/getting-started.html
+      - name: Configure commitlint
+        id: configure-commitlint
+        run: |
+          echo "starting commitlint configuration. "
+          echo "copying 'commitlint.config.js' from the 'assets/' directory. "
+          cp assets/commitlint.config.js commitlint.config.js
+          echo "the 'commitlint.config.js' configuration has been copied to the current working directory. "
 
       # https://commitlint.js.org/guides/local-setup.html
       - name: Install husky
+        id: install-husky
         run: |
           echo "installing husky"
           npm install husky --save-dev
@@ -71,3 +85,17 @@ jobs:
       - name: Validate PR commits with commitlint
         if: github.event_name == 'pull_request'
         run: npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  # Run the 'not-repo-owner' job if the repository_owner is not correct
+  not-repo-owner:
+    #name: Exit on forked repo
+    runs-on: ubuntu-latest
+    if: (github.repository_owner != 'rwaight')
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    steps:
+      - name: Print a message based on a condition
+        id: print-message
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo ""
