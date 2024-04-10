@@ -32,11 +32,12 @@ The actions should have their `branding` section updated according to the [updat
 
 The following actions are pending import to this repo:
 - **git**
-    - None at this time.
+    - [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
+    - [`WyriHaximus/github-action-next-semvers`](https://github.com/WyriHaximus/github-action-next-semvers)
 - **github**
     - None at this time.
 - **releases**
-    - [`cycjimmy/semantic-release-action`](https://github.com/cycjimmy/semantic-release-action)
+    - None at this time.
 - **utilities**
     - None at this time.
 
@@ -57,6 +58,8 @@ The following actions should be reviewed as candidates to import to this repo:
     - [`cardinalby/git-get-release-action`](https://github.com/cardinalby/git-get-release-action)
         - Github Action that allows you to get release information by release id, tag, commit SHA (current commit or specified).
 - **git**
+    - [`stefanzweifel/git-auto-commit-action`](https://github.com/stefanzweifel/git-auto-commit-action)
+        - Automatically commit and push changed files back to GitHub with this GitHub Action for the 80% use case.
     - [`mdomke/git-semver`](https://github.com/mdomke/git-semver)
         - Semantic Versioning with git tags
     - [`peter-evans/rebase`](https://github.com/peter-evans/rebase)
