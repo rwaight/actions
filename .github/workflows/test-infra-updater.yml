@@ -187,6 +187,59 @@ jobs:
         if: steps.filter-changes.outputs.workflows != 'true'
         run: echo "workflow files were NOT changed"
 
+  update-repo-assets:
+    # intention... update assets, issue and PR templates, and workflows
+    # using the 'render-template' action (and maybe the 'add-and-commit' action)
+    # so that template files can be used to deploy workflow changes
+    #   inspiration: https://github.com/chuhlomin/render-template/issues/5#issuecomment-1141204548
+    #       references: https://github.com/chuhlomin/ip/pull/2/files
+    name: update-repo-assets
+    runs-on: ubuntu-latest
+    if: ${{ needs.paths-filter.outputs.label_assets == 'true' }}
+    needs: [paths-filter]
+    permissions:
+      contents: write
+    steps:
+      # Create a GitHub App Token from actions/create-github-app-token
+      # https://github.com/actions/create-github-app-token
+      - name: Create an App Token
+        #uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          # create a token for all repositories in the current owner's installation
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Generate pull request template
+        id: pull-request-template
+        uses: rwaight/actions/utilities/render-template@main
+        #if: steps.write-results.outcome != 'skipped'
+        with:
+          template: assets/templates/dot-github_pr-template.md
+          result_path: .github/PULL_REQUEST_TEMPLATE.md
+          vars_path: assets/vars-${{ matrix.repo }}.yml
+          vars: |
+            owner: ${{ github.repository_owner }}
+            repo: ${{ matrix.repo }}
+            foo: this
+            bar: that
+            event_number: ${{ github.event.number }}
+            label_check: ${{ steps.write-results.outputs.label_check }}
+            label_scope: ${{ env.GHA_LABEL_SCOPE }}
+            step_outcome: ${{ steps.write-results.outputs.step_outcome }}
+            test_name: ${{ env.test_name }}
+
+      - name: Check rendered template
+        run: cat .github/PULL_REQUEST_TEMPLATE.md
+
   call-dispatch-label-manager:
     name: Run Infra Labeler
     uses: rwaight/actions/.github/workflows/infra-label-manager.yml@main
