@@ -218,7 +218,8 @@ jobs:
           allow_failure: true
           prefix_mode: true
           #any_of: 'group:'
-          none_of: 'version:'
+          # allow 'version:' labels if it is needed to overwrite what is set in the release template
+          #none_of: 'version:'
           one_of: 'type:'
           repo_token: ${{ steps.app-token.outputs.token }}
 
