@@ -8,14 +8,40 @@ Get the next semantic version based on inputs.
 
 See the `inputs` configured in the [action.yml](action.yml) file.
 
+#### pre-release-id
+
+The Pre-release identifier (only for pre-release builds). The only supported pre-release syntax is "rc" at this time.
+* required: false
+* default: `rc`
+
+#### release-type
+
+The release type, should be one of: major, minor, patch, or prerelease. The only supported pre-release syntax is "rc" at this time.
+* required: true
+* default: `not-set`
+
+#### my_action_debug:
+
+Determine if the workflow should run debug tasks, defaults to false.
+* required: false
+* default: `false`
+
 ### Outputs
 
-See the `inputs` configured in the [action.yml](action.yml) file.
+See the `outputs` configured in the [action.yml](action.yml) file.
+
+#### current-release-version
+
+The current release version in the repo.
+
+#### next-release-version
+
+The next release version in the repo.
 
 
 ## Example Usage
 
-Create a file named `.github/workflows/bump-json-version.yml` with the following:
+Create a file named `.github/workflows/get-next-semver.yml` with the following:
 ```
 name: Get Next Semver
 run-name: Get Next Semver
@@ -31,8 +57,15 @@ on:
           - major
           - minor
           - patch
+          - premajor
+          - preminor
+          - prepatch
           - prerelease
         default: patch
+      preid:
+        description: 'Pre-release identifier (only for pre-release builds)'
+        default: rc
+        required: false
 
 jobs:
   get-next-semver:
@@ -60,35 +93,32 @@ jobs:
         id: get-next-semver
         uses: rwaight/actions/test/get-next-semver@main
         with:
+          #pre-release-id: ${{ inputs.preid }}
           release-type: ${{ inputs.release-type }}
           my_action_debug: true
 
-      - name: Report the output from the bump-json-version step
-        if: ${{ steps.bump-json-version.outputs.next-release-version }}
+      - name: Report the output from the get-next-semver step
+        if: ${{ steps.get-next-semver.outputs.next-release-version }}
         run: |
-          echo "The output from the 'bump-json-version' step was: "
+          echo "The output from the 'get-next-semver' step was: "
           echo "current release version: ${{ env.current-release-version }} "
           echo "next release version: ${{ env.next-release-version }} "
-          echo "old json version: ${{ env.old-json-version }} "
-          echo "new json version: ${{ env.new-json-version }} "
         env:
-          current-release-version: ${{ steps.bump-json-version.outputs.current-release-version }}
-          next-release-version: ${{ steps.bump-json-version.outputs.next-release-version }}
-          old-json-version: ${{ steps.bump-json-version.outputs.old-json-version }}
-          new-json-version: ${{ steps.bump-json-version.outputs.new-json-version }}
+          current-release-version: ${{ steps.get-next-semver.outputs.current-release-version }}
+          next-release-version: ${{ steps.get-next-semver.outputs.next-release-version }}
 
-      - name: Fail if the 'bump-json-version' step did not output the next release version
-        if: ${{ ! steps.bump-json-version.outputs.next-release-version }}
+      - name: Fail if the 'get-next-semver' step did not output the next release version
+        if: ${{ ! steps.get-next-semver.outputs.next-release-version }}
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: |
-          echo "::error title=⛔ error in the 'bump-json-version' step hint::Next release version was not provided"
+          echo "::error title=⛔ error in the 'get-next-semver' step hint::Next release version was not provided"
           exit 1
 
 ```
 
 ### About `actions/checkout`
 
-The token you use when setting up the repo with this action will determine what token `bump-json-version` will use.  
+The token you use when setting up the repo with this action will determine what token `get-next-semver` will use.  
 
 ### Working with PRs
 
