@@ -22,6 +22,7 @@ on:
         default: patch
       preid:
         description: 'Pre-release identifier (only for pre-release builds)'
+        default: rc
         required: false
 
 permissions:
