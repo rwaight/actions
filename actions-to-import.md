@@ -19,6 +19,9 @@ The following actions should be copied/imported to this repo:
         - GitHub Action for Semantic Release
         - Uses [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
 - **utilities**
+    - [`DamianReeves/write-file-action`](https://github.com/DamianReeves/write-file-action)
+        - A GitHub action to write a file
+        - Use case: overwrite, append, or preserve files
     - [`c-py/action-dotenv-to-setenv`](https://github.com/c-py/action-dotenv-to-setenv)
         - GitHub Action to export a dotenv file to environment variables (via set-env)
     - [`imjohnbo/action-to-mermaid`](https://github.com/imjohnbo/action-to-mermaid)
@@ -34,6 +37,7 @@ The following actions are pending import to this repo:
 - **git**
     - [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
     - [`WyriHaximus/github-action-next-semvers`](https://github.com/WyriHaximus/github-action-next-semvers)
+    - [`WyriHaximus/github-action-get-previous-tag`](https://github.com/WyriHaximus/github-action-get-previous-tag)
 - **github**
     - None at this time.
 - **releases**
@@ -99,6 +103,10 @@ The following actions should be reviewed as candidates to import to this repo:
         - An action that allows you to check whether your npm package version has been updated
     - [`technote-space/package-version-check-action`](https://github.com/technote-space/package-version-check-action)
         - GitHub Actions to check package version before publish
+    - [`antifree/json-to-variables`](https://github.com/antifree/json-to-variables)
+        - GitHub action reads JSON file and writes its content as environment variables.
+    - [`tomwhross/write-good-action`](https://github.com/tomwhross/write-good-action)
+        - A Markdown prose linting action based on [`write-good`](https://github.com/btford/write-good)
 
 
 ## Update standards for imported actions
