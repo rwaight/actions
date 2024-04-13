@@ -31,7 +31,10 @@ concurrency:
 
 jobs:
   pr-labeler:
-    name: Label pull request ${{ github.event.number }}
+    #name: PR Labeler
+    # commenting out the name with the '${{ github.event.number }}' as the job could
+    # not be selected as a required status check as part of protecting branches
+    #name: Label pull request ${{ github.event.number }}
     runs-on: ubuntu-latest
     # the 'if' statement below is not needed at this time, but would be if the 'on' section above changes
     if: github.event_name == 'pull_request'
