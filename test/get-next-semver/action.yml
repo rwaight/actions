@@ -337,8 +337,8 @@ runs:
 
     - name: Error if the current version matches the next version
       id: error-matched-versions
-      #try next#if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} == 'true' )
-      if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+      if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} == 'true' )
+      #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
       #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' )
       shell: bash
       run: |
@@ -361,8 +361,8 @@ runs:
 
     - name: Validate that the current version does not match the next version
       id: validate-version-not-matched
-      #try next#if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true' )
-      if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true'
+      if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true' )
+      #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true'
       #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' != 'true' )
       shell: bash
       run: |
