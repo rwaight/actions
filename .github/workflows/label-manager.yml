@@ -64,6 +64,14 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
+      - name: Configure Git Credentials if using the app token
+        if: ${{ steps.app-token.outputs.token }}
+        run: |
+          ##
+          ## Configure git to login as the RW Actions Bot.
+          git config user.name rw-actions-bot[bot]
+          git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+
       - name: Export label config using rwaight/actions/github/export-label-config
         id: export-label-config
         if: |
