@@ -366,7 +366,9 @@ runs:
 
     - name: Validate that the current version does not match the next version
       id: validate-version-not-matched
-      if: ( '${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}' != 'true' )
+      #try next#if: ( ${{ steps.compare-current-to-next-release.outputs.does_current_match_next }} != 'true' )
+      if: ${{ steps.compare-current-to-next-release.outputs.does_current_match_next }} != 'true'
+      #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}' != 'true' )
       shell: bash
       run: |
         ## Validate that the current version does not match the next version
@@ -379,6 +381,7 @@ runs:
             echo "next-release-version is   :  ${{ env.next-release-version }} "
         fi
         echo "Excellent, the current version does not match the next version. "
+        echo "::notice title=validate-version-not-matched::Excellent, the current version does not match the next version."
         ##
         if [ ${{ inputs.my_action_debug }} == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
       env: 
