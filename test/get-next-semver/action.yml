@@ -48,8 +48,22 @@ runs:
       shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the my_action_debug variable is set to true.
 
+    - name: Debug | Print the release-type
+      #if: inputs.my_action_debug=='true'
+      id: debug-print-release-type
+      shell: bash
+      run: | 
+        ## Print the inputs if inputs.my_action_debug=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'debug-print-release-type' step. "
+        echo ""
+        echo "release-type is   :  ${{ inputs.release-type }} "
+        ##
+        echo "completing the 'debug-print-release-type' step. "
+
     - name: Validate the release-type input
-      id: validate-input-release-type
+      id: validate-input-release-type-0
       if: | 
         ${{ inputs.release-type != 'major' }} || 
         ${{ inputs.release-type != 'minor' }} || 
@@ -60,8 +74,26 @@ runs:
         ${{ inputs.release-type != 'prepatch' }}
       shell: bash
       run: |
-        echo "::error title=⛔ error hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
-        exit 1
+        echo "::error title=⛔ validate-input-release-type-0 hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+        #exit 1
+
+    - name: Validate the release-type input
+      # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
+      id: validate-input-release-type-1
+      if: contains('pre', inputs.release-type)
+      shell: bash
+      run: |
+        echo "::error title=⛔ validate-input-release-type-1 hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+        #exit 1
+
+    - name: Validate the release-type input
+      # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
+      id: validate-input-release-type-2
+      if: contains(inputs.release-type, 'pre')
+      shell: bash
+      run: |
+        echo "::error title=⛔ validate-input-release-type-2 hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+        #exit 1
 
     - name: Debug | Print the inputs
       if: inputs.my_action_debug=='true'
