@@ -48,12 +48,12 @@ runs:
         exit 1
 
     - name: Greet the triggering_actor
-      if: ${{ inputs.my_action_debug=='true' }}
+      if: inputs.my_action_debug=='true'
       shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the my_action_debug variable is set to true.
 
     - name: Debug | Print the release-type
-      #if: ${{ inputs.my_action_debug=='true' }}
+      #if: inputs.my_action_debug=='true'
       id: debug-print-release-type
       shell: bash
       run: | 
@@ -100,7 +100,7 @@ runs:
         #exit 1
 
     - name: Debug | Print the inputs
-      if: ${{ inputs.my_action_debug=='true' }}
+      if: inputs.my_action_debug=='true'
       id: debug-print-inputs
       shell: bash
       run: | 
@@ -383,7 +383,7 @@ runs:
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
 
     - name: Debug | Print the outputs
-      if: ${{ inputs.my_action_debug=='true' }}
+      if: inputs.my_action_debug=='true'
       id: debug-print-outputs
       shell: bash
       run: | 
