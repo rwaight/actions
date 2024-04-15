@@ -335,33 +335,33 @@ runs:
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
         next_release_version: ${{ steps.set-next-release.outputs.next-release-version }}
 
-    - name: Error if the current version matches the next version
-      id: error-matched-versions
-      if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} == 'true' )
-      #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
-      #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' )
-      shell: bash
-      run: |
-        ## Error if the current version matches the next version
-        ## the double number signs below are for line spacing and readability only
-        ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
-            echo "starting the 'error-matched-versions' step. "
-            echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
-            echo "current-release-version is:  ${{ env.current-release-version }} "
-            echo "next-release-version is   :  ${{ env.next-release-version }} "
-        fi
-        echo "::error title=⛔ matched versions error::The current version matches the next version"
-        exit 1
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
-      env: 
-        current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
-        next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
-        does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+    # - name: Error if the current version matches the next version
+    #   id: error-matched-versions
+    #   if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} == 'true' )
+    #   #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+    #   #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' )
+    #   shell: bash
+    #   run: |
+    #     ## Error if the current version matches the next version
+    #     ## the double number signs below are for line spacing and readability only
+    #     ##
+    #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+    #         echo "starting the 'error-matched-versions' step. "
+    #         echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
+    #         echo "current-release-version is:  ${{ env.current-release-version }} "
+    #         echo "next-release-version is   :  ${{ env.next-release-version }} "
+    #     fi
+    #     echo "::error title=⛔ matched versions error::The current version matches the next version"
+    #     exit 1
+    #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
+    #   env: 
+    #     current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
+    #     next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
+    #     does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
 
     - name: Validate that the current version does not match the next version
       id: validate-version-not-matched
-      if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true' )
+      #if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true' )
       #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true'
       #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' != 'true' )
       shell: bash
@@ -375,8 +375,17 @@ runs:
             echo "current-release-version is:  ${{ env.current-release-version }} "
             echo "next-release-version is   :  ${{ env.next-release-version }} "
         fi
-        echo "Excellent, the current version does not match the next version. "
-        echo "::notice title=validate-version-not-matched::Excellent, the current version does not match the next version."
+        ##
+        if [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'false' ]; then
+            echo "Excellent, the current version does not match the next version. "
+            echo "::notice title=validate-version-not-matched::Excellent, the current version does not match the next version."
+        elif [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' ]; then
+            echo "Uh oh! The current version matches the next version! "
+            echo "::error title=⛔ matched versions error::The current version matches the next version"
+            exit 1
+        else
+            echo "::notice title=validate-version-not-matched::something strange is happening, this is the else statement of validate-version-not-matched."
+        fi
         ##
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
       env: 
