@@ -68,14 +68,7 @@ runs:
 
     - name: Validate the release-type input
       id: validate-input-release-type-0
-      if: | 
-        ${{ ! contains(inputs.release-type, 'major') }} || 
-        ${{ ! contains(inputs.release-type, 'minor') }} || 
-        ${{ ! contains(inputs.release-type, 'patch') }} || 
-        ${{ ! contains(inputs.release-type, 'prerelease') }} ||
-        ${{ ! contains(inputs.release-type, 'premajor') }} || 
-        ${{ ! contains(inputs.release-type, 'preminor') }} ||
-        ${{ ! contains(inputs.release-type, 'prepatch') }}
+      if: ${{ !contains(fromJSON('["major", "minor", "patch", "pre"]'), inputs.release-type) }}
       shell: bash
       run: |
         echo "::error title=⛔ validate-input-release-type-0,hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
@@ -342,9 +335,9 @@ runs:
 
     - name: Error if the current version matches the next version
       id: error-matched-versions
-      #try next#if: ( ${{ steps.compare-current-to-next-release.outputs.does_current_match_next }} == 'true' )
-      if: ${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}
-      #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}' == 'true' )
+      #try next#if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} == 'true' )
+      if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+      #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' )
       shell: bash
       run: |
         ## Error if the current version matches the next version
@@ -366,9 +359,9 @@ runs:
 
     - name: Validate that the current version does not match the next version
       id: validate-version-not-matched
-      #try next#if: ( ${{ steps.compare-current-to-next-release.outputs.does_current_match_next }} != 'true' )
-      if: ${{ steps.compare-current-to-next-release.outputs.does_current_match_next }} != 'true'
-      #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}' != 'true' )
+      #try next#if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true' )
+      if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true'
+      #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' != 'true' )
       shell: bash
       run: |
         ## Validate that the current version does not match the next version
