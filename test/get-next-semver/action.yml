@@ -84,22 +84,26 @@ runs:
         contains('patch', inputs.release-type)
       shell: bash
       run: |
-        echo "::notice title=validate-input-release-type-1::The 'release-type' is valid."
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'validate-input-release-type-1' step. "
+            echo "::notice title=validate-input-release-type-1::The 'release-type' is valid."
+        fi
+        ##
 
-    - name: Validate the release-type input
-      # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
-      id: validate-input-release-type-2
-      if: ${{ !contains(fromJSON('["major", "minor", "patch", "pre"]'), inputs.release-type) }}
-      # the below if statement does not work
-      # if: | 
-      #   ${{ !contains(inputs.release-type, 'major') }} || 
-      #   ${{ !contains(inputs.release-type, 'minor') }} || 
-      #   ${{ !contains(inputs.release-type, 'patch') }} || 
-      #   ${{ !contains(inputs.release-type, 'pre') }}
-      shell: bash
-      run: |
-        echo "::error title=⛔ validate-input-release-type-2::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
-        #exit 1
+    # - name: Validate the release-type input
+    #   # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
+    #   id: validate-input-release-type-2
+    #   if: ${{ !contains(fromJSON('["major", "minor", "patch", "pre"]'), inputs.release-type) }}
+    #   # the below if statement does not work
+    #   # if: | 
+    #   #   ${{ !contains(inputs.release-type, 'major') }} || 
+    #   #   ${{ !contains(inputs.release-type, 'minor') }} || 
+    #   #   ${{ !contains(inputs.release-type, 'patch') }} || 
+    #   #   ${{ !contains(inputs.release-type, 'pre') }}
+    #   shell: bash
+    #   run: |
+    #     echo "::error title=⛔ validate-input-release-type-2::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+    #     #exit 1
 
     - name: Debug | Print the inputs
       if: inputs.my_action_debug=='true'
