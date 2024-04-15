@@ -194,6 +194,8 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Configure Git Credentials
+        id: configure-git
+        if: ${{ steps.app-token.outputs.token }}
         run: |
           ##
           ## Configure git to login as the RW Actions Bot.

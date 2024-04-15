@@ -92,6 +92,7 @@ jobs:
           repositories: "${{ matrix.repo }}"
 
       - name: Configure Git Credentials if using the app token
+        id: configure-git
         if: ${{ steps.app-token.outputs.token }}
         run: |
           ##
