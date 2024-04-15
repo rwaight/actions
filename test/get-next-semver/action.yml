@@ -129,7 +129,7 @@ runs:
         ## Get the current release version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "starting the 'get-current-release' step. "
             echo ""
             echo "Using the GitHub CLI to print release information"
@@ -174,19 +174,19 @@ runs:
             current_release_version=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
         fi
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "current_release_version: $current_release_version"
             echo "writing the 'current_release_version' to the environment and GitHub output"
         fi
         echo "current_release_version=${current_release_version}" >> "$GITHUB_OUTPUT"
         echo "current_release_version=${current_release_version}" >> $GITHUB_ENV
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "The current release version of this repo is \`$current_release_version\`"
             echo "writing $current_release_version to the 'current-release-version' GitHub output"
         fi
         echo "current-release-version=${current_release_version}" >> "$GITHUB_OUTPUT"
         echo "current-release-version=${current_release_version}" >> $GITHUB_ENV
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'get-current-release' step. "; fi
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then echo "completing the 'get-current-release' step. "; fi
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
 
@@ -197,7 +197,7 @@ runs:
         ## Set the next release version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "starting the 'set-next-release' step. "
             echo "current_release_version is:  ${{ env.current_release_version }} "
             echo "pre-release-id is         :  ${{ inputs.pre-release-id }} "
@@ -252,13 +252,13 @@ runs:
         fi
         echo "next_release_version=${next_release_version}" >> "$GITHUB_OUTPUT"
         echo "next_release_version=${next_release_version}" >> $GITHUB_ENV
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "The next release version has been set to \`$next_release_version\`"
             echo "writing $next_release_version to the 'next-release-version' GitHub output"
         fi
         echo "next-release-version=${next_release_version}" >> "$GITHUB_OUTPUT"
         echo "next-release-version=${next_release_version}" >> $GITHUB_ENV
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'set-next-release' step. "; fi
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then echo "completing the 'set-next-release' step. "; fi
       env:
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
         ## Increment a PRERELEASE '-rc' version:
@@ -285,7 +285,7 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            if [ ${{ inputs.my_action_debug }} == 'true' ]; then
                 echo "VERSION is: $VERSION "
                 echo "RE is     : $RE "
                 echo "MAJOR is  : $MAJOR "
@@ -298,7 +298,7 @@ runs:
             echo "::error::Next release version '$VERSION' is not in a valid format"
             exit 1
         fi
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
       env:
         next_release_version: ${{ steps.set-next-release.outputs.next-release-version }}
 
@@ -309,7 +309,7 @@ runs:
         ## Compare the current release version to the next release version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "starting the 'compare-current-to-next-release' step. "
             echo "current_release_version is:  ${{ env.current_release_version }} "
             echo "next_release_version is   :  ${{ env.next_release_version }} "
@@ -324,18 +324,18 @@ runs:
             echo "  the 'next_release_version' which is set to '${{ env.next_release_version }}'. "
             current_and_next_match=false
         fi
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "setting the value of 'does_current_match_next' to '${current_and_next_match}' and sending it to GitHub output"
         fi
         echo "does_current_match_next=${current_and_next_match}" >> "$GITHUB_OUTPUT"
         echo "does_current_match_next=${current_and_next_match}" >> $GITHUB_ENV
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "The does_current_match_next variable has been set to \`$current_and_next_match\`"
             echo "writing $current_and_next_match to the 'does-current-match-next' GitHub output"
         fi
         echo "does-current-match-next=${current_and_next_match}" >> "$GITHUB_OUTPUT"
         echo "does-current-match-next=${current_and_next_match}" >> $GITHUB_ENV
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'compare-current-to-next-release' step. "; fi
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then echo "completing the 'compare-current-to-next-release' step. "; fi
       env:
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
         next_release_version: ${{ steps.set-next-release.outputs.next-release-version }}
@@ -350,7 +350,7 @@ runs:
         ## Error if the current version matches the next version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "starting the 'error-matched-versions' step. "
             echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
             echo "current-release-version is:  ${{ env.current-release-version }} "
@@ -358,7 +358,7 @@ runs:
         fi
         echo "::error title=⛔ matched versions error::The current version matches the next version"
         exit 1
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
       env: 
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
@@ -372,7 +372,7 @@ runs:
         ## Validate that the current version does not match the next version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then
             echo "starting the 'validate-version-not-matched' step. "
             echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
             echo "current-release-version is:  ${{ env.current-release-version }} "
@@ -380,7 +380,7 @@ runs:
         fi
         echo "Excellent, the current version does not match the next version. "
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
+        if [ ${{ inputs.my_action_debug }} == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
       env: 
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
