@@ -342,7 +342,9 @@ runs:
 
     - name: Error if the current version matches the next version
       id: error-matched-versions
-      if: ( '${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}' == 'true' )
+      #try next#if: ( ${{ steps.compare-current-to-next-release.outputs.does_current_match_next }} == 'true' )
+      if: ${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}
+      #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}' == 'true' )
       shell: bash
       run: |
         ## Error if the current version matches the next version
