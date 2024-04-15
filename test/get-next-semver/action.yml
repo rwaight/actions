@@ -8,6 +8,10 @@ branding:
   # fork: https://github.com/rwaight/github-action-brandings
 
 inputs:
+  gh-token:
+    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
+    required: true
+    default: ${{ github.token }}
   pre-release-id:
     description: 'Pre-release identifier (only for pre-release builds). The only supported pre-release syntax is "rc" at this time. '
     required: false
@@ -40,7 +44,7 @@ runs:
       if: ${{ runner.os != 'Linux' }}
       shell: bash
       run: |
-        echo "::error title=⛔ error hint::This action supports Linux only"
+        echo "::error title=⛔ error::This action supports Linux only"
         exit 1
 
     - name: Greet the triggering_actor
@@ -65,34 +69,41 @@ runs:
     - name: Validate the release-type input
       id: validate-input-release-type-0
       if: | 
-        ${{ inputs.release-type != 'major' }} || 
-        ${{ inputs.release-type != 'minor' }} || 
-        ${{ inputs.release-type != 'patch' }} || 
-        ${{ inputs.release-type != 'prerelease' }} ||
-        ${{ inputs.release-type != 'premajor' }} || 
-        ${{ inputs.release-type != 'preminor' }} ||
-        ${{ inputs.release-type != 'prepatch' }}
+        ${{ ! contains(inputs.release-type, 'major') }} || 
+        ${{ ! contains(inputs.release-type, 'minor') }} || 
+        ${{ ! contains(inputs.release-type, 'patch') }} || 
+        ${{ ! contains(inputs.release-type, 'prerelease') }} ||
+        ${{ ! contains(inputs.release-type, 'premajor') }} || 
+        ${{ ! contains(inputs.release-type, 'preminor') }} ||
+        ${{ ! contains(inputs.release-type, 'prepatch') }}
       shell: bash
       run: |
-        echo "::error title=⛔ validate-input-release-type-0 hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+        echo "::error title=⛔ validate-input-release-type-0,hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
         #exit 1
 
     - name: Validate the release-type input
       # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
       id: validate-input-release-type-1
-      if: contains('pre', inputs.release-type)
+      if: |
+        contains('pre', inputs.release-type) ||
+        contains('major', inputs.release-type) ||
+        contains('minor', inputs.release-type) ||
+        contains('patch', inputs.release-type)
       shell: bash
       run: |
-        echo "::error title=⛔ validate-input-release-type-1 hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
-        #exit 1
+        echo "::notice title=validate-input-release-type-1::The 'release-type' is valid."
 
     - name: Validate the release-type input
       # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
       id: validate-input-release-type-2
-      if: contains(inputs.release-type, 'pre')
+      if: | 
+        ${{ !contains(inputs.release-type, 'major') }} || 
+        ${{ !contains(inputs.release-type, 'minor') }} || 
+        ${{ !contains(inputs.release-type, 'patch') }} || 
+        ${{ !contains(inputs.release-type, 'pre') }}
       shell: bash
       run: |
-        echo "::error title=⛔ validate-input-release-type-2 hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+        echo "::error title=⛔ validate-input-release-type-2::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
         #exit 1
 
     - name: Debug | Print the inputs
@@ -176,6 +187,8 @@ runs:
         echo "current-release-version=${current_release_version}" >> "$GITHUB_OUTPUT"
         echo "current-release-version=${current_release_version}" >> $GITHUB_ENV
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'get-current-release' step. "; fi
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
 
     - name: Set the next release version
       id: set-next-release
@@ -341,7 +354,7 @@ runs:
             echo "current-release-version is:  ${{ env.current-release-version }} "
             echo "next-release-version is   :  ${{ env.next-release-version }} "
         fi
-        echo "::error title=⛔ error hint::The current version matches the next version"
+        echo "::error title=⛔ matched versions error::The current version matches the next version"
         exit 1
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
       env: 
