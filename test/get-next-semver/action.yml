@@ -68,7 +68,7 @@ runs:
 
     - name: Validate the release-type input
       id: validate-input-release-type-0
-      if: ${{ !contains(fromJSON('["major", "minor", "patch", "pre"]'), inputs.release-type) }}
+      if: ${{ !contains(fromJSON('["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch"]'), inputs.release-type) }}
       shell: bash
       run: |
         echo "::error title=⛔ validate-input-release-type-0,hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
@@ -78,10 +78,13 @@ runs:
       # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
       id: validate-input-release-type-1
       if: |
-        contains('pre', inputs.release-type) ||
         contains('major', inputs.release-type) ||
         contains('minor', inputs.release-type) ||
-        contains('patch', inputs.release-type)
+        contains('patch', inputs.release-type) ||
+        contains('prerelease', inputs.release-type) ||
+        contains('premajor', inputs.release-type) ||
+        contains('preminor', inputs.release-type) ||
+        contains('prepatch', inputs.release-type)
       shell: bash
       run: |
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
