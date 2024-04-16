@@ -67,16 +67,8 @@ runs:
         echo "completing the 'debug-print-release-type' step. "
 
     - name: Validate the release-type input
-      id: validate-input-release-type-0
-      if: ${{ !contains(fromJSON('["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch"]'), inputs.release-type) }}
-      shell: bash
-      run: |
-        echo "::error title=⛔ validate-input-release-type-0,hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
-        #exit 1
-
-    - name: Validate the release-type input
       # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
-      id: validate-input-release-type-1
+      id: validate-input-release-type
       if: |
         contains('major', inputs.release-type) ||
         contains('minor', inputs.release-type) ||
@@ -87,11 +79,28 @@ runs:
         contains('prepatch', inputs.release-type)
       shell: bash
       run: |
+        ## Validate the release-type input
+        ## the double number signs below are for line spacing and readability only
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
-            echo "starting the 'validate-input-release-type-1' step. "
-            echo "::notice title=validate-input-release-type-1::The 'release-type' is valid."
+            echo "starting the 'validate-input-release-type' step. "
+            echo "release-type is   :  ${{ inputs.release-type }} "
+            echo "::notice title=validate-input-release-type::The 'release-type' is valid."
         fi
         ##
+
+    - name: Error if the release-type input is incorrect
+      id: error-incorrect-release-type
+      if: ${{ !contains(fromJSON('["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch"]'), inputs.release-type) }}
+      shell: bash
+      run: |
+        ## Error if the release-type input is incorrect
+        ## the double number signs below are for line spacing and readability only
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'error-incorrect-release-type. "
+            echo "release-type is   :  ${{ inputs.release-type }} "
+        echo "::error title=⛔ error-incorrect-release-type,hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+        echo "completing the 'error-incorrect-release-type' step. "
+        exit 1
 
     # - name: Validate the release-type input
     #   # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
