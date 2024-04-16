@@ -20,11 +20,11 @@ inputs:
   release-type:
     #description: 'The release type, should be one of: major, minor, patch, or prerelease. The only supported pre-release syntax is "rc" at this time. '
     description: >-
-      The release type, should be one of: major, minor, patch, or prerelease. For production releases, select the appropriate major, 
-      minor, or patch. For prereleases, select prerelease when you are already working on a prerelease tag (example: 0.2.1-rc1); 
-      select premajor when you need to create a new premajor prerelease; select preminor when you need to create a new preminor 
-      prerelease; or select prepatch when you need to create a new prepatch prerelease. Note that the only supported pre-release 
-      syntax is "rc" at this time.
+      The release type, should be one of: major, minor, patch, prerelease, premajor, preminor, or prepatch. For production 
+      releases, select the appropriate major, minor, or patch. For prereleases, select prerelease when you are already working 
+      on a prerelease tag (example: 0.2.1-rc1); select premajor when you need to create a new premajor prerelease; select 
+      preminor when you need to create a new preminor prerelease; or select prepatch when you need to create a new prepatch 
+      prerelease. Note that the only supported pre-release syntax is "rc" at this time.
     required: true
     default: 'not-set'
     # should consider adding 'premajor', 'preminor', and 'prepatch' in the future
