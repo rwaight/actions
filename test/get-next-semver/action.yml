@@ -18,7 +18,13 @@ inputs:
     default: 'rc'
     # should consider adding 'premajor', 'preminor', and 'prepatch' in the future
   release-type:
-    description: 'The release type, should be one of: major, minor, patch, or prerelease. The only supported pre-release syntax is "rc" at this time. '
+    #description: 'The release type, should be one of: major, minor, patch, or prerelease. The only supported pre-release syntax is "rc" at this time. '
+    description: >-
+      The release type, should be one of: major, minor, patch, or prerelease. For production releases, select the appropriate major, 
+      minor, or patch. For prereleases, select prerelease when you are already working on a prerelease tag (example: 0.2.1-rc1); 
+      select premajor when you need to create a new premajor prerelease; select preminor when you need to create a new preminor 
+      prerelease; or select prepatch when you need to create a new prepatch prerelease. Note that the only supported pre-release 
+      syntax is "rc" at this time.
     required: true
     default: 'not-set'
     # should consider adding 'premajor', 'preminor', and 'prepatch' in the future
@@ -241,20 +247,25 @@ runs:
         fi
         ##
         if [ '${{ inputs.release-type }}' == 'prerelease' ]; then
-            echo "updating the next rc-version for a prerelease. "
+            ##echo "updating the next rc-version for a prerelease. "
+            echo "updating the next ${{ inputs.pre-release-id }}-version for a prerelease. "
+            echo "The 'prerelease' option will increment the prerelease number (example: 0.2.1-rc1 becomes 0.2.1-rc2)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
             ##next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1')
             ##
         elif [ '${{ inputs.release-type }}' == 'patch' ]; then
             echo "updating the next-version for a patch release. "
+            echo "The 'patch' option will increment the version by a single patch version (example: 0.2.1 becomes 0.2.2)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1')
             ##
         elif [ '${{ inputs.release-type }}' == 'minor' ]; then
             echo "updating the next-version for a minor release. "
+            echo "The 'minor' option will increment the version by a single minor version (example: 0.2.1 becomes 0.3.0)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1')
             ##
         elif [ '${{ inputs.release-type }}' == 'major' ]; then
             echo "updating the next-version for a major release. "
+            echo "The 'major' option will increment the version by a single major version (example: 0.2.1 becomes 1.0.0)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1')
             ##
         else
