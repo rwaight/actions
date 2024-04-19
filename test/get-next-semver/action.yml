@@ -20,11 +20,11 @@ inputs:
   release-type:
     #description: 'The release type, should be one of: major, minor, patch, or prerelease. The only supported pre-release syntax is "rc" at this time. '
     description: >-
-      The release type, should be one of: major, minor, patch, prerelease, premajor, preminor, or prepatch. For production 
-      releases, select the appropriate major, minor, or patch. For prereleases, select prerelease when you are already working 
-      on a prerelease tag (example: 0.2.1-rc1); select premajor when you need to create a new premajor prerelease; select 
-      preminor when you need to create a new preminor prerelease; or select prepatch when you need to create a new prepatch 
-      prerelease. Note that the only supported pre-release syntax is "rc" at this time.
+      The release type, should be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod. For 
+      production releases, select the appropriate major, minor, or patch. For prereleases, select prerelease when you are 
+      already working on a prerelease tag (example: 0.2.1-rc1); select premajor when you need to create a new premajor 
+      prerelease; select preminor when you need to create a new preminor prerelease; or select prepatch when you need to 
+      create a new prepatch prerelease. Note that the only supported pre-release syntax is "rc" at this time.
     required: true
     default: 'not-set'
     # should consider adding 'premajor', 'preminor', and 'prepatch' in the future
@@ -282,6 +282,12 @@ runs:
             echo "updating the next-version for a premajor release. "
             echo "The 'premajor' option will create a new premajor version (example: 0.2.1 becomes 1.0.0-rc1)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
+            ##
+        elif [ '${{ inputs.release-type }}' == 'pretoprod' ]; then
+            echo "removing the prerelease ID to prepare for the next production version. "
+            echo "The 'pretoprod' option will remove the prerelease ID (example: 0.2.2-rc1 becomes 0.2.2)"
+            next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} { print $1 }')
+            ##next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }')
             ##
         else
             echo "something is wrong with a conditional, incrementing the version as a PATCH release.. "
