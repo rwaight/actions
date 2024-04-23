@@ -34,11 +34,14 @@ inputs:
     default: 'false'
 
 outputs:
-  current-release-version:
+  #current-release-version:
+  current-version:
     description: "The current release version in the repo. "
     value: ${{ steps.get-current-release.outputs.current-release-version }}
-  next-release-version:
-    description: "The next release version in the repo. "
+  #next-release-version:
+  #  description: "The next release version in the repo. "
+  next-version:
+    description: "The calculated next-release version in the repo, based on the provided inputs. "
     value: ${{ steps.set-next-release.outputs.next-release-version }}
 
 
