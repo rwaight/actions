@@ -18,7 +18,13 @@ inputs:
     default: 'rc'
     # should consider adding 'premajor', 'preminor', and 'prepatch' in the future
   release-type:
-    description: 'The release type, should be one of: major, minor, patch, or prerelease. The only supported pre-release syntax is "rc" at this time. '
+    #description: 'The release type, should be one of: major, minor, patch, or prerelease. The only supported pre-release syntax is "rc" at this time. '
+    description: >-
+      The release type, should be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod. For 
+      production releases, select the appropriate major, minor, or patch. For prereleases, select prerelease when you are 
+      already working on a prerelease tag (example: 0.2.1-rc1); select premajor when you need to create a new premajor 
+      prerelease; select preminor when you need to create a new preminor prerelease; or select prepatch when you need to 
+      create a new prepatch prerelease. Note that the only supported pre-release syntax is "rc" at this time.
     required: true
     default: 'not-set'
     # should consider adding 'premajor', 'preminor', and 'prepatch' in the future
@@ -28,11 +34,17 @@ inputs:
     default: 'false'
 
 outputs:
-  current-release-version:
+  current-tag:
+    description: "The current tag from the repo. "
+    value: ${{ steps.get-current-tag.outputs.current-tag-version }}
+  #current-release-version:
+  current-version:
     description: "The current release version in the repo. "
     value: ${{ steps.get-current-release.outputs.current-release-version }}
-  next-release-version:
-    description: "The next release version in the repo. "
+  #next-release-version:
+  #  description: "The next release version in the repo. "
+  next-version:
+    description: "The calculated next-release version in the repo, based on the provided inputs. "
     value: ${{ steps.set-next-release.outputs.next-release-version }}
 
 
@@ -67,44 +79,56 @@ runs:
         echo "completing the 'debug-print-release-type' step. "
 
     - name: Validate the release-type input
-      id: validate-input-release-type-0
-      if: | 
-        ${{ ! contains(inputs.release-type, 'major') }} || 
-        ${{ ! contains(inputs.release-type, 'minor') }} || 
-        ${{ ! contains(inputs.release-type, 'patch') }} || 
-        ${{ ! contains(inputs.release-type, 'prerelease') }} ||
-        ${{ ! contains(inputs.release-type, 'premajor') }} || 
-        ${{ ! contains(inputs.release-type, 'preminor') }} ||
-        ${{ ! contains(inputs.release-type, 'prepatch') }}
-      shell: bash
-      run: |
-        echo "::error title=⛔ validate-input-release-type-0,hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
-        #exit 1
-
-    - name: Validate the release-type input
       # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
-      id: validate-input-release-type-1
+      id: validate-input-release-type
       if: |
-        contains('pre', inputs.release-type) ||
         contains('major', inputs.release-type) ||
         contains('minor', inputs.release-type) ||
-        contains('patch', inputs.release-type)
+        contains('patch', inputs.release-type) ||
+        contains('prerelease', inputs.release-type) ||
+        contains('premajor', inputs.release-type) ||
+        contains('preminor', inputs.release-type) ||
+        contains('prepatch', inputs.release-type) ||
+        contains('pretoprod', inputs.release-type)
       shell: bash
       run: |
-        echo "::notice title=validate-input-release-type-1::The 'release-type' is valid."
+        ## Validate the release-type input
+        ## the double number signs below are for line spacing and readability only
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'validate-input-release-type' step. "
+            echo "release-type is   :  ${{ inputs.release-type }} "
+            echo "::notice title=validate-input-release-type::The 'release-type' is valid."
+        fi
+        ##
 
-    - name: Validate the release-type input
-      # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
-      id: validate-input-release-type-2
-      if: | 
-        ${{ !contains(inputs.release-type, 'major') }} || 
-        ${{ !contains(inputs.release-type, 'minor') }} || 
-        ${{ !contains(inputs.release-type, 'patch') }} || 
-        ${{ !contains(inputs.release-type, 'pre') }}
+    - name: Error if the release-type input is incorrect
+      id: error-incorrect-release-type
+      if: ${{ !contains(fromJSON('["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch", "pretoprod"]'), inputs.release-type) }}
       shell: bash
       run: |
-        echo "::error title=⛔ validate-input-release-type-2::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
-        #exit 1
+        ## Error if the release-type input is incorrect
+        ## the double number signs below are for line spacing and readability only
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'error-incorrect-release-type. "
+            echo "release-type is   :  ${{ inputs.release-type }} "
+        echo "::error title=⛔ error-incorrect-release-type,hint::Invalid 'release-type', must be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod"
+        echo "completing the 'error-incorrect-release-type' step. "
+        exit 1
+
+    # - name: Validate the release-type input
+    #   # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
+    #   id: validate-input-release-type-2
+    #   if: ${{ !contains(fromJSON('["major", "minor", "patch", "pre"]'), inputs.release-type) }}
+    #   # the below if statement does not work
+    #   # if: | 
+    #   #   ${{ !contains(inputs.release-type, 'major') }} || 
+    #   #   ${{ !contains(inputs.release-type, 'minor') }} || 
+    #   #   ${{ !contains(inputs.release-type, 'patch') }} || 
+    #   #   ${{ !contains(inputs.release-type, 'pre') }}
+    #   shell: bash
+    #   run: |
+    #     echo "::error title=⛔ validate-input-release-type-2::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+    #     #exit 1
 
     - name: Debug | Print the inputs
       if: inputs.my_action_debug=='true'
@@ -190,6 +214,126 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
 
+    - name: Get the current tag
+      id: get-current-tag
+      shell: bash
+      run: |
+        ## Get the current tag
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'get-current-tag' step. "
+            echo ""
+            echo "Using the CLI to get tag information"
+            echo ""
+            echo "Debug enabled, running additional 'git describe' commands"
+            echo ""
+            echo "::group::running 'git describe --abbrev=0 --tags' ... "
+            echo "this command will get the tag from the current branch"
+            git describe --abbrev=0 --tags
+            echo "::endgroup::"
+            echo ""
+            echo "::group::running 'git describe --tags `git rev-list --tags --max-count=1`' ... "
+            echo "this command will get tags across all branches, not just the current branch"
+            git describe --tags `git rev-list --tags --max-count=1`
+            echo "::endgroup::"
+            echo ""
+            echo "::group::running 'git describe --tags' ... "
+            git describe --tags
+            echo "::endgroup::"
+            echo ""
+            echo "Debug enabled, running additional 'git tag' commands"
+            echo ""
+            echo "::group::running 'git tag --sort=-taggerdate | tail -1' ... "
+            echo "this command will sort the tags by '-taggerdate' "
+            git tag --sort=-taggerdate | tail -1
+            echo "::endgroup::"
+            echo ""
+            echo "::group::running 'git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1' ... "
+            echo "this command will sort the tags by committerdate "
+            git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1
+            echo "::endgroup::"
+            echo ""
+            echo "::group::running 'git tag -l | tail -1' ... "
+            echo "this command will list the tags and grab the last entry "
+            git tag -l | tail -1
+            echo "::endgroup::"
+            echo ""
+            echo "To learn more about using the 'git tag' and 'git describe' commands with workflows... "
+            echo "See: "
+            echo "     - https://git-scm.com/book/en/v2/Git-Basics-Tagging "
+            echo "     - https://git-scm.com/docs/git-tag "
+            echo "     - https://git-scm.com/docs/git-describe "
+            echo ""
+        fi
+        ##
+        echo "This step uses 'git describe' with 'git rev-list' to get tags across all branches, not just the current branch"
+        if [ '${{ inputs.release-type }}' == 'prerelease' ]; then
+            echo "capturing the latest tag from the CLI, as the 'release-type' is 'prerelease'. "
+            current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
+        elif [[ "${{ inputs.release-type }}" == "pre"* ]]; then
+            echo "capturing the latest tag from the CLI, as the 'release-type' is one of 'premajor/preminor/prepatch'. "
+            current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
+            # https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
+        else
+            echo "capturing the latest (current) tag from the CLI "
+            current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
+        fi
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "current_tag_version: $current_tag_version"
+            echo "writing the 'current_tag_version' to the environment and GitHub output"
+        fi
+        echo "current_tag_version=${current_tag_version}" >> "$GITHUB_OUTPUT"
+        echo "current_tag_version=${current_tag_version}" >> $GITHUB_ENV
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "The current tag of this repo is \`$current_tag_version\`"
+            echo "writing $current_tag_version to the 'get-current-tag' GitHub output"
+        fi
+        echo "current-tag-version=${current_tag_version}" >> "$GITHUB_OUTPUT"
+        echo "current-tag-version=${current_tag_version}" >> $GITHUB_ENV
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'get-current-tag' step. "; fi
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+
+    - name: Compare the current tag to the current release version
+      id: compare-tag-to-current-release
+      shell: bash
+      run: |
+        ## Compare the current release version to the current tag version
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "starting the 'compare-tag-to-current-release' step. "
+            echo "current_release_version is:  ${{ env.current_release_version }} "
+            echo "current_tag_version is    :  ${{ env.current_tag_version }} "
+        fi
+        ##
+        if [ '${{ env.current_release_version }}' == '${{ env.current_tag_version }}' ]; then
+            echo "the 'current_release_version' is set to '${{ env.current_release_version }}' and matches "
+            echo "  the 'current_tag_version' which is set to '${{ env.current_tag_version }}'. "
+            current_tag_and_release_match=true
+        else
+            echo "the 'current_release_version' is set to '${{ env.current_release_version }}' and DOES NOT MATCH "
+            echo "  the 'current_tag_version' which is set to '${{ env.current_tag_version }}'. "
+            current_tag_and_release_match=false
+        fi
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "setting the value of 'does_current_tag_match_current_release' to '${current_tag_and_release_match}' and sending it to GitHub output"
+        fi
+        echo "does_current_tag_match_current_release=${current_tag_and_release_match}" >> "$GITHUB_OUTPUT"
+        echo "does_current_tag_match_current_release=${current_tag_and_release_match}" >> $GITHUB_ENV
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+            echo "The does_current_tag_match_current_release variable has been set to \`$current_tag_and_release_match\`"
+            echo "writing $current_tag_and_release_match to the 'does-tag-match-release' GitHub output"
+        fi
+        echo "does-tag-match-release=${current_tag_and_release_match}" >> "$GITHUB_OUTPUT"
+        echo "does-tag-match-release=${current_tag_and_release_match}" >> $GITHUB_ENV
+        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'compare-tag-to-current-release' step. "; fi
+      env:
+        current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
+        current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
+
     - name: Set the next release version
       id: set-next-release
       shell: bash
@@ -230,21 +374,47 @@ runs:
         fi
         ##
         if [ '${{ inputs.release-type }}' == 'prerelease' ]; then
-            echo "updating the next rc-version for a prerelease. "
+            ##echo "updating the next rc-version for a prerelease. "
+            echo "updating the next ${{ inputs.pre-release-id }}-version for a prerelease. "
+            echo "The 'prerelease' option will increment the prerelease number (example: 0.2.1-rc1 becomes 0.2.1-rc2)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
             ##next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1')
             ##
         elif [ '${{ inputs.release-type }}' == 'patch' ]; then
             echo "updating the next-version for a patch release. "
+            echo "The 'patch' option will increment the version by a single patch version (example: 0.2.1 becomes 0.2.2)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1')
             ##
         elif [ '${{ inputs.release-type }}' == 'minor' ]; then
             echo "updating the next-version for a minor release. "
+            echo "The 'minor' option will increment the version by a single minor version (example: 0.2.1 becomes 0.3.0)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1')
             ##
         elif [ '${{ inputs.release-type }}' == 'major' ]; then
             echo "updating the next-version for a major release. "
+            echo "The 'major' option will increment the version by a single major version (example: 0.2.1 becomes 1.0.0)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1')
+            ##
+        elif [ '${{ inputs.release-type }}' == 'prepatch' ]; then
+            echo "updating the next-version for a prepatch release. "
+            echo "The 'prepatch' option will create a new prepatch version (example: 0.2.1 becomes 0.2.2-rc1)"
+            next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1' | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
+            ##
+        elif [ '${{ inputs.release-type }}' == 'preminor' ]; then
+            echo "updating the next-version for a preminor release. "
+            echo "The 'preminor' option will create a new preminor version (example: 0.2.1 becomes 0.3.0-rc1)"
+            next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1' | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
+            ##
+        elif [ '${{ inputs.release-type }}' == 'premajor' ]; then
+            echo "updating the next-version for a premajor release. "
+            echo "The 'premajor' option will create a new premajor version (example: 0.2.1 becomes 1.0.0-rc1)"
+            next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
+            ##
+        elif [ '${{ inputs.release-type }}' == 'pretoprod' ]; then
+            echo "removing the prerelease ID to prepare for the next production version. "
+            echo "The 'pretoprod' option will remove the prerelease ID (example: 0.2.2-rc1 becomes 0.2.2)"
+            next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} { print $1 }')
+            ##next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }')
             ##
         else
             echo "something is wrong with a conditional, incrementing the version as a PATCH release.. "
@@ -260,6 +430,7 @@ runs:
         echo "next-release-version=${next_release_version}" >> $GITHUB_ENV
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'set-next-release' step. "; fi
       env:
+        #current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
         ## Increment a PRERELEASE '-rc' version:
         ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
@@ -269,6 +440,12 @@ runs:
         ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1'
         ## Increment a MAJOR version:
         ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1'
+        ## Create a PREPATCH version:
+        ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+        ## Create a PREMINOR version:
+        ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+        ## Create a PREMAJOR version:
+        ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
 
     - name: Validate the next release version
       id: validate-next-release
@@ -337,34 +514,39 @@ runs:
         echo "does-current-match-next=${current_and_next_match}" >> $GITHUB_ENV
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'compare-current-to-next-release' step. "; fi
       env:
+        #current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
         next_release_version: ${{ steps.set-next-release.outputs.next-release-version }}
 
-    - name: Error if the current version matches the next version
-      id: error-matched-versions
-      if: ( '${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}' == 'true' )
-      shell: bash
-      run: |
-        ## Error if the current version matches the next version
-        ## the double number signs below are for line spacing and readability only
-        ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
-            echo "starting the 'error-matched-versions' step. "
-            echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
-            echo "current-release-version is:  ${{ env.current-release-version }} "
-            echo "next-release-version is   :  ${{ env.next-release-version }} "
-        fi
-        echo "::error title=⛔ matched versions error::The current version matches the next version"
-        exit 1
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
-      env: 
-        current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
-        next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
-        does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+    # - name: Error if the current version matches the next version
+    #   id: error-matched-versions
+    #   if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} == 'true' )
+    #   #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+    #   #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' )
+    #   shell: bash
+    #   run: |
+    #     ## Error if the current version matches the next version
+    #     ## the double number signs below are for line spacing and readability only
+    #     ##
+    #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+    #         echo "starting the 'error-matched-versions' step. "
+    #         echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
+    #         echo "current-release-version is:  ${{ env.current-release-version }} "
+    #         echo "next-release-version is   :  ${{ env.next-release-version }} "
+    #     fi
+    #     echo "::error title=⛔ matched versions error::The current version matches the next version"
+    #     exit 1
+    #     if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
+    #   env: 
+    #     current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
+    #     next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
+    #     does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
 
     - name: Validate that the current version does not match the next version
       id: validate-version-not-matched
-      if: ( '${{ steps.compare-current-to-next-release.outputs.does_current_match_next }}' != 'true' )
+      #if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true' )
+      #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true'
+      #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' != 'true' )
       shell: bash
       run: |
         ## Validate that the current version does not match the next version
@@ -376,13 +558,24 @@ runs:
             echo "current-release-version is:  ${{ env.current-release-version }} "
             echo "next-release-version is   :  ${{ env.next-release-version }} "
         fi
-        echo "Excellent, the current version does not match the next version. "
+        ##
+        if [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'false' ]; then
+            echo "Excellent, the current version does not match the next version. "
+            echo "::notice title=validate-version-not-matched::Excellent, the current version does not match the next version."
+        elif [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' ]; then
+            echo "Uh oh! The current version matches the next version! "
+            echo "::error title=⛔ matched versions error::The current version matches the next version"
+            exit 1
+        else
+            echo "::notice title=validate-version-not-matched::something strange is happening, this is the else statement of validate-version-not-matched."
+        fi
         ##
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
       env: 
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+        does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
 
     - name: Debug | Print the outputs
       if: inputs.my_action_debug=='true'
@@ -403,9 +596,14 @@ runs:
         echo "Version match results: "
         echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
         echo ""
+        echo "Current release and current tag match results: "
+        echo "does-tag-match-release is:  ${{ env.does-tag-match-release }} "
+        echo ""
         ##
         echo "completing the 'debug-print-outputs' step. "
       env:
+        current-tag-version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+        does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}

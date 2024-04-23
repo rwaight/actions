@@ -30,13 +30,13 @@ Determine if the workflow should run debug tasks, defaults to false.
 
 See the `outputs` configured in the [action.yml](action.yml) file.
 
-#### current-release-version
+#### current-version
 
 The current release version in the repo.
 
-#### next-release-version
+#### next-version
 
-The next release version in the repo.
+The calculated next-release version in the repo, based on the provided inputs.
 
 
 ## Example Usage
