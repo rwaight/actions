@@ -85,7 +85,8 @@ runs:
         contains('prerelease', inputs.release-type) ||
         contains('premajor', inputs.release-type) ||
         contains('preminor', inputs.release-type) ||
-        contains('prepatch', inputs.release-type)
+        contains('prepatch', inputs.release-type) ||
+        contains('pretoprod', inputs.release-type)
       shell: bash
       run: |
         ## Validate the release-type input
@@ -99,7 +100,7 @@ runs:
 
     - name: Error if the release-type input is incorrect
       id: error-incorrect-release-type
-      if: ${{ !contains(fromJSON('["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch"]'), inputs.release-type) }}
+      if: ${{ !contains(fromJSON('["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch", "pretoprod"]'), inputs.release-type) }}
       shell: bash
       run: |
         ## Error if the release-type input is incorrect
@@ -107,7 +108,7 @@ runs:
         if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
             echo "starting the 'error-incorrect-release-type. "
             echo "release-type is   :  ${{ inputs.release-type }} "
-        echo "::error title=⛔ error-incorrect-release-type,hint::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+        echo "::error title=⛔ error-incorrect-release-type,hint::Invalid 'release-type', must be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod"
         echo "completing the 'error-incorrect-release-type' step. "
         exit 1
 
