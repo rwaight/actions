@@ -259,6 +259,16 @@ runs:
             git tag -l | tail -1
             echo "::endgroup::"
             echo ""
+            echo "::group::running 'git tag -l --sort=-version:refname \"v*\" | head -1' ... "
+            echo "this command will list and sort the tags starting with 'v*' and grab the first entry "
+            git tag -l --sort=-version:refname "v*" | head -1
+            echo "::endgroup::"
+            echo ""
+            echo "::group::running 'git tag -l --sort=-version:refname \"v*.*.*\" | head -1' ... "
+            echo "this command will list and sort the tags starting with 'v*.*.*' and grab the first entry "
+            git tag -l --sort=-version:refname "v*.*.*" | head -1
+            echo "::endgroup::"
+            echo ""
             echo "To learn more about using the 'git tag' and 'git describe' commands with workflows... "
             echo "See: "
             echo "     - https://git-scm.com/book/en/v2/Git-Basics-Tagging "
