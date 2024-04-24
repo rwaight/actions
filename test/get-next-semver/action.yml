@@ -39,7 +39,7 @@ outputs:
     value: ${{ steps.get-current-tag.outputs.current-tag-version }}
   #current-release-version:
   current-version:
-    description: "The current release version in the repo. "
+    description: "The current GitHub release version in the repo. "
     value: ${{ steps.get-current-release.outputs.current-release-version }}
   #next-release-version:
   #  description: "The next release version in the repo. "

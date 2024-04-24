@@ -32,11 +32,62 @@ See the `outputs` configured in the [action.yml](action.yml) file.
 
 #### current-version
 
-The current release version in the repo.
+The current GitHub release version in the repo. 
+
+<details><summary>Determining the current-version output</summary>
+
+The `current-version` output is currently determined using:
+```bash
+# for production: major, minor, patch releases
+gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
+
+# for pre-releases: prerelease, premajor, preminor, prepatch
+gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName"
+```
+
+</details>
+
 
 #### next-version
 
-The calculated next-release version in the repo, based on the provided inputs.
+The calculated next-release version in the repo, based on the provided inputs. 
+
+<details><summary>Determining the next-version output</summary>
+
+The `next-version` output is currently determined using:
+```bash
+# Increment a PRERELEASE '-rc' version:
+echo "${current-version}" | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+# Increment a PATCH version:
+echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1'
+# Increment a MINOR version:
+echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1'
+# Increment a MAJOR version:
+echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1'
+# Create a PREPATCH version:
+echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+# Create a PREMINOR version:
+echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+# Create a PREMAJOR version:
+echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+```
+
+</details>
+
+
+#### current-tag
+
+The current tag from the repo. 
+
+<details><summary>Determining the current-tag output</summary>
+
+The `current-tag` output is currently determined using:
+```bash
+git describe --tags `git rev-list --tags --max-count=1`
+```
+
+</details>
+
 
 
 ## Example Usage
