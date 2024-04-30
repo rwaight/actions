@@ -51,7 +51,7 @@ jobs:
     name: Validate PR title
     runs-on: ubuntu-latest
     steps:
-      - uses: rwaight/actions/git/semantic-pull-request@main
+      - uses: rwaight/actions/github/semantic-pull-request@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -148,7 +148,7 @@ jobs:
     name: Validate PR title
     runs-on: ubuntu-latest
     steps:
-      - uses: rwaight/actions/git/semantic-pull-request@main
+      - uses: rwaight/actions/github/semantic-pull-request@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -204,7 +204,7 @@ jobs:
     name: Validate PR title
     runs-on: ubuntu-latest
     steps:
-      - uses: rwaight/actions/git/semantic-pull-request@main
+      - uses: rwaight/actions/github/semantic-pull-request@main
         id: lint_pr_title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
