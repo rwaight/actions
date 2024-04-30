@@ -16,7 +16,7 @@ A GitHub action to create or update an issue or pull request comment.
 
 ```yml
       - name: Create comment
-        uses: rwaight/actions/github/create-or-update-comment@main
+        uses: rwaight/actions/chatops/create-or-update-comment@main
         with:
           issue-number: 1
           body: |
@@ -32,7 +32,7 @@ A GitHub action to create or update an issue or pull request comment.
 
 ```yml
       - name: Update comment
-        uses: rwaight/actions/github/create-or-update-comment@main
+        uses: rwaight/actions/chatops/create-or-update-comment@main
         with:
           comment-id: 008675309
           body: |
@@ -44,7 +44,7 @@ A GitHub action to create or update an issue or pull request comment.
 
 ```yml
       - name: Add reactions
-        uses: rwaight/actions/github/create-or-update-comment@main
+        uses: rwaight/actions/chatops/create-or-update-comment@main
         with:
           comment-id: 008675309
           reactions: |
@@ -79,7 +79,7 @@ Note that in order to read the step output the action step must have an id.
 
 ```yml
       - name: Create comment
-        uses: rwaight/actions/github/create-or-update-comment@main
+        uses: rwaight/actions/chatops/create-or-update-comment@main
         id: couc
         with:
           issue-number: 1
@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add reaction
-        uses: rwaight/actions/github/create-or-update-comment@main
+        uses: rwaight/actions/chatops/create-or-update-comment@main
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: eyes
@@ -119,7 +119,7 @@ If the find-comment action output `comment-id` returns an empty string, a new co
 If it returns a value, the comment already exists and the content is replaced.
 ```yml
     - name: Find Comment
-      uses: rwaight/actions/github/find-comment@v2
+      uses: rwaight/actions/chatops/find-comment@v2
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -127,7 +127,7 @@ If it returns a value, the comment already exists and the content is replaced.
         body-includes: Build output
 
     - name: Create or update comment
-      uses: rwaight/actions/github/create-or-update-comment@main
+      uses: rwaight/actions/chatops/create-or-update-comment@main
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         issue-number: ${{ github.event.pull_request.number }}
@@ -140,7 +140,7 @@ If it returns a value, the comment already exists and the content is replaced.
 If required, the create and update steps can be separated for greater control.
 ```yml
     - name: Find Comment
-      uses: rwaight/actions/github/find-comment@v2
+      uses: rwaight/actions/chatops/find-comment@v2
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -149,7 +149,7 @@ If required, the create and update steps can be separated for greater control.
 
     - name: Create comment
       if: steps.fc.outputs.comment-id == ''
-      uses: rwaight/actions/github/create-or-update-comment@main
+      uses: rwaight/actions/chatops/create-or-update-comment@main
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
@@ -158,7 +158,7 @@ If required, the create and update steps can be separated for greater control.
 
     - name: Update comment
       if: steps.fc.outputs.comment-id != ''
-      uses: rwaight/actions/github/create-or-update-comment@main
+      uses: rwaight/actions/chatops/create-or-update-comment@main
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         body: |
@@ -170,7 +170,7 @@ If required, the create and update steps can be separated for greater control.
 
 ```yml
       - name: Create comment
-        uses: rwaight/actions/github/create-or-update-comment@main
+        uses: rwaight/actions/chatops/create-or-update-comment@main
         with:
           issue-number: 1
           body-path: 'comment-body.md'
@@ -184,11 +184,11 @@ This is a test comment template
 Render template variables such as {{ .foo }} and {{ .bar }}.
 ```
 
-The template is rendered using the [render-template](https://github.com/chuhlomin/render-template) action and the result is used to create the comment.
+The template is rendered using the [render-template](../../utilities/render-template/) action and the result is used to create the comment.
 ```yml
       - name: Render template
         id: template
-        uses: chuhlomin/render-template@v1.4
+        uses: rwaight/actions/utilities/render-template@main
         with:
           template: .github/comment-template.md
           vars: |
@@ -196,7 +196,7 @@ The template is rendered using the [render-template](https://github.com/chuhlomi
             bar: that
 
       - name: Create comment
-        uses: rwaight/actions/github/create-or-update-comment@main
+        uses: rwaight/actions/chatops/create-or-update-comment@main
         with:
           issue-number: 1
           body: ${{ steps.template.outputs.result }}
