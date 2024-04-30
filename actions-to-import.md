@@ -7,6 +7,8 @@ The following actions should be copied/imported to this repo:
         - A GitHub action that facilitates "ChatOps" by creating repository dispatch events for slash commands
     - [`peter-evans/slash-command-dispatch-processor`](https://github.com/peter-evans/slash-command-dispatch-processor)
         - A command processor for slash-command-dispatch, a GitHub action that facilitates "ChatOps"
+- **git**
+    - None at this time.
 - **github**
     - [`imjohnbo/issue-bot` action](https://github.com/imjohnbo/issue-bot)
         - GitHub Actions powered Issue Bot
@@ -34,6 +36,8 @@ The actions should have their `branding` section updated according to the [updat
 ##### Actions pending import
 
 The following actions are pending import to this repo:
+- **chatops**
+    - None at this time.
 - **git**
     - [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
     - [`WyriHaximus/github-action-next-semvers`](https://github.com/WyriHaximus/github-action-next-semvers)
@@ -48,6 +52,8 @@ The following actions are pending import to this repo:
 #### Other actions to review
 
 The following actions should be reviewed as candidates to import to this repo:
+- **chatops**
+    - None at this time.
 - **releases**
     - [`huggingface/semver-release-action`](https://github.com/huggingface/semver-release-action)
         - Github Action to release projects using Semantic Release.
@@ -120,13 +126,13 @@ Keep the README updated with the current list of actions.
 ##### Get the categories from the root directory
 ```bash
 # use the '-I' option to exclude the non-category directories
-tree . -d -L 1 -I '.git|archive|assets|composite|examples|test' --noreport
+tree . -d -L 1 -I '.git|.github|archive|assets|composite|examples|test' --noreport
 ```
 
 ##### Get the actions by category
 ```bash
 # use the '-I' option to exclude the non-category directories
-tree . -d -L 2 -I '.git|archive|assets|composite|examples|test' --noreport
+tree . -d -L 2 -I '.git|.github|archive|assets|composite|examples|test' --noreport
 ```
 
 
@@ -145,7 +151,7 @@ tree . -d -L 2 --noreport
 ##### Get the directories by category with `find`
 ```bash
 # store the categories into an array to use in a for loop
-categories=(builders git github releases utilities)
+categories=(builders chatops git github releases utilities)
 
 # get the action names by category, using find
 for item in ${categories[@]}; do find $item -type d -maxdepth 1; done
@@ -160,7 +166,7 @@ for item in ${categories[@]}; do find $item -type d -maxdepth 1 | sed 's,^[^/]*/
 ##### Get the directories by category with `tree`
 ```bash
 # store the categories into an array to use in a for loop
-categories=(builders git github releases utilities)
+categories=(builders chatops git github releases utilities)
 
 # get the action names by category, using tree
 for item in ${categories[@]}; do tree $item -d -L 1; done
@@ -169,7 +175,7 @@ for item in ${categories[@]}; do tree $item -d -L 1; done
 ##### Filter out the non-category directories with `tree`
 ```bash
 # use the '-I' option to exclude the non-category directories
-tree . -d -L 2 -I '.git|archive|assets|composite|examples|test' --noreport
+tree . -d -L 2 -I '.git|.github|archive|assets|composite|examples|test' --noreport
 ```
 
 </details>
