@@ -24,6 +24,12 @@ group:chatops:
   - changed-files:
     - any-glob-to-any-file: 'chatops/**'
 
+# Add 'group:composite' label to any file changes within the 'composite' folder
+group:composite:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'composite/**'
+
 # Add 'group:git' label to any file changes within the 'git' folder
 group:git:
 - any:
@@ -58,7 +64,7 @@ group:utilities:
 impacts:actions:
 - any:
   - changed-files:
-    - any-glob-to-any-file: ['builders/**', 'chatops/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
+    - any-glob-to-any-file: ['builders/**', 'chatops/**', 'composite/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
 
 # Add 'impacts:assets' label to any file changes within the 'assets' folder
 impacts:assets:
