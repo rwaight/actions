@@ -18,6 +18,12 @@ group:builders:
   - changed-files:
     - any-glob-to-any-file: 'builders/**'
 
+# Add 'group:chatops' label to any file changes within the 'chatops' folder
+group:chatops:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'chatops/**'
+
 # Add 'group:git' label to any file changes within the 'git' folder
 group:git:
 - any:
@@ -52,7 +58,7 @@ group:utilities:
 impacts:actions:
 - any:
   - changed-files:
-    - any-glob-to-any-file: ['builders/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
+    - any-glob-to-any-file: ['builders/**', 'chatops/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
 
 # Add 'impacts:assets' label to any file changes within the grouped actions folders
 impacts:assets:
