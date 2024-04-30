@@ -88,6 +88,11 @@
   description: 'Actions in the ''builders'' group'
   aliases: []
 -
+  name: 'group:chatops'
+  color: '50790C'
+  description: 'Actions in the ''chatops'' group'
+  aliases: []
+-
   name: 'group:composite'
   color: '50790C'
   description: 'Actions in the ''composite'' group'

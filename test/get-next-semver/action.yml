@@ -39,7 +39,7 @@ outputs:
     value: ${{ steps.get-current-tag.outputs.current-tag-version }}
   #current-release-version:
   current-version:
-    description: "The current release version in the repo. "
+    description: "The current GitHub release version in the repo. "
     value: ${{ steps.get-current-release.outputs.current-release-version }}
   #next-release-version:
   #  description: "The next release version in the repo. "
@@ -257,6 +257,16 @@ runs:
             echo "::group::running 'git tag -l | tail -1' ... "
             echo "this command will list the tags and grab the last entry "
             git tag -l | tail -1
+            echo "::endgroup::"
+            echo ""
+            echo "::group::running 'git tag -l --sort=-version:refname \"v*\" | head -1' ... "
+            echo "this command will list and sort the tags starting with 'v*' and grab the first entry "
+            git tag -l --sort=-version:refname "v*" | head -1
+            echo "::endgroup::"
+            echo ""
+            echo "::group::running 'git tag -l --sort=-version:refname \"v*.*.*\" | head -1' ... "
+            echo "this command will list and sort the tags starting with 'v*.*.*' and grab the first entry "
+            git tag -l --sort=-version:refname "v*.*.*" | head -1
             echo "::endgroup::"
             echo ""
             echo "To learn more about using the 'git tag' and 'git describe' commands with workflows... "

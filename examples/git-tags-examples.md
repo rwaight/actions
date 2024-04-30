@@ -66,6 +66,58 @@ v0.1.2
 
 ### Sorting tags
 
+
+#### Using the --sort option
+
+From https://stackoverflow.com/questions/14273531/how-to-sort-git-tags-by-version-string-order-of-form-rc-x-y-z-w?#answer-22634649
+> With Git 2.0 (June 2014), you will be able to specify a sorting order!
+
+Using `--sort=<type>`
+
+> **Sort in a specific order.**
+> Supported type is:
+> * "`refname`" (lexicographic order),
+> * "`version:refname`" or "`v:refname`" (tag names are treated as versions).
+> 
+> Prepend "`-`" to reverse sort order.
+
+So, if you have:
+```bash
+git tag foo1.3 &&
+git tag foo1.6 &&
+git tag foo1.10
+```
+
+Here is what you would get:
+```bash
+# lexical sort
+git tag -l --sort=refname "foo*"
+foo1.10
+foo1.3
+foo1.6
+
+# version sort
+git tag -l --sort=version:refname "foo*"
+foo1.3
+foo1.6
+foo1.10
+
+# reverse version sort
+git tag -l --sort=-version:refname "foo*"
+foo1.10
+foo1.6
+foo1.3
+
+# reverse lexical sort
+git tag -l --sort=-refname "foo*"
+foo1.6
+foo1.3
+foo1.10
+```
+
+
+#### Examples using git tag to sort tags
+
 Sort by `-taggerdate`
 ```bash
 git tag --sort=-taggerdate

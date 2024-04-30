@@ -295,7 +295,7 @@ jobs:
 
       # look for a comment 
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: find-comment
         #continue-on-error: true
         with:
@@ -324,7 +324,7 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/github/create-or-update-comment@main
+        uses: rwaight/actions/chatops/create-or-update-comment@main
         if: steps.write-results.outcome != 'skipped'
         with:
           body: ${{ steps.comment-template.outputs.result }}

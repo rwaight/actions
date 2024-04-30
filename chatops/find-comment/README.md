@@ -18,7 +18,7 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           issue-number: ${{ github.event.number }}
@@ -29,7 +29,7 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           issue-number: ${{ github.event.number }}
@@ -40,7 +40,7 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           issue-number: ${{ github.event.number }}
@@ -50,7 +50,7 @@ The action will output the comment ID of the comment matching the search criteri
 ### Find the first comment by the github-actions bot
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           issue-number: ${{ github.event.number }}
@@ -61,7 +61,7 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           #issue-number: 1
@@ -74,7 +74,7 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           issue-number: ${{ github.event.number }}
@@ -85,7 +85,7 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           issue-number: ${{ github.event.number }}
@@ -97,7 +97,7 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           issue-number: ${{ github.event.number }}
@@ -129,7 +129,7 @@ e.g. If `comment-id` is an empty string `steps.fc.outputs.comment-id == 0` evalu
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: fc
         with:
           issue-number: 1
