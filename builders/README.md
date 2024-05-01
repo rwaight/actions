@@ -1,6 +1,6 @@
 # Actions used for builds
 
-This directory contains actions that are used for building packages, images, etc.
+This directory contains actions that are used for building packages, images, etc.  Composite actions created for building should be stored here.
 
 ### Using KVM (Nested virtualization) in GitHub Actions
 
