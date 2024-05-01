@@ -9,6 +9,6 @@
 
 This sentence contains render template variables such as {{ .foo }} and {{ .bar }}.  This comment was created in **pull request {{ .event_number }}** using [create-or-update-comment][1].
 
-[1]: https://github.com/rwaight/actions/tree/main/github/create-or-update-comment
+[1]: https://github.com/rwaight/actions/tree/main/chatops/create-or-update-comment
 
 </details>
