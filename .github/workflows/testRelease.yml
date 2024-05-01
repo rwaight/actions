@@ -5,6 +5,10 @@ on:
     branches:
       - main
   push:
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-including-and-excluding-branches-and-tags
+    #branches:
+    #  - 'releases/**'
+    #  - '!releases/**-alpha'
 
   schedule:
     - cron: 0 2 * * 0
