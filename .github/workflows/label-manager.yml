@@ -51,7 +51,7 @@ jobs:
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
         #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        uses: actions/create-github-app-token@7bfa3a4717ef143a604ee0a99d859b8886a96d00
         with:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
