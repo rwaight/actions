@@ -1,6 +1,12 @@
+# Actions to import
+
+An attempt to keep track of what actions should be imported into this monorepo.
+
 ## Future planning - actions to import to this repo
 
 The following actions should be copied/imported to this repo:
+- **builders**
+    - None at this time.
 - **chatops**
     - See https://www.pagerduty.com/blog/what-is-chatops/
     - [`peter-evans/slash-command-dispatch`](https://github.com/peter-evans/slash-command-dispatch)
@@ -33,9 +39,11 @@ The following actions should be copied/imported to this repo:
 
 The actions should have their `branding` section updated according to the [update standards](#update-standards-for-imported-actions) listed below.
 
-##### Actions pending import
+## Actions pending import
 
 The following actions are pending import to this repo:
+- **builders**
+    - None at this time.
 - **chatops**
     - None at this time.
 - **git**
@@ -49,9 +57,11 @@ The following actions are pending import to this repo:
 - **utilities**
     - None at this time.
 
-#### Other actions to review
+## Other actions to review
 
 The following actions should be reviewed as candidates to import to this repo:
+- **builders**
+    - None at this time.
 - **chatops**
     - None at this time.
 - **releases**
@@ -94,13 +104,12 @@ The following actions should be reviewed as candidates to import to this repo:
     - [`peter-evans/enable-pull-request-automerge`](https://github.com/peter-evans/enable-pull-request-automerge)
         - A GitHub action to enable auto-merge on a pull request
         - **NOTE** same functionality exists in the GitHub CLI. See the [`gh pr merge` documentation](https://cli.github.com/manual/gh_pr_merge)
-
-```yml
-    - name: Enable Pull Request Automerge
-      run: gh pr merge --merge --auto "1"
-      env:
-        GH_TOKEN: ${{ secrets.PAT }}
-```
+        ```yml
+            - name: Enable Pull Request Automerge
+              run: gh pr merge --merge --auto "1"
+              env:
+                GH_TOKEN: ${{ secrets.PAT }}
+        ```
 
 - **utilities**
     - [`peter-evans/ghaction-import-gpg`](https://github.com/peter-evans/ghaction-import-gpg)
@@ -114,3 +123,69 @@ The following actions should be reviewed as candidates to import to this repo:
     - [`tomwhross/write-good-action`](https://github.com/tomwhross/write-good-action)
         - A Markdown prose linting action based on [`write-good`](https://github.com/btford/write-good)
 
+
+
+## Reviewed actions
+
+This section should contain the actions that have been reviewed and status.
+
+#### Tracking Table Legend
+
+<details><summary> Legend for tracking imports (click to expand) </summary>
+
+#### Legend
+We can use emoji and reference an [emoji cheat sheet](https://github.com/ikatyang/emoji-cheat-sheet) ([punctuation link](https://github.com/ikatyang/emoji-cheat-sheet#punctuation)).
+
+| Icon | Description |
+|:----:|:-----------:|
+| :white_check_mark: | Imported |
+| :large_orange_diamond: | Partially imported |
+| :exclamation: | Update is needed |
+| :grey_question: | Under review |
+| :grey_exclamation: | Review needed |
+| :x: | Not selected for import, <br/> needs a comment |
+| :wavy_dash: | Not applicable |
+
+</details>
+
+### Reviewed actions by category
+
+- **builders**
+    - None at this time.
+- **chatops**
+    - :white_check_mark: [`peter-evans/create-or-update-comment`](https://github.com/peter-evans/create-or-update-comment)
+        - Create or update an issue or pull request comment.
+    - :white_check_mark: [`peter-evans/find-comment`](https://github.com/peter-evans/find-comment)
+        - Find an issue or pull request comment.
+- **git**
+    - This section **probably** needs to be updated.
+    - :white_check_mark: [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
+        - Commit changes made in your workflow run directly to your repo: for example, you use it to lint your code, update documentation, commit updated builds, etc...
+    - :white_check_mark: [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
+        - Semver versioning based on the git history and commit messages of your repository.
+    - :white_check_mark: [`release-flow/keep-a-changelog-action`](https://github.com/release-flow/keep-a-changelog-action)
+        - A GitHub Action that performs various operations on changelogs that adhere to
+[keep-a-changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/) conventions.
+- **github**
+    - This section **probably** needs to be updated.
+    - :white_check_mark: [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request)
+        - Create a pull request for changes to your repository in the actions workspace.
+    - :white_check_mark: [`agilepathway/label-checker`](https://github.com/agilepathway/label-checker)
+        - Check pull requests (PRs) for the presence or absence of specified labels
+    - :white_check_mark: [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
+        - Enables conditional execution of workflow steps and jobs, based on the files modified by pull request, on a feature branch, or by the recently pushed commits.
+    - :white_check_mark: [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
+        - A GitHub action to create a repository dispatch event.
+    - :white_check_mark: [`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request)
+        - Ensure that your pull request titles match the [Conventional Commits spec](https://www.conventionalcommits.org/).
+- **releases**
+    - This section needs to be updated.
+- **utilities**
+    - This section needs to be updated.
+
+## Created Actions
+
+This section contains the actions that have been created within this repo and have been moved out of testing.
+
+- **git**
+    - [`rwaight/actions` repo-version-info](https://github.com/rwaight/actions/blob/main/git/repo-version-info)
