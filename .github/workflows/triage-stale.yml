@@ -43,7 +43,7 @@ jobs:
           exit 0
 
       - name: Triage issues using actions/stale
-        uses: actions/stale@v8
+        uses: actions/stale@v9
         with:
           days-before-close: -1 # do not close issues or PRs
           days-before-issue-stale: 90
