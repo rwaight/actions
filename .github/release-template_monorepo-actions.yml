@@ -23,6 +23,7 @@ categories:
   - title: 'New Features'
     labels:
       - 'enhancement'
+      - 'type:feat'
     collapse-after: 10
   - title: '🐛 Bug Fixes'
     labels:
