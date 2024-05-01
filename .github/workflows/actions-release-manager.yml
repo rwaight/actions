@@ -267,6 +267,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+    permissions:
+      contents: write
     if: | 
       (github.repository_owner == 'rwaight') &&
       (github.event_name=='release' && github.event.action=='published')
