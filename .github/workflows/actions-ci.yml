@@ -3,7 +3,11 @@
 name: Commit manager
 run-name: Check commit conventions on ${{ github.event_name }}
 
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - '!v*.*.*'
+  pull_request:
 
 jobs:
   commitlint:
