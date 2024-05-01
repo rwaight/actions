@@ -64,19 +64,19 @@ replacers:
   - search: 'myname'
     replace: 'My Name'
   # remove commit message prefixes from release notes
-  - search: '/^(fix|feat|ci|docs)?: /g'
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)?: /g'
     replace: ''
   # remove commit message prefixes, including scope, from release notes
   # but attempt to put the 'scope' (regex group 2) back into the notes
-  - search: '/^(fix|feat|ci|docs)(\(.+?\))?: /g'
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)(\(.+?\))?: /g'
     #replace: ''
     replace: '$2: '
   # find breaking changes and include 'breaking' in the notes
-  - search: '/^(fix|feat|ci|docs)?!?: /g'
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)?!?: /g'
     replace: 'breaking: '
   # find breaking changes and include 'breaking' in the notes
   # but attempt to put the 'scope' (regex group 2) back into the notes
-  - search: '/^(fix|feat|ci|docs)(\(.+?\))?!?: /g'
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)(\(.+?\))?!?: /g'
     replace: 'breaking($2): '
 
 version-resolver:
