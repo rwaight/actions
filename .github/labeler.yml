@@ -5,11 +5,15 @@ actions:autorelease:
 - any:
   - head-branch: ['^autorelease','autorelease']
 
+actions:dependabot:
+- any:
+  - head-branch: ['^dependabot','dependabot']
+
 # Add 'documentation' label to any file changes within 'docs' or 'examples' folders
 documentation:
 - all:
   - changed-files:
-    - any-glob-to-any-file: ['**/*.md','**/docs/*','examples/**']
+    - any-glob-to-any-file: ['**/*.md','**/docs/*','docs/**','examples/**']
     - all-globs-to-all-files: '!CHANGELOG.md'
 
 # Add 'group:builders' label to any file changes within the 'builders' folder

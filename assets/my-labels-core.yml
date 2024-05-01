@@ -80,49 +80,6 @@
   description: 'Action changes or updates made by dependabot'
   aliases: []
 #
-##### group: labels
-# The group: labels have not been formally defined
--
-  name: 'group:builders'
-  color: '50790C'
-  description: 'Actions in the ''builders'' group'
-  aliases: []
--
-  name: 'group:chatops'
-  color: '50790C'
-  description: 'Actions in the ''chatops'' group'
-  aliases: []
--
-  name: 'group:composite'
-  color: '50790C'
-  description: 'Actions in the ''composite'' group'
-  aliases: []
--
-  name: 'group:git'
-  color: '50790C'
-  description: 'Actions in the ''git'' group'
-  aliases: []
--
-  name: 'group:github'
-  color: '50790C'
-  description: 'Actions in the ''github'' group'
-  aliases: []
--
-  name: 'group:releases'
-  color: '50790C'
-  description: 'Actions in the ''releases'' group'
-  aliases: []
--
-  name: 'group:test'
-  color: '50790C'
-  description: 'Actions in the ''test'' group'
-  aliases: []
--
-  name: 'group:utilities'
-  color: '50790C'
-  description: 'Actions in the ''utilities'' group'
-  aliases: []
-#
 ##### impacts: labels
 # The impacts: labels have not been formally defined
 -
@@ -143,7 +100,7 @@
 -
   name: 'impacts:repo'
   color: '5F9188'
-  description: 'Impacting the ''.gitHub'' directory'
+  description: 'Impacting the ''.git'' or ''.github'' directory'
   aliases: []
 -
   name: 'impacts:workflows'

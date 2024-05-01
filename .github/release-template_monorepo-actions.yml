@@ -23,6 +23,7 @@ categories:
   - title: 'New Features'
     labels:
       - 'enhancement'
+      - 'type:feat'
     collapse-after: 10
   - title: '🐛 Bug Fixes'
     labels:
@@ -63,19 +64,28 @@ replacers:
   - search: 'myname'
     replace: 'My Name'
   # remove commit message prefixes from release notes
-  - search: '/^(fix|feat|ci|docs)?: /g'
-    replace: ''
+  # try: ^(?<type>fix|feat|docs|style|refactor|perf|test|build|ci|chore|¯\\_\(ツ\)_\/¯)(?<scope>\(\w+\)?((?=:\s)|(?=!:\s)))?(?<breaking>!)?(?<subject>:\s.*)?|^(?<merge>Merge \w+)
+  # above from https://stackoverflow.com/questions/58899999/regexp-to-match-conventional-commit-syntax
+  #
+  # need to try: ^(fix|feat|docs|style|refactor|perf|test|build|ci|chore){1}(\([\w\-\.]+\))?(!)?: ([\w ])+([\s\S]*)
+  # above from https://gist.github.com/marcojahn/482410b728c31b221b70ea6d2c433f0c
+  #
+  # https://github.com/release-drafter/release-drafter/issues/510#issuecomment-623883335
+  - search: "/(fix|feat|docs|style|refactor|perf|test|build|ci|chore)(\\(\\w+\\))?: /g"
+    replace: ""
+  #- search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)?: /g'
+  #  replace: ''
   # remove commit message prefixes, including scope, from release notes
   # but attempt to put the 'scope' (regex group 2) back into the notes
-  - search: '/^(fix|feat|ci|docs)(\(.+?\))?: /g'
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)(\(.+?\))?: /g'
     #replace: ''
     replace: '$2: '
   # find breaking changes and include 'breaking' in the notes
-  - search: '/^(fix|feat|ci|docs)?!?: /g'
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)?!?: /g'
     replace: 'breaking: '
   # find breaking changes and include 'breaking' in the notes
   # but attempt to put the 'scope' (regex group 2) back into the notes
-  - search: '/^(fix|feat|ci|docs)(\(.+?\))?!?: /g'
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)(\(.+?\))?!?: /g'
     replace: 'breaking($2): '
 
 version-resolver:

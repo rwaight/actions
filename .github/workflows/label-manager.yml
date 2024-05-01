@@ -104,8 +104,10 @@ jobs:
         with:
           config-file: |
             https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
+            https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-actions.yml
             https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-versioning.yml
           ##  assets/my-labels-core.yml
+          ##  assets/my-labels-actions.yml
           ##  assets/my-labels-versioning.yml
           #
           # The 'request-token' parameter is needed so the remote config-file values can be accessed
