@@ -1,6 +1,6 @@
 # GitHub Release Drafter Action
 
-The current version in this repo is based off of [**release-drafter** v5.25.0](https://github.com/release-drafter/release-drafter/releases/tag/v5.25.0)
+The current version in this repo is based off of [**release-drafter** v6.0.0](https://github.com/release-drafter/release-drafter/releases/tag/v6.0.0)
 - This action is from https://github.com/release-drafter/release-drafter
 
 The [`release-drafter/release-drafter`](https://github.com/release-drafter/release-drafter) code has a ISC license:
@@ -14,10 +14,12 @@ The [`release-drafter/release-drafter`](https://github.com/release-drafter/relea
 
 <p align="center">Drafts your next release notes as pull requests are merged into master. Built with <a href="https://github.com/probot/probot">Probot</a>.</p>
 
+---
 
 ## Updates to the action
 
-None at this time.
+This action was updated from [**release-drafter** v5.25.0](https://github.com/release-drafter/release-drafter/releases/tag/v5.25.0) to [**release-drafter** v6.0.0](https://github.com/release-drafter/release-drafter/releases/tag/v6.0.0).
+
 
 ## Deploying this action
 
