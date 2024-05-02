@@ -50,7 +50,7 @@ runs:
       if: ${{ runner.os != 'Linux' }}
       shell: bash
       run: |
-        echo "::error title=⛔ error::This action supports Linux only"
+        echo "::error file=get-next-semver,title=⛔ error::This action supports Linux only"
         exit 1
 
     - name: Greet the triggering_actor
@@ -91,7 +91,7 @@ runs:
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then
             echo "starting the 'validate-input-release-type' step. "
             echo "release-type is:  ${{ inputs.release-type }} "
-            echo "::notice title=validate-input-release-type::The 'release-type' is valid."
+            echo "::notice file=get-next-semver,title=validate-input-release-type::The 'release-type' is valid."
         fi
         ##
 
@@ -105,7 +105,7 @@ runs:
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then
             echo "starting the 'error-incorrect-release-type. "
             echo "release-type is:  ${{ inputs.release-type }} "
-        echo "::error title=⛔ error-incorrect-release-type,hint::Invalid 'release-type', must be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod"
+        echo "::error file=get-next-semver,title=⛔ error-incorrect-release-type,hint::Invalid 'release-type', must be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod"
         echo "completing the 'error-incorrect-release-type' step. "
         exit 1
 
@@ -121,7 +121,7 @@ runs:
     #   #   ${{ !contains(inputs.release-type, 'pre') }}
     #   shell: bash
     #   run: |
-    #     echo "::error title=⛔ validate-input-release-type-2::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
+    #     echo "::error file=get-next-semver,title=⛔ validate-input-release-type-2::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
     #     #exit 1
 
     - name: Verbose | Print the inputs
@@ -538,7 +538,7 @@ runs:
     #         echo "current-release-version is:  ${{ env.current-release-version }} "
     #         echo "next-release-version is   :  ${{ env.next-release-version }} "
     #     fi
-    #     echo "::error title=⛔ matched versions error::The current version matches the next version"
+    #     echo "::error file=get-next-semver,title=⛔ matched versions error::The current version matches the next version"
     #     exit 1
     #     if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
     #   env: 
@@ -565,13 +565,13 @@ runs:
         ##
         if [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'false' ]; then
             echo "Excellent, the current version does not match the next version. "
-            echo "::notice title=validate-version-not-matched::Excellent, the current version does not match the next version."
+            echo "::notice file=get-next-semver,title=validate-version-not-matched::Excellent, the current version does not match the next version."
         elif [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' ]; then
             echo "Uh oh! The current version matches the next version! "
-            echo "::error title=⛔ matched versions error::The current version matches the next version"
+            echo "::error file=get-next-semver,title=⛔ matched versions error::The current version matches the next version"
             exit 1
         else
-            echo "::notice title=validate-version-not-matched::something strange is happening, this is the else statement of validate-version-not-matched."
+            echo "::notice file=get-next-semver,title=validate-version-not-matched::something strange is happening, this is the else statement of validate-version-not-matched."
         fi
         ##
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
