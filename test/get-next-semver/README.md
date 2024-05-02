@@ -57,24 +57,6 @@ The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed
 
 See the `outputs` configured in the [action.yml](action.yml) file.
 
-#### current-version
-
-The current GitHub release version in the repo. 
-
-<details><summary>Determining the current-version output</summary>
-
-The `current-version` output is currently determined using:
-```bash
-# for production: major, minor, patch releases
-gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
-
-# for pre-releases: prerelease, premajor, preminor, prepatch
-gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName"
-```
-
-</details>
-
-
 #### next-version
 
 The calculated next-release version in the repo, based on the provided inputs. 
@@ -102,6 +84,21 @@ echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'B
 </details>
 
 
+#### is-next-prerelease
+
+If the calculated next-release version is a prerelease (**true**) or not (**false**), based on the provided inputs.
+
+This can be used with the `include-pre-releases` option in [`release-drafter`](https://github.com/release-drafter/release-drafter):
+```yml
+      - name: Run release-drafter
+        uses: release-drafter/release-drafter@v6.0.0
+        id: draft-release
+        with:
+          # https://github.com/release-drafter/release-drafter/pull/1302
+          include-pre-releases: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+          #include-pre-releases: true
+```
+
 #### current-tag
 
 The current tag from the repo. 
@@ -111,6 +108,24 @@ The current tag from the repo.
 The `current-tag` output is currently determined using:
 ```bash
 git describe --tags `git rev-list --tags --max-count=1`
+```
+
+</details>
+
+
+#### current-version
+
+The current GitHub release version in the repo. 
+
+<details><summary>Determining the current-version output</summary>
+
+The `current-version` output is currently determined using:
+```bash
+# for production: major, minor, patch releases
+gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
+
+# for pre-releases: prerelease, premajor, preminor, prepatch
+gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName"
 ```
 
 </details>
@@ -171,22 +186,27 @@ jobs:
         id: get-next-semver
         uses: rwaight/actions/test/get-next-semver@main
         with:
-          #pre-release-id: ${{ inputs.preid }}
+          gh-token: ${{ github.token }}
+          pre-release-id: ${{ inputs.preid }}
           release-type: ${{ inputs.release-type }}
           action-verbose: true
 
       - name: Report the output from the get-next-semver step
-        if: ${{ steps.get-next-semver.outputs.next-release-version }}
+        if: ${{ steps.get-next-semver.outputs.next-version }}
         run: |
           echo "The output from the 'get-next-semver' step was: "
-          echo "current release version: ${{ env.current-release-version }} "
-          echo "next release version: ${{ env.next-release-version }} "
+          echo "current tag       : ${{ env.current-tag }} "
+          echo "current version   : ${{ env.current-version }} "
+          echo "next version      : ${{ env.next-version }} "
+          echo "is next prerelease: ${{ env.is-next-prerelease }} "
         env:
-          current-release-version: ${{ steps.get-next-semver.outputs.current-release-version }}
-          next-release-version: ${{ steps.get-next-semver.outputs.next-release-version }}
+          current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+          current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
 
       - name: Fail if the 'get-next-semver' step did not output the next release version
-        if: ${{ ! steps.get-next-semver.outputs.next-release-version }}
+        if: ${{ ! steps.get-next-semver.outputs.next-version }}
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: |
           echo "::error title=⛔ error in the 'get-next-semver' step hint::Next release version was not provided"
