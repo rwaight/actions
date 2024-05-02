@@ -8,23 +8,50 @@ Get the next semantic version based on inputs.
 
 See the `inputs` configured in the [action.yml](action.yml) file.
 
-#### pre-release-id
-
-The Pre-release identifier (only for pre-release builds). The only supported pre-release syntax is "rc" at this time.
-* required: false
-* default: `rc`
-
 #### release-type
 
-The release type, should be one of: major, minor, patch, or prerelease. The only supported pre-release syntax is "rc" at this time.
 * required: true
 * default: `not-set`
 
-#### my_action_debug:
+The release type, input one of: 
+* `major`,
+* `minor`,
+* `patch`,
+* `prerelease`,
+* `premajor`,
+* `preminor`,
+* `prepatch`, or
+* `pretoprod`
 
-Determine if the workflow should run debug tasks, defaults to false.
+For production releases, select the appropriate: `major`, `minor`, or `patch`
+
+For prereleases, select prerelease when you are already working on a prerelease tag (example: 0.2.1-rc1):
+* select premajor when you need to create a new premajor prerelease; 
+* select preminor when you need to create a new preminor prerelease; or 
+* select prepatch when you need to create a new prepatch prerelease.
+ 
+Note that only `rc` has been tested as a pre-release syntax.
+
+#### pre-release-id
+
+* required: false
+* default: `rc`
+
+The Pre-release identifier (only for pre-release builds). Currently, only `rc` has been tested as a pre-release syntax.
+
+#### action-verbose
+
+Determine if the workflow should run verbose tasks, defaults to false.
 * required: false
 * default: `false`
+
+#### gh-token
+
+* required: true
+* default: `${{ github.token }}`
+
+The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed to run the `gh release` command depending on permissions granted to the default GitHub token.
+
 
 ### Outputs
 
@@ -146,7 +173,7 @@ jobs:
         with:
           #pre-release-id: ${{ inputs.preid }}
           release-type: ${{ inputs.release-type }}
-          my_action_debug: true
+          action-verbose: true
 
       - name: Report the output from the get-next-semver step
         if: ${{ steps.get-next-semver.outputs.next-release-version }}

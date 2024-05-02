@@ -9,7 +9,7 @@ branding:
 
 inputs:
   gh-token:
-    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI.'
+    description: 'The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed to run the `gh release` command depending on permissions granted to the default GitHub token.'
     required: true
     default: ${{ github.token }}
   pre-release-id:
