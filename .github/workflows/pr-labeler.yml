@@ -269,8 +269,8 @@ jobs:
       - name: Write the check-${{ env.GHA_LABEL_SCOPE }}-labels results to the environment
         # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
         id: write-results
-        # Skip running on forks or Dependabot since neither has access to secrets
-        if: steps.app-token.outcome != 'skipped'
+        ## Skip running on forks or Dependabot since neither has access to secrets
+        ##if: steps.app-token.outcome != 'skipped'
         run: |
           ## the double number signs below are for line spacing and readability only
           ##
