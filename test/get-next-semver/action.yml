@@ -40,7 +40,9 @@ outputs:
   next-version:
     description: "The calculated next-release version in the repo, based on the provided inputs."
     value: ${{ steps.set-next-release.outputs.next-release-version }}
-
+  is-next-prerelease:
+    description: "If the calculated next-release version is a prerelease (true) or not (false), based on the provided inputs."
+    value: ${{ steps.set-next-release.outputs.is-next-prerelease }}
 
 runs:
   using: "composite"
@@ -184,7 +186,7 @@ runs:
             echo "capturing the latest pre-release from the GitHub CLI, as the 'release-type' is 'prerelease'. "
             current_release_version=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName")
         elif [[ "${{ inputs.release-type }}" == "pre"* ]]; then
-            echo "capturing the latest premajor/preminor/prepatch from the GitHub CLI, as the 'release-type' is one of 'premajor/preminor/prepatch'. "
+            echo "capturing the latest premajor/preminor/prepatch/pretoprod from the GitHub CLI, as the 'release-type' is one of 'premajor/preminor/prepatch/pretoprod'. "
             current_release_version=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName")
             # https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
         else
@@ -370,9 +372,26 @@ runs:
                 ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1'
                 echo "the syntax to bump 'major' is: "
                 echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$1+=1;\$2=0;\$3=0} 1'"
+            elif [ '${{ inputs.release-type }}' == 'prepatch' ]; then
+                ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+                echo "the syntax to bump 'prepatch' is: "
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$3+=1} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+            elif [ '${{ inputs.release-type }}' == 'preminor' ]; then
+                ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+                echo "the syntax to bump 'preminor' is: "
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$2+=1;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+            elif [ '${{ inputs.release-type }}' == 'premajor' ]; then
+                ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+                echo "the syntax to bump 'premajor' is: "
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$1+=1;\$2=0;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+            elif [ '${{ inputs.release-type }}' == 'pretoprod' ]; then
+                ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
+                echo "the syntax to remove the prerelease ID for 'pretoprod' is: "
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} { print \$1 }'
             else
                 echo "something is wrong with a conditional. "
-                echo "this is the DEBUG 'else' statement in the 'set-next-release' step. "
+                echo "::warning file=get-next-semver,title=set-next-release::something is wrong with a conditional in the VERBOSE 'else' statement in the 'set-next-release' step."
+                echo "this is the VERBOSE 'else' statement in the 'set-next-release' step. "
             fi
             echo "::endgroup::"
         fi
@@ -383,55 +402,75 @@ runs:
             echo "The 'prerelease' option will increment the prerelease number (example: 0.2.1-rc1 becomes 0.2.1-rc2)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
             ##next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1')
+            is_next_prerelease=true
             ##
         elif [ '${{ inputs.release-type }}' == 'patch' ]; then
             echo "updating the next-version for a patch release. "
             echo "The 'patch' option will increment the version by a single patch version (example: 0.2.1 becomes 0.2.2)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1')
+            is_next_prerelease=false
             ##
         elif [ '${{ inputs.release-type }}' == 'minor' ]; then
             echo "updating the next-version for a minor release. "
             echo "The 'minor' option will increment the version by a single minor version (example: 0.2.1 becomes 0.3.0)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1')
+            is_next_prerelease=false
             ##
         elif [ '${{ inputs.release-type }}' == 'major' ]; then
             echo "updating the next-version for a major release. "
             echo "The 'major' option will increment the version by a single major version (example: 0.2.1 becomes 1.0.0)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1')
+            is_next_prerelease=false
             ##
         elif [ '${{ inputs.release-type }}' == 'prepatch' ]; then
             echo "updating the next-version for a prepatch release. "
             echo "The 'prepatch' option will create a new prepatch version (example: 0.2.1 becomes 0.2.2-rc1)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1' | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
+            is_next_prerelease=true
             ##
         elif [ '${{ inputs.release-type }}' == 'preminor' ]; then
             echo "updating the next-version for a preminor release. "
             echo "The 'preminor' option will create a new preminor version (example: 0.2.1 becomes 0.3.0-rc1)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1' | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
+            is_next_prerelease=true
             ##
         elif [ '${{ inputs.release-type }}' == 'premajor' ]; then
             echo "updating the next-version for a premajor release. "
             echo "The 'premajor' option will create a new premajor version (example: 0.2.1 becomes 1.0.0-rc1)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} {$2+=1} 1')
+            is_next_prerelease=true
             ##
         elif [ '${{ inputs.release-type }}' == 'pretoprod' ]; then
             echo "removing the prerelease ID to prepare for the next production version. "
             echo "The 'pretoprod' option will remove the prerelease ID (example: 0.2.2-rc1 becomes 0.2.2)"
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-${{ inputs.pre-release-id }}"} { print $1 }')
             ##next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }')
+            is_next_prerelease=false
             ##
         else
+            echo "::warning file=get-next-semver,title=set-next-release::something is wrong with a conditional, incrementing the version as a PATCH release during 'set-next-release'."
             echo "something is wrong with a conditional, incrementing the version as a PATCH release.. "
             next_release_version=$(echo "$current_release_version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1')
+            echo "something is wrong with a conditional, setting 'is_next_prerelease' to 'false' .. "
+            is_next_prerelease=false
         fi
         echo "next_release_version=${next_release_version}" >> "$GITHUB_OUTPUT"
         echo "next_release_version=${next_release_version}" >> $GITHUB_ENV
+        #
+        echo "is_next_prerelease=${is_next_prerelease}" >> "$GITHUB_OUTPUT"
+        echo "is_next_prerelease=${is_next_prerelease}" >> $GITHUB_ENV
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then
             echo "The next release version has been set to \`$next_release_version\`"
             echo "writing $next_release_version to the 'next-release-version' GitHub output"
+            ##
+            echo "The 'is next prerelease' variable has been set to \`$is_next_prerelease\`"
+            echo "writing $is_next_prerelease to the 'is-next-prerelease' GitHub output"
         fi
         echo "next-release-version=${next_release_version}" >> "$GITHUB_OUTPUT"
         echo "next-release-version=${next_release_version}" >> $GITHUB_ENV
+        #
+        echo "is-next-prerelease=${is_next_prerelease}" >> "$GITHUB_OUTPUT"
+        echo "is-next-prerelease=${is_next_prerelease}" >> $GITHUB_ENV
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'set-next-release' step. "; fi
       env:
         #current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
@@ -450,6 +489,8 @@ runs:
         ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
         ## Create a PREMAJOR version:
         ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
+        ## Remove the prerelease ID:
+        ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
 
     - name: Validate the next release version
       id: validate-next-release
@@ -476,12 +517,13 @@ runs:
             fi
         else
             ## Fail the workflow if the 'next-release-version' is not valid
-            echo "::error::Next release version '$VERSION' is not in a valid format"
+            echo "::error file=get-next-semver,title=⛔ validate-next-release,hint::Next release version '$VERSION' is not in a valid format"
             exit 1
         fi
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
       env:
         next_release_version: ${{ steps.set-next-release.outputs.next-release-version }}
+        is_next_prerelease: ${{ steps.set-next-release.outputs.is-next-prerelease }}
 
     - name: Compare the current release version to the next release version
       id: compare-current-to-next-release
@@ -558,26 +600,33 @@ runs:
         ##
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then
             echo "starting the 'validate-version-not-matched' step. "
-            echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
+            echo "does-tag-match-release is :  ${{ env.does-tag-match-release }} "
             echo "current-release-version is:  ${{ env.current-release-version }} "
+            echo "current-tag-version is    :  ${{ env.current-tag-version }} "
+            echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
             echo "next-release-version is   :  ${{ env.next-release-version }} "
+            echo "is-next-prerelease is     :  ${{ env.is-next-prerelease }} "
         fi
         ##
         if [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'false' ]; then
             echo "Excellent, the current version does not match the next version. "
-            echo "::notice file=get-next-semver,title=validate-version-not-matched::Excellent, the current version does not match the next version."
+            if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+                echo "::notice file=get-next-semver,title=validate-version-not-matched::Excellent, the current version does not match the next version."
+            fi
         elif [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' ]; then
             echo "Uh oh! The current version matches the next version! "
             echo "::error file=get-next-semver,title=⛔ matched versions error::The current version matches the next version"
             exit 1
         else
-            echo "::notice file=get-next-semver,title=validate-version-not-matched::something strange is happening, this is the else statement of validate-version-not-matched."
+            echo "::warning file=get-next-semver,title=validate-version-not-matched::something strange is happening, this is the else statement of validate-version-not-matched."
         fi
         ##
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
       env: 
+        current-tag-version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
+        is-next-prerelease: ${{ steps.set-next-release.outputs.is-next-prerelease }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
 
@@ -593,9 +642,11 @@ runs:
         echo ""
         echo "Current release version information: "
         echo "current-release-version is:  ${{ env.current-release-version }} "
+        echo "current-tag-version is    :  ${{ env.current-tag-version }} "
         echo ""
         echo "Next release version information: "
         echo "next-release-version is:  ${{ env.next-release-version }} "
+        echo "is-next-prerelease is  :  ${{ env.is-next-prerelease }} "
         echo ""
         echo "Version match results: "
         echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
@@ -609,5 +660,6 @@ runs:
         current-tag-version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-release-version: ${{ steps.set-next-release.outputs.next-release-version }}
+        is-next-prerelease: ${{ steps.set-next-release.outputs.is-next-prerelease }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
