@@ -80,6 +80,11 @@ jobs:
           echo "below are the file contents... "
           ls -R
 
+##### do not use the copycat action with the create pull request action... they don't play nice
+## instead, just use the 'run' block to copy the files we want to copy to whatever folder
+## that means, checkout both repos, then copy files from the 'actions' repo to the proper 'matrix.repo' directory
+## THEN use the create-pull-request action to add and commit the copied files...
+
       - name: Run the copycat action
         #uses: rwaight/actions/utilities/copycat@main # can set to main or specific version
         uses: rwaight/actions/utilities/copycat@v0.1.26 # can set to main or specific version
