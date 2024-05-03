@@ -3,6 +3,9 @@
 name: Label Manager
 run-name: Run ${{ github.event.action || 'label manager' }} from ${{ github.event_name }}
 on: 
+  #push:
+  #  branches: [main]
+  #  paths: ['assets/my-labels-*.yml']
   repository_dispatch:
     types: [export-labels,sync-labels]
   # You can run this with every event, but it's better to run it only when you actually need it.
