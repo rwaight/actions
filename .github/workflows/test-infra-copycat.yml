@@ -41,6 +41,12 @@ jobs:
           #- 'hosts'
           #- 'WindowsAutomation'
           #- 'actions-run-markserv'
+        # use 'include' to specify additional variables
+        include:
+          - repo: test-actions
+            base: main
+          - action: rwaight.github.io
+            base: master
     steps:
       # Create a GitHub App Token from actions/create-github-app-token
       # https://github.com/actions/create-github-app-token
@@ -69,10 +75,15 @@ jobs:
       - name: Verbose | File structure before the copycat actions
         #if: env.VERBOSE_WORKFLOW=='true'
         run: |
-          echo "this is the current working directory... "
+          echo "this is the current working directory, it was not set to anything specific ... "
           pwd
           echo "below are the file contents... "
           ls -R
+
+##### do not use the copycat action with the create pull request action... they don't play nice
+## instead, just use the 'run' block to copy the files we want to copy to whatever folder
+## that means, checkout both repos, then copy files from the 'actions' repo to the proper 'matrix.repo' directory
+## THEN use the create-pull-request action to add and commit the copied files...
 
       - name: Run the copycat action
         #uses: rwaight/actions/utilities/copycat@main # can set to main or specific version
@@ -111,6 +122,11 @@ jobs:
           echo "below are the file contents... "
           ls -R
 
+      - name: Verbose | Need to delete the 'actions' repo directory
+        #if: env.VERBOSE_WORKFLOW=='true'
+        run: |
+          echo "Need to delete the 'actions' repo directory now... "
+
       - name: Checkout the 'copycat-assets' branch from the '${{ matrix.repo }}' repo
         id: checkout-matrix-repo
         uses: actions/checkout@v4
@@ -119,7 +135,25 @@ jobs:
           repository: ${{ github.repository_owner }}/${{ matrix.repo }}
           ref: copycat-assets
           path: ${{ matrix.repo }}
-          fetch-depth: 0
+          #fetch-depth: 0
+
+      - name: Verbose | File structure after checkout of the second repo
+        #if: env.VERBOSE_WORKFLOW=='true'
+        working-directory: ./actions
+        run: |
+          echo "this is the current working directory, it was set to './actions' ... "
+          pwd
+          echo "below are the file contents... "
+          ls -R
+
+      - name: Verbose | Status of the ${{ matrix.repo }} repo
+        #if: env.VERBOSE_WORKFLOW=='true'
+        working-directory: ./${{ matrix.repo }}
+        run: |
+          echo "this is the current status of the ${{ matrix.repo }} repo... "
+          git status
+          echo ""
+          echo "the results of 'git status' are above"
 
       - name: Verbose | File structure after checkout of the ${{ matrix.repo }} repo
         #if: env.VERBOSE_WORKFLOW=='true'
@@ -130,6 +164,7 @@ jobs:
           echo "below are the file contents... "
           ls -R
 
+      # https://github.com/peter-evans/create-pull-request/blob/main/README.md
       - name: Create pull request in ${{ matrix.repo }}
         id: create-copycat-pr
         #uses: rwaight/actions/github/create-pull-request@main # can set to main or specific version
@@ -139,7 +174,11 @@ jobs:
           #add-paths: |
           #  .github/workflows/*.yml
           branch: 'copycat-assets'
+          #branch: 'infra-copycat-assets'
+          branch-suffix: short-commit-hash
+          # https://github.com/peter-evans/create-pull-request#alternative-strategy---always-create-a-new-pull-request-branch
           # probably do not need this since we have the proper 'ref' set in the 'checkout-matrix-repo' step #base: 'main'
+          base: '${{ matrix.base }}'
           title: '[infra-copycat] update copycat assets from ${{ env.INFRA_SOURCE }}'
           author: '${{ env.INFRA_BOT }} <${{ secrets.RW_ACTIONS_BOT_UID }}+${{ env.INFRA_BOT }}@users.noreply.github.com>'
           #committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
