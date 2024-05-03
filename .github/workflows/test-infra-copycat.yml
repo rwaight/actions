@@ -140,6 +140,7 @@ jobs:
           #  .github/workflows/*.yml
           branch: 'copycat-assets'
           # probably do not need this since we have the proper 'ref' set in the 'checkout-matrix-repo' step #base: 'main'
+          base: 'main'
           title: '[infra-copycat] update copycat assets from ${{ env.INFRA_SOURCE }}'
           author: '${{ env.INFRA_BOT }} <${{ secrets.RW_ACTIONS_BOT_UID }}+${{ env.INFRA_BOT }}@users.noreply.github.com>'
           #committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
