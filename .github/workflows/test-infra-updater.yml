@@ -12,9 +12,17 @@ on:
     #paths:
     #  - 'assets/my-labels-*.yml'
     types: [ closed ]
+  workflow_dispatch:
+    inputs:
+      verbose_output:
+        description: 'Verbose output'
+        required: true
+        #default: false
+        default: true
+        type: boolean
 
 env:
-  MY_WORKFLOW_DEBUG: 'true'
+  VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
 
 jobs:
   paths-filter:
@@ -34,7 +42,18 @@ jobs:
       label_assets: ${{ steps.filter-changes.outputs.label_assets }}
       markdown: ${{ steps.filter-changes.outputs.markdown }}
       workflows: ${{ steps.filter-changes.outputs.workflows }}
+      # the count of matches
+      added_count: ${{ steps.filter-changes.outputs.added_count }}
+      deleted_count: ${{ steps.filter-changes.outputs.deleted_count }}
+      modified_count: ${{ steps.filter-changes.outputs.modified_count }}
+      #### specific files and/or directories
+      archive_count: ${{ steps.filter-changes.outputs.archive_count }}
+      assets_count: ${{ steps.filter-changes.outputs.assets_count }}
+      label_assets_count: ${{ steps.filter-changes.outputs.label_assets_count }}
+      markdown_count: ${{ steps.filter-changes.outputs.markdown_count }}
+      workflows_count: ${{ steps.filter-changes.outputs.workflows_count }}
     permissions:
+      contents: read
       pull-requests: read
     steps:
       - name: Checkout files from commit tree
@@ -43,7 +62,7 @@ jobs:
         #   fetch-depth: 0
 
       - name: Output the GitHub context
-        #if: env.MY_WORKFLOW_DEBUG=='true'
+        #if: env.VERBOSE_WORKFLOW=='true'
         run: | 
           echo ""
           echo "::group::GitHub context"
@@ -89,8 +108,8 @@ jobs:
               - added|deleted|modified: '.github/workflows/**'
           list-files: 'json'
 
-      - name: Debug | Output the filter matches
-        #if: env.MY_WORKFLOW_DEBUG=='true'
+      - name: Verbose | Output the filter matches
+        #if: env.VERBOSE_WORKFLOW=='true'
         run: | 
           echo "::group::Count of matching files"
           echo "## the count of matches"
@@ -251,21 +270,59 @@ jobs:
       export_labels: true
       sync_labels: true
       debug_output: true
+      # need to change 'debug_output' to 'verbose_output'
     secrets: inherit
 
   print-info:
     name: Print paths-filter output and GitHub context
-    #if: env.MY_WORKFLOW_DEBUG=='true'
+    #if: env.VERBOSE_WORKFLOW=='true'
     needs: [paths-filter]
     runs-on: ubuntu-latest
     steps:
-      - name: Debug | Output the runner environment and GitHub context
+      - name: Verbose | Output the runner environment and GitHub context
         if: ${{ needs.paths-filter.outputs.label_assets == 'true' }}
         run: | 
           echo "the label_assets output from the paths-filter job was set to true "
 
-      - name: Debug | Output the runner environment and GitHub context
-        #if: env.MY_WORKFLOW_DEBUG=='true'
+      - name: Print the outputs from the 'paths-filter' job
+        id: print-paths-filter-outputs
+        run: | 
+          ## Print the '_count' outputs from the 'paths-filter' job
+          echo "below are the '_count' outputs from the 'paths-filter' job"
+          echo "- added_count: ${{ needs.paths-filter.outputs.added_count }}"
+          echo "- deleted_count: ${{ needs.paths-filter.outputs.deleted_count }}"
+          echo "- modified_count: ${{ needs.paths-filter.outputs.modified_count }}"
+          echo "- archive_count: ${{ needs.paths-filter.outputs.archive_count }}"
+          echo "- assets_count: ${{ needs.paths-filter.outputs.assets_count }}"
+          echo "- label_assets_count: ${{ needs.paths-filter.outputs.label_assets_count }}"
+          echo "- markdown_count: ${{ needs.paths-filter.outputs.markdown_count }}"
+          echo "- workflows_count: ${{ needs.paths-filter.outputs.workflows_count }}"
+          echo ""
+        env:
+          added: ${{ needs.paths-filter.outputs.added }}
+          deleted: ${{ needs.paths-filter.outputs.deleted }}
+          modified: ${{ needs.paths-filter.outputs.modified }}
+          ## all changes
+          changes: ${{ needs.paths-filter.outputs.changes }}
+          #### specific files and/or directories
+          archive: ${{ needs.paths-filter.outputs.archive }}
+          assets: ${{ needs.paths-filter.outputs.assets }}
+          label_assets: ${{ needs.paths-filter.outputs.label_assets }}
+          markdown: ${{ needs.paths-filter.outputs.markdown }}
+          workflows: ${{ needs.paths-filter.outputs.workflows }}
+          # the count of matches
+          added_count: ${{ needs.paths-filter.outputs.added_count }}
+          deleted_count: ${{ needs.paths-filter.outputs.deleted_count }}
+          modified_count: ${{ needs.paths-filter.outputs.modified_count }}
+          #### specific files and/or directories
+          archive_count: ${{ needs.paths-filter.outputs.archive_count }}
+          assets_count: ${{ needs.paths-filter.outputs.assets_count }}
+          label_assets_count: ${{ needs.paths-filter.outputs.label_assets_count }}
+          markdown_count: ${{ needs.paths-filter.outputs.markdown_count }}
+          workflows_count: ${{ needs.paths-filter.outputs.workflows_count }}
+
+      - name: Verbose | Output the runner environment and GitHub context
+        #if: env.VERBOSE_WORKFLOW=='true'
         run: | 
           echo "::group::Runner Environment"
           echo "## Runner Environment"
