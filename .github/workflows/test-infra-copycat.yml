@@ -170,6 +170,8 @@ jobs:
           #  .github/workflows/*.yml
           branch: 'copycat-assets'
           #branch: 'infra-copycat-assets'
+          branch-suffix: short-commit-hash
+          # https://github.com/peter-evans/create-pull-request#alternative-strategy---always-create-a-new-pull-request-branch
           # probably do not need this since we have the proper 'ref' set in the 'checkout-matrix-repo' step #base: 'main'
           base: '${{ matrix.base }}'
           title: '[infra-copycat] update copycat assets from ${{ env.INFRA_SOURCE }}'
