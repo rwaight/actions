@@ -54,6 +54,7 @@ jobs:
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
           # create a token for all repositories in the current owner's installation
           owner: ${{ github.repository_owner }}
+          #repositories: "actions,${{ matrix.repo }}"
 
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
@@ -131,6 +132,9 @@ jobs:
           branch: 'copycat-assets'
           title: '[infra-copycat] update copycat assets from ${{ env.INFRA_SOURCE }}'
           author: '${{ env.INFRA_BOT }} <${{ secrets.RW_ACTIONS_BOT_UID }}+${{ env.INFRA_BOT }}@users.noreply.github.com>'
+          #committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
+          committer: '${{ env.INFRA_BOT }} <${{ secrets.RW_ACTIONS_BOT_UID }}+${{ env.INFRA_BOT }}@users.noreply.github.com>'
+          commit-message: 'chore(copycat): update assets from ${{ env.INFRA_SOURCE }}'
           # Be careful of newlines here. We need to use the literal block chomping style (|) so that the
           # contents of the release notes don't get chomped. See https://yaml-multiline.info/
           body: |
