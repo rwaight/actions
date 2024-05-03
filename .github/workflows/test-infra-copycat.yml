@@ -1,0 +1,127 @@
+# This IS A TEST workflow to run other workflows based on changes within the repo
+name: Infra Copycat
+run-name: Run copycat on ${{ github.event_name }}
+on: 
+  push:
+    branches: # 'on push' to 'main' is used by: 'dispatch-label-manager'
+      - main
+    paths:
+      - 'assets/copycat/**'
+  # pull_request:
+  #   branches: [ main ]
+  #   #paths:
+  #   #  - 'assets/my-labels-*.yml'
+  #   types: [ closed ]
+  workflow_dispatch:
+    inputs:
+      verbose_output:
+        description: 'Verbose output'
+        required: true
+        default: false
+        type: boolean
+
+env:
+  VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'false' }}
+  INFRA_SOURCE: rwaight/actions
+  INFRA_BOT: rw-actions-bot[bot]
+
+jobs:
+  copycat-assets:
+    name: copycat-assets on ${{ github.repository_owner }}/${{ matrix.repo }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      matrix:
+        repo: 
+          #- 'actions'
+          - 'test-actions'
+          - 'rwaight.github.io'
+          #- 'hosts'
+          #- 'WindowsAutomation'
+          #- 'actions-run-markserv'
+    steps:
+      # Create a GitHub App Token from actions/create-github-app-token
+      # https://github.com/actions/create-github-app-token
+      - name: Create an App Token
+        #uses: actions/create-github-app-token@v1.9.0
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          # create a token for all repositories in the current owner's installation
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout files from commit tree
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          path: rw-actions
+          sparse-checkout: |
+            .github
+            assets/copycat/
+
+      - name: Verbose | File structure before the copycat actions
+        #if: env.VERBOSE_WORKFLOW=='true'
+        run: ls -R
+
+      - name: Run the copycat action
+        #uses: rwaight/actions/utilities/copycat@main # can set to main or specific version
+        uses: rwaight/actions/utilities/copycat@v0.1.26 # can set to main or specific version
+        id: copycat
+        # see https://github.com/rwaight/actions/blob/main/utilities/copycat/copycat_README.md#usage for more detail
+        with:
+          #github-token: ${{ steps.app-token.outputs.token }}
+          # currently only supports the (classic) personal access tokens
+          personal_token: ${{ steps.app-token.outputs.token }}
+          file_filter: '*.yml'
+          exclude: '.github/*'
+          # do NOT empty the 'dst_path' before copying
+          clean: false
+          src_path: rw-actions/assets/copycat/
+          src_branch: main
+          dst_path: .github/workflows/
+          dst_branch: copycat-assets
+          dst_owner: ${{ github.repository_owner }}
+          dst_repo_name: ${{ matrix.repo }}
+          #username: rw-actions-bot[bot]
+          username: ${{ env.INFRA_BOT }}
+          #email: ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          email: ${{ secrets.RW_ACTIONS_BOT_UID }}+${{ env.INFRA_BOT }}@users.noreply.github.com
+          commit_message: "chore: update copycat assets from ${{ env.INFRA_SOURCE }}"
+
+      - name: Checkout files from the '${{ matrix.repo }}' repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: ${{ github.repository_owner }}/${{ matrix.repo }}
+          path: ${{ matrix.repo }}
+          fetch-depth: 0
+
+      - name: Create pull request in ${{ matrix.repo }}
+        id: create-copycat-pr
+        #uses: rwaight/actions/github/create-pull-request@main # can set to main or specific version
+        uses: rwaight/actions/github/create-pull-request@v0.1.26 # can set to main or specific version
+        with:
+          path: ${{ matrix.repo }}/
+          branch: 'copycat-assets'
+          title: '[infra-copycat] update copycat assets from ${{ env.INFRA_SOURCE }}'
+          author: '${{ env.INFRA_BOT }} <${{ secrets.RW_ACTIONS_BOT_UID }}+${{ env.INFRA_BOT }}@users.noreply.github.com>'
+          # Be careful of newlines here. We need to use the literal block chomping style (|) so that the
+          # contents of the release notes don't get chomped. See https://yaml-multiline.info/
+          body: |
+            **This PR was created automatically by the test-infra-copycat workflow**
+          labels: type:chore, impacts:assets
+          token: ${{ steps.generate-token.outputs.token }}
+          assignees: rwaight
+          reviewers: rwaight
+          #team-reviewers: |
+          #  developers
+          draft: true
+  
+      - name: Output summary
+        run: |
+          echo "::notice title=Copycat PR Prepared::A copycat PR has been created in ${{ matrix.repo }}, please merge it to update the asset files: ${{ steps.create-copycat-pr.outputs.pull-request-url }}"
