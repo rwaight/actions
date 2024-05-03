@@ -75,7 +75,7 @@ jobs:
       - name: Verbose | File structure before the copycat actions
         #if: env.VERBOSE_WORKFLOW=='true'
         run: |
-          echo "this is the current working directory... "
+          echo "this is the current working directory, it was not set to anything specific ... "
           pwd
           echo "below are the file contents... "
           ls -R
@@ -117,6 +117,11 @@ jobs:
           echo "below are the file contents... "
           ls -R
 
+      - name: Verbose | Need to delete the 'actions' repo directory
+        #if: env.VERBOSE_WORKFLOW=='true'
+        run: |
+          echo "Need to delete the 'actions' repo directory now... "
+
       - name: Checkout the 'copycat-assets' branch from the '${{ matrix.repo }}' repo
         id: checkout-matrix-repo
         uses: actions/checkout@v4
@@ -125,7 +130,16 @@ jobs:
           repository: ${{ github.repository_owner }}/${{ matrix.repo }}
           ref: copycat-assets
           path: ${{ matrix.repo }}
-          fetch-depth: 0
+          #fetch-depth: 0
+
+      - name: Verbose | File structure after checkout of the second repo
+        #if: env.VERBOSE_WORKFLOW=='true'
+        working-directory: ./actions
+        run: |
+          echo "this is the current working directory, it was set to './actions' ... "
+          pwd
+          echo "below are the file contents... "
+          ls -R
 
       - name: Verbose | Status of the ${{ matrix.repo }} repo
         #if: env.VERBOSE_WORKFLOW=='true'
@@ -154,7 +168,8 @@ jobs:
           path: ${{ matrix.repo }}/
           #add-paths: |
           #  .github/workflows/*.yml
-          branch: 'infra-copycat-assets'
+          branch: 'copycat-assets'
+          #branch: 'infra-copycat-assets'
           # probably do not need this since we have the proper 'ref' set in the 'checkout-matrix-repo' step #base: 'main'
           base: '${{ matrix.base }}'
           title: '[infra-copycat] update copycat assets from ${{ env.INFRA_SOURCE }}'
