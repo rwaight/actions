@@ -140,7 +140,7 @@ jobs:
           body: |
             **This PR was created automatically by the test-infra-copycat workflow**
           labels: type:chore, impacts:assets
-          token: ${{ steps.generate-token.outputs.token }}
+          token: ${{ steps.app-token.outputs.token }}
           assignees: rwaight
           reviewers: rwaight
           #team-reviewers: |
