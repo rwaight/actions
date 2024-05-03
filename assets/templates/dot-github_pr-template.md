@@ -4,6 +4,7 @@
 test: {{ .owner }}/{{ .repo }}
 test1: {{ .name }}
 test2: {{ .owner2 }}/{{ .repo2 }}
+hopefully this will get copied over: ${{ github.repository_owner }}
 
 ## Items required before submitting the pull request
 1. A very clear and concise title
