@@ -82,8 +82,8 @@ jobs:
         with:
           #github-token: ${{ steps.app-token.outputs.token }}
           # currently only supports the (classic) personal access tokens
-          #personal_token: ${{ steps.app-token.outputs.token }}
-          personal_token: ${{ secrets.RW_COPYCAT_TOKEN }}
+          personal_token: ${{ steps.app-token.outputs.token }}
+          #might not need this, but try it next#personal_token: ${{ secrets.RW_COPYCAT_TOKEN }}
           #try next#personal_token: ${{ secrets.GITHUB_TOKEN }}
           #try next#personal_token: ${{ github.token }}
           file_filter: '*.yml'
@@ -123,6 +123,7 @@ jobs:
 
       - name: Verbose | File structure after checkout of the ${{ matrix.repo }} repo
         #if: env.VERBOSE_WORKFLOW=='true'
+        #working-directory: ./${{ matrix.repo }}
         run: |
           echo "this is the current working directory... "
           pwd
