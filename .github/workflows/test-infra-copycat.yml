@@ -27,7 +27,7 @@ env:
 
 jobs:
   copycat-assets:
-    name: copycat-assets on ${{ github.repository_owner }}/${{ matrix.repo }}
+    name: copycat assets to ${{ github.repository_owner }}/${{ matrix.repo }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -59,14 +59,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ steps.app-token.outputs.token }}
-          path: rw-actions
+          #path: rw-actions
           sparse-checkout: |
             .github
             assets/copycat/
 
       - name: Verbose | File structure before the copycat actions
         #if: env.VERBOSE_WORKFLOW=='true'
-        run: ls -R
+        run: |
+          echo "this is the current working directory... "
+          pwd
+          echo "below are the file contents... "
+          ls -R
 
       - name: Run the copycat action
         #uses: rwaight/actions/utilities/copycat@main # can set to main or specific version
@@ -81,7 +85,8 @@ jobs:
           exclude: '.github/*'
           # do NOT empty the 'dst_path' before copying
           clean: false
-          src_path: rw-actions/assets/copycat/
+          #src_path: rw-actions/assets/copycat/
+          src_path: assets/copycat/
           src_branch: main
           dst_path: .github/workflows/
           dst_branch: copycat-assets
@@ -93,6 +98,14 @@ jobs:
           email: ${{ secrets.RW_ACTIONS_BOT_UID }}+${{ env.INFRA_BOT }}@users.noreply.github.com
           commit_message: "chore: update copycat assets from ${{ env.INFRA_SOURCE }}"
 
+      - name: Verbose | File structure after the copycat actions
+        #if: env.VERBOSE_WORKFLOW=='true'
+        run: |
+          echo "this is the current working directory... "
+          pwd
+          echo "below are the file contents... "
+          ls -R
+
       - name: Checkout files from the '${{ matrix.repo }}' repo
         uses: actions/checkout@v4
         with:
@@ -100,6 +113,14 @@ jobs:
           repository: ${{ github.repository_owner }}/${{ matrix.repo }}
           path: ${{ matrix.repo }}
           fetch-depth: 0
+
+      - name: Verbose | File structure after checkout of the ${{ matrix.repo }} repo
+        #if: env.VERBOSE_WORKFLOW=='true'
+        run: |
+          echo "this is the current working directory... "
+          pwd
+          echo "below are the file contents... "
+          ls -R
 
       - name: Create pull request in ${{ matrix.repo }}
         id: create-copycat-pr
