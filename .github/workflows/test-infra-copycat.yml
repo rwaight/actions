@@ -81,7 +81,10 @@ jobs:
         with:
           #github-token: ${{ steps.app-token.outputs.token }}
           # currently only supports the (classic) personal access tokens
-          personal_token: ${{ steps.app-token.outputs.token }}
+          #personal_token: ${{ steps.app-token.outputs.token }}
+          personal_token: ${{ secrets.RW_COPYCAT_TOKEN }}
+          #try next#personal_token: ${{ secrets.GITHUB_TOKEN }}
+          #try next#personal_token: ${{ github.token }}
           file_filter: '*.yml'
           exclude: '.github/*'
           # do NOT empty the 'dst_path' before copying
