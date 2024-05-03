@@ -127,6 +127,15 @@ jobs:
           path: ${{ matrix.repo }}
           fetch-depth: 0
 
+      - name: Verbose | Status of the ${{ matrix.repo }} repo
+        #if: env.VERBOSE_WORKFLOW=='true'
+        working-directory: ./${{ matrix.repo }}
+        run: |
+          echo "this is the current status of the ${{ matrix.repo }} repo... "
+          git status
+          echo ""
+          echo "the results of 'git status' are above"
+
       - name: Verbose | File structure after checkout of the ${{ matrix.repo }} repo
         #if: env.VERBOSE_WORKFLOW=='true'
         #working-directory: ./${{ matrix.repo }}
@@ -136,6 +145,7 @@ jobs:
           echo "below are the file contents... "
           ls -R
 
+      # https://github.com/peter-evans/create-pull-request/blob/main/README.md
       - name: Create pull request in ${{ matrix.repo }}
         id: create-copycat-pr
         #uses: rwaight/actions/github/create-pull-request@main # can set to main or specific version
@@ -144,7 +154,7 @@ jobs:
           path: ${{ matrix.repo }}/
           #add-paths: |
           #  .github/workflows/*.yml
-          branch: 'copycat-assets'
+          branch: 'infra-copycat-assets'
           # probably do not need this since we have the proper 'ref' set in the 'checkout-matrix-repo' step #base: 'main'
           base: '${{ matrix.base }}'
           title: '[infra-copycat] update copycat assets from ${{ env.INFRA_SOURCE }}'
