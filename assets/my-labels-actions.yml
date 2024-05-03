@@ -1,0 +1,52 @@
+## Actions GitHub Labels
+##
+## Note: When planning to migrate an old label to a new label,
+##       you should first add the old label to the 'aliases'
+##       section of the new label, then run label sync, and then
+##       you can comment out the old label. Once the old label
+##       has been migrated to the new label, across all repos,
+##       it can then be deleted in this file.
+#
+##### group: labels
+# The group: labels have not been formally defined
+-
+  name: 'group:builders'
+  color: '50790C'
+  description: 'Actions in the ''builders'' group'
+  aliases: []
+-
+  name: 'group:chatops'
+  color: '50790C'
+  description: 'Actions in the ''chatops'' group'
+  aliases: []
+-
+  name: 'group:composite'
+  color: '50790C'
+  description: 'Actions in the ''composite'' group'
+  aliases: []
+-
+  name: 'group:git'
+  color: '50790C'
+  description: 'Actions in the ''git'' group'
+  aliases: []
+-
+  name: 'group:github'
+  color: '50790C'
+  description: 'Actions in the ''github'' group'
+  aliases: []
+-
+  name: 'group:releases'
+  color: '50790C'
+  description: 'Actions in the ''releases'' group'
+  aliases: []
+-
+  name: 'group:test'
+  color: '50790C'
+  description: 'Actions in the ''test'' group'
+  aliases: []
+-
+  name: 'group:utilities'
+  color: '50790C'
+  description: 'Actions in the ''utilities'' group'
+  aliases: []
+#

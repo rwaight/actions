@@ -5,11 +5,15 @@ actions:autorelease:
 - any:
   - head-branch: ['^autorelease','autorelease']
 
+actions:dependabot:
+- any:
+  - head-branch: ['^dependabot','dependabot']
+
 # Add 'documentation' label to any file changes within 'docs' or 'examples' folders
 documentation:
 - all:
   - changed-files:
-    - any-glob-to-any-file: ['**/*.md','**/docs/*','examples/**']
+    - any-glob-to-any-file: ['**/*.md','**/docs/*','docs/**','examples/**']
     - all-globs-to-all-files: '!CHANGELOG.md'
 
 # Add 'group:builders' label to any file changes within the 'builders' folder
@@ -17,6 +21,18 @@ group:builders:
 - any:
   - changed-files:
     - any-glob-to-any-file: 'builders/**'
+
+# Add 'group:chatops' label to any file changes within the 'chatops' folder
+group:chatops:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'chatops/**'
+
+# Add 'group:composite' label to any file changes within the 'composite' folder
+group:composite:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'composite/**'
 
 # Add 'group:git' label to any file changes within the 'git' folder
 group:git:
@@ -52,13 +68,19 @@ group:utilities:
 impacts:actions:
 - any:
   - changed-files:
-    - any-glob-to-any-file: ['builders/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
+    - any-glob-to-any-file: ['builders/**', 'chatops/**', 'composite/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
 
-# Add 'impacts:assets' label to any file changes within the grouped actions folders
+# Add 'impacts:assets' label to any file changes within the 'assets' folder
 impacts:assets:
 - any:
   - changed-files:
     - any-glob-to-any-file: 'assets/**'
+
+# Add 'impacts:examples' label to any file changes within the 'examples' folder
+impacts:examples:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'examples/**'
 
 # Add 'impacts:repo' label to file changes within the '.github' folder EXCEPT for the workflows sub-folder
 impacts:repo:

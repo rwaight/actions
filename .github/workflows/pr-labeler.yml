@@ -31,7 +31,10 @@ concurrency:
 
 jobs:
   pr-labeler:
-    name: Label pull request ${{ github.event.number }}
+    #name: PR Labeler
+    # commenting out the name with the '${{ github.event.number }}' as the job could
+    # not be selected as a required status check as part of protecting branches
+    #name: Label pull request ${{ github.event.number }}
     runs-on: ubuntu-latest
     # the 'if' statement below is not needed at this time, but would be if the 'on' section above changes
     if: github.event_name == 'pull_request'
@@ -176,8 +179,13 @@ jobs:
       # https://github.com/actions/create-github-app-token
       - name: Create an App Token
         #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
         id: app-token
+        # Skip running on forks or Dependabot since neither has access to secrets
+        if: |
+          (github.repository == 'rwaight/actions') &&
+          (github.actor!= 'dependabot[bot]') &&
+          (contains(github.head_ref, 'dependabot-') == false)
         with:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
@@ -187,14 +195,49 @@ jobs:
 
       - name: Checkout files from commit tree
         uses: actions/checkout@v4
+        id: checkout
+        # Skip running on forks or Dependabot since neither has access to secrets
+        if: steps.app-token.outcome != 'skipped'
         with:
           token: ${{ steps.app-token.outputs.token }}
+
+      - name: Configure Git Credentials
+        id: configure-git
+        #if: ${{ steps.app-token.outputs.token }}
+        # Skip running on forks or Dependabot since neither has access to secrets
+        if: steps.app-token.outcome != 'skipped'
+        run: |
+          ##
+          ## Configure git to login as the RW Actions Bot.
+          git config user.name rw-actions-bot[bot]
+          git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+
+      - name: Checkout files from commit tree for dependabot
+        uses: actions/checkout@v4
+        id: checkout-dependabot
+        # Run for Dependabot with the default token
+        if: |
+          (github.repository == 'rwaight/actions') &&
+          (github.actor== 'dependabot[bot]') &&
+          (contains(github.head_ref, 'dependabot-') == true)
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git Credentials for github-actions bot
+        id: configure-dependabot-git
+        # Run for Dependabot with the default token
+        if: steps.checkout-dependabot.outcome != 'skipped'
+        run: |
+          ##
+          ## Configure git to login as the GitHub Actions Bot.
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
       - name: Apply non-versioning labels
         id: label-pull-request
         uses: actions/labeler@v5
         with:
-          repo-token: ${{ steps.app-token.outputs.token }}
+          repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
         uses: rwaight/actions/test/check-semver-labels@main
@@ -202,7 +245,7 @@ jobs:
         #if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
         if: contains('refs/heads/autorelease', github.ref)
         with:
-          gh-token: ${{ steps.app-token.outputs.token }}
+          gh-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           allow-failure: true
           #allow-failure: false
           semver-fallback: 'triage:version-needed'
@@ -218,13 +261,16 @@ jobs:
           allow_failure: true
           prefix_mode: true
           #any_of: 'group:'
-          none_of: 'version:'
+          # allow 'version:' labels if it is needed to overwrite what is set in the release template
+          #none_of: 'version:'
           one_of: 'type:'
-          repo_token: ${{ steps.app-token.outputs.token }}
+          repo_token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Write the check-${{ env.GHA_LABEL_SCOPE }}-labels results to the environment
         # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
         id: write-results
+        # Skip running on forks or Dependabot since neither has access to secrets
+        if: steps.app-token.outcome != 'skipped'
         run: |
           ## the double number signs below are for line spacing and readability only
           ##
@@ -282,8 +328,9 @@ jobs:
 
       # look for a comment 
       - name: Find Comment
-        uses: rwaight/actions/github/find-comment@main
+        uses: rwaight/actions/chatops/find-comment@main
         id: find-comment
+        if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
         with:
           #issue-number: ${{ github.event.number }}
@@ -311,8 +358,8 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/github/create-or-update-comment@main
-        if: steps.write-results.outcome != 'skipped'
+        uses: rwaight/actions/chatops/create-or-update-comment@main
+        if: steps.comment-template.outcome != 'skipped'
         with:
           body: ${{ steps.comment-template.outputs.result }}
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
@@ -321,6 +368,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Output comment ID
+        if: steps.comment-on-pr.outcome != 'skipped'
         run: |
           echo "Comment ID - ${{ steps.comment-on-pr.outputs.comment-id }}"
 

@@ -1,12 +1,20 @@
+# Actions to import
+
+An attempt to keep track of what actions should be imported into this monorepo.
+
 ## Future planning - actions to import to this repo
 
 The following actions should be copied/imported to this repo:
+- **builders**
+    - None at this time.
 - **chatops**
     - See https://www.pagerduty.com/blog/what-is-chatops/
     - [`peter-evans/slash-command-dispatch`](https://github.com/peter-evans/slash-command-dispatch)
         - A GitHub action that facilitates "ChatOps" by creating repository dispatch events for slash commands
     - [`peter-evans/slash-command-dispatch-processor`](https://github.com/peter-evans/slash-command-dispatch-processor)
         - A command processor for slash-command-dispatch, a GitHub action that facilitates "ChatOps"
+- **git**
+    - None at this time.
 - **github**
     - [`imjohnbo/issue-bot` action](https://github.com/imjohnbo/issue-bot)
         - GitHub Actions powered Issue Bot
@@ -19,6 +27,9 @@ The following actions should be copied/imported to this repo:
         - GitHub Action for Semantic Release
         - Uses [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
 - **utilities**
+    - [`DamianReeves/write-file-action`](https://github.com/DamianReeves/write-file-action)
+        - A GitHub action to write a file
+        - Use case: overwrite, append, or preserve files
     - [`c-py/action-dotenv-to-setenv`](https://github.com/c-py/action-dotenv-to-setenv)
         - GitHub Action to export a dotenv file to environment variables (via set-env)
     - [`imjohnbo/action-to-mermaid`](https://github.com/imjohnbo/action-to-mermaid)
@@ -28,12 +39,17 @@ The following actions should be copied/imported to this repo:
 
 The actions should have their `branding` section updated according to the [update standards](#update-standards-for-imported-actions) listed below.
 
-##### Actions pending import
+## Actions pending import
 
 The following actions are pending import to this repo:
+- **builders**
+    - None at this time.
+- **chatops**
+    - None at this time.
 - **git**
     - [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
     - [`WyriHaximus/github-action-next-semvers`](https://github.com/WyriHaximus/github-action-next-semvers)
+    - [`WyriHaximus/github-action-get-previous-tag`](https://github.com/WyriHaximus/github-action-get-previous-tag)
 - **github**
     - None at this time.
 - **releases**
@@ -41,9 +57,13 @@ The following actions are pending import to this repo:
 - **utilities**
     - None at this time.
 
-#### Other actions to review
+## Other actions to review
 
 The following actions should be reviewed as candidates to import to this repo:
+- **builders**
+    - None at this time.
+- **chatops**
+    - None at this time.
 - **releases**
     - [`huggingface/semver-release-action`](https://github.com/huggingface/semver-release-action)
         - Github Action to release projects using Semantic Release.
@@ -84,13 +104,12 @@ The following actions should be reviewed as candidates to import to this repo:
     - [`peter-evans/enable-pull-request-automerge`](https://github.com/peter-evans/enable-pull-request-automerge)
         - A GitHub action to enable auto-merge on a pull request
         - **NOTE** same functionality exists in the GitHub CLI. See the [`gh pr merge` documentation](https://cli.github.com/manual/gh_pr_merge)
-
-```yml
-    - name: Enable Pull Request Automerge
-      run: gh pr merge --merge --auto "1"
-      env:
-        GH_TOKEN: ${{ secrets.PAT }}
-```
+        ```yml
+            - name: Enable Pull Request Automerge
+              run: gh pr merge --merge --auto "1"
+              env:
+                GH_TOKEN: ${{ secrets.PAT }}
+        ```
 
 - **utilities**
     - [`peter-evans/ghaction-import-gpg`](https://github.com/peter-evans/ghaction-import-gpg)
@@ -99,152 +118,74 @@ The following actions should be reviewed as candidates to import to this repo:
         - An action that allows you to check whether your npm package version has been updated
     - [`technote-space/package-version-check-action`](https://github.com/technote-space/package-version-check-action)
         - GitHub Actions to check package version before publish
+    - [`antifree/json-to-variables`](https://github.com/antifree/json-to-variables)
+        - GitHub action reads JSON file and writes its content as environment variables.
+    - [`tomwhross/write-good-action`](https://github.com/tomwhross/write-good-action)
+        - A Markdown prose linting action based on [`write-good`](https://github.com/btford/write-good)
 
 
-## Update standards for imported actions
 
-#### Updating the README
+## Reviewed actions
 
-Keep the README updated with the current list of actions.
+This section should contain the actions that have been reviewed and status.
 
-<details><summary>commands to list directories (click to expand)</summary>
+#### Tracking Table Legend
 
-##### Get the categories from the root directory
-```bash
-# use the '-I' option to exclude the non-category directories
-tree . -d -L 1 -I '.git|archive|assets|composite|examples|test' --noreport
-```
+<details><summary> Legend for tracking imports (click to expand) </summary>
 
-##### Get the actions by category
-```bash
-# use the '-I' option to exclude the non-category directories
-tree . -d -L 2 -I '.git|archive|assets|composite|examples|test' --noreport
-```
+#### Legend
+We can use emoji and reference an [emoji cheat sheet](https://github.com/ikatyang/emoji-cheat-sheet) ([punctuation link](https://github.com/ikatyang/emoji-cheat-sheet#punctuation)).
 
-
-##### Get the top two levels of directories from the root directory of the repo
-```bash
-# two levels of directories, using find
-find . -type d -maxdepth 2
-
-# two levels of directories, using tree
-tree . -d -L 2
-
-# two levels of directories, using tree, without the report
-tree . -d -L 2 --noreport
-```
-
-##### Get the directories by category with `find`
-```bash
-# store the categories into an array to use in a for loop
-categories=(builders git github releases utilities)
-
-# get the action names by category, using find
-for item in ${categories[@]}; do find $item -type d -maxdepth 1; done
-
-# not fancy way, using cut, to get the action names below their category
-for item in ${categories[@]}; do find $item -type d -maxdepth 1 | cut -d'/' -f2-; done
-
-# similar to above, but with sed
-for item in ${categories[@]}; do find $item -type d -maxdepth 1 | sed 's,^[^/]*/,,'; done
-```
-
-##### Get the directories by category with `tree`
-```bash
-# store the categories into an array to use in a for loop
-categories=(builders git github releases utilities)
-
-# get the action names by category, using tree
-for item in ${categories[@]}; do tree $item -d -L 1; done
-```
-
-##### Filter out the non-category directories with `tree`
-```bash
-# use the '-I' option to exclude the non-category directories
-tree . -d -L 2 -I '.git|archive|assets|composite|examples|test' --noreport
-```
+| Icon | Description |
+|:----:|:-----------:|
+| :white_check_mark: | Imported |
+| :large_orange_diamond: | Partially imported |
+| :exclamation: | Update is needed |
+| :grey_question: | Under review |
+| :grey_exclamation: | Review needed |
+| :x: | Not selected for import, <br/> needs a comment |
+| :wavy_dash: | Not applicable |
 
 </details>
 
+### Reviewed actions by category
 
-#### Branding Imported Actions
+- **builders**
+    - None at this time.
+- **chatops**
+    - :white_check_mark: [`peter-evans/create-or-update-comment`](https://github.com/peter-evans/create-or-update-comment)
+        - Create or update an issue or pull request comment.
+    - :white_check_mark: [`peter-evans/find-comment`](https://github.com/peter-evans/find-comment)
+        - Find an issue or pull request comment.
+- **git**
+    - This section **probably** needs to be updated.
+    - :white_check_mark: [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
+        - Commit changes made in your workflow run directly to your repo: for example, you use it to lint your code, update documentation, commit updated builds, etc...
+    - :white_check_mark: [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
+        - Semver versioning based on the git history and commit messages of your repository.
+    - :white_check_mark: [`release-flow/keep-a-changelog-action`](https://github.com/release-flow/keep-a-changelog-action)
+        - A GitHub Action that performs various operations on changelogs that adhere to
+[keep-a-changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/) conventions.
+- **github**
+    - This section **probably** needs to be updated.
+    - :white_check_mark: [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request)
+        - Create a pull request for changes to your repository in the actions workspace.
+    - :white_check_mark: [`agilepathway/label-checker`](https://github.com/agilepathway/label-checker)
+        - Check pull requests (PRs) for the presence or absence of specified labels
+    - :white_check_mark: [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
+        - Enables conditional execution of workflow steps and jobs, based on the files modified by pull request, on a feature branch, or by the recently pushed commits.
+    - :white_check_mark: [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
+        - A GitHub action to create a repository dispatch event.
+    - :white_check_mark: [`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request)
+        - Ensure that your pull request titles match the [Conventional Commits spec](https://www.conventionalcommits.org/).
+- **releases**
+    - This section needs to be updated.
+- **utilities**
+    - This section needs to be updated.
 
-Use the code block below to add `branding` to the imported actions.
-```yml
-branding:
-  icon: 'copy'
-  color: 'blue'
-  # Ref: https://haya14busa.github.io/github-action-brandings/
-  # fork: https://github.com/rwaight/github-action-brandings
-```
+## Created Actions
 
-#### Copying documentation in place
+This section contains the actions that have been created within this repo and have been moved out of testing.
 
-When importing a new action, `cd` into the directory then run the following commands to keep an original copy of specific files:
-```bash
-import=example-action
-# cd into the directory
-cd $import
-# rename the '.github' directory
-mv .github __dot_github
-# copy and rename the '.md' file(s)
-for f in *.md; do cp "$f" "${import}__$f"; done
-# copy and rename the '.yml' file(s)
-for f in *.yml; do cp "$f" "${import}__$f"; done
-```
-
-#### Documentation for imported actions
-
-The source actions repository README should be **renamed** to `<reponame>__README.md` and a new README should be created, using the following as a template:
-````markdown
-# GitHub ACTION_TITLE Action
-
-The current version in this repo was based off of [**REPO_NAME_ONLY** RELEASE_TAG_VERSION_HERE](https://github.com/REPO_OWNER_SLASH_REPO_NAME/releases/tag/RELEASE_TAG_VERSION_HERE)
-- for specific commits, include the following _after_ the tag link: `(specifically [this commit](https://github.com/REPO_OWNER_SLASH_REPO_NAME/commit/HASH_OF_UNIQUE_COMMIT_IN_SOURCE_REPO))`
-- This action is from https://github.com/REPO_OWNER_SLASH_REPO_NAME.
-
-
-The [`REPO_OWNER_SLASH_REPO_NAME`](https://github.com/REPO_OWNER_SLASH_REPO_NAME) has a (an) LICENSE_NAME_HERE:
-> LICENSE_SUMMARY_TEXT_HERE
-
-## Updates to the action
-
-None at this time.
-
-## ACTION_TITLE action
-
-ACTION_SUMMARY_DESCRIPTION_HERE
-
-## Inputs
-
-ACTION_INPUTS_SUMMARY_HERE
-
-## Outputs
-
-ACTION_OUTPUTS_SUMMARY_HERE
-
-## Deploying this action
-
-Example workflow:
-```yml
-name: EXAMPLE_WORKFLOW_NAME_HERE
-run-name: EXAMPLE_WORKFLOW_RUN_NAME_HERE
-
-on:
-  push:
-    branches:
-        - 'main'
-
-jobs:
-  EXAMPLE_JOB_NAME:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: EXAMPLE_STEP_WITH_ACTION
-        id: example_step_id
-        #uses: rwaight/actions/ACTION_CATEGORY/ACTION_DIRECTORY@main # can use version specific or main
-        uses: rwaight/actions/ACTION_CATEGORY/ACTION_DIRECTORY@v1
-
-```
-
-````
+- **git**
+    - [`rwaight/actions` repo-version-info](https://github.com/rwaight/actions/blob/main/git/repo-version-info)

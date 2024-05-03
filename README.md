@@ -7,7 +7,7 @@ This repo currently **does not include** [actions](https://docs.github.com/actio
 ### Actions in scope
 
 This repo contains [GitHub Actions](https://github.com/marketplace?type=actions) that are **not** [verified Actions](https://docs.github.com/actions/automating-your-workflow-with-github-actions/using-github-marketplace-actions).  Actions that **do not** have the `Verified creator` badge should be copied to this repo and run from this repo.
-- ***Note***: Any actions that run in a Docker container **must** be run by the dfeault Docker user, `root`, per [the Dockerfile support for GitHub Actions **USER** section](https://docs.github.com/en/actions/creating-actions/dockerfile-support-for-github-actions#user).
+- ***Note***: Any actions that run in a Docker container **must** be run by the default Docker user, `root`, per [the Dockerfile support for GitHub Actions **USER** section](https://docs.github.com/en/actions/creating-actions/dockerfile-support-for-github-actions#user).
 
 
 ### Categories
@@ -16,6 +16,8 @@ The actions are currently organized by the following categories:
 ```bash
 .
 ├── builders
+├── chatops
+├── composite
 ├── git
 ├── github
 ├── releases
@@ -24,8 +26,12 @@ The actions are currently organized by the following categories:
 
 #### Category Overview
 
-Before the first official release, the categories will be changed to align with the GitHub Actions categories. They will use the category list from https://github.com/marketplace?category=&type=actions:
+While the long-term plan _was_ to use the [category list from the GitHub Actions Marketplace](https://github.com/marketplace?category=&type=actions), the categories above have been chosen as marketplace actions can select more than one category.
+<!--- ~Before the first official release~, ~the categories will be changed to align with the GitHub Actions categories~. ~They will use~ the category list from https://github.com/marketplace?category=&type=actions: --->
 
+<details><summary>GitHub Actions Marketplace Categories</summary>
+
+The current [categories from the GitHub Actions Marketplace](https://github.com/marketplace?category=&type=actions) are:
 ```markdown
 **Categories**
 API management
@@ -50,6 +56,8 @@ Testing
 Utilities
 ```
 
+</details>
+
 
 #### Actions by category
 
@@ -57,16 +65,17 @@ Here is a current list of actions by category
 ```bash
 .
 ├── builders
+├── chatops
+│   ├── create-or-update-comment
+│   └── find-comment
 ├── git
 │   ├── add-and-commit
 │   ├── git-describe-semver
-│   ├── repo-version-info
-│   └── semantic-pull-request
+│   ├── keep-a-changelog-action
+│   └── repo-version-info
 ├── github
-│   ├── create-or-update-comment
 │   ├── create-pull-request
 │   ├── export-label-config
-│   ├── find-comment
 │   ├── find-pull-request
 │   ├── github-changelog-generator
 │   ├── issue-triage
@@ -75,10 +84,12 @@ Here is a current list of actions by category
 │   ├── label-sync
 │   ├── paths-filter
 │   ├── projectnext-label-assigner
-│   └── repository-dispatch
+│   ├── repository-dispatch
+│   └── semantic-pull-request
 ├── releases
 │   ├── release-drafter
-│   └── release-tag-updater
+│   ├── release-tag-updater
+│   └── semantic-release-action
 └── utilities
     ├── copycat
     ├── packer

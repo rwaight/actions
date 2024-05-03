@@ -1,8 +1,8 @@
 name-template: 'Actions Monorepo v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 version-template: '$MAJOR.$MINOR.$PATCH'
-filter-by-commitish: true
 commitish: main
+filter-by-commitish: true
 template: |
  GitHub Actions Monorepo, version $RESOLVED_VERSION
  
@@ -20,14 +20,16 @@ categories:
     labels:
       - 'impacts:actions'
     collapse-after: 10
-  - title: '🐛 Bug Fixes'
-    labels:
-      - 'bug'
-    collapse-after: 3
   - title: 'New Features'
     labels:
       - 'enhancement'
+      - 'type:feat'
     collapse-after: 10
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+      - 'type:fix'
+    collapse-after: 3
   - title: 'Repo Updates'
     labels:
       - 'impacts:repo'
@@ -35,11 +37,56 @@ categories:
   - title: 'Documentation'
     labels:
       - 'documentation'
+      - 'type:docs'
     collapse-after: 5
+  - title: '🧰 Maintenance'
+    labels:
+      - 'type:chore'
+      - 'type:refactor'
 
 category-template: "### $TITLE"
-change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+#change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
+
+exclude-labels:
+  - 'skip-changelog'
+  - 'actions:autorelease'
+
+exclude-contributors:
+  - 'rw-actions-bot[bot]'
+
+prerelease-identifier: 'rc'
+
+replacers:
+  - search: '/CVE-(\d{4})-(\d+)/g'
+    replace: 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-$1-$2'
+  - search: 'myname'
+    replace: 'My Name'
+  # remove commit message prefixes from release notes
+  # try: ^(?<type>fix|feat|docs|style|refactor|perf|test|build|ci|chore|¯\\_\(ツ\)_\/¯)(?<scope>\(\w+\)?((?=:\s)|(?=!:\s)))?(?<breaking>!)?(?<subject>:\s.*)?|^(?<merge>Merge \w+)
+  # above from https://stackoverflow.com/questions/58899999/regexp-to-match-conventional-commit-syntax
+  #
+  # need to try: ^(fix|feat|docs|style|refactor|perf|test|build|ci|chore){1}(\([\w\-\.]+\))?(!)?: ([\w ])+([\s\S]*)
+  # above from https://gist.github.com/marcojahn/482410b728c31b221b70ea6d2c433f0c
+  #
+  # https://github.com/release-drafter/release-drafter/issues/510#issuecomment-623883335
+  - search: "/(fix|feat|docs|style|refactor|perf|test|build|ci|chore)(\\(\\w+\\))?: /g"
+    replace: ""
+  #- search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)?: /g'
+  #  replace: ''
+  # remove commit message prefixes, including scope, from release notes
+  # but attempt to put the 'scope' (regex group 2) back into the notes
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)(\(.+?\))?: /g'
+    #replace: ''
+    replace: '$2: '
+  # find breaking changes and include 'breaking' in the notes
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)?!?: /g'
+    replace: 'breaking: '
+  # find breaking changes and include 'breaking' in the notes
+  # but attempt to put the 'scope' (regex group 2) back into the notes
+  - search: '/^(fix|feat|docs|style|refactor|perf|test|build|ci|chore)(\(.+?\))?!?: /g'
+    replace: 'breaking($2): '
 
 version-resolver:
   major:
@@ -48,11 +95,25 @@ version-resolver:
   minor:
     labels:
       - 'version:minor'
+      #- 'type:feat'
   patch:
     labels:
       - 'version:patch'
+      - 'type:feat'
+      - 'type:fix'
+      - 'type:docs'
+      - 'type:style'
+      - 'type:refactor'
+      - 'type:perf'
+      - 'type:test'
+      - 'type:build'
+      - 'type:ci'
+      - 'type:chore'
+      - 'type:revert'
+      - 'type:change'
+      - 'type:deprecate'
+      - 'type:remove'
+      - 'type:security'
   default: 'patch'
 
-exclude-labels:
-  - 'skip-changelog'
-  - 'actions:autorelease'
+

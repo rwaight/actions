@@ -22,6 +22,7 @@ on:
         default: patch
       preid:
         description: 'Pre-release identifier (only for pre-release builds)'
+        default: rc
         required: false
 
 permissions:
@@ -46,7 +47,7 @@ jobs:
       # https://github.com/actions/create-github-app-token
       - name: Creating a GitHub App Token from actions/create-github-app-token
         #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
         id: app-token
         with:
           # required

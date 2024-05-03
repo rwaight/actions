@@ -51,7 +51,7 @@ jobs:
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
         #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
         with:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
@@ -63,6 +63,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git Credentials if using the app token
+        id: configure-git
+        if: ${{ steps.app-token.outputs.token }}
+        run: |
+          ##
+          ## Configure git to login as the RW Actions Bot.
+          git config user.name rw-actions-bot[bot]
+          git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
 
       - name: Export label config using rwaight/actions/github/export-label-config
         id: export-label-config
@@ -95,8 +104,10 @@ jobs:
         with:
           config-file: |
             https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
+            https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-actions.yml
             https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-versioning.yml
           ##  assets/my-labels-core.yml
+          ##  assets/my-labels-actions.yml
           ##  assets/my-labels-versioning.yml
           #
           # The 'request-token' parameter is needed so the remote config-file values can be accessed

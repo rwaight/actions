@@ -1,0 +1,25 @@
+# https://docs.github.com/en/code-security/dependabot
+
+version: 2
+updates:
+
+  - package-ecosystem: "github-actions"
+    commit-message:
+      # Prefix all commit messages with "chore(actions): "
+      prefix: "chore(actions): "
+    directory: "/"
+    schedule:
+      # Runs once each month. This is on the first day of the month.
+      #interval: "monthly"
+      # Runs once each week. By default, this is on Monday. To modify this, use `schedule.day`.
+      interval: "weekly"
+      day: "tuesday"
+    labels:
+      - "actions:dependabot"
+      - "type:chore"
+      - "impacts:actions"
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      separator: "-"
+    reviewers:
+      - "rwaight"
