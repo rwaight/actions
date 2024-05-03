@@ -122,7 +122,7 @@ jobs:
         id: push
         # Verified creator: https://github.com/marketplace/actions/build-and-push-docker-images
         # GitHub Action to build and push Docker images with Buildx
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        uses: docker/build-push-action@eb539f44b153603ccbfbd98e2ab9d4d0dcaf23a4
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
           (github.repository == 'rwaight/actions') &&
