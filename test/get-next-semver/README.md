@@ -41,7 +41,7 @@ The Pre-release identifier (only for pre-release builds). Currently, only `rc` h
 
 #### action-verbose
 
-Determine if the workflow should run verbose tasks, defaults to false.
+Determine if the action should run verbose tasks, defaults to false.
 * required: false
 * default: `false`
 
