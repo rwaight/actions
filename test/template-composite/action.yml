@@ -15,19 +15,19 @@ inputs:
     description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
     required: false
     default: ${{ github.token }}
-  my_custom_input:
-    description: 'A custom input that you can use. '
-    required: false
-  my_action_debug:
-    description: 'Determine if the workflow should run debug tasks, defaults to false. '
+  my-example-input1:
+    description: 'An example input that you can use. '
+    required: true
+  action-verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
     default: 'false'
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
 outputs:
-  my_action_output:
+  action-output1:
     description: "The example output from this action. "
-    value: ${{ steps.template-example-output.outputs.my_action_output }}
+    value: ${{ steps.set-vars-output.outputs.EXAMPLE_ACTION_OUTPUT1 }}
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
 runs:
@@ -42,21 +42,21 @@ runs:
         exit 1
 
     - name: Greet the triggering_actor
-      if: inputs.my_action_debug=='true'
+      if: inputs.action-verbose=='true'
       shell: bash
-      run: echo Hello ${{ github.triggering_actor }}, the my_action_debug variable is set to true.
+      run: echo Hello ${{ github.triggering_actor }}, the action-verbose variable is set to true.
 
-    - name: Debug | Print the inputs
-      if: inputs.my_action_debug=='true'
-      id: debug-print-inputs
+    - name: Verbose | Print the inputs
+      if: inputs.action-verbose=='true'
+      id: verbose-print-inputs
       shell: bash
       run: | 
-        ## Print the inputs if inputs.my_action_debug=='true'
+        ## Print the inputs if inputs.action-verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "gh-token SHOULD BE MASKED, but is set to ${{ inputs.gh-token }} "
-        echo "my_custom_input is set to ${{ inputs.my_custom_input }} "
-        echo "my_action_debug is set to ${{ inputs.my_action_debug }} "
+        echo "my-example-input1 is set to ${{ inputs.my-example-input1 }} "
+        echo "action-verbose is set to ${{ inputs.action-verbose }} "
         ##
 
     - name: This is a template only
@@ -73,6 +73,15 @@ runs:
         echo ""
         echo "Running step 'template-example-output', which sends variables to GitHub output. "
         template_action_datetime=$(date +%Y%m%d-%Z-%H%M)
-        echo "The current datetime is $template_action_datetime"
-        echo "my_action_output=$template_action_datetime" >> "$GITHUB_OUTPUT"
+        echo "The current datetime is ${template_action_datetime}"
+        echo "Setting EXAMPLE_ACTION_OUTPUT1 to '${template_action_datetime}'..."
+        echo "EXAMPLE_ACTION_OUTPUT1=${template_action_datetime}" >> $GITHUB_ENV
+        echo "EXAMPLE_ACTION_OUTPUT1=${template_action_datetime}" >> "$GITHUB_OUTPUT"
         echo ""
+
+    # Output variables for the action
+    - name: Output variables from this job to the action output
+      id: set-vars-output
+      shell: bash
+      run: |
+        echo "EXAMPLE_ACTION_OUTPUT1=${EXAMPLE_ACTION_OUTPUT1}" >> "$GITHUB_OUTPUT"
