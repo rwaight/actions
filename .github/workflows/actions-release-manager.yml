@@ -177,7 +177,8 @@ jobs:
       # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
       - name: Run rwaight/actions/releases/release-drafter
         #uses: rwaight/actions/releases/release-drafter@050473414fe65f13fc4adbaf3c900410c50b9f8a
-        uses: rwaight/actions/releases/release-drafter@v0.1.26
+        #uses: rwaight/actions/releases/release-drafter@v0.1.26
+        uses: rwaight/actions/releases/release-drafter@main
         id: draft-release
         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
         with:
@@ -428,7 +429,8 @@ jobs:
         #old-name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
         id: release-tag-updater
         #uses: rwaight/actions/releases/release-tag-updater@050473414fe65f13fc4adbaf3c900410c50b9f8a
-        uses: rwaight/actions/releases/release-tag-updater@v0.1.26
+        #uses: rwaight/actions/releases/release-tag-updater@v0.1.26
+        uses: rwaight/actions/releases/release-tag-updater@main
         with:
           #tag: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
           tag: ${{ steps.get-release-version.outputs.full-version-ref }}
