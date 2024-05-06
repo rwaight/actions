@@ -58,8 +58,8 @@ jobs:
       - name: Checkout repository
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        #uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
-        uses: actions/checkout@v4.1.4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        #uses: actions/checkout@v4.1.4
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -76,8 +76,8 @@ jobs:
         if: ${{ matrix.go-version }}
         # Verified creator: https://github.com/marketplace/actions/setup-go-environment
         # Set up your GitHub Actions workflow with a specific version of Go
-        #uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe
-        uses: actions/setup-go@v4.1.0
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        #uses: actions/setup-go@v4.1.0
         with:
           go-version: ${{ matrix.go-version }}
 
@@ -90,15 +90,15 @@ jobs:
       - name: Setup Docker Buildx
         # Verified creator: https://github.com/marketplace/actions/docker-setup-buildx
         # GitHub Action to set up Docker Buildx
-        #uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb
-        uses: docker/setup-buildx-action@v3.3.0
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        #uses: docker/setup-buildx-action@v3.3.0
 
       # Uses the `docker/login-action` action to log in to the Container registry registry using the account and password that will publish the packages. Once published, the packages are scoped to the account defined here.
       - name: Log in to the ${{ env.REGISTRY }} container registry
         # Verified creator: https://github.com/marketplace/actions/docker-login
         # GitHub Action to login against a Docker registry
-        #uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        #uses: docker/login-action@v3.0.0
         with:
           #registry: ghcr.io
           registry: ${{ env.REGISTRY }}
@@ -111,8 +111,8 @@ jobs:
         id: meta
         # Verified creator: https://github.com/marketplace/actions/docker-metadata-action
         # GitHub Action to extract metadata (tags, labels) from Git reference and GitHub events for Docker 
-        #uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c
-        uses: docker/metadata-action@v5.5.0
+        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
+        #uses: docker/metadata-action@v5.5.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -126,8 +126,8 @@ jobs:
         id: push
         # Verified creator: https://github.com/marketplace/actions/build-and-push-docker-images
         # GitHub Action to build and push Docker images with Buildx
-        #uses: docker/build-push-action@af5a7ed5ba88268d5278f7203fb52cd833f66d6e
-        uses: docker/build-push-action@v5.2.0
+        uses: docker/build-push-action@af5a7ed5ba88268d5278f7203fb52cd833f66d6e # v5.2.0
+        #uses: docker/build-push-action@v5.2.0
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
           (github.repository == 'rwaight/actions') &&
@@ -146,8 +146,8 @@ jobs:
       - name: Generate artifact attestation
         # Verified creator: https://github.com/marketplace/actions/attest-build-provenance
         # Action for generating build provenance attestations for workflow artifacts
-        #uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940
-        uses: actions/attest-build-provenance@v1.0.0
+        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        #uses: actions/attest-build-provenance@v1.0.0
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
           (github.repository == 'rwaight/actions') &&
