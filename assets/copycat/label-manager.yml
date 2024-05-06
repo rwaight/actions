@@ -1,7 +1,11 @@
-# This workflow runs the 'Export label config' and 'Sync labels' actions and includes user input
+# This file is sourced from https://github.com/rwaight/actions/tree/main/assets/copycat
+# This workflow runs 'export-and-sync-labels'
 name: Label Manager
 run-name: Run ${{ github.event.action || 'label manager' }} from ${{ github.event_name }}
 on: 
+  #push:
+  #  branches: [main]
+  #  paths: ['assets/my-labels-*.yml']
   repository_dispatch:
     types: [export-labels,sync-labels]
   # You can run this with every event, but it's better to run it only when you actually need it.
@@ -17,20 +21,25 @@ on:
         required: true
         default: false
         type: boolean
-      debug_output:
-        description: 'Debug output'
+      verbose_output:
+        description: 'Verbose output'
         required: true
         default: false
         type: boolean
   schedule:
     - cron: '0 10 1 */6 *'  # export labels once every six months, at 10:00 on the first of the month
 
+env:
+  #VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'false' }}
+  INFRA_SOURCE: rwaight/actions
+  INFRA_BOT: rw-actions-bot[bot]
+
 jobs:
   export-and-sync-labels:
     name: Export and sync repo labels
     runs-on: ubuntu-latest
     env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'false' }}
     permissions:
       contents: write
       issues: write
@@ -41,7 +50,8 @@ jobs:
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
           echo "This workflow will now exit. "
-          exit 0
+          echo "::error file=label-manager,title=⛔ error::This workflow was run in a forked repo."
+          exit 1
 
       # Create a GitHub App Token from actions/create-github-app-token
       # https://github.com/actions/create-github-app-token
@@ -50,7 +60,7 @@ jobs:
         if: | 
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
-        #uses: actions/create-github-app-token@v1
+        #uses: actions/create-github-app-token@v1.10.0
         uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
         with:
           # required
@@ -70,8 +80,10 @@ jobs:
         run: |
           ##
           ## Configure git to login as the RW Actions Bot.
-          git config user.name rw-actions-bot[bot]
+          git config user.name ${{ env.INFRA_BOT }}
           git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+        ## previous 'run' commands
+          ##git config user.name rw-actions-bot[bot]
 
       - name: Export label config using rwaight/actions/github/export-label-config
         id: export-label-config
@@ -81,8 +93,8 @@ jobs:
           (github.event_name=='repository_dispatch' && github.event.action=='export-labels') ||
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
-        #uses: rwaight/actions/github/export-label-config@v1   # can use version specific or main
-        uses: rwaight/actions/github/export-label-config@main  # can use version specific or main
+        uses: rwaight/actions/github/export-label-config@v0.1.26   # can use version specific or main
+        #uses: rwaight/actions/github/export-label-config@main  # can use version specific or main
         with:
           # This is needed if you're dealing with private repos.
           token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
@@ -99,8 +111,8 @@ jobs:
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
           )
-        #uses: rwaight/actions/github/label-sync@v1 # can use version specific or main
-        uses: rwaight/actions/github/label-sync@main # can use version specific or main
+        uses: rwaight/actions/github/label-sync@v0.1.26 # can use version specific or main
+        #uses: rwaight/actions/github/label-sync@main # can use version specific or main
         with:
           config-file: |
             https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
@@ -119,11 +131,11 @@ jobs:
           # You can change the token used to change the labels, this is the default one
           token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
-      - name: Run workflow debug
-        id: run-workflow-debug
-        if: env.MY_WORKFLOW_DEBUG=='true'
+      - name: Verbose | Output workflow information
+        id: run-workflow-verbose
+        if: env.VERBOSE_WORKFLOW=='true'
         run: |
-          echo "workflow debug was set to true... you should probably put something here for debug purposes. "
+          echo "workflow verbose was set to true... you should probably put something here for verbose purposes. "
           echo ""
           echo "The GitHub event_name is: ${{ github.event_name }}"
           echo "The GitHub ref is: ${{ github.ref }}"
@@ -131,5 +143,5 @@ jobs:
           echo ""
           echo "For more information, see the GitHub Actions Contexts docs, which are located at: "
           echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
-          echo "The 'run-workflow-debug' step is now complete. "
+          echo "The 'run-workflow-verbose' step is now complete. "
         continue-on-error: true
