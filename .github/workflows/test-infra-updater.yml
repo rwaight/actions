@@ -87,9 +87,9 @@ jobs:
 
 
       - name: Filter changes
-        #uses: rwaight/actions/github/paths-filter@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        uses: rwaight/actions/github/paths-filter@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
         #uses: rwaight/actions/github/paths-filter@v0.1.26
-        uses: rwaight/actions/github/paths-filter@main
+        #uses: rwaight/actions/github/paths-filter@main
         id: filter
         with:
           # should not need to use base##base: ${{ github.ref }}
@@ -247,9 +247,9 @@ jobs:
 
       - name: Generate pull request template
         id: pull-request-template
-        #uses: rwaight/actions/utilities/render-template@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        uses: rwaight/actions/utilities/render-template@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
         #uses: rwaight/actions/utilities/render-template@v0.1.26
-        uses: rwaight/actions/utilities/render-template@main
+        #uses: rwaight/actions/utilities/render-template@main
         #if: steps.write-results.outcome != 'skipped'
         with:
           template: assets/templates/dot-github_pr-template.md
@@ -271,7 +271,7 @@ jobs:
 
   call-dispatch-label-manager:
     name: Run Infra Labeler
-    #uses: rwaight/actions/.github/workflows/infra-label-manager.yml@050473414fe65f13fc4adbaf3c900410c50b9f8a
+    #uses: rwaight/actions/.github/workflows/infra-label-manager.yml@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
     #uses: rwaight/actions/.github/workflows/infra-label-manager.yml@v0.1.26
     uses: rwaight/actions/.github/workflows/infra-label-manager.yml@main
     if: ${{ needs.paths-filter.outputs.label_assets == 'true' }}

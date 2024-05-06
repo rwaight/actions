@@ -90,9 +90,9 @@ jobs:
       - name: Get latest release info
         id: query-latest-release
         continue-on-error: true
-        #uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
         #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
-        uses: rwaight/actions/git/keep-a-changelog-action@main
+        #uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
@@ -112,9 +112,9 @@ jobs:
       - name: Get unreleased changes release info
         id: query-unreleased-changes
         continue-on-error: true
-        #uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
         #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
-        uses: rwaight/actions/git/keep-a-changelog-action@main
+        #uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
@@ -134,9 +134,9 @@ jobs:
       - name: Get latest-or-unreleased changes release info
         id: query-latest-or-unreleased-changes
         continue-on-error: true
-        #uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
         #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
-        uses: rwaight/actions/git/keep-a-changelog-action@main
+        #uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
           command: query
@@ -160,9 +160,9 @@ jobs:
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Update changelog using inputs.release-type (${{ github.event.inputs.release-type }})
         id: update-changelog
-        #uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
         #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
-        uses: rwaight/actions/git/keep-a-changelog-action@main
+        #uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/bump.md
           command: bump
