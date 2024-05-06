@@ -95,7 +95,7 @@ jobs:
       - name: Log in to the ${{ env.REGISTRY }} container registry
         # Verified creator: https://github.com/marketplace/actions/docker-login
         # GitHub Action to login against a Docker registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        uses: docker/login-action@5f4866a30a54f16a52d2ecb4a3898e9e424939cf
         with:
           #registry: ghcr.io
           registry: ${{ env.REGISTRY }}
