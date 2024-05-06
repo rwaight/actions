@@ -44,10 +44,11 @@ jobs:
           echo "This workflow will now exit. "
           exit 0
 
-      # https://github.com/actions/create-github-app-token
       - name: Creating a GitHub App Token from actions/create-github-app-token
-        #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        #uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
+        uses: actions/create-github-app-token@v1.10.0
         id: app-token
         with:
           # required
@@ -55,7 +56,10 @@ jobs:
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
 
       - name: Checkout files from commit tree
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        #uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f
+        uses: actions/checkout@v4.1.3
         with:
           ref: ${{ github.head_ref }}
           token: ${{ steps.app-token.outputs.token }}
@@ -86,9 +90,8 @@ jobs:
       - name: Get latest release info
         id: query-latest-release
         continue-on-error: true
-        #uses: ./
-        #uses: release-flow/keep-a-changelog-action@v3
-        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
         uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
@@ -109,9 +112,8 @@ jobs:
       - name: Get unreleased changes release info
         id: query-unreleased-changes
         continue-on-error: true
-        #uses: ./
-        #uses: release-flow/keep-a-changelog-action@v3
-        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
         uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
@@ -132,9 +134,8 @@ jobs:
       - name: Get latest-or-unreleased changes release info
         id: query-latest-or-unreleased-changes
         continue-on-error: true
-        #uses: ./
-        #uses: release-flow/keep-a-changelog-action@v3
-        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
         uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/query.md
@@ -159,11 +160,9 @@ jobs:
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Update changelog using inputs.release-type (${{ github.event.inputs.release-type }})
         id: update-changelog
-        #uses: ./
-        #uses: release-flow/keep-a-changelog-action@v3
-        #uses: release-flow/keep-a-changelog-action@74931dec7ecdbfc8e38ac9ae7e8dd84c08db2f32
+        #uses: rwaight/actions/git/keep-a-changelog-action@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
         uses: rwaight/actions/git/keep-a-changelog-action@main
-        #uses: release-flow/keep-a-changelog-action@v3.0.0
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/bump.md
           command: bump

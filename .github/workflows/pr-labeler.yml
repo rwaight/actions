@@ -62,7 +62,10 @@ jobs:
         if: (github.repository_owner != 'rwaight')
         # Save this in case we want to exit the workflow if it is called by 'rw-actions-bot[bot]'
         #if: (github.repository_owner != 'rwaight') || ${{ github.actor == 'rw-actions-bot[bot]' }}
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        #uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f
+        uses: actions/checkout@v4.1.3
 
       - name: Forked repo | Exit workflow early in forked repo
         id: check-repo-owner
@@ -175,11 +178,11 @@ jobs:
           echo "At the time this step has started, no '${{ env.GHA_LABEL_SCOPE }}' labels have been added to the PR"
           echo "The 'check-for-scope-labels' step has completed. "
 
-      # Create a GitHub App Token from actions/create-github-app-token
-      # https://github.com/actions/create-github-app-token
       - name: Create an App Token
-        #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        #uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
+        uses: actions/create-github-app-token@v1.10.0
         id: app-token
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
@@ -194,7 +197,10 @@ jobs:
           owner: ${{ github.repository_owner }}
 
       - name: Checkout files from commit tree
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        #uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f
+        uses: actions/checkout@v4.1.3
         id: checkout
         # Skip running on forks or Dependabot since neither has access to secrets
         if: steps.app-token.outcome != 'skipped'
@@ -213,7 +219,10 @@ jobs:
           git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
 
       - name: Checkout files from commit tree for dependabot
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        #uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f
+        uses: actions/checkout@v4.1.3
         id: checkout-dependabot
         # Run for Dependabot with the default token
         if: |
@@ -234,12 +243,17 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
       - name: Apply non-versioning labels
+        # Verified creator: https://github.com/marketplace/actions/labeler
+        # An action for automatically labelling pull requests
+        #uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9
+        uses: actions/labeler@v5.0.0
         id: label-pull-request
-        uses: actions/labeler@v5
         with:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
+        #uses: rwaight/actions/test/check-semver-labels@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/test/check-semver-labels@v0.1.26
         uses: rwaight/actions/test/check-semver-labels@main
         id: check-semver-labels
         #if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
@@ -253,8 +267,9 @@ jobs:
           my_action_debug: true
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@main # can use version specific or main
-        #uses: rwaight/actions/github/label-checker@v1 # can use version specific or main
+        #uses: rwaight/actions/github/label-checker@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/github/label-checker@v0.1.26
+        uses: rwaight/actions/github/label-checker@main
         id: check-type-labels
         if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         with:
@@ -328,6 +343,8 @@ jobs:
 
       # look for a comment 
       - name: Find Comment
+        #uses: rwaight/actions/chatops/find-comment@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/chatops/find-comment@v0.1.26
         uses: rwaight/actions/chatops/find-comment@main
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
@@ -341,6 +358,8 @@ jobs:
       - name: Generate comment template
         # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
+        #uses: rwaight/actions/utilities/render-template@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/utilities/render-template@v0.1.26
         uses: rwaight/actions/utilities/render-template@main
         if: steps.write-results.outcome != 'skipped'
         with:
@@ -358,6 +377,8 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
+        #uses: rwaight/actions/chatops/create-or-update-comment@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/chatops/create-or-update-comment@v0.1.26
         uses: rwaight/actions/chatops/create-or-update-comment@main
         if: steps.comment-template.outcome != 'skipped'
         with:

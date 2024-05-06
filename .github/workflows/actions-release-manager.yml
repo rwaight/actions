@@ -63,7 +63,10 @@ jobs:
           exit 0
 
       - name: Checkout files from commit tree
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        #uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f
+        uses: actions/checkout@v4.1.3
         with:
           fetch-depth: '0'
 
@@ -80,8 +83,10 @@ jobs:
 
       # https://github.com/actions/create-github-app-token
       - name: Creating a GitHub App Token from actions/create-github-app-token
-        #uses: actions/create-github-app-token@v1
-        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        #uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
+        uses: actions/create-github-app-token@v1.10.0
         id: app-token
         with:
           # required
@@ -171,7 +176,8 @@ jobs:
 
       # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
       - name: Run rwaight/actions/releases/release-drafter
-        #uses: rwaight/actions/releases/release-drafter@v1
+        #uses: rwaight/actions/releases/release-drafter@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/releases/release-drafter@v0.1.26
         uses: rwaight/actions/releases/release-drafter@main
         id: draft-release
         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
@@ -276,7 +282,10 @@ jobs:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
     steps:
       - name: Check-out the repository under GITHUB_WORKSPACE
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        #uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f
+        uses: actions/checkout@v4.1.3
 
       - name: Get release version
         id: get-release-version
@@ -419,8 +428,9 @@ jobs:
       - name: Update major and minor release tags for ${{ steps.get-release-version.outputs.full-version-ref }}
         #old-name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
         id: release-tag-updater
-        #uses: rwaight/actions/releases/release-tag-updater@v1 # can use version specific or main
-        uses: rwaight/actions/releases/release-tag-updater@main # can use version specific or main
+        #uses: rwaight/actions/releases/release-tag-updater@050473414fe65f13fc4adbaf3c900410c50b9f8a
+        #uses: rwaight/actions/releases/release-tag-updater@v0.1.26
+        uses: rwaight/actions/releases/release-tag-updater@main
         with:
           #tag: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
           tag: ${{ steps.get-release-version.outputs.full-version-ref }}
