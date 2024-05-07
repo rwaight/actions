@@ -1,0 +1,254 @@
+name: 'Set Build Type'
+description: 'Set the build type'
+# Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+author: 'rwaight'
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
+branding:
+  icon: 'edit'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+inputs:
+  gh-token:
+    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
+    required: false
+    default: ${{ github.token }}
+  my_custom_input:
+    description: 'A custom input that you can use. '
+    required: false
+  action-verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false. '
+    required: false
+    default: 'false'
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
+outputs:
+  build-type:
+    description: "The build-type, this should return one of: dev, test, main, or prod. "
+    value: ${{ steps.set-vars-output.outputs.MY_BUILD_TYPE }}
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
+runs:
+  using: "composite"
+  steps:
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::This action supports Linux only"
+        exit 1
+
+    - name: Greet the triggering_actor
+      if: inputs.action-verbose=='true'
+      shell: bash
+      run: echo Hello ${{ github.triggering_actor }}, the action-verbose variable is set to true.
+
+    - name: Verbose | Print the inputs
+      if: inputs.action-verbose=='true'
+      id: verbose-print-inputs
+      shell: bash
+      run: | 
+        ## Print the inputs if inputs.action-verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "my_custom_input is set to ${{ inputs.my_custom_input }} "
+        echo "action-verbose is set to ${{ inputs.action-verbose }} "
+        ##
+
+    - name: Set environmental variables used by the action
+      id: set-action-env-vars
+      # Ensure that the needed environmental variables are set
+      #   - 'EVAL_BUILD_TYPE' is set to 'false'
+      #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        echo "Setting EVAL_BUILD_TYPE to false..."
+        echo "EVAL_BUILD_TYPE=false" >> $GITHUB_ENV
+        echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
+        echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
+        echo ""
+      # https://github.blog/changelog/2020-07-22-github-actions-better-support-for-alternative-default-branch-names/
+
+    - name: Get tag version
+      id: get-tag-version
+      #if: (github.ref_type == 'tag')
+      if: (github.ref_name == 'v*.*.*')
+      shell: bash
+      run: |
+        VERSION="${{ github.ref_name }}"
+
+        RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        if [[ $VERSION =~ $RE ]]; then
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PATCH="${BASH_REMATCH[3]}"
+          PRERELEASE="${BASH_REMATCH[4]}"
+          if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "VERSION is: $VERSION "
+            echo "RE is     : $RE "
+            echo "MAJOR is  : $MAJOR "
+            echo "MINOR is  : $MINOR "
+            echo "PATCH is  : $PATCH "
+            echo "PRERELEASE: $PRERELEASE"
+          fi
+        else
+          echo "::error::Version '$VERSION' is not in a valid format" && exit 1
+        fi
+
+        if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+        if [[ -f $GITHUB_OUTPUT ]]; then
+          echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+          echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+          echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+        else
+          echo "::set-output name=major-ref::v$MAJOR"
+          echo "::set-output name=minor-ref::v$MINOR"
+          echo "::set-output name=patch-ref::v$PATCH"
+          echo "::set-output name=is-prerelease::$pre"
+        fi
+      ## old 'run' block info
+      ####
+      ## VERSION="${{ github.event.release.tag_name }}"
+
+    - name: Check output from get-tag-version
+      id: check-get-tag-version
+      shell: bash
+      env:
+        FULL_VERSION: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
+        MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
+        PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
+        IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+      run: |
+        echo "## get-tag-version outputs"
+        echo "Full version: ${{ env.FULL_VERSION }} "
+        echo "Major ref   : ${{ env.MAJOR_REF }} "
+        echo "Minor ref   : ${{ env.MINOR_REF }} "
+        echo "Patch ref   : ${{ env.PATCH_REF }} "
+        echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
+        echo ""
+
+    - name: MY_BUILD_TYPE | Check for 'v*.*.*' tags, set the build type to prod
+      # This step is run when the branch is a 'v*.*.*' tag
+      #if: (github.ref == 'refs/heads/v*.*.*' || github.ref_name == 'v*.*.*')
+      #if: ${{ contains('refs/tags/v*.*.*', github.ref) }} && (github.ref_type == 'tag')
+      if: ${{ contains('refs/tags/v*.*.*', github.ref) }}
+      #if: {{ github.ref == 'ref/head/v*' }}
+      shell: bash
+      run: |
+        echo "Check for 'v*.*.*' tags, setting MY_BUILD_TYPE to 'prod'..."
+        echo "MY_BUILD_TYPE=prod" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+      env:
+        FULL_VERSION: ${{ steps.get-tag-version.outputs.full-version-ref }}
+
+    - name: MY_BUILD_TYPE | Check for default branch, set the build type to main
+      # This step is run when the branch is main
+      #if: (github.ref == 'refs/heads/main' || github.ref_name == 'main')
+      if: ${{ github.event.repository.default_branch }}
+      #if: ${{ always() && format('refs/heads/{0}', github.event.repository.default_branch) == github.ref }}
+      shell: bash
+      run: |
+        echo "Check for the default branch, setting MY_BUILD_TYPE to 'main'..."
+        echo "MY_BUILD_TYPE=main" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+
+    - name: MY_BUILD_TYPE | Check for main-2.x branch, set the build type to main
+      # This step is run when the branch is main-2.x
+      if: (github.ref == 'refs/heads/main-2.x' || github.ref_name == 'main-2.x')
+      shell: bash
+      run: |
+        echo "Check for main-2.x branch, setting MY_BUILD_TYPE to 'main'..."
+        echo "MY_BUILD_TYPE=main" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+
+    - name: MY_BUILD_TYPE | Check for 'main-*' branch, set the build type to main
+      # This step is run when the branch is 'main-*'
+      if: ${{ contains('refs/heads/main-*', github.ref) }}
+      shell: bash
+      run: |
+        echo "Check for 'main-*' branch, setting MY_BUILD_TYPE to 'main'..."
+        echo "MY_BUILD_TYPE=main" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+
+    - name: MY_BUILD_TYPE | Check for dev branch, set the build type to dev
+      # This step is run when the branch is dev
+      if: (github.ref == 'refs/heads/dev' || github.ref_name == 'dev')
+      #if: env.EVAL_BUILD_TYPE=='false'
+      shell: bash
+      run: |
+        echo "Check for dev branch, setting MY_BUILD_TYPE to 'dev'..."
+        echo "MY_BUILD_TYPE=dev" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+
+    - name: MY_BUILD_TYPE | Check for 'dev*' branch, set the build type to dev
+      # This step is run when the branch is dev
+      if: ${{ contains('refs/heads/dev*', github.ref) }}
+      #if: env.EVAL_BUILD_TYPE=='false'
+      shell: bash
+      run: |
+        echo "Check for 'dev*' branch, setting MY_BUILD_TYPE to 'dev'..."
+        echo "MY_BUILD_TYPE=dev" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+
+    - name: MY_BUILD_TYPE | Check for test branch, set the build type to test
+      # This step is run when the branch is test
+      if: (github.ref == 'refs/heads/test' || github.ref_name == 'test')
+      #if: env.EVAL_BUILD_TYPE=='false'
+      shell: bash
+      run: |
+        echo "Setting MY_BUILD_TYPE to 'test'..."
+        echo "MY_BUILD_TYPE=test" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+
+    - name: MY_BUILD_TYPE | Check for 'test*' branch, set the build type to test
+      # This step is run when the branch is test
+      if: ${{ contains('refs/heads/test*', github.ref) }}
+      #if: env.EVAL_BUILD_TYPE=='false'
+      shell: bash
+      run: |
+        echo "Setting MY_BUILD_TYPE to 'test'..."
+        echo "MY_BUILD_TYPE=test" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+
+    - name: MY_BUILD_TYPE | Fallback value - Set the build type to dev
+      # This step is run when the branch is NOT main or dev
+      #if: github.ref != 'refs/heads/main'
+      # If this runs, then that means the previous steps were skipped
+      if: env.EVAL_BUILD_TYPE=='false'
+      shell: bash
+      run: |
+        echo "Setting MY_BUILD_TYPE to 'dev'..."
+        echo "MY_BUILD_TYPE=dev" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_TYPE to true..."
+        echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
+        echo ""
+
+    # Output variables for the action
+    - name: Output variables from this job to the action output
+      id: set-vars-output
+      shell: bash
+      run: |
+        echo "MY_BUILD_TYPE=$MY_BUILD_TYPE" >> "$GITHUB_OUTPUT"
