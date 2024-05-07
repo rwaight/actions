@@ -3,10 +3,8 @@ name: Infra Copycat
 run-name: Run copycat on ${{ github.event_name }}
 on: 
   push:
-    # 'on push' to 'main' is used by: 'dispatch-label-manager'
-    #branches: [main] # 'on push' to 'main' is used by: 'dispatch-label-manager'
-    branches: [ $default-branch ]
-    # https://github.blog/changelog/2020-07-22-github-actions-better-support-for-alternative-default-branch-names/
+    branches: # 'on push' to 'main' is used by: 'dispatch-label-manager'
+      - main
     paths:
       - 'assets/copycat/**'
   # pull_request:
