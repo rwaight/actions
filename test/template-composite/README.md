@@ -44,17 +44,17 @@ jobs:
         uses: rwaight/actions/test/template-composite@main
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
-          my_custom_input: 'hello'
-          my_action_debug: true
+          my-example-input1: 'hello'
+          action-verbose: true
 
       - name: Report the output from the run-template-composite step
-        if: ${{ steps.run-template-composite.outputs.my_action_output }}
-        run: echo "The output in the 'run-template-composite' step was $template_output ."
+        if: ${{ steps.run-template-composite.outputs.action-output1 }}
+        run: echo "The output in the 'run-template-composite' step was ${template_output1} ."
         env:
-          template_output: ${{ steps.run-template-composite.outputs.my_action_output }}
+          template_output1: ${{ steps.run-template-composite.outputs.action-output1 }}
 
       - name: Fail if the 'run-template-composite' step did not provide output
-        if: ${{ ! steps.run-template-composite.outputs.my_action_output }}
+        if: ${{ ! steps.run-template-composite.outputs.action-output1 }}
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: |
           echo "::error title=⛔ error in the 'run-template-composite' step hint::No output provided"
