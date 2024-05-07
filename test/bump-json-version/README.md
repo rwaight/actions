@@ -15,6 +15,9 @@ See the `inputs` configured in the [action.yml](action.yml) file.
 
 ## Example Usage
 
+
+### Calculate the release version then bump the JSON version
+
 Create a file named `.github/workflows/bump-json-version.yml` with the following:
 ```
 name: Bump JSON version
@@ -56,44 +59,44 @@ jobs:
           git status
           echo "the 'set-up-git' step has completed. "
 
-      - name: Bump the JSON version
-        id: bump-json-version
+      - name: Calculate the release version then bump the JSON version
+        id: calculate-and-bump-json
         uses: rwaight/actions/test/bump-json-version@main
         with:
-          #author_name: Your Name
-          #author_email: mail@example.com
-          committer_name: GitHub Actions
-          committer_email: 41898282+github-actions[bot]@users.noreply.github.com
-          default_author: github_actions
+          #author-name: Your Name
+          #author-email: mail@example.com
+          committer-name: GitHub Actions
+          committer-email: 41898282+github-actions[bot]@users.noreply.github.com
+          default-author: github_actions
           json-vars-file: 'hello'
           json-vars-field: true
           release-type: ${{ inputs.release-type }}
-          my_action_debug: true
+          action-verbose: true
 
-      - name: Report the output from the bump-json-version step
-        if: ${{ steps.bump-json-version.outputs.next-release-version }}
+      - name: Report the output from the calculate-and-bump-json step
+        if: ${{ steps.calculate-and-bump-json.outputs.next-release-version }}
         run: |
-          echo "The output from the 'bump-json-version' step was: "
+          echo "The output from the 'calculate-and-bump-json' step was: "
           echo "current release version: ${{ env.current-release-version }} "
           echo "next release version: ${{ env.next-release-version }} "
           echo "old json version: ${{ env.old-json-version }} "
           echo "new json version: ${{ env.new-json-version }} "
         env:
-          current-release-version: ${{ steps.bump-json-version.outputs.current-release-version }}
-          next-release-version: ${{ steps.bump-json-version.outputs.next-release-version }}
-          old-json-version: ${{ steps.bump-json-version.outputs.old-json-version }}
-          new-json-version: ${{ steps.bump-json-version.outputs.new-json-version }}
+          current-release-version: ${{ steps.calculate-and-bump-json.outputs.current-release-version }}
+          next-release-version: ${{ steps.calculate-and-bump-json.outputs.next-release-version }}
+          old-json-version: ${{ steps.calculate-and-bump-json.outputs.old-json-version }}
+          new-json-version: ${{ steps.calculate-and-bump-json.outputs.new-json-version }}
 
-      - name: Fail if the 'bump-json-version' step did not output the next release version
-        if: ${{ ! steps.bump-json-version.outputs.next-release-version }}
+      - name: Fail if the 'calculate-and-bump-json' step did not output the next release version
+        if: ${{ ! steps.calculate-and-bump-json.outputs.next-release-version }}
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: |
-          echo "::error title=⛔ error in the 'bump-json-version' step hint::Next release version was not provided"
+          echo "::error title=⛔ error in the 'calculate-and-bump-json' step hint::Next release version was not provided"
           exit 1
 
 ```
 
-### About `actions/checkout`
+## About `actions/checkout`
 
 The token you use when setting up the repo with this action will determine what token `bump-json-version` will use.  
 
