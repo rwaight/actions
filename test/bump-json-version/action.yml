@@ -107,7 +107,7 @@ runs:
     - name: Validate that either the 'release-type' input or the 'release-version' input is set
       id: validate-inputs
       if: | 
-        ${{ inputs.release-version == 'not-set' }} && (
+        ${{ inputs.release-version == 'not-set' }} && ( ${{ inputs.release-type != 'not-set' }} ||
         ${{ inputs.release-type != 'major' }} || ${{ inputs.release-type != 'minor' }} || 
         ${{ inputs.release-type != 'patch' }} || ${{ inputs.release-type != 'prerelease' }} )
       shell: bash
