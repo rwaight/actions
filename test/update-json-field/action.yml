@@ -1,0 +1,290 @@
+name: 'Update JSON field'
+description: 'Update a specific field in a JSON file'
+author: 'rwaight'
+branding:
+  icon: 'info'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+
+inputs:
+  # author-name:
+  #   description: 'The name of the user that will be displayed as the author of the commit. This is sent to the `add-and-commit` action. '
+  #   required: false
+  # author-email:
+  #   description: 'The email of the user that will be displayed as the author of the commit. This is sent to the `add-and-commit` action. '
+  #   required: false
+  # committer-name:
+  #   description: 'The name of the custom committer you want to use. This is sent to the `add-and-commit` action. '
+  #   required: false
+  # committer-email:
+  #   description: 'The email of the custom committer you want to use. This is sent to the `add-and-commit` action. '
+  #   required: false
+  # # cwd:
+  # #   description: 'The directory where your repository is located. You should use actions/checkout first to set it up'
+  # #   required: false
+  # #   default: '.'
+  # default-author:
+  #   description: >-
+  #     'Determines the way the `add-and-commit` action fills missing author name and email. Three options are available:
+  #       - github_actor   ->  UserName <UserName@users.noreply.github.com>
+  #       - user_info      ->  Your Display Name <your-actual@email.com>
+  #       - github_actions ->  github-actions <email associated with the github logo>
+  #     This is sent to the `add-and-commit` action. '
+  #   required: false
+  #   default: 'github_actor'
+  # gh-token:
+  #   description: 'The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed to run the `gh release` command depending on permissions granted to the default GitHub token.'
+  #   required: false
+  #   default: ${{ github.token }}
+  json-file:
+    description: 'The JSON file, including the relative path in the repo. '
+    required: true
+    default: 'not-set'
+  vars-field:
+    description: 'The field that should be updated within the JSON file. '
+    required: true
+    default: 'not-set'
+  vars-new-value:
+    description: 'The new value that should be updated within the specified field. '
+    required: true
+    default: 'not-set'
+  action-verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false. '
+    required: false
+    default: 'false'
+
+outputs:
+  previous-value:
+    description: "The previous value of the field that was updated in the JSON file. "
+    value: ${{ steps.get-current-value.outputs.previous-value }}
+  new-value:
+    description: "The new value of the field that was updated in the JSON file. "
+    value: ${{ steps.get-updated-value.outputs.new-value }}
+
+runs:
+  using: "composite"
+  # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+  steps:
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::This action supports Linux only"
+        exit 1
+
+    - name: Greet the triggering_actor
+      if: inputs.action-verbose=='true'
+      shell: bash
+      run: echo Hello ${{ github.triggering_actor }}, the action-verbose variable is set to true.
+
+    - name: Verbose | Print the inputs
+      if: inputs.action-verbose=='true'
+      id: verbose-print-inputs
+      shell: bash
+      run: | 
+        ## Print the inputs if inputs.action-verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'verbose-print-inputs' step. "
+        echo ""
+        ##echo "author-name is    :  ${{ inputs.author-name }} "
+        ##echo "author-email is   :  ${{ inputs.author-email }} "
+        ##echo "committer-name is :  ${{ inputs.committer-name }} "
+        ##echo "committer-email is:  ${{ inputs.committer-email }} "
+        ####echo "cwd is            :  ${{ inputs.cwd }} "
+        ##echo "default-author is :  ${{ inputs.default-author }} "
+        echo "json-file is      :  ${{ inputs.json-file }} "
+        echo "vars-field is     :  ${{ inputs.vars-field }} "
+        echo "vars-new-value is :  ${{ inputs.vars-new-value }} "
+        echo "action-verbose is :  ${{ inputs.action-verbose }} "
+        ##
+        echo "completing the 'verbose-print-inputs' step. "
+
+    - name: Get the current value of the ${{ inputs.vars-field }} field
+      id: get-current-value
+      shell: bash
+      run: |
+        ## Get the current value of ${{ env.vars_field }}
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "starting the 'get-current-value' step. "
+            echo "json_vars_file is:  ${{ env.json_vars_file }} "
+            echo "vars_field is    :  ${{ env.vars_field }} "
+            echo "vars_new_value is:  ${{ env.vars_new_value }} "
+            echo ""
+            echo "the syntax is 'MY_CUSTOM_VALUE=$(jq --raw-output .my_custom_field my-custom-variables.json)' "
+        fi
+        current_value=$(jq --raw-output .${{ env.vars_field }} ${{ env.json_vars_file }})
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "current_value: ${current_value} "
+            echo "writing the 'current_value' to the environment and GitHub output"
+        fi
+        echo "current_value=${current_value}" >> $GITHUB_ENV
+        echo "current_value=${current_value}" >> "$GITHUB_OUTPUT"
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "writing ${current_value} to the 'previous-value' GitHub output"
+        fi
+        echo "previous-value=${current_value}" >> $GITHUB_ENV
+        echo "previous-value=${current_value}" >> "$GITHUB_OUTPUT"
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'get-current-value' step. "; fi
+      env:
+        json_vars_file: ${{ inputs.json-vars-file }}
+        vars_field: ${{ inputs.vars-field }}
+        vars_new_value: ${{ inputs.vars-new-value }}
+
+    - name: Update the value of the json field
+      id: update-json-field-value
+      shell: bash
+      run: |
+        ## Update the value of the json field
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "starting the 'update-json-field-value' step. "
+            echo "json_vars_file is:  ${{ env.json_vars_file }} "
+            echo "vars_field is    :  ${{ env.vars_field }} "
+            echo "vars_new_value is:  ${{ env.vars_new_value }} "
+            echo ""
+            echo "::group::printing the syntax to set the '${{ env.vars_field }}' field to ${{ env.vars_new_value }} ... "
+            ## tmp=$(mktemp)
+            ## jq '.my_custom_field = "my-new-value"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
+            echo "tmp=\$(mktemp)"
+            echo "jq '.my_custom_field = \"my-new-value\"' my-custom-variables.json > \"\$tmp\" && mv \"\$tmp\" my-custom-variables.json\" "
+            echo ""
+            echo "special thanks to whoever posted the commands on stackoverflow... "
+            echo " https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
+            echo ""
+            echo "::endgroup::"
+        fi
+        tmp=$(mktemp)
+        jq '.${{ env.vars_field }} = "${{ env.vars_new_value }}"' ${{ env.json_vars_file }} > "$tmp" && mv "$tmp" ${{ env.json_vars_file }}
+        ##
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "going to check the value in the JSON file "
+        fi
+        ##
+        check_json_value=$(jq --raw-output .${{ env.vars_field }} ${{ env.json_vars_file }})
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "check_json_value: $check_json_value"
+        fi
+        ##
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'update-json-field-value' step. "; fi
+      env:
+        json_vars_file: ${{ inputs.json-vars-file }}
+        vars_field: ${{ inputs.vars-field }}
+        vars_new_value: ${{ inputs.vars-new-value }}
+
+    - name: Get the updated value of the ${{ inputs.vars-field }} field
+      id: get-updated-value
+      shell: bash
+      run: |
+        ## Get the updated value of the ${{ inputs.vars-field }} field
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "starting the 'get-updated-value' step. "
+            echo "json_vars_file is:  ${{ env.json_vars_file }} "
+            echo "vars_field is    :  ${{ env.vars_field }} "
+            echo "vars_new_value is:  ${{ env.vars_new_value }} "
+            echo ""
+            echo "the syntax is 'MY_CUSTOM_VALUE=$(jq --raw-output .my_custom_field my-custom-variables.json)' "
+        fi
+        updated_json_value=$(jq --raw-output .${{ env.vars_field }} ${{ env.json_vars_file }})
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "updated_json_value: ${updated_json_value}"
+            echo "writing the 'updated_json_value' to the environment and GitHub output"
+        fi
+        ##
+        echo "updated_json_value=${updated_json_value}" >> $GITHUB_ENV
+        echo "updated_json_value=${updated_json_value}" >> "$GITHUB_OUTPUT"
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "writing ${updated_json_value} to the 'new-value' GitHub output"
+        fi
+        echo "new-value=${updated_json_value}" >> $GITHUB_ENV
+        echo "new-value=${updated_json_value}" >> "$GITHUB_OUTPUT"
+        ##
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "checking to see if the updated_json_value matches the vars_new_value "
+        fi
+        if [ '${updated_json_value}' == '${{ env.vars_new_value }}' ]; then
+            echo "the 'updated_json_value' is set to '${updated_json_value}' and matches "
+            echo "  the 'vars_new_value' which is set to '${{ env.vars_new_value }}'. "
+            next_and_updated_match=true
+        else
+            echo "the 'updated_json_value' is set to '${updated_json_value}' and DOES NOT MATCH "
+            echo "  the 'vars_new_value' which is set to '${{ env.vars_new_value }}'. "
+            next_and_updated_match=false
+        fi
+        ##
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            echo "setting the value of 'does_next_match_updated' to '${next_and_updated_match}' and sending it to GitHub output"
+        fi
+        echo "does_next_match_updated=${next_and_updated_match}" >> "$GITHUB_OUTPUT"
+        echo "does_next_match_updated=${next_and_updated_match}" >> $GITHUB_ENV
+        #
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'get-updated-value' step. "; fi
+      env:
+        json_vars_file: ${{ inputs.json-vars-file }}
+        vars_field: ${{ inputs.vars-field }}
+        vars_new_value: ${{ inputs.vars-new-value }}
+
+    # - name: Commit the changes to the '${{ inputs.json-vars-file }}' file
+    #   id: commit-json-value-changes
+    #   # probably want to only try to commit changes if 'does_next_match_updated' is 'true'
+    #   #if: ( '${{ steps.get-updated-value.outputs.does_next_match_updated }}' == 'true' )
+    #   #uses: stefanzweifel/git-auto-commit-action@v4
+    #   #uses: EndBug/add-and-commit@v9
+    #   uses: rwaight/actions/git/add-and-commit@main
+    #   with:
+    #     add: ${{ inputs.json-vars-file }}
+    #     author_name: ${{ inputs.author-name }}
+    #     author_email: ${{ inputs.author-email }}
+    #     commit: --signoff
+    #     committer_name: ${{ inputs.committer-name }}
+    #     committer_email: ${{ inputs.committer-email }}
+    #     default_author: ${{ inputs.default-author }}
+    #     message: 'chore(update-json-field): Update value of field ${{ inputs.vars-field }}'
+    #     # options below are for 'stefanzweifel/git-auto-commit-action'
+    #     #commit_message: Bump ${{ inputs.vars-field }} to ${{ steps.set-next-release.outputs.next-release-value }}
+    #     #commit_options: '--signoff'
+    #     #file_pattern: ${{ inputs.json-vars-file }}
+    #     #branch: '${{ github.ref_name }}'
+    #     #create_branch: false
+    #     #commit_user_name: ${{ inputs.gh-user-name }}
+    #     #commit_user_email: ${{ inputs.gh-user-email }}
+
+    - name: Verbose | Print the outputs
+      if: inputs.action-verbose=='true'
+      id: verbose-print-outputs
+      shell: bash
+      run: | 
+        ## Print the outputs if inputs.action-verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'verbose-print-outputs' step. "
+        echo ""
+        echo "Previous value of the ${{ env.vars_field }} field: "
+        echo "previous-value is:  ${{ env.previous-value }} "
+        echo ""
+        echo "New value of the ${{ env.vars_field }} field: "
+        echo "new-value is:  ${{ env.new-value }} "
+        echo ""
+        ##
+        echo "completing the 'verbose-print-outputs' step. "
+      env:
+        previous-value: ${{ steps.get-current-value.outputs.previous-value }}
+        new-value: ${{ steps.get-updated-value.outputs.new-value }}
+        json_vars_file: ${{ inputs.json-vars-file }}
+        vars_field: ${{ inputs.vars-field }}
+        vars_new_value: ${{ inputs.vars-new-value }}
+
+    # - name: Modify a JSON key value in place
+    #   id: update-json-in-place
+    #   shell: bash
+    #   run: |
+    #     echo "special thanks to this person on stack overflow ... "
+    #     echo "https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
+    #     tmp=$(mktemp)
+    #     jq '.my_custom_field = "ami-02d8sdfsdf"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
