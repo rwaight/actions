@@ -130,7 +130,7 @@ runs:
         echo "previous-value=${current_value}" >> "$GITHUB_OUTPUT"
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'get-current-value' step. "; fi
       env:
-        json_vars_file: ${{ inputs.json-vars-file }}
+        json_vars_file: ${{ inputs.json-file }}
         vars_field: ${{ inputs.vars-field }}
         vars_new_value: ${{ inputs.vars-new-value }}
 
@@ -151,7 +151,7 @@ runs:
             ## tmp=$(mktemp)
             ## jq '.my_custom_field = "my-new-value"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
             echo "placeholder=\$(mktemp)"
-            echo "jq \'.my_custom_field = \"my-new-value\"\' my-custom-variables.json > \"\$placeholder\" && mv \"\$placeholder\" my-custom-variables.json\" "
+            echo "jq '.my_custom_field = \"my-new-value\"' my-custom-variables.json > \"\$placeholder\" && mv \"\$placeholder\" my-custom-variables.json\" "
             echo ""
             echo "special thanks to whoever posted the commands on stackoverflow... "
             echo " https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
@@ -162,6 +162,7 @@ runs:
         ## https://github.com/srvrco/getssl/issues/612#issuecomment-740694339
         ###placeholder=$(mktemp --tmpdir ./)
         placeholder=$(mktemp)
+        ### try this next ###placeholder=$(mktemp -d jsontmp.XXXXXX)
         echo "placeholder is ${placeholder} "
         jq '.${{ env.vars_field }} = "${{ env.vars_new_value }}"' ${{ env.json_vars_file }} > "$placeholder" && mv "$placeholder" ${{ env.json_vars_file }}
         ##
@@ -176,7 +177,7 @@ runs:
         ##
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'update-json-field-value' step. "; fi
       env:
-        json_vars_file: ${{ inputs.json-vars-file }}
+        json_vars_file: ${{ inputs.json-file }}
         vars_field: ${{ inputs.vars-field }}
         vars_new_value: ${{ inputs.vars-new-value }}
 
@@ -230,11 +231,11 @@ runs:
         #
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'get-updated-value' step. "; fi
       env:
-        json_vars_file: ${{ inputs.json-vars-file }}
+        json_vars_file: ${{ inputs.json-file }}
         vars_field: ${{ inputs.vars-field }}
         vars_new_value: ${{ inputs.vars-new-value }}
 
-    # - name: Commit the changes to the '${{ inputs.json-vars-file }}' file
+    # - name: Commit the changes to the '${{ inputs.json-file }}' file
     #   id: commit-json-value-changes
     #   # probably want to only try to commit changes if 'does_next_match_updated' is 'true'
     #   #if: ( '${{ steps.get-updated-value.outputs.does_next_match_updated }}' == 'true' )
@@ -242,7 +243,7 @@ runs:
     #   #uses: EndBug/add-and-commit@v9
     #   uses: rwaight/actions/git/add-and-commit@main
     #   with:
-    #     add: ${{ inputs.json-vars-file }}
+    #     add: ${{ inputs.json-file }}
     #     author_name: ${{ inputs.author-name }}
     #     author_email: ${{ inputs.author-email }}
     #     commit: --signoff
@@ -253,7 +254,7 @@ runs:
     #     # options below are for 'stefanzweifel/git-auto-commit-action'
     #     #commit_message: Bump ${{ inputs.vars-field }} to ${{ steps.set-next-release.outputs.next-release-value }}
     #     #commit_options: '--signoff'
-    #     #file_pattern: ${{ inputs.json-vars-file }}
+    #     #file_pattern: ${{ inputs.json-file }}
     #     #branch: '${{ github.ref_name }}'
     #     #create_branch: false
     #     #commit_user_name: ${{ inputs.gh-user-name }}
@@ -280,7 +281,7 @@ runs:
       env:
         previous-value: ${{ steps.get-current-value.outputs.previous-value }}
         new-value: ${{ steps.get-updated-value.outputs.new-value }}
-        json_vars_file: ${{ inputs.json-vars-file }}
+        json_vars_file: ${{ inputs.json-file }}
         vars_field: ${{ inputs.vars-field }}
         vars_new_value: ${{ inputs.vars-new-value }}
 
