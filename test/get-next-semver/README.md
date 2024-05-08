@@ -57,13 +57,13 @@ The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed
 
 See the `outputs` configured in the [action.yml](action.yml) file.
 
-#### next-version
+#### next-tag
 
-The calculated next-release version in the repo, based on the provided inputs. 
+The calculated next-release tag in the repo, based on the provided inputs.
 
-<details><summary>Determining the next-version output</summary>
+<details><summary>Determining the next-tag output</summary>
 
-The `next-version` output is currently determined using:
+The `next-tag` output is currently determined using:
 ```bash
 # Increment a PRERELEASE '-rc' version:
 echo "${current-version}" | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
@@ -82,6 +82,11 @@ echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'B
 ```
 
 </details>
+
+
+#### next-version
+
+The calculated next version, without the `v` prefix, based on the `next-tag` output.
 
 
 #### is-next-prerelease
@@ -197,11 +202,13 @@ jobs:
           echo "The output from the 'get-next-semver' step was: "
           echo "current tag       : ${{ env.current-tag }} "
           echo "current version   : ${{ env.current-version }} "
+          echo "next tag          : ${{ env.next-tag }} "
           echo "next version      : ${{ env.next-version }} "
           echo "is next prerelease: ${{ env.is-next-prerelease }} "
         env:
           current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
           current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-tag: ${{ steps.get-next-semver.outputs.next-tag }}
           next-version: ${{ steps.get-next-semver.outputs.next-version }}
           is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
 
