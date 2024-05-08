@@ -58,7 +58,7 @@ jobs:
       - name: Checkout repository
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
         #uses: actions/checkout@v4.1.4
         with:
           fetch-depth: 0
@@ -146,7 +146,7 @@ jobs:
       - name: Generate artifact attestation
         # Verified creator: https://github.com/marketplace/actions/attest-build-provenance
         # Action for generating build provenance attestations for workflow artifacts
-        uses: actions/attest-build-provenance@897ed5eab6ed058a474202017ada7f40bfa52940 # v1.0.0
+        uses: actions/attest-build-provenance@f8d5ea8082b0d9f5ab855907be308fbd7eefb155 # v1.1.0
         #uses: actions/attest-build-provenance@v1.0.0
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |

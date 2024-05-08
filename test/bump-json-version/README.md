@@ -63,15 +63,15 @@ jobs:
         id: calculate-and-bump-json
         uses: rwaight/actions/test/bump-json-version@main
         with:
-          #author_name: Your Name
-          #author_email: mail@example.com
-          committer_name: GitHub Actions
-          committer_email: 41898282+github-actions[bot]@users.noreply.github.com
-          default_author: github_actions
+          #author-name: Your Name
+          #author-email: mail@example.com
+          committer-name: GitHub Actions
+          committer-email: 41898282+github-actions[bot]@users.noreply.github.com
+          default-author: github_actions
           json-vars-file: 'hello'
           json-vars-field: true
           release-type: ${{ inputs.release-type }}
-          my_action_debug: true
+          action-verbose: true
 
       - name: Report the output from the calculate-and-bump-json step
         if: ${{ steps.calculate-and-bump-json.outputs.next-release-version }}
