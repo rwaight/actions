@@ -150,17 +150,20 @@ runs:
             echo "::group::printing the syntax to set the '${{ env.vars_field }}' field to ${{ env.vars_new_value }} ... "
             ## tmp=$(mktemp)
             ## jq '.my_custom_field = "my-new-value"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
-            echo "tmp=\$(mktemp)"
-            echo "jq \'.my_custom_field = \"my-new-value\"\' my-custom-variables.json > \"\$tmp\" && mv \"\$tmp\" my-custom-variables.json\" "
+            echo "placeholder=\$(mktemp)"
+            echo "jq \'.my_custom_field = \"my-new-value\"\' my-custom-variables.json > \"\$placeholder\" && mv \"\$placeholder\" my-custom-variables.json\" "
             echo ""
             echo "special thanks to whoever posted the commands on stackoverflow... "
             echo " https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
             echo ""
             echo "::endgroup::"
         fi
-        tmp=$(mktemp --tmpdir ./)
-        echo "tmp is ${tmp} "
-        jq '.${{ env.vars_field }} = "${{ env.vars_new_value }}"' ${{ env.json_vars_file }} > "$tmp" && mv "$tmp" ${{ env.json_vars_file }}
+        ## https://stackoverflow.com/questions/65289690/macos-env-tmpdir-not-working-in-github-actions
+        ## https://github.com/srvrco/getssl/issues/612#issuecomment-740694339
+        ###placeholder=$(mktemp --tmpdir ./)
+        placeholder=$(mktemp)
+        echo "placeholder is ${placeholder} "
+        jq '.${{ env.vars_field }} = "${{ env.vars_new_value }}"' ${{ env.json_vars_file }} > "$placeholder" && mv "$placeholder" ${{ env.json_vars_file }}
         ##
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then
             echo "going to check the value in the JSON file "
