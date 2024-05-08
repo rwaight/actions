@@ -151,14 +151,15 @@ runs:
             ## tmp=$(mktemp)
             ## jq '.my_custom_field = "my-new-value"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
             echo "tmp=\$(mktemp)"
-            echo "jq '.my_custom_field = \"my-new-value\"' my-custom-variables.json > \"\$tmp\" && mv \"\$tmp\" my-custom-variables.json\" "
+            echo "jq \'.my_custom_field = \"my-new-value\"\' my-custom-variables.json > \"\$tmp\" && mv \"\$tmp\" my-custom-variables.json\" "
             echo ""
             echo "special thanks to whoever posted the commands on stackoverflow... "
             echo " https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
             echo ""
             echo "::endgroup::"
         fi
-        tmp=$(mktemp)
+        tmp=$(mktemp --tmpdir ./)
+        echo "tmp is ${tmp} "
         jq '.${{ env.vars_field }} = "${{ env.vars_new_value }}"' ${{ env.json_vars_file }} > "$tmp" && mv "$tmp" ${{ env.json_vars_file }}
         ##
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then
