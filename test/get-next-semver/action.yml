@@ -40,6 +40,9 @@ outputs:
   next-tag:
     description: "The calculated next-release tag in the repo, based on the provided inputs."
     value: ${{ steps.set-next-tag.outputs.next-tag-version }}
+  next-version:
+    description: "The calculated next version, without the 'v' prefix, based on the 'next-tag'."
+    value:  ${{ steps.set-next-version.outputs.next-version-number }}
   is-next-prerelease:
     description: "If the calculated next-release version is a prerelease (true) or not (false), based on the provided inputs."
     value: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
@@ -492,6 +495,56 @@ runs:
         ## Remove the prerelease ID:
         ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
 
+    - name: Set the next release version
+      id: set-next-version
+      shell: bash
+      run: |
+        ## Set the next release version
+        ## the double number signs below are for line spacing and readability only
+        ##
+        VERSION="${{ env.next_tag_version }}"
+        ##  
+        RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        if [[ $VERSION =~ $RE ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+            if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+                echo "VERSION is: $VERSION "
+                echo "RE is     : $RE "
+                echo "MAJOR is  : $MAJOR "
+                echo "MINOR is  : $MINOR "
+                echo "PATCH is  : $PATCH "
+                echo "PRERELEASE: $PRERELEASE"
+            fi
+        else
+            ## Fail the workflow if the 'next-version' is not valid
+            echo "::error file=get-next-semver,title=⛔ set-next-version,hint::The next version '$VERSION' is not in a valid format"
+            exit 1
+        fi
+        ##
+        if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+        ##
+        if [[ -f $GITHUB_OUTPUT ]]; then
+            echo "next-version-number=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+            echo "next-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+            echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+            echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+            echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+            echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+        else
+            echo "::set-output name=major-ref::v$MAJOR"
+            echo "::set-output name=minor-ref::v$MINOR"
+            echo "::set-output name=patch-ref::v$PATCH"
+            echo "::set-output name=is-prerelease::$pre"
+        fi
+        ##
+        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
+      env:
+        next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
+        is_next_prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
+
     - name: Validate the next tag version
       id: validate-next-release
       shell: bash
@@ -535,7 +588,7 @@ runs:
         if [ '${{ inputs.action-verbose }}' == 'true' ]; then
             echo "starting the 'compare-current-to-next-release' step. "
             echo "current_release_version is:  ${{ env.current_release_version }} "
-            echo "next_tag_version is   :  ${{ env.next_tag_version }} "
+            echo "next_tag_version is       :  ${{ env.next_tag_version }} "
         fi
         ##
         if [ '${{ env.current_release_version }}' == '${{ env.next_tag_version }}' ]; then
@@ -604,7 +657,8 @@ runs:
             echo "current-release-version is:  ${{ env.current-release-version }} "
             echo "current-tag-version is    :  ${{ env.current-tag-version }} "
             echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
-            echo "next-tag-version is   :  ${{ env.next-tag-version }} "
+            echo "next-tag-version is       :  ${{ env.next-tag-version }} "
+            echo "next-version-number is    :  ${{ env.next-version-number }} "
             echo "is-next-prerelease is     :  ${{ env.is-next-prerelease }} "
         fi
         ##
@@ -626,6 +680,7 @@ runs:
         current-tag-version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
+        next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
         is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
@@ -660,6 +715,7 @@ runs:
         current-tag-version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
+        next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
         is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
