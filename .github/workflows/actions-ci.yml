@@ -95,10 +95,17 @@ jobs:
       - name: Validate current commit (last commit) with commitlint
         if: github.event_name == 'push'
         run: npx commitlint --last --verbose
+        # note for future reference: take a look at 
+        # https://github.com/agilepathway/label-checker/blob/master/.github/workflows/check-commit-message-push.yml
 
       - name: Validate PR commits with commitlint
-        if: github.event_name == 'pull_request'
+        #if: github.event_name == 'pull_request'
+        if: |
+          github.event_name == 'pull_request' && (github.actor!= 'dependabot[bot]') &&
+          (contains(github.head_ref, 'dependabot-') == false) 
         run: npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
+        # note for future reference: take a look at 
+        # https://github.com/agilepathway/label-checker/blob/master/.github/workflows/check-commit-message-pr.yml
 
   # Run the 'not-repo-owner' job if the repository_owner is not correct
   not-repo-owner:

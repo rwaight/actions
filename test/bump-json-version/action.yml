@@ -104,15 +104,23 @@ runs:
       shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the action-verbose variable is set to true.
 
-    - name: Validate that either the 'release-type' input or the 'release-version' input is set
-      id: validate-inputs
-      if: | 
-        ${{ inputs.release-version == 'not-set' }} && (
-        ${{ inputs.release-type != 'major' }} || ${{ inputs.release-type != 'minor' }} || 
-        ${{ inputs.release-type != 'patch' }} || ${{ inputs.release-type != 'prerelease' }} )
+    - name: Validate either 'release-type' or 'release-version' is set
+      id: validate-inputs-not-set
+      if: ${{ inputs.release-version == 'not-set' && inputs.release-type == 'not-set' }}
       shell: bash
       run: |
-        echo "::error title=⛔ error hint::Invalid input, either provide a 'release-version' or provide a 'release-type' that is one of: major, minor, patch, or prerelease"
+        echo "::error title=⛔ error hint::Missing input, either provide either 'release-version' or 'release-type'."
+        exit 1
+
+    - name: Validate the 'release-type' input is set
+      id: validate-input-release-type
+      if: | 
+         ${{ inputs.release-type != 'not-set' }} || 
+         ${{ inputs.release-type != 'major' }} || ${{ inputs.release-type != 'minor' }} || 
+         ${{ inputs.release-type != 'patch' }} || ${{ inputs.release-type != 'prerelease' }}
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::Invalid input, provide a 'release-type' that is one of: major, minor, patch, or prerelease"
         exit 1
 
     - name: Verbose | Print the inputs
