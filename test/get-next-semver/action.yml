@@ -378,19 +378,19 @@ runs:
             elif [ '${{ inputs.release-type }}' == 'prepatch' ]; then
                 ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
                 echo "the syntax to bump 'prepatch' is: "
-                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$3+=1} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$3+=1} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'"
             elif [ '${{ inputs.release-type }}' == 'preminor' ]; then
                 ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
                 echo "the syntax to bump 'preminor' is: "
-                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$2+=1;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$2+=1;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'"
             elif [ '${{ inputs.release-type }}' == 'premajor' ]; then
                 ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
                 echo "the syntax to bump 'premajor' is: "
-                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$1+=1;\$2=0;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$1+=1;\$2=0;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'"
             elif [ '${{ inputs.release-type }}' == 'pretoprod' ]; then
                 ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
                 echo "the syntax to remove the prerelease ID for 'pretoprod' is: "
-                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} { print \$1 }'
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} { print \$1 }'"
             else
                 echo "something is wrong with a conditional. "
                 echo "::warning file=get-next-semver,title=set-next-tag::something is wrong with a conditional in the VERBOSE 'else' statement in the 'set-next-tag' step."
