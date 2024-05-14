@@ -152,6 +152,19 @@ runs:
         ##
         echo "completing the 'verbose-print-inputs' step. "
 
+    - name: Notice | The pre-release-id value is blank
+      if: inputs.pre-release-id==''
+      id: blank-pre-release-id
+      shell: bash
+      run: | 
+        ## Ensure the pre-release-id is not blank
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "starting the 'blank-pre-release-id' step. "
+        echo ""
+        echo "::notice file=get-next-semver,title=blank-pre-release-id::The pre-release-id value is blank, it is not using the default value."
+        echo "completing the 'blank-pre-release-id' step. "
+
     - name: Get the current release version
       id: get-current-release
       shell: bash

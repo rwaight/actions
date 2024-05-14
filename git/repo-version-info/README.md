@@ -1,5 +1,8 @@
 # GitHub Composite Action - Repo version information
 
+The current version in this repo was based off of [rwaight/actions **repo-version-info** v0.1.31](https://github.com/rwaight/actions/releases/tag/v0.1.31)
+- This action is from https://github.com/rwaight/actions.
+
 ## Deploying this action
 
 ### Inputs

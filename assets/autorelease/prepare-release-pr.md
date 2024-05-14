@@ -9,7 +9,8 @@ This PR **was created automatically** by the autorelease process, courtesy of {{
 ### Release Overview
 
 The changes in this PR prepare for release, the next tag will be `{{ .next_tag }}`.
-            
+* Version: `{{ .next_version }}`
+
 A release draft has been created, please review it as part of the release process: [release draft link][1]
 
 # Release Notes

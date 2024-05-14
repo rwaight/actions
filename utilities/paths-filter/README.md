@@ -79,8 +79,8 @@ For more information, see [`dorny/paths-filter/CHANGELOG`](https://github.com/do
 
 ```yaml
 - name: paths-filter example
-  #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-  uses: rwaight/actions/github/paths-filter@v1
+  #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+  uses: rwaight/actions/utilities/paths-filter@v1
   id: changes
   with:
     filters: |
@@ -98,8 +98,8 @@ For more scenarios see [examples](#examples) section.
 
 ```yaml
 - name: paths-filter example
-  #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-  uses: rwaight/actions/github/paths-filter@v1
+  #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+  uses: rwaight/actions/utilities/paths-filter@v1
   with:
     # Defines filters applied to detected changed files.
     # Each filter has a name and a list of rules.
@@ -210,8 +210,8 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         filters: |
@@ -256,8 +256,8 @@ jobs:
     steps:
     # For pull requests it's not necessary to checkout the code
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         filters: |
@@ -304,8 +304,8 @@ jobs:
     steps:
     # For pull requests it's not necessary to checkout the code
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         filters: |
@@ -349,8 +349,8 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         filters: ... # Configure your filters
@@ -377,8 +377,8 @@ jobs:
         fetch-depth: 20
 
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         base: develop # Change detection against merge-base with this branch
@@ -404,8 +404,8 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         # Use context to get the branch where commits were pushed.
@@ -441,8 +441,8 @@ jobs:
       # Changes could be, for example, automatically committed
 
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         base: HEAD
@@ -458,8 +458,8 @@ jobs:
 
 ```yaml
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         # Path to file where filters are defined
@@ -473,8 +473,8 @@ jobs:
 
 ```yaml
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         # &shared is YAML anchor,
@@ -496,8 +496,8 @@ jobs:
 
 ```yaml
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         # Changed file can be 'added', 'modified', or 'deleted'.
@@ -524,8 +524,8 @@ jobs:
 
 ```yaml
     - name: paths-filter example
-      #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-      uses: rwaight/actions/github/paths-filter@v1
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v1
       id: filter
       with:
         # This makes it so that all the patterns have to match a file for it to be
@@ -554,8 +554,8 @@ jobs:
 
 ```yaml
 - name: paths-filter example
-  #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-  uses: rwaight/actions/github/paths-filter@v1
+  #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+  uses: rwaight/actions/utilities/paths-filter@v1
   id: filter
   with:
     # Enable listing of files matching each filter.
@@ -583,8 +583,8 @@ jobs:
 
 ```yaml
 - name: paths-filter example
-  #uses: rwaight/actions/github/paths-filter@main  # can use version specific or main
-  uses: rwaight/actions/github/paths-filter@v1
+  #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+  uses: rwaight/actions/utilities/paths-filter@v1
   id: filter
   with:
     # Enable listing of files matching each filter.
