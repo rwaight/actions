@@ -516,6 +516,9 @@ runs:
         ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
 
     - name: Set the next release version
+      # remove 'v' from the 'next_tag_version'
+      # syntax is: `echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }'`
+      # command: `NEXT_VER_NUMBER=$(echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }')`
       id: set-next-version
       shell: bash
       run: |
@@ -530,13 +533,18 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
+            ## remove 'v' from the 'next_tag_version'
+            NEXT_VER_NUMBER=$(echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }')
             if [ '${{ inputs.verbose }}' == 'true' ]; then
-                echo "VERSION is: $VERSION "
-                echo "RE is     : $RE "
-                echo "MAJOR is  : $MAJOR "
-                echo "MINOR is  : $MINOR "
-                echo "PATCH is  : $PATCH "
-                echo "PRERELEASE: $PRERELEASE"
+                echo "next tag version info: "
+                echo "   VERSION is: $VERSION "
+                echo "   RE is     : $RE "
+                echo "   MAJOR is  : $MAJOR "
+                echo "   MINOR is  : $MINOR "
+                echo "   PATCH is  : $PATCH "
+                echo "   PRERELEASE: $PRERELEASE"
+                echo "next version number: "
+                echo "   NEXT_VER_NUMBER is: $NEXT_VER_NUMBER "
             fi
         else
             ## Fail the workflow if the 'next-version' is not valid
@@ -547,12 +555,14 @@ runs:
         if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
         ##
         if [[ -f $GITHUB_OUTPUT ]]; then
-            echo "next-version-number=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
-            echo "next-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
-            echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
-            echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
-            echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
-            echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+            echo "next-version-number=$NEXT_VER_NUMBER" >> $GITHUB_OUTPUT
+            ## do not output the items below
+            ##echo "next-version-number=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+            ##echo "next-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+            ##echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+            ##echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+            ##echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+            ##echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
         else
             echo "::set-output name=major-ref::v$MAJOR"
             echo "::set-output name=minor-ref::v$MINOR"
