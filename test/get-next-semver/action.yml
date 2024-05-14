@@ -9,24 +9,31 @@ branding:
 
 inputs:
   gh-token:
-    description: 'The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed to run the `gh release` command depending on permissions granted to the default GitHub token.'
+    description: >-
+      The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed to run
+      the `gh release` command depending on permissions granted to the default GitHub token.
     required: true
     default: ${{ github.token }}
   pre-release-id:
-    description: 'Pre-release identifier (only for pre-release builds). The only tested pre-release syntax is "rc" at this time.'
+    description: >-
+      Pre-release identifier (only for pre-release builds).
+      The only tested pre-release identifier is `rc` at this time.
     required: false
     default: 'rc'
   release-type:
     description: >-
-      The release type, should be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod. For 
-      production releases, select the appropriate major, minor, or patch. For prereleases, select prerelease when you are 
-      already working on a prerelease tag (example: 0.2.1-rc1); select premajor when you need to create a new premajor 
-      prerelease; select preminor when you need to create a new preminor prerelease; or select prepatch when you need to 
-      create a new prepatch prerelease. Note that the only tested pre-release syntax is "rc" at this time.
+      The release type, should be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod. 
+      For production releases, select the appropriate major, minor, or patch. 
+      To convert a prerelease to production, select pretoprod (example: change 0.2.1-rc1 to 0.2.1). 
+      For prereleases, select prerelease to increment an existing prerelease (example: increment 0.2.1-rc1 to 0.2.1-rc2); 
+      select premajor to create a new premajor prerelease (example: increment 0.2.1 to 1.0.0-rc1);
+      select preminor to create a new preminor prerelease (example: increment 0.2.1 to 0.3.0-rc1); or 
+      select prepatch to create a new prepatch prerelease (example: increment 0.2.1 to 0.2.2-rc1). 
+      Note that the only tested pre-release identifier is `rc` at this time.
     required: true
     default: 'not-set'
   action-verbose:
-    description: 'Determine if the workflow should run verbose tasks, defaults to false. '
+    description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
     default: 'false'
 
@@ -378,19 +385,19 @@ runs:
             elif [ '${{ inputs.release-type }}' == 'prepatch' ]; then
                 ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
                 echo "the syntax to bump 'prepatch' is: "
-                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$3+=1} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$3+=1} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'"
             elif [ '${{ inputs.release-type }}' == 'preminor' ]; then
                 ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
                 echo "the syntax to bump 'preminor' is: "
-                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$2+=1;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$2+=1;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'"
             elif [ '${{ inputs.release-type }}' == 'premajor' ]; then
                 ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
                 echo "the syntax to bump 'premajor' is: "
-                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$1+=1;\$2=0;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\".\"} {\$1+=1;\$2=0;\$3=0} 1' | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} {\$2+=1} 1'"
             elif [ '${{ inputs.release-type }}' == 'pretoprod' ]; then
                 ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
                 echo "the syntax to remove the prerelease ID for 'pretoprod' is: "
-                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} { print \$1 }'
+                echo "echo \"\$version\" | awk 'BEGIN{FS=OFS=\"-${{ inputs.pre-release-id }}\"} { print \$1 }'"
             else
                 echo "something is wrong with a conditional. "
                 echo "::warning file=get-next-semver,title=set-next-tag::something is wrong with a conditional in the VERBOSE 'else' statement in the 'set-next-tag' step."

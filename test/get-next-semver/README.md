@@ -23,21 +23,30 @@ The release type, input one of:
 * `prepatch`, or
 * `pretoprod`
 
+##### Production releases
+
 For production releases, select the appropriate: `major`, `minor`, or `patch`
 
-For prereleases, select prerelease when you are already working on a prerelease tag (example: 0.2.1-rc1):
-* select premajor when you need to create a new premajor prerelease; 
-* select preminor when you need to create a new preminor prerelease; or 
-* select prepatch when you need to create a new prepatch prerelease.
- 
-Note that only `rc` has been tested as a pre-release syntax.
+##### Convert prerelease to production
+
+To convert a prerelease to production, select `pretoprod` (example: change `0.2.1-rc1` to `0.2.1`). 
+
+##### Pre-release releases
+
+For pre-release releases:
+* select `prerelease` to **increment an existing prerelease** (example: increment `0.2.1-rc1` to `0.2.1-rc2`); 
+* select `premajor` to **create a new premajor prerelease** (example: increment `0.2.1` to `1.0.0-rc1`);
+* select `preminor` to **create a new preminor prerelease** (example: increment `0.2.1` to `0.3.0-rc1`); or 
+* select `prepatch` to **create a new prepatch prerelease** (example: increment `0.2.1` to `0.2.2-rc1`). 
+
+Note that the only tested pre-release identifier is `rc` at this time.
 
 #### pre-release-id
 
 * required: false
 * default: `rc`
 
-The Pre-release identifier (only for pre-release builds). Currently, only `rc` has been tested as a pre-release syntax.
+The pre-release identifier (only for pre-release builds). Currently, only `rc` has been tested as a pre-release identifier.
 
 #### action-verbose
 
@@ -65,14 +74,16 @@ The calculated next-release tag in the repo, based on the provided inputs.
 
 The `next-tag` output is currently determined using:
 ```bash
-# Increment a PRERELEASE '-rc' version:
-echo "${current-version}" | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
 # Increment a PATCH version:
 echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1'
 # Increment a MINOR version:
 echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$2+=1;$3=0} 1'
 # Increment a MAJOR version:
 echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1'
+# Remove the prerelease ID '-rc':
+echo "${current-version}" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
+# Increment a PRERELEASE '-rc' version:
+echo "${current-version}" | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
 # Create a PREPATCH version:
 echo "${current-version}" | awk 'BEGIN{FS=OFS="."} {$3+=1} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
 # Create a PREMINOR version:
@@ -155,6 +166,7 @@ on:
           - major
           - minor
           - patch
+          - pretopatch
           - premajor
           - preminor
           - prepatch
@@ -171,7 +183,10 @@ jobs:
     name: Get Next Semver
     steps:
       - name: Run the checkout action
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
+        id: checkout
         with:
           fetch-depth: '0'
           fetch-tags: true
