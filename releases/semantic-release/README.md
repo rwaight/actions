@@ -1,4 +1,4 @@
-# GitHub Semantic Release Action Action
+# GitHub Semantic Release Action
 
 The current version in this repo was based off of [**semantic-release-action** v4.1.0](https://github.com/cycjimmy/semantic-release-action/releases/tag/v4.1.0)
 - This action is from https://github.com/cycjimmy/semantic-release-action.
