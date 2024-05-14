@@ -87,7 +87,7 @@ jobs:
 
 
       - name: Filter changes
-        uses: rwaight/actions/github/paths-filter@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/github/paths-filter@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/github/paths-filter@v0.1.26
         #uses: rwaight/actions/github/paths-filter@main
         id: filter
@@ -247,7 +247,7 @@ jobs:
 
       - name: Generate pull request template
         id: pull-request-template
-        uses: rwaight/actions/utilities/render-template@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/utilities/render-template@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/utilities/render-template@v0.1.26
         #uses: rwaight/actions/utilities/render-template@main
         #if: steps.write-results.outcome != 'skipped'

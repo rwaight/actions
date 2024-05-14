@@ -89,7 +89,7 @@ jobs:
 ## THEN use the create-pull-request action to add and commit the copied files...
 
       - name: Run the copycat action
-        uses: rwaight/actions/utilities/copycat@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/utilities/copycat@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/utilities/copycat@v0.1.26
         #uses: rwaight/actions/utilities/copycat@main
         id: copycat
@@ -174,7 +174,7 @@ jobs:
       # https://github.com/peter-evans/create-pull-request/blob/main/README.md
       - name: Create pull request in ${{ matrix.repo }}
         id: create-copycat-pr
-        uses: rwaight/actions/github/create-pull-request@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/github/create-pull-request@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/github/create-pull-request@v0.1.26
         #uses: rwaight/actions/github/create-pull-request@main
         with:
