@@ -1,0 +1,127 @@
+# This workflow tests the actions when there is a push to main
+name: Test actions
+run-name: Run actions test on ${{ github.event_name }}
+on: 
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [ closed ]
+  #workflow_dispatch:
+  # eventually add a drop down that will allow selecting an action to test on a specific branch
+
+# env:
+#   branch_to_use: ${{ github.ref_name || main }}
+
+jobs:
+
+  # use the 'paths-filter' action, from a released version, to determine which actions to test
+  eval-changes:
+    runs-on: ubuntu-latest
+    #if: github.event.pull_request.merged == true # only if the pull request has been merged
+    outputs:
+      builder-set-version: ${{ steps.paths-filter.outputs.builder-set-version }}
+      test-get-next-semver: ${{ steps.paths-filter.outputs.test-get-next-semver }}
+      utility-paths-filter: ${{ steps.paths-filter.outputs.utility-paths-filter }}
+      utility-public-ip: ${{ steps.paths-filter.outputs.utility-public-ip }}
+    steps:
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
+
+      - name: Evaluate changes to actions using utilities/paths-filter
+        uses: rwaight/actions/utilities/paths-filter@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        id: paths-filter
+        with:
+          ref: 'main'
+          filters: |
+            builder-set-version:
+              - 'builders/set-version/**'
+            test-get-next-semver:
+              - 'test/get-next-semver/**'
+            utility-paths-filter:
+              - 'utilities/paths-filter/**'
+            utility-public-ip:
+              - 'utilities/public-ip/**'
+
+      - name: utilities/paths-filter | Print outputs
+        run: |
+          echo "builder-set-version :  ${{ steps.paths-filter.outputs.builder-set-version }} "
+          echo "test-get-next-semver:  ${{ steps.paths-filter.outputs.test-get-next-semver }} "
+          echo "utility-paths-filter:  ${{ steps.paths-filter.outputs.utility-paths-filter }} "
+          echo "utility-public-ip   :  ${{ steps.paths-filter.outputs.utility-public-ip }} "
+
+  no-testing:
+    # Run if the pull request has been closed without being merged
+    runs-on: ubuntu-latest
+    if: (github.event_name == "pull_request" && github.event.pull_request.merged == false)
+    steps:
+    - run: |
+        echo "Pull request #${{ github.event.number }} has been closed without being merged"
+
+  public-ip:
+    runs-on: ubuntu-latest
+    needs: [eval-changes]
+    #if: ${{ needs.eval-changes.outputs.utility-public-ip == 'true' }}
+    if: (needs.eval-changes.outputs.utility-public-ip == 'true')
+    steps:
+      - name: utilities/public-ip | Test action
+        id: ip
+        uses: rwaight/actions/utilities/public-ip@main
+
+      - name: utilities/public-ip | Print outputs
+        run: |
+          echo ${{ steps.ip.outputs.ipv4 }}
+          echo ${{ steps.ip.outputs.ipv6 }}
+
+  paths-filter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
+
+      - name: utilities/paths-filter | Test action
+        uses: rwaight/actions/utilities/paths-filter@main
+        id: filter
+        with:
+          filters: |
+            categories:
+              - 'builders/**'
+              - 'chatops/**'
+              - 'composite/**'
+              - 'git/**'
+              - 'github/**'
+              - 'releases/**'
+              - 'utilities/**'
+              - 'builders/**'
+            docs:
+              - 'docs/**'
+            examples:
+              - 'examples/**'
+            test:
+              - 'test/**'
+            paths-filter:
+              - 'utilities/paths-filter/**'
+
+      - name: utilities/paths-filter | Print outputs
+        run: |
+          echo "categories  :  ${{ steps.filter.outputs.categories }}"
+          echo "docs        :  ${{ steps.filter.outputs.docs }}"
+          echo "examples    :  ${{ steps.filter.outputs.examples }}"
+          echo "test        :  ${{ steps.filter.outputs.test }}"
+          echo "paths-filter:  ${{ steps.filter.outputs.paths-filter }}"
+
+      # run only if 'docs' files were changed
+      - name: utilities/paths-filter | docs tests
+        if: steps.filter.outputs.docs == 'true'
+        run: |
+          echo "docs:  ${{ steps.filter.outputs.docs }}"
+
+      # run only if 'paths-filter' files were changed
+      - name: utilities/paths-filter | paths-filter tests
+        if: steps.filter.outputs.paths-filter == 'true'
+        run: |
+          echo "paths-filter:  ${{ steps.filter.outputs.paths-filter }}"

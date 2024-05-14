@@ -32,7 +32,7 @@ inputs:
       Note that the only tested pre-release identifier is `rc` at this time.
     required: true
     default: 'not-set'
-  action-verbose:
+  verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
     default: 'false'
@@ -66,16 +66,16 @@ runs:
         exit 1
 
     - name: Greet the triggering_actor
-      if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       shell: bash
-      run: echo Hello ${{ github.triggering_actor }}, the action-verbose variable is set to true.
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
 
     - name: Verbose | Print the release-type
-      #if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       id: verbose-print-release-type
       shell: bash
       run: | 
-        ## Print the inputs if inputs.action-verbose=='true'
+        ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'verbose-print-release-type' step. "
@@ -100,7 +100,7 @@ runs:
       run: |
         ## Validate the release-type input
         ## the double number signs below are for line spacing and readability only
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'validate-input-release-type' step. "
             echo "release-type is:  ${{ inputs.release-type }} "
             echo "::notice file=get-next-semver,title=validate-input-release-type::The 'release-type' is valid."
@@ -114,7 +114,7 @@ runs:
       run: |
         ## Error if the release-type input is incorrect
         ## the double number signs below are for line spacing and readability only
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'error-incorrect-release-type. "
             echo "release-type is:  ${{ inputs.release-type }} "
         echo "::error file=get-next-semver,title=⛔ error-incorrect-release-type,hint::Invalid 'release-type', must be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod"
@@ -137,18 +137,18 @@ runs:
     #     #exit 1
 
     - name: Verbose | Print the inputs
-      if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       id: verbose-print-inputs
       shell: bash
       run: | 
-        ## Print the inputs if inputs.action-verbose=='true'
+        ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'verbose-print-inputs' step. "
         echo ""
         echo "pre-release-id is:  ${{ inputs.pre-release-id }} "
         echo "release-type is  :  ${{ inputs.release-type }} "
-        echo "action-verbose is:  ${{ inputs.action-verbose }} "
+        echo "verbose is       :  ${{ inputs.verbose }} "
         ##
         echo "completing the 'verbose-print-inputs' step. "
 
@@ -172,7 +172,7 @@ runs:
         ## Get the current release version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'get-current-release' step. "
             echo ""
             echo "Using the GitHub CLI to print release information"
@@ -217,19 +217,19 @@ runs:
             current_release_version=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
         fi
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "current_release_version: $current_release_version"
             echo "writing the 'current_release_version' to the environment and GitHub output"
         fi
         echo "current_release_version=${current_release_version}" >> "$GITHUB_OUTPUT"
         echo "current_release_version=${current_release_version}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "The current release version of this repo is \`$current_release_version\`"
             echo "writing $current_release_version to the 'current-release-version' GitHub output"
         fi
         echo "current-release-version=${current_release_version}" >> "$GITHUB_OUTPUT"
         echo "current-release-version=${current_release_version}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'get-current-release' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'get-current-release' step. "; fi
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
 
@@ -240,7 +240,7 @@ runs:
         ## Get the current tag
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'get-current-tag' step. "
             echo ""
             echo "Using the CLI to get tag information"
@@ -309,19 +309,19 @@ runs:
             current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
         fi
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "current_tag_version: $current_tag_version"
             echo "writing the 'current_tag_version' to the environment and GitHub output"
         fi
         echo "current_tag_version=${current_tag_version}" >> "$GITHUB_OUTPUT"
         echo "current_tag_version=${current_tag_version}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "The current tag of this repo is \`$current_tag_version\`"
             echo "writing $current_tag_version to the 'get-current-tag' GitHub output"
         fi
         echo "current-tag-version=${current_tag_version}" >> "$GITHUB_OUTPUT"
         echo "current-tag-version=${current_tag_version}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'get-current-tag' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'get-current-tag' step. "; fi
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
 
@@ -332,7 +332,7 @@ runs:
         ## Compare the current release version to the current tag version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'compare-tag-to-current-release' step. "
             echo "current_release_version is:  ${{ env.current_release_version }} "
             echo "current_tag_version is    :  ${{ env.current_tag_version }} "
@@ -347,18 +347,18 @@ runs:
             echo "  the 'current_tag_version' which is set to '${{ env.current_tag_version }}'. "
             current_tag_and_release_match=false
         fi
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "setting the value of 'does_current_tag_match_current_release' to '${current_tag_and_release_match}' and sending it to GitHub output"
         fi
         echo "does_current_tag_match_current_release=${current_tag_and_release_match}" >> "$GITHUB_OUTPUT"
         echo "does_current_tag_match_current_release=${current_tag_and_release_match}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "The does_current_tag_match_current_release variable has been set to \`$current_tag_and_release_match\`"
             echo "writing $current_tag_and_release_match to the 'does-tag-match-release' GitHub output"
         fi
         echo "does-tag-match-release=${current_tag_and_release_match}" >> "$GITHUB_OUTPUT"
         echo "does-tag-match-release=${current_tag_and_release_match}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'compare-tag-to-current-release' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'compare-tag-to-current-release' step. "; fi
       env:
         current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
@@ -370,7 +370,7 @@ runs:
         ## Set the next tag version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'set-next-tag' step. "
             echo "current_release_version is:  ${{ env.current_release_version }} "
             echo "pre-release-id is         :  ${{ inputs.pre-release-id }} "
@@ -482,7 +482,7 @@ runs:
         #
         echo "is_next_prerelease=${is_next_prerelease}" >> "$GITHUB_OUTPUT"
         echo "is_next_prerelease=${is_next_prerelease}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "The next tag version has been set to \`$next_tag_version\`"
             echo "writing $next_tag_version to the 'next-tag-version' GitHub output"
             ##
@@ -494,7 +494,7 @@ runs:
         #
         echo "is-next-prerelease=${is_next_prerelease}" >> "$GITHUB_OUTPUT"
         echo "is-next-prerelease=${is_next_prerelease}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'set-next-tag' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'set-next-tag' step. "; fi
       env:
         #current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
@@ -516,6 +516,9 @@ runs:
         ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
 
     - name: Set the next release version
+      # remove 'v' from the 'next_tag_version'
+      # syntax is: `echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }'`
+      # command: `NEXT_VER_NUMBER=$(echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }')`
       id: set-next-version
       shell: bash
       run: |
@@ -530,13 +533,18 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ inputs.action-verbose }}' == 'true' ]; then
-                echo "VERSION is: $VERSION "
-                echo "RE is     : $RE "
-                echo "MAJOR is  : $MAJOR "
-                echo "MINOR is  : $MINOR "
-                echo "PATCH is  : $PATCH "
-                echo "PRERELEASE: $PRERELEASE"
+            ## remove 'v' from the 'next_tag_version'
+            NEXT_VER_NUMBER=$(echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }')
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
+                echo "next tag version info: "
+                echo "   VERSION is: $VERSION "
+                echo "   RE is     : $RE "
+                echo "   MAJOR is  : $MAJOR "
+                echo "   MINOR is  : $MINOR "
+                echo "   PATCH is  : $PATCH "
+                echo "   PRERELEASE: $PRERELEASE"
+                echo "next version number: "
+                echo "   NEXT_VER_NUMBER is: $NEXT_VER_NUMBER "
             fi
         else
             ## Fail the workflow if the 'next-version' is not valid
@@ -547,12 +555,14 @@ runs:
         if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
         ##
         if [[ -f $GITHUB_OUTPUT ]]; then
-            echo "next-version-number=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
-            echo "next-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
-            echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
-            echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
-            echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
-            echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+            echo "next-version-number=$NEXT_VER_NUMBER" >> $GITHUB_OUTPUT
+            ## do not output the items below
+            ##echo "next-version-number=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+            ##echo "next-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+            ##echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+            ##echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+            ##echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+            ##echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
         else
             echo "::set-output name=major-ref::v$MAJOR"
             echo "::set-output name=minor-ref::v$MINOR"
@@ -560,7 +570,7 @@ runs:
             echo "::set-output name=is-prerelease::$pre"
         fi
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
       env:
         next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
         is_next_prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
@@ -580,7 +590,7 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
                 echo "VERSION is: $VERSION "
                 echo "RE is     : $RE "
                 echo "MAJOR is  : $MAJOR "
@@ -593,7 +603,7 @@ runs:
             echo "::error file=get-next-semver,title=⛔ validate-next-release,hint::Next tag version '$VERSION' is not in a valid format"
             exit 1
         fi
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
       env:
         next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
         is_next_prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
@@ -605,7 +615,7 @@ runs:
         ## Compare the current release version to the next tag version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'compare-current-to-next-release' step. "
             echo "current_release_version is:  ${{ env.current_release_version }} "
             echo "next_tag_version is       :  ${{ env.next_tag_version }} "
@@ -620,18 +630,18 @@ runs:
             echo "  the 'next_tag_version' which is set to '${{ env.next_tag_version }}'. "
             current_and_next_match=false
         fi
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "setting the value of 'does_current_match_next' to '${current_and_next_match}' and sending it to GitHub output"
         fi
         echo "does_current_match_next=${current_and_next_match}" >> "$GITHUB_OUTPUT"
         echo "does_current_match_next=${current_and_next_match}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "The does_current_match_next variable has been set to \`$current_and_next_match\`"
             echo "writing $current_and_next_match to the 'does-current-match-next' GitHub output"
         fi
         echo "does-current-match-next=${current_and_next_match}" >> "$GITHUB_OUTPUT"
         echo "does-current-match-next=${current_and_next_match}" >> $GITHUB_ENV
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'compare-current-to-next-release' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'compare-current-to-next-release' step. "; fi
       env:
         #current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
@@ -647,7 +657,7 @@ runs:
     #     ## Error if the current version matches the next version
     #     ## the double number signs below are for line spacing and readability only
     #     ##
-    #     if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+    #     if [ '${{ inputs.verbose }}' == 'true' ]; then
     #         echo "starting the 'error-matched-versions' step. "
     #         echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
     #         echo "current-release-version is:  ${{ env.current-release-version }} "
@@ -655,7 +665,7 @@ runs:
     #     fi
     #     echo "::error file=get-next-semver,title=⛔ matched versions error::The current version matches the next version"
     #     exit 1
-    #     if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
+    #     if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'error-matched-versions' step. "; fi
     #   env: 
     #     current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
     #     next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
@@ -671,7 +681,7 @@ runs:
         ## Validate that the current version does not match the next version
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'validate-version-not-matched' step. "
             echo "does-tag-match-release is :  ${{ env.does-tag-match-release }} "
             echo "current-release-version is:  ${{ env.current-release-version }} "
@@ -684,7 +694,7 @@ runs:
         ##
         if [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'false' ]; then
             echo "Excellent, the current version does not match the next version. "
-            if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
                 echo "::notice file=get-next-semver,title=validate-version-not-matched::Excellent, the current version does not match the next version."
             fi
         elif [ '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' ]; then
@@ -695,7 +705,7 @@ runs:
             echo "::warning file=get-next-semver,title=validate-version-not-matched::something strange is happening, this is the else statement of validate-version-not-matched."
         fi
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'validate-version-not-matched' step. "; fi
       env: 
         current-tag-version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
@@ -706,11 +716,11 @@ runs:
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
 
     - name: Verbose | Print the outputs
-      if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       id: verbose-print-outputs
       shell: bash
       run: | 
-        ## Print the outputs if inputs.action-verbose=='true'
+        ## Print the outputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'verbose-print-outputs' step. "
