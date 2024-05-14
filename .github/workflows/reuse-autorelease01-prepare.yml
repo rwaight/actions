@@ -423,7 +423,7 @@ jobs:
 
       - name: Generate pull request template
         id: pr-template
-        uses: rwaight/actions/utilities/render-template@v0.1.29
+        uses: rwaight/actions/utilities/render-template@v0.1.31
         with:
           template: assets/autorelease/prepare-release-pr.md
           vars: |

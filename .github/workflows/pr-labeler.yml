@@ -252,7 +252,7 @@ jobs:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/test/check-semver-labels@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/test/check-semver-labels@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/test/check-semver-labels@v0.1.26
         #uses: rwaight/actions/test/check-semver-labels@main
         id: check-semver-labels
@@ -267,7 +267,7 @@ jobs:
           my_action_debug: true
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/github/label-checker@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/github/label-checker@v0.1.26
         #uses: rwaight/actions/github/label-checker@main
         id: check-type-labels
@@ -343,7 +343,7 @@ jobs:
 
       # look for a comment 
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/chatops/find-comment@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/chatops/find-comment@v0.1.26
         #uses: rwaight/actions/chatops/find-comment@main
         id: find-comment
@@ -358,7 +358,7 @@ jobs:
       - name: Generate comment template
         # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
-        uses: rwaight/actions/utilities/render-template@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/utilities/render-template@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/utilities/render-template@v0.1.26
         #uses: rwaight/actions/utilities/render-template@main
         if: steps.write-results.outcome != 'skipped'
@@ -377,7 +377,7 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/chatops/create-or-update-comment@050473414fe65f13fc4adbaf3c900410c50b9f8a # v0.1.26
+        uses: rwaight/actions/chatops/create-or-update-comment@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/chatops/create-or-update-comment@v0.1.26
         #uses: rwaight/actions/chatops/create-or-update-comment@main
         if: steps.comment-template.outcome != 'skipped'
