@@ -18,8 +18,8 @@ inputs:
   my-example-input1:
     description: 'An example input that you can use. '
     required: true
-  action-verbose:
-    description: 'Determine if the action should run verbose tasks, defaults to false. '
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
     required: false
     default: 'false'
 
@@ -42,21 +42,21 @@ runs:
         exit 1
 
     - name: Greet the triggering_actor
-      if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       shell: bash
-      run: echo Hello ${{ github.triggering_actor }}, the action-verbose variable is set to true.
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
 
     - name: Verbose | Print the inputs
-      if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       id: verbose-print-inputs
       shell: bash
       run: | 
-        ## Print the inputs if inputs.action-verbose=='true'
+        ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "gh-token SHOULD BE MASKED, but is set to ${{ inputs.gh-token }} "
         echo "my-example-input1 is set to ${{ inputs.my-example-input1 }} "
-        echo "action-verbose is set to ${{ inputs.action-verbose }} "
+        echo "verbose is set to ${{ inputs.verbose }} "
         ##
 
     - name: This is a template only
