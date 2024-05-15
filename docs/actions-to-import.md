@@ -23,9 +23,7 @@ The following actions should be copied/imported to this repo:
     - [`robvanderleek/create-issue-branch` action](https://github.com/robvanderleek/create-issue-branch)
         - GitHub App/Action that automates the creation of issue branches
 - **releases**
-    - [`cycjimmy/semantic-release-action`](https://github.com/cycjimmy/semantic-release-action)
-        - GitHub Action for Semantic Release
-        - Uses [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
+    - None at this time.
 - **utilities**
     - [`DamianReeves/write-file-action`](https://github.com/DamianReeves/write-file-action)
         - A GitHub action to write a file
@@ -47,9 +45,7 @@ The following actions are pending import to this repo:
 - **chatops**
     - None at this time.
 - **git**
-    - [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
-    - [`WyriHaximus/github-action-next-semvers`](https://github.com/WyriHaximus/github-action-next-semvers)
-    - [`WyriHaximus/github-action-get-previous-tag`](https://github.com/WyriHaximus/github-action-get-previous-tag)
+    - None at this time.
 - **github**
     - None at this time.
 - **releases**
@@ -64,19 +60,6 @@ The following actions should be reviewed as candidates to import to this repo:
     - None at this time.
 - **chatops**
     - None at this time.
-- **releases**
-    - [`huggingface/semver-release-action`](https://github.com/huggingface/semver-release-action)
-        - Github Action to release projects using Semantic Release.
-        - Uses [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
-    - [`K-Phoen/semver-release-action`](https://github.com/K-Phoen/semver-release-action/)
-        - GitHub Action to automatically create SemVer compliant releases based on PR labels.
-        - Based on the [`github_tag_and_release.yml`](https://github.com/agilepathway/label-checker/blob/master/.github/workflows/github_tag_and_release.yml) workflow
-    - [`phish108/release-check`](https://github.com/phish108/release-check)
-        - Check if a push or pull request should trigger a release.
-    - [`InsonusK/get-latest-release`](https://github.com/InsonusK/get-latest-release)
-        - Get latest release, include all types of release
-    - [`cardinalby/git-get-release-action`](https://github.com/cardinalby/git-get-release-action)
-        - Github Action that allows you to get release information by release id, tag, commit SHA (current commit or specified).
 - **git**
     - [`stefanzweifel/git-auto-commit-action`](https://github.com/stefanzweifel/git-auto-commit-action)
         - Automatically commit and push changed files back to GitHub with this GitHub Action for the 80% use case.
@@ -110,7 +93,19 @@ The following actions should be reviewed as candidates to import to this repo:
               env:
                 GH_TOKEN: ${{ secrets.PAT }}
         ```
-
+- **releases**
+    - [`huggingface/semver-release-action`](https://github.com/huggingface/semver-release-action)
+        - Github Action to release projects using Semantic Release.
+        - Uses [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
+    - [`K-Phoen/semver-release-action`](https://github.com/K-Phoen/semver-release-action/)
+        - GitHub Action to automatically create SemVer compliant releases based on PR labels.
+        - Based on the [`github_tag_and_release.yml`](https://github.com/agilepathway/label-checker/blob/master/.github/workflows/github_tag_and_release.yml) workflow
+    - [`phish108/release-check`](https://github.com/phish108/release-check)
+        - Check if a push or pull request should trigger a release.
+    - [`InsonusK/get-latest-release`](https://github.com/InsonusK/get-latest-release)
+        - Get latest release, include all types of release
+    - [`cardinalby/git-get-release-action`](https://github.com/cardinalby/git-get-release-action)
+        - Github Action that allows you to get release information by release id, tag, commit SHA (current commit or specified).
 - **utilities**
     - [`peter-evans/ghaction-import-gpg`](https://github.com/peter-evans/ghaction-import-gpg)
         - GitHub Action to import a GPG key
@@ -145,47 +140,118 @@ We can use emoji and reference an [emoji cheat sheet](https://github.com/ikatyan
 | :grey_exclamation: | Review needed |
 | :x: | Not selected for import, <br/> needs a comment |
 | :wavy_dash: | Not applicable |
+| :coffee: | Created in this repo |
 
 </details>
 
 ### Reviewed actions by category
 
 - **builders**
-    - None at this time.
+    - `set-version` :coffee:
+        - Determine a **build version** using `git describe`.
+        - Source: Created within this repo.
 - **chatops**
-    - :white_check_mark: [`peter-evans/create-or-update-comment`](https://github.com/peter-evans/create-or-update-comment)
+    - `create-or-update-comment` :white_check_mark:
         - Create or update an issue or pull request comment.
-    - :white_check_mark: [`peter-evans/find-comment`](https://github.com/peter-evans/find-comment)
+        - Source: [`peter-evans/create-or-update-comment`](https://github.com/peter-evans/create-or-update-comment)
+    - `find-comment` :white_check_mark:
         - Find an issue or pull request comment.
+        - Source: [`peter-evans/find-comment`](https://github.com/peter-evans/find-comment)
 - **git**
-    - This section **probably** needs to be updated.
-    - :white_check_mark: [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
+    - `add-and-commit` :white_check_mark:
         - Commit changes made in your workflow run directly to your repo: for example, you use it to lint your code, update documentation, commit updated builds, etc...
-    - :white_check_mark: [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
+        - Source: [`EndBug/add-and-commit`](https://github.com/EndBug/add-and-commit)
+    - `git-describe-semver` :white_check_mark:
+        - Replacement for `git describe --tags` that produces [semver](https://semver.org/) compatible versions that follow to semver sorting rules.
+        - Source: [`choffmeister/git-describe-semver`](https://github.com/choffmeister/git-describe-semver/)
+    - `keep-a-changelog-action` :white_check_mark:
+        - A GitHub Action that performs various operations on changelogs that adhere to [keep-a-changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/) conventions.
+        - Source: [`release-flow/keep-a-changelog-action`](https://github.com/release-flow/keep-a-changelog-action)
+    - `repo-version-info` :coffee:
+        - Provide version information from a git repo
+        - Source: Created within this repo.
+    - `semver-git-version` :white_check_mark:
         - Semver versioning based on the git history and commit messages of your repository.
-    - :white_check_mark: [`release-flow/keep-a-changelog-action`](https://github.com/release-flow/keep-a-changelog-action)
-        - A GitHub Action that performs various operations on changelogs that adhere to
-[keep-a-changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/) conventions.
+        - Source: [`codedesignplus/semver-git-version`](https://github.com/codedesignplus/semver-git-version)
 - **github**
-    - This section **probably** needs to be updated.
-    - :white_check_mark: [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request)
+    - This section needs to be updated.
+    - `create-pull-request` :white_check_mark:
         - Create a pull request for changes to your repository in the actions workspace.
-    - :white_check_mark: [`agilepathway/label-checker`](https://github.com/agilepathway/label-checker)
+        - Source: [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request)
+    - `export-label-config` :exclamation:
+        - description
+        - Source: 
+    - `find-pull-request` :exclamation:
+        - description
+        - Source: 
+    - `github-changelog-generator` :exclamation:
+        - description
+        - Source: 
+    - `issue-triage` :exclamation:
+        - description
+        - Source: 
+    - `label-checker` :white_check_mark:
         - Check pull requests (PRs) for the presence or absence of specified labels
-    - :white_check_mark: [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
-        - Enables conditional execution of workflow steps and jobs, based on the files modified by pull request, on a feature branch, or by the recently pushed commits.
-    - :white_check_mark: [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
+        - Source: [`agilepathway/label-checker`](https://github.com/agilepathway/label-checker)
+    - `label-manager` :exclamation:
+        - description
+        - Source: 
+    - `label-sync` :exclamation:
+        - description
+        - Source: 
+    - `projectnext-label-assigner` :exclamation:
+        - description
+        - Source: 
+    - `repository-dispatch` :white_check_mark:
         - A GitHub action to create a repository dispatch event.
-    - :white_check_mark: [`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request)
+        - Source: [`peter-evans/repository-dispatch`](https://github.com/peter-evans/repository-dispatch)
+    - `semantic-pull-request` :white_check_mark:
         - Ensure that your pull request titles match the [Conventional Commits spec](https://www.conventionalcommits.org/).
+        - Source: [`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request)
 - **releases**
     - This section needs to be updated.
+    - `release-drafter` :exclamation:
+        - description
+        - Source: 
+    - `release-tag-updater` :exclamation:
+        - description
+        - Source: 
+    - `semantic-release` :white_check_mark:
+        - GitHub Action for Semantic Release
+        - Uses [`semantic-release/semantic-release`](https://github.com/semantic-release/semantic-release)
+        - Source: [`cycjimmy/semantic-release-action`](https://github.com/cycjimmy/semantic-release-action)
 - **utilities**
     - This section needs to be updated.
+    - `copycat` :exclamation:
+        - description
+        - Source: 
+    - `packer` :exclamation:
+        - description
+        - Source: 
+    - `paths-filter` :white_check_mark:
+        - Enables conditional execution of workflow steps and jobs, based on the files modified by pull request, on a feature branch, or by the recently pushed commits.
+        - Source: [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
+    - `public-ip` :exclamation:
+        - description
+        - Source: 
+    - `render-template` :exclamation:
+        - description
+        - Source: 
+
+##### Template for entries in this section
+
+```
+    - `name` :exclamation:
+        - description
+        - Source: 
+```
 
 ## Created Actions
 
 This section contains the actions that have been created within this repo and have been moved out of testing.
 
+- **builders**
+    - [`rwaight/actions` set-version](https://github.com/rwaight/actions/blob/main/builders/set-version) :coffee:
 - **git**
-    - [`rwaight/actions` repo-version-info](https://github.com/rwaight/actions/blob/main/git/repo-version-info)
+    - [`rwaight/actions` repo-version-info](https://github.com/rwaight/actions/blob/main/git/repo-version-info) :coffee:
+

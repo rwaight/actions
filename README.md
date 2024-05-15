@@ -24,7 +24,47 @@ The actions are currently organized by the following categories:
 └── utilities
 ```
 
-#### Category Overview
+#### Actions by category
+
+Here is a current list of actions by category
+```bash
+.
+├── builders
+│   └── set-version
+├── chatops
+│   ├── create-or-update-comment
+│   └── find-comment
+├── git
+│   ├── add-and-commit
+│   ├── git-describe-semver
+│   ├── keep-a-changelog-action
+│   ├── repo-version-info
+│   └── semver-git-version
+├── github
+│   ├── create-pull-request
+│   ├── export-label-config
+│   ├── find-pull-request
+│   ├── github-changelog-generator
+│   ├── issue-triage
+│   ├── label-checker
+│   ├── label-manager
+│   ├── label-sync
+│   ├── projectnext-label-assigner
+│   ├── repository-dispatch
+│   └── semantic-pull-request
+├── releases
+│   ├── release-drafter
+│   ├── release-tag-updater
+│   └── semantic-release
+└── utilities
+    ├── copycat
+    ├── packer
+    ├── paths-filter
+    ├── public-ip
+    └── render-template
+```
+
+#### GitHub Actions Category Overview
 
 While the long-term plan _was_ to use the [category list from the GitHub Actions Marketplace](https://github.com/marketplace?category=&type=actions), the categories above have been chosen as marketplace actions can select more than one category.
 <!--- ~Before the first official release~, ~the categories will be changed to align with the GitHub Actions categories~. ~They will use~ the category list from https://github.com/marketplace?category=&type=actions: --->
@@ -58,41 +98,3 @@ Utilities
 
 </details>
 
-
-#### Actions by category
-
-Here is a current list of actions by category
-```bash
-.
-├── builders
-├── chatops
-│   ├── create-or-update-comment
-│   └── find-comment
-├── git
-│   ├── add-and-commit
-│   ├── git-describe-semver
-│   ├── keep-a-changelog-action
-│   └── repo-version-info
-├── github
-│   ├── create-pull-request
-│   ├── export-label-config
-│   ├── find-pull-request
-│   ├── github-changelog-generator
-│   ├── issue-triage
-│   ├── label-checker
-│   ├── label-manager
-│   ├── label-sync
-│   ├── paths-filter
-│   ├── projectnext-label-assigner
-│   ├── repository-dispatch
-│   └── semantic-pull-request
-├── releases
-│   ├── release-drafter
-│   ├── release-tag-updater
-│   └── semantic-release-action
-└── utilities
-    ├── copycat
-    ├── packer
-    ├── public-ip
-    └── render-template
-```
