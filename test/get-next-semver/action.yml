@@ -541,65 +541,87 @@ runs:
         ## Remove the prerelease ID:
         ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
 
-    - name: Set the next release version
+    - name: Set the next release version number
       # remove 'v' from the 'next_tag_version'
-      # syntax is: `echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }'`
-      # command: `NEXT_VER_NUMBER=$(echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }')`
+      # syntax is: `echo "${VERSION//v}"`
+      # command: `next_ver_number=$(echo "${VERSION//v}")`
       id: set-next-version
       shell: bash
       run: |
         ## Set the next release version
         ## the double number signs below are for line spacing and readability only
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "starting the 'set-next-version' step. "; fi
         ##
         VERSION="${{ env.next_tag_version }}"
-        ##  
-        RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
-        if [[ $VERSION =~ $RE ]]; then
+        ##
+        if [[ $VERSION == v* ]]; then
+            echo "Setting the next version number by removing the 'v' from the next tag version. "
+            next_ver_number=$(echo "${VERSION//v}")
+            echo "The next version number has been set to '${next_ver_number}' ... "
+        else
+            echo "this must mean that the 'next_tag_version' does not start with a 'v' "
+            next_ver_number=${VERSION}
+            echo "The next version number has been set to '${next_ver_number}' ... "
+            echo "::warning file=get-next-semver,title=set-next-version::something strange is happening, the 'next_tag_version' does not start with a 'v'."
+        fi
+        ##
+        echo "going to ensure that the next version number does not start with a 'v'. 'next_ver_number' is set to '$next_ver_number' "
+        ##
+        RE_NO_V='^([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        if [[ $next_ver_number =~ $RE_NO_V ]]; then
             MAJOR="${BASH_REMATCH[1]}"
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            ## remove 'v' from the 'next_tag_version'
-            NEXT_VER_NUMBER=$(echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }')
+            ##
             if [ '${{ inputs.verbose }}' == 'true' ]; then
-                echo "next tag version info: "
+                echo "next version tag info: "
                 echo "   VERSION is: $VERSION "
-                echo "   RE is     : $RE "
-                echo "   MAJOR is  : $MAJOR "
-                echo "   MINOR is  : $MINOR "
-                echo "   PATCH is  : $PATCH "
-                echo "   PRERELEASE: $PRERELEASE"
-                echo "next version number: "
-                echo "   NEXT_VER_NUMBER is: $NEXT_VER_NUMBER "
+                echo ""
+                echo "next version number info: "
+                echo "   next_ver_number is: $next_ver_number "
+                echo "   RE_NO_V is        : $RE_NO_V "
+                echo "           MAJOR is  : $MAJOR "
+                echo "           MINOR is  : $MINOR "
+                echo "           PATCH is  : $PATCH "
+                echo "           PRERELEASE: $PRERELEASE "
             fi
         else
-            ## Fail the workflow if the 'next-version' is not valid
-            echo "::error file=get-next-semver,title=⛔ set-next-version,hint::The next version '$VERSION' is not in a valid format"
+            ## Fail the workflow if the '${next_ver_number}' is not valid
+            echo "::error file=get-next-semver,title=⛔ set-next-version,hint::Unable to set the next version number to a valid format."
             exit 1
         fi
-        ##
         if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
         ##
-        if [[ -f $GITHUB_OUTPUT ]]; then
-            echo "next-version-number=$NEXT_VER_NUMBER" >> $GITHUB_OUTPUT
-            ## do not output the items below
-            ##echo "next-version-number=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
-            ##echo "next-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
-            ##echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
-            ##echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
-            ##echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
-            ##echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
-        else
-            echo "::set-output name=major-ref::v$MAJOR"
-            echo "::set-output name=minor-ref::v$MINOR"
-            echo "::set-output name=patch-ref::v$PATCH"
-            echo "::set-output name=is-prerelease::$pre"
+        ## extra test
+        if [[ $next_ver_number == v* ]]; then
+            ## Fail the workflow if the '${next_ver_number}' is not valid
+            echo "::error file=get-next-semver,title=⛔ set-next-version,hint::The next version number is not set to a valid format, it starts with a 'v'."
+            exit 1    
         fi
         ##
-        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'validate-next-release' step. "; fi
+        echo "is_next_number_pre=${pre}" >> "$GITHUB_OUTPUT"
+        echo "is_next_number_pre=${pre}" >> $GITHUB_ENV
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo "The next_ver_number variable is valid and has been set to \`$next_ver_number\`"
+            echo "writing $next_ver_number to the 'next-version-number' GitHub output"
+            ##
+            echo "The 'is next number prerelease' variable has been set to \`$is_next_number_pre\`"
+            echo "writing $is_next_number_pre to the 'is-next-number-prerelease' GitHub output"
+        fi
+        echo "next-version-number=${next_ver_number}" >> "$GITHUB_OUTPUT"
+        echo "next-version-number=${next_ver_number}" >> $GITHUB_ENV
+        #
+        echo "is-next-number-prerelease=${is_next_number_pre}" >> "$GITHUB_OUTPUT"
+        echo "is-next-number-prerelease=${is_next_number_pre}" >> $GITHUB_ENV
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'set-next-version' step. "; fi
+      # this did not work all the time
+      # ## remove 'v' from the 'next_tag_version'
+      # next_ver_number=$(echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }')
       env:
         next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
-        is_next_prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
 
     - name: Validate the next tag version
       id: validate-next-release
@@ -633,6 +655,41 @@ runs:
       env:
         next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
         is_next_prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
+
+    - name: Validate the next version number
+      id: validate-next-version-number
+      shell: bash
+      run: |
+        ## Validate the next version number
+        ## the double number signs below are for line spacing and readability only
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "starting the 'validate-next-version-number' step. "; fi
+        ##
+        NEXT_VER_NUMBER="${{ env.next_version_number }}"
+        ##  
+        RE_NO_V='^([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        if [[ $NEXT_VER_NUMBER =~ $RE_NO_V ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
+                echo "next version number info: "
+                echo "   next_ver_number is: $next_ver_number "
+                echo "   RE_NO_V is        : $RE_NO_V "
+                echo "           MAJOR is  : $MAJOR "
+                echo "           MINOR is  : $MINOR "
+                echo "           PATCH is  : $PATCH "
+                echo "           PRERELEASE: $PRERELEASE "
+            fi
+        else
+            ## Fail the workflow if the 'next-version-number' is not valid
+            echo "::error file=get-next-semver,title=⛔ validate-next-version-number,hint::Next version number '$NEXT_VER_NUMBER' is not in a valid format"
+            exit 1
+        fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'validate-next-version-number' step. "; fi
+      env:
+        next_version_number: ${{ steps.set-next-version.outputs.next-version-number }}
+        is_next_number_prerelease: ${{ steps.set-next-version.outputs.is-next-number-prerelease }}
 
     - name: Compare the current release version to the next tag version
       id: compare-current-to-next-release
@@ -685,6 +742,7 @@ runs:
             echo "next-tag-version is       :  ${{ env.next-tag-version }} "
             echo "next-version-number is    :  ${{ env.next-version-number }} "
             echo "is-next-prerelease is     :  ${{ env.is-next-prerelease }} "
+            echo "is-next-number-prerelease :  ${{ env.is-next-number-prerelease }} "
         fi
         ##
         if [ 'v${{ env.next-version-number }}' == '${{ env.next-tag-version }}' ]; then
@@ -711,6 +769,7 @@ runs:
       env:
         is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
         next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
+        is-next-number-prerelease: ${{ steps.set-next-version.outputs.is-next-number-prerelease }}
         next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
 
     # - name: Error if the current version matches the next version
@@ -768,8 +827,9 @@ runs:
         if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'validate-next-versions-are-matched' step. "; fi
       env: 
         next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
-        next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
         is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
+        next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
+        is-next-number-prerelease: ${{ steps.set-next-version.outputs.is-next-number-prerelease }}
         does-next-version-match-next-tag: ${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }}
 
     - name: Validate that the current version does not match the next version
@@ -831,9 +891,10 @@ runs:
         echo "current-tag-version is    :  ${{ env.current-tag-version }} "
         echo ""
         echo "Next release version information: "
-        echo "next-tag-version is   :  ${{ env.next-tag-version }} "
-        echo "is-next-prerelease is :  ${{ env.is-next-prerelease }} "
-        echo "next-version-number is:  ${{ env.next-version-number }} "
+        echo "next-tag-version is      :  ${{ env.next-tag-version }} "
+        echo "is-next-prerelease is    :  ${{ env.is-next-prerelease }} "
+        echo "next-version-number is   :  ${{ env.next-version-number }} "
+        echo "is-next-number-prerelease:  ${{ env.is-next-number-prerelease }} "
         echo ""
         echo "Current and next match results: "
         echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
@@ -850,8 +911,9 @@ runs:
         current-tag-version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
         next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
-        next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
         is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
+        next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
+        is-next-number-prerelease: ${{ steps.set-next-version.outputs.is-next-number-prerelease }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
         does-next-version-match-next-tag: ${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }}
