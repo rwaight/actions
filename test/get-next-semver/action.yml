@@ -673,6 +673,46 @@ runs:
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
         next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
 
+    - name: Compare the the next version match the next tag version
+      id: compare-next-version-to-next-tag
+      shell: bash
+      run: |
+        ## Compare the the next version match the next tag version
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo "starting the 'compare-next-version-to-next-tag' step. "
+            echo "next-tag-version is       :  ${{ env.next-tag-version }} "
+            echo "next-version-number is    :  ${{ env.next-version-number }} "
+            echo "is-next-prerelease is     :  ${{ env.is-next-prerelease }} "
+        fi
+        ##
+        if [ 'v${{ env.next-version-number }}' == '${{ env.next-tag-version }}' ]; then
+            echo "the 'next-version-number' is set to '${{ env.next-version-number }}' and, when prepending with 'v', does match "
+            echo "  the 'next-tag-version' which is set to '${{ env.next-tag-version }}'. "
+            next_version_and_tag_match=true
+        else
+            echo "the 'next-version-number' is set to '${{ env.next-version-number }}' and, when prepending with 'v', DOES NOT MATCH "
+            echo "  the 'next-tag-version' which is set to '${{ env.next-tag-version }}'. "
+            next_version_and_tag_match=false
+        fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo "setting the value of 'does_next_version_match_next_tag' to '${next_version_and_tag_match}' and sending it to GitHub output"
+        fi
+        echo "does_next_version_match_next_tag=${next_version_and_tag_match}" >> "$GITHUB_OUTPUT"
+        echo "does_next_version_match_next_tag=${next_version_and_tag_match}" >> $GITHUB_ENV
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo "The does_next_version_match_next_tag variable has been set to \`$next_version_and_tag_match\`"
+            echo "writing ${next_version_and_tag_match} to the 'does-next-version-match-next-tag' GitHub output"
+        fi
+        echo "does-next-version-match-next-tag=${next_version_and_tag_match}" >> "$GITHUB_OUTPUT"
+        echo "does-next-version-match-next-tag=${next_version_and_tag_match}" >> $GITHUB_ENV
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'compare-next-version-to-next-tag' step. "; fi
+      env:
+        is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
+        next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
+        next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
+
     # - name: Error if the current version matches the next version
     #   id: error-matched-versions
     #   if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} == 'true' )
@@ -696,6 +736,41 @@ runs:
     #     current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
     #     next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
     #     does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+
+    - name: Validate that the next version match the next tag version
+      id: validate-next-versions-are-matched
+      shell: bash
+      run: |
+        ## Validate that the next version match the next tag version
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo "starting the 'validate-next-versions-are-matched' step. "
+            echo "next-tag-version is             :  ${{ env.next-tag-version }} "
+            echo "next-version-number is          :  ${{ env.next-version-number }} "
+            echo "is-next-prerelease is           :  ${{ env.is-next-prerelease }} "
+            echo "does-next-version-match-next-tag:  ${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }} "
+        fi
+        ##
+        if [ '${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }}' == 'true' ]; then
+            echo "Excellent, the next version number does match the next tag version. "
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
+                echo "::notice file=get-next-semver,title=validate-next-versions-are-matched::Excellent, the next version number does match the next tag version."
+            fi
+        elif [ '${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }}' == 'false' ]; then
+            echo "Uh oh! The next version number does not match the next tag version! "
+            echo "::error file=get-next-semver,title=⛔ next version match error::The next version number does not the next tag version"
+            exit 1
+        else
+            echo "::warning file=get-next-semver,title=validate-next-versions-are-matched::something strange is happening, this is the else statement of validate-next-versions-are-matched."
+        fi
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'validate-next-versions-are-matched' step. "; fi
+      env: 
+        next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
+        next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
+        is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
+        does-next-version-match-next-tag: ${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }}
 
     - name: Validate that the current version does not match the next version
       id: validate-version-not-matched
@@ -756,14 +831,18 @@ runs:
         echo "current-tag-version is    :  ${{ env.current-tag-version }} "
         echo ""
         echo "Next release version information: "
-        echo "next-tag-version is:  ${{ env.next-tag-version }} "
-        echo "is-next-prerelease is  :  ${{ env.is-next-prerelease }} "
+        echo "next-tag-version is   :  ${{ env.next-tag-version }} "
+        echo "is-next-prerelease is :  ${{ env.is-next-prerelease }} "
+        echo "next-version-number is:  ${{ env.next-version-number }} "
         echo ""
-        echo "Version match results: "
+        echo "Current and next match results: "
         echo "does-current-match-next is:  ${{ env.does-current-match-next }} "
         echo ""
         echo "Current release and current tag match results: "
         echo "does-tag-match-release is:  ${{ env.does-tag-match-release }} "
+        echo ""
+        echo "Next version number and next tag match results: "
+        echo "does-next-version-match-next-tag is:  ${{ env.does-next-version-match-next-tag }} "
         echo ""
         ##
         echo "completing the 'verbose-print-outputs' step. "
@@ -775,3 +854,4 @@ runs:
         is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
+        does-next-version-match-next-tag: ${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }}
