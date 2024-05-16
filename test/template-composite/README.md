@@ -37,7 +37,9 @@ jobs:
     name: Template Composite Action
     steps:
       - name: Run the checkout action
-        uses: actions/checkout@v4
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
 
       - name: Run the composite template action
         id: run-template-composite
@@ -45,7 +47,7 @@ jobs:
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
           my-example-input1: 'hello'
-          action-verbose: true
+          verbose: true
 
       - name: Report the output from the run-template-composite step
         if: ${{ steps.run-template-composite.outputs.action-output1 }}

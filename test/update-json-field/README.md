@@ -61,7 +61,7 @@ jobs:
           vars-field: 'my-custom-field'
           #vars-new-value: 'my-new-value'
           vars-new-value: ${{ inputs.my-custom-notes || 'my-fallback-value' }}
-          action-verbose: true
+          verbose: true
 
       - name: Report the output from the update-json-field step
         if: ${{ steps.update-json-field.outputs.new-value }}

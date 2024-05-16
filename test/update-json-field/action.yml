@@ -49,7 +49,7 @@ inputs:
     description: 'The new value that should be updated within the specified field. '
     required: true
     default: 'not-set'
-  action-verbose:
+  verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
     default: 'false'
@@ -74,16 +74,16 @@ runs:
         exit 1
 
     - name: Greet the triggering_actor
-      if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       shell: bash
-      run: echo Hello ${{ github.triggering_actor }}, the action-verbose variable is set to true.
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
 
     - name: Verbose | Print the inputs
-      if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       id: verbose-print-inputs
       shell: bash
       run: | 
-        ## Print the inputs if inputs.action-verbose=='true'
+        ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'verbose-print-inputs' step. "
@@ -97,7 +97,7 @@ runs:
         echo "json-file is      :  ${{ inputs.json-file }} "
         echo "vars-field is     :  ${{ inputs.vars-field }} "
         echo "vars-new-value is :  ${{ inputs.vars-new-value }} "
-        echo "action-verbose is :  ${{ inputs.action-verbose }} "
+        echo "verbose is        :  ${{ inputs.verbose }} "
         ##
         echo "completing the 'verbose-print-inputs' step. "
 
@@ -108,7 +108,7 @@ runs:
         ## Get the current value of ${{ env.vars_field }}
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'get-current-value' step. "
             echo "json_vars_file is:  ${{ env.json_vars_file }} "
             echo "vars_field is    :  ${{ env.vars_field }} "
@@ -117,18 +117,18 @@ runs:
             echo "the syntax is 'MY_CUSTOM_VALUE=$(jq --raw-output .my_custom_field my-custom-variables.json)' "
         fi
         current_value=$(jq --raw-output .${{ env.vars_field }} ${{ env.json_vars_file }})
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "current_value: ${current_value} "
             echo "writing the 'current_value' to the environment and GitHub output"
         fi
         echo "current_value=${current_value}" >> $GITHUB_ENV
         echo "current_value=${current_value}" >> "$GITHUB_OUTPUT"
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "writing ${current_value} to the 'previous-value' GitHub output"
         fi
         echo "previous-value=${current_value}" >> $GITHUB_ENV
         echo "previous-value=${current_value}" >> "$GITHUB_OUTPUT"
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'get-current-value' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'get-current-value' step. "; fi
       env:
         json_vars_file: ${{ inputs.json-file }}
         vars_field: ${{ inputs.vars-field }}
@@ -141,7 +141,7 @@ runs:
         ## Update the value of the json field
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'update-json-field-value' step. "
             echo "json_vars_file is:  ${{ env.json_vars_file }} "
             echo "vars_field is    :  ${{ env.vars_field }} "
@@ -166,16 +166,16 @@ runs:
         echo "placeholder is ${placeholder} "
         jq '.${{ env.vars_field }} = "${{ env.vars_new_value }}"' ${{ env.json_vars_file }} > "$placeholder" && mv "$placeholder" ${{ env.json_vars_file }}
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "going to check the value in the JSON file "
         fi
         ##
         check_json_value=$(jq --raw-output .${{ env.vars_field }} ${{ env.json_vars_file }})
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "check_json_value: $check_json_value"
         fi
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'update-json-field-value' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'update-json-field-value' step. "; fi
       env:
         json_vars_file: ${{ inputs.json-file }}
         vars_field: ${{ inputs.vars-field }}
@@ -188,7 +188,7 @@ runs:
         ## Get the updated value of the ${{ inputs.vars-field }} field
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'get-updated-value' step. "
             echo "json_vars_file is:  ${{ env.json_vars_file }} "
             echo "vars_field is    :  ${{ env.vars_field }} "
@@ -197,20 +197,20 @@ runs:
             echo "the syntax is 'MY_CUSTOM_VALUE=$(jq --raw-output .my_custom_field my-custom-variables.json)' "
         fi
         updated_json_value=$(jq --raw-output .${{ env.vars_field }} ${{ env.json_vars_file }})
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "updated_json_value: ${updated_json_value}"
             echo "writing the 'updated_json_value' to the environment and GitHub output"
         fi
         ##
         echo "updated_json_value=${updated_json_value}" >> $GITHUB_ENV
         echo "updated_json_value=${updated_json_value}" >> "$GITHUB_OUTPUT"
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "writing ${updated_json_value} to the 'new-value' GitHub output"
         fi
         echo "new-value=${updated_json_value}" >> $GITHUB_ENV
         echo "new-value=${updated_json_value}" >> "$GITHUB_OUTPUT"
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "checking to see if the updated_json_value matches the vars_new_value "
         fi
         if [ '${updated_json_value}' == '${{ env.vars_new_value }}' ]; then
@@ -223,13 +223,13 @@ runs:
             next_and_updated_match=false
         fi
         ##
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "setting the value of 'does_next_match_updated' to '${next_and_updated_match}' and sending it to GitHub output"
         fi
         echo "does_next_match_updated=${next_and_updated_match}" >> "$GITHUB_OUTPUT"
         echo "does_next_match_updated=${next_and_updated_match}" >> $GITHUB_ENV
         #
-        if [ '${{ inputs.action-verbose }}' == 'true' ]; then echo "completing the 'get-updated-value' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'get-updated-value' step. "; fi
       env:
         json_vars_file: ${{ inputs.json-file }}
         vars_field: ${{ inputs.vars-field }}
@@ -261,11 +261,11 @@ runs:
     #     #commit_user_email: ${{ inputs.gh-user-email }}
 
     - name: Verbose | Print the outputs
-      if: inputs.action-verbose=='true'
+      if: inputs.verbose=='true'
       id: verbose-print-outputs
       shell: bash
       run: | 
-        ## Print the outputs if inputs.action-verbose=='true'
+        ## Print the outputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'verbose-print-outputs' step. "

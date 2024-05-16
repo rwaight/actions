@@ -55,7 +55,7 @@ jobs:
   no-testing:
     # Run if the pull request has been closed without being merged
     runs-on: ubuntu-latest
-    if: (github.event_name == "pull_request" && github.event.pull_request.merged == false)
+    if: (github.event_name=='pull_request' && github.event.pull_request.merged == false)
     steps:
     - run: |
         echo "Pull request #${{ github.event.number }} has been closed without being merged"
