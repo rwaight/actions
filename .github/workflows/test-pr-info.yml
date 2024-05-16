@@ -38,17 +38,128 @@ jobs:
         run: |
           echo "this means that 'github.event.pull_request.merged' equals 'true' (single quotes) "
 
+      - name: autorelease | use bash to check the branch name
+        id: bash-check-branch-name
+        if: github.event.pull_request.merged == 'true'
+        run: |
+          echo "starting the 'bash-check-branch-name' step. "
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+              ##
+              echo "next thing to do is to output whichever match group, so it can be tested... "
+          else
+              echo "the head ref did not match the regex "
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              ##echo "::warning file=test-pr-info,title=bash-check-branch-name::the head ref did not match the regex."
+          fi
+          ##
+          echo "completing the 'bash-check-branch-name' step. "
+
       - name: autorelease | startsWith github.event.pull_request.head.ref conditional
         id: autorelease-startswith-head-ref-single-quotes
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
         run: |
+          echo "starting the 'autorelease-startswith-head-ref-single-quotes' step. "
           echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "the head ref did not match the regex, but the branch matched with single quotes."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=test-pr-info,title=autorelease-startswith-head-ref-single-quotes::the head ref did not match the regex, but the branch matched with single quotes."
+          fi
+          ##
+          echo "completing the 'autorelease-startswith-head-ref-single-quotes' step. "
 
       - name: autorelease | startsWith github.event.pull_request.head.ref conditional (double quotes)
         id: autorelease-startswith-head-ref-double-quotes
         if: startsWith(github.event.pull_request.head.ref, "autorelease")
         run: |
+          echo "starting the 'autorelease-startswith-head-ref-double-quotes' step. "
           echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (double quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "the head ref did not match the regex, but the branch matched with double quotes."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=test-pr-info,title=autorelease-startswith-head-ref-double-quotes::the head ref did not match the regex, but the branch matched with double quotes."
+          fi
+          ##
+          echo "completing the 'autorelease-startswith-head-ref-double-quotes' step. "
 
       - name: version syntax | contains github.event.pull_request.head.ref conditional
         id: version-contains-head-ref-single-quotes
