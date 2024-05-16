@@ -5,7 +5,7 @@ on:
   pull_request:
     branches:
       - main
-    #types: [closed]
+    types: [closed]
 
 permissions:
   contents: write
@@ -120,46 +120,47 @@ jobs:
           ##
           echo "completing the 'autorelease-startswith-head-ref-single-quotes' step. "
 
-      - name: autorelease | startsWith github.event.pull_request.head.ref conditional (double quotes)
-        id: autorelease-startswith-head-ref-double-quotes
-        if: startsWith(github.event.pull_request.head.ref, "autorelease")
-        run: |
-          echo "starting the 'autorelease-startswith-head-ref-double-quotes' step. "
-          echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (double quotes) "
-          echo ""
-          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
-          HEAD_REF="${{ github.event.pull_request.head.ref }}"
-          ##  
-          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
-          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
-              AUTO_NAME="${BASH_REMATCH[1]}"
-              FULL_VER="${BASH_REMATCH[2]}"
-              VER_NO_V="${BASH_REMATCH[3]}"
-              MAJOR="${BASH_REMATCH[4]}"
-              MINOR="${BASH_REMATCH[5]}"
-              PATCH="${BASH_REMATCH[6]}"
-              PRERELEASE="${BASH_REMATCH[7]}"
-              ##
-              if [ 'true' == 'true' ]; then
-                  echo "HEAD_REF is: $HEAD_REF "
-                  echo "RE_AUTO is : $RE_AUTO "
-                  echo ""
-                  echo "AUTO_NAME is: $AUTO_NAME "
-                  echo "FULL_VER is : $FULL_VER "
-                  echo "VER_NO_V is : $VER_NO_V "
-                  echo ""
-                  echo "MAJOR is  : $MAJOR "
-                  echo "MINOR is  : $MINOR "
-                  echo "PATCH is  : $PATCH "
-                  echo "PRERELEASE: $PRERELEASE"
-              fi
-          else
-              echo "the head ref did not match the regex, but the branch matched with double quotes."
-              ## use the warning below once the 'autorelease' startsWith conditionals are working
-              echo "::warning file=test-pr-info,title=autorelease-startswith-head-ref-double-quotes::the head ref did not match the regex, but the branch matched with double quotes."
-          fi
-          ##
-          echo "completing the 'autorelease-startswith-head-ref-double-quotes' step. "
+      # - name: autorelease | startsWith github.event.pull_request.head.ref conditional (double quotes)
+      #   id: autorelease-startswith-head-ref-double-quotes
+      #   # error:  Unexpected symbol: '"autorelease"'. Located at position 48 within expression: startsWith(github.event.pull_request.head.ref, "autorelease")
+      #   if: startsWith(github.event.pull_request.head.ref, "autorelease")
+      #   run: |
+      #     echo "starting the 'autorelease-startswith-head-ref-double-quotes' step. "
+      #     echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (double quotes) "
+      #     echo ""
+      #     echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+      #     HEAD_REF="${{ github.event.pull_request.head.ref }}"
+      #     ##  
+      #     RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+      #     if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+      #         AUTO_NAME="${BASH_REMATCH[1]}"
+      #         FULL_VER="${BASH_REMATCH[2]}"
+      #         VER_NO_V="${BASH_REMATCH[3]}"
+      #         MAJOR="${BASH_REMATCH[4]}"
+      #         MINOR="${BASH_REMATCH[5]}"
+      #         PATCH="${BASH_REMATCH[6]}"
+      #         PRERELEASE="${BASH_REMATCH[7]}"
+      #         ##
+      #         if [ 'true' == 'true' ]; then
+      #             echo "HEAD_REF is: $HEAD_REF "
+      #             echo "RE_AUTO is : $RE_AUTO "
+      #             echo ""
+      #             echo "AUTO_NAME is: $AUTO_NAME "
+      #             echo "FULL_VER is : $FULL_VER "
+      #             echo "VER_NO_V is : $VER_NO_V "
+      #             echo ""
+      #             echo "MAJOR is  : $MAJOR "
+      #             echo "MINOR is  : $MINOR "
+      #             echo "PATCH is  : $PATCH "
+      #             echo "PRERELEASE: $PRERELEASE"
+      #         fi
+      #     else
+      #         echo "the head ref did not match the regex, but the branch matched with double quotes."
+      #         ## use the warning below once the 'autorelease' startsWith conditionals are working
+      #         echo "::warning file=test-pr-info,title=autorelease-startswith-head-ref-double-quotes::the head ref did not match the regex, but the branch matched with double quotes."
+      #     fi
+      #     ##
+      #     echo "completing the 'autorelease-startswith-head-ref-double-quotes' step. "
 
       - name: version syntax | contains github.event.pull_request.head.ref conditional
         id: version-contains-head-ref-single-quotes
@@ -167,11 +168,12 @@ jobs:
         run: |
           echo "this means that 'github.event.pull_request.head.ref' contains 'v*.*.*' (single quotes) "
 
-      - name: version syntax | contains github.event.pull_request.head.ref conditional (double quotes)
-        id: version-contains-head-ref-double-quotes
-        if: contains(github.event.pull_request.head.ref, "v*.*.*")
-        run: |
-          echo "this means that 'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
+      # - name: version syntax | contains github.event.pull_request.head.ref conditional (double quotes)
+      #   id: version-contains-head-ref-double-quotes
+      #   # error:  Unexpected symbol: '"v*'. Located at position 46 within expression: contains(github.event.pull_request.head.ref, "v*.*.*")
+      #   if: contains(github.event.pull_request.head.ref, "v*.*.*")
+      #   run: |
+      #     echo "this means that 'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
 
       - name: dev | startsWith github.event.pull_request.head.ref conditional
         id: dev-startswith-head-ref-single-quotes
@@ -179,11 +181,12 @@ jobs:
         run: |
           echo "this means that 'github.event.pull_request.head.ref' starts with 'dev' (single quotes) "
 
-      - name: dev | startsWith github.event.pull_request.head.ref conditional (double quotes)
-        id: dev-startswith-head-ref-double-quotes
-        if: startsWith(github.event.pull_request.head.ref, "dev")
-        run: |
-          echo "this means that 'github.event.pull_request.head.ref' starts with 'dev' (double quotes) "
+      # - name: dev | startsWith github.event.pull_request.head.ref conditional (double quotes)
+      #   id: dev-startswith-head-ref-double-quotes
+      #   # error:  Unexpected symbol: '"dev"'. Located at position 48 within expression: startsWith(github.event.pull_request.head.ref, "dev") 
+      #   #if: startsWith(github.event.pull_request.head.ref, "dev")
+      #   run: |
+      #     echo "this means that 'github.event.pull_request.head.ref' starts with 'dev' (double quotes) "
 
       - name: autorelease and version | startsWith and contains conditional
         id: autorelease-and-version-head-ref-single-quotes
@@ -194,14 +197,15 @@ jobs:
           echo "  AND  "
           echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (single quotes) "
 
-      - name: autorelease and version | startsWith and contains conditional (double quotes)
-        id: autorelease-and-version-head-ref-double-quotes
-        if: startsWith(github.event.pull_request.head.ref, "autorelease") && contains(github.event.pull_request.head.ref, "v*.*.*")
-        run: |
-          echo "this means that the: "
-          echo "     'github.event.pull_request.head.ref' starts with 'autorelease' (double quotes) "
-          echo "  AND  "
-          echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
+      # - name: autorelease and version | startsWith and contains conditional (double quotes)
+      #   id: autorelease-and-version-head-ref-double-quotes
+      #   # error:  Unexpected symbol: '"autorelease"'. Located at position 48 within expression: startsWith(github.event.pull_request.head.ref, "autorelease") && contains(github.event.pull_request.head.ref, "v*.*.*")
+      #   #if: startsWith(github.event.pull_request.head.ref, "autorelease") && contains(github.event.pull_request.head.ref, "v*.*.*")
+      #   run: |
+      #     echo "this means that the: "
+      #     echo "     'github.event.pull_request.head.ref' starts with 'autorelease' (double quotes) "
+      #     echo "  AND  "
+      #     echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
 
       - name: dev and version | startsWith and contains conditional
         id: dev-and-version-head-ref-single-quotes
@@ -212,14 +216,15 @@ jobs:
           echo "  AND  "
           echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (single quotes) "
 
-      - name: dev and version | startsWith and contains conditional (double quotes)
-        id: dev-and-version-head-ref-double-quotes
-        if: startsWith(github.event.pull_request.head.ref, "dev") && contains(github.event.pull_request.head.ref, "v*.*.*")
-        run: |
-          echo "this means that the: "
-          echo "     'github.event.pull_request.head.ref' starts with 'dev' (double quotes) "
-          echo "  AND  "
-          echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
+      # - name: dev and version | startsWith and contains conditional (double quotes)
+      #   id: dev-and-version-head-ref-double-quotes
+      #   # error:  Unexpected symbol: '"autorelease"'. Located at position 48 within expression: startsWith(github.event.pull_request.head.ref, "dev") && contains(github.event.pull_request.head.ref, "v*.*.*")
+      #   #if: startsWith(github.event.pull_request.head.ref, "dev") && contains(github.event.pull_request.head.ref, "v*.*.*")
+      #   run: |
+      #     echo "this means that the: "
+      #     echo "     'github.event.pull_request.head.ref' starts with 'dev' (double quotes) "
+      #     echo "  AND  "
+      #     echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
 
       - name: label autorelease | contains github.event.pull_request.labels.*.name conditional
         id: label-autorelease-contains-label-name-single-quotes
@@ -227,11 +232,12 @@ jobs:
         run: |
           echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (single quotes) "
 
-      - name: label autorelease | contains github.event.pull_request.labels.*.name conditional (double quotes)
-        id: label-autorelease-contains-label-name-double-quotes
-        if: contains(github.event.pull_request.labels.*.name, "actions:autorelease")
-        run: |
-          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (double quotes) "
+      # - name: label autorelease | contains github.event.pull_request.labels.*.name conditional (double quotes)
+      #   id: label-autorelease-contains-label-name-double-quotes
+      #   # error: Unexpected symbol: '"actions:autorelease"'. Located at position 51 within expression: contains(github.event.pull_request.labels.*.name, "actions:autorelease") 
+      #   #if: contains(github.event.pull_request.labels.*.name, "actions:autorelease")
+      #   run: |
+      #     echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (double quotes) "
 
       - name: label group test | contains github.event.pull_request.labels.*.name conditional
         id: label-group-test-contains-label-name-single-quotes
@@ -239,11 +245,12 @@ jobs:
         run: |
           echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (single quotes) "
 
-      - name: label group test | contains github.event.pull_request.labels.*.name conditional (double quotes)
-        id: label-group-test-contains-label-name-double-quotes
-        if: contains(github.event.pull_request.labels.*.name, "group:test")
-        run: |
-          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (double quotes) "
+      # - name: label group test | contains github.event.pull_request.labels.*.name conditional (double quotes)
+      #   id: label-group-test-contains-label-name-double-quotes
+      #   # error:  Unexpected symbol: '"group:test"'. Located at position 51 within expression: contains(github.event.pull_request.labels.*.name, "group:test")
+      #   #if: contains(github.event.pull_request.labels.*.name, "group:test")
+      #   run: |
+      #     echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (double quotes) "
 
 
   check-commit-sha:
