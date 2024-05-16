@@ -165,7 +165,7 @@ runs:
       shell: bash
       run: |
         VERSION="${{ github.event.release.tag_name }}"
-  
+        ##
         RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
         if [[ $VERSION =~ $RE ]]; then
           MAJOR="${BASH_REMATCH[1]}"
@@ -183,7 +183,7 @@ runs:
         else
           echo "::error::Version '$VERSION' is not in a valid format" && exit 1
         fi
-  
+        ##
         if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
         if [[ -f $GITHUB_OUTPUT ]]; then
           echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
