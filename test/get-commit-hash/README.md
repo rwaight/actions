@@ -15,7 +15,7 @@ See the `inputs` configured in the [action.yml](action.yml) file.
 
 The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed to run the `git describe` command depending on permissions granted to the default GitHub token.
 
-#### action-verbose
+#### verbose
 
 Determine if the action should run verbose tasks, defaults to false.
 * required: false
@@ -62,7 +62,7 @@ jobs:
         uses: rwaight/actions/test/get-commit-hash@main
         with:
           gh-token: ${{ github.token }}
-          action-verbose: true
+          verbose: true
 
       - name: Report the output from the get-commit-hash step
         if: ${{ steps.get-commit-hash.outputs.current-hash-suffix }}
