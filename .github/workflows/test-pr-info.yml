@@ -1,0 +1,308 @@
+name: Test - Get PR Info
+run-name: 'Print PR merged info - `${{ github.event.pull_request.merged }}`'
+
+on:
+  pull_request:
+    branches:
+      - main
+    #types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+
+  pr-merged:
+    name: pr-merged
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true  # use this for testing
+
+    steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 0
+
+      - name: merged | github.event.pull_request.merged conditional (no quotes)
+        id: pr-merged-equal-true-no-quotes
+        if: github.event.pull_request.merged == true
+        run: |
+          echo "this means that 'github.event.pull_request.merged' equals true (no quotes) "
+
+      - name: merged | github.event.pull_request.merged conditional (single quotes)
+        id: pr-merged-equal-true-single-quotes
+        if: github.event.pull_request.merged == 'true'
+        run: |
+          echo "this means that 'github.event.pull_request.merged' equals 'true' (single quotes) "
+
+      - name: autorelease | startsWith github.event.pull_request.head.ref conditional
+        id: autorelease-startswith-head-ref-single-quotes
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
+        run: |
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+
+      - name: autorelease | startsWith github.event.pull_request.head.ref conditional (double quotes)
+        id: autorelease-startswith-head-ref-double-quotes
+        if: startsWith(github.event.pull_request.head.ref, "autorelease")
+        run: |
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (double quotes) "
+
+      - name: version syntax | contains github.event.pull_request.head.ref conditional
+        id: version-contains-head-ref-single-quotes
+        if: contains(github.event.pull_request.head.ref, 'v*.*.*')
+        run: |
+          echo "this means that 'github.event.pull_request.head.ref' contains 'v*.*.*' (single quotes) "
+
+      - name: version syntax | contains github.event.pull_request.head.ref conditional (double quotes)
+        id: version-contains-head-ref-double-quotes
+        if: contains(github.event.pull_request.head.ref, "v*.*.*")
+        run: |
+          echo "this means that 'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
+
+      - name: dev | startsWith github.event.pull_request.head.ref conditional
+        id: dev-startswith-head-ref-single-quotes
+        if: startsWith(github.event.pull_request.head.ref, 'dev')
+        run: |
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'dev' (single quotes) "
+
+      - name: dev | startsWith github.event.pull_request.head.ref conditional (double quotes)
+        id: dev-startswith-head-ref-double-quotes
+        if: startsWith(github.event.pull_request.head.ref, "dev")
+        run: |
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'dev' (double quotes) "
+
+      - name: autorelease and version | startsWith and contains conditional
+        id: autorelease-and-version-head-ref-single-quotes
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease') && contains(github.event.pull_request.head.ref, 'v*.*.*')
+        run: |
+          echo "this means that the: "
+          echo "     'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+          echo "  AND  "
+          echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (single quotes) "
+
+      - name: autorelease and version | startsWith and contains conditional (double quotes)
+        id: autorelease-and-version-head-ref-double-quotes
+        if: startsWith(github.event.pull_request.head.ref, "autorelease") && contains(github.event.pull_request.head.ref, "v*.*.*")
+        run: |
+          echo "this means that the: "
+          echo "     'github.event.pull_request.head.ref' starts with 'autorelease' (double quotes) "
+          echo "  AND  "
+          echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
+
+      - name: dev and version | startsWith and contains conditional
+        id: dev-and-version-head-ref-single-quotes
+        if: startsWith(github.event.pull_request.head.ref, 'dev') && contains(github.event.pull_request.head.ref, 'v*.*.*')
+        run: |
+          echo "this means that the: "
+          echo "     'github.event.pull_request.head.ref' starts with 'dev' (single quotes) "
+          echo "  AND  "
+          echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (single quotes) "
+
+      - name: dev and version | startsWith and contains conditional (double quotes)
+        id: dev-and-version-head-ref-double-quotes
+        if: startsWith(github.event.pull_request.head.ref, "dev") && contains(github.event.pull_request.head.ref, "v*.*.*")
+        run: |
+          echo "this means that the: "
+          echo "     'github.event.pull_request.head.ref' starts with 'dev' (double quotes) "
+          echo "  AND  "
+          echo "     'github.event.pull_request.head.ref' contains 'v*.*.*' (double quotes) "
+
+      - name: label autorelease | contains github.event.pull_request.labels.*.name conditional
+        id: label-autorelease-contains-label-name-single-quotes
+        if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
+        run: |
+          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (single quotes) "
+
+      - name: label autorelease | contains github.event.pull_request.labels.*.name conditional (double quotes)
+        id: label-autorelease-contains-label-name-double-quotes
+        if: contains(github.event.pull_request.labels.*.name, "actions:autorelease")
+        run: |
+          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (double quotes) "
+
+      - name: label group test | contains github.event.pull_request.labels.*.name conditional
+        id: label-group-test-contains-label-name-single-quotes
+        if: contains(github.event.pull_request.labels.*.name, 'group:test')
+        run: |
+          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (single quotes) "
+
+      - name: label group test | contains github.event.pull_request.labels.*.name conditional (double quotes)
+        id: label-group-test-contains-label-name-double-quotes
+        if: contains(github.event.pull_request.labels.*.name, "group:test")
+        run: |
+          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (double quotes) "
+
+
+  check-commit-sha:
+    # get the commit SHA's from the merged pull request
+    name: get-commit-sha
+    runs-on: ubuntu-latest
+    if: (github.event.pull_request.merged == true)  # use this for testing
+    outputs:
+      pr-sha: ${{ steps.pr-commit.outputs.sha }}
+      main-sha: ${{ steps.main-commit.outputs.sha }}
+    steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 1
+
+      - name: Create a GitHub App Token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        with:
+          #ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      # not sure if running 'git config' is needed for this...
+      # # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+      # # user: 'rw-actions-bot <noreply@github.com>'
+      # - name: Configure Git
+      #   id: configure-git
+      #   #if: ${{ steps.app-token.outputs.token }}
+      #   run: |
+      #     git --version
+      #     ## Configure git to login as the RW Actions Bot.
+      #     git config user.name rw-actions-bot[bot]
+      #     git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+      #     git status
+      #     echo "the 'set-up-git' step has completed. "
+
+      - name: Get PR commit SHA
+        id: pr-commit
+        if: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "getting the PR commit SHA"
+          echo "the value of 'github.event.pull_request.head.sha' is '${{ github.event.pull_request.head.sha }}' "
+          git rev-parse ${{ github.event.pull_request.head.sha }}
+          pr_sha=$(git rev-parse ${{ github.event.pull_request.head.sha }})
+          echo "the PR SHA is ${pr_sha}"
+          echo "sha=${pr_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get main branch commit SHA
+        id: main-commit
+        if: ${{ github.event.pull_request.base.sha }}
+        run: |
+          echo "getting the main commit SHA"
+          echo "the value of 'github.event.pull_request.base.sha' is '${{ github.event.pull_request.base.sha }}' "
+          git rev-parse ${{ github.event.pull_request.base.sha }}
+          main_sha=$(git rev-parse ${{ github.event.pull_request.base.sha }})
+          echo "the main SHA is ${main_sha}"
+          echo "sha=${main_sha}" >> $GITHUB_OUTPUT
+
+      - name: Print the SHAs
+        id: print-info
+        run: |
+          echo "PR commit SHA: ${{ steps.pr-commit.outputs.sha }}"
+          echo "Main branch commit SHA: ${{ steps.main-commit.outputs.sha }}"
+
+
+  not-applicable:
+    # do nothing else because this is not an autorelease branch
+    #name: do nothing else because this is not an autorelease branch
+    runs-on: ubuntu-latest
+    if: |
+      !(contains(github.event.pull_request.labels.*.name, 'actions:autorelease')) && 
+      !(startsWith(github.event.pull_request.head.ref, 'autorelease'))
+    steps:
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 1
+
+      - name: Nothing to do, this is not an autorelease branch
+        id: print-something
+        run: |
+          # Nothing to do, this is not an autorelease branch
+          echo "This is not an autorelease branch, not much to do but print info for testing... "
+
+      - name: Print labels
+        id: print-labels
+        run: | 
+          ## Print labels
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'print-labels' step. "
+          ##
+          echo "::group::other github info"
+          echo "  printing other github info:"
+          echo "event pr base ref:  ${{ github.event.pull_request.base.ref }}"
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          echo "::endgroup::"
+          echo ""
+          echo "::group::GitHub labels"
+          echo "## GitHub labels"
+          echo "$GITHUB_LABELS"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "completing the 'print-labels' step. "
+        env:
+          GITHUB_LABELS: ${{ toJson(github.event.pull_request.labels) }}
+
+      - name: Create a GitHub App Token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        with:
+          #ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Get PR commit SHA
+        id: pr-commit
+        continue-on-error: true
+        if: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "getting the PR commit SHA"
+          echo "the value of 'github.event.pull_request.head.sha' is '${{ github.event.pull_request.head.sha }}' "
+          git rev-parse ${{ github.event.pull_request.head.sha }}
+          pr_sha=$(git rev-parse ${{ github.event.pull_request.head.sha }})
+          echo "the PR SHA is ${pr_sha}"
+          echo "sha=${pr_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get main branch commit SHA
+        id: main-commit
+        continue-on-error: true
+        if: ${{ github.event.pull_request.base.sha }}
+        run: |
+          echo "getting the main commit SHA"
+          echo "the value of 'github.event.pull_request.base.sha' is '${{ github.event.pull_request.base.sha }}' "
+          git rev-parse ${{ github.event.pull_request.base.sha }}
+          main_sha=$(git rev-parse ${{ github.event.pull_request.base.sha }})
+          echo "the main SHA is ${main_sha}"
+          echo "sha=${main_sha}" >> $GITHUB_OUTPUT
+
+      - name: Print the SHAs
+        id: print-info
+        run: |
+          echo "PR commit SHA: ${{ steps.pr-commit.outputs.sha }}"
+          echo "Main branch commit SHA: ${{ steps.main-commit.outputs.sha }}"
