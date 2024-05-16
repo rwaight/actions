@@ -48,7 +48,7 @@ Note that the only tested pre-release identifier is `rc` at this time.
 
 The pre-release identifier (only for pre-release builds). Currently, only `rc` has been tested as a pre-release identifier.
 
-#### action-verbose
+#### verbose
 
 Determine if the action should run verbose tasks, defaults to false.
 * required: false
@@ -209,7 +209,7 @@ jobs:
           gh-token: ${{ github.token }}
           pre-release-id: ${{ inputs.preid }}
           release-type: ${{ inputs.release-type }}
-          action-verbose: true
+          verbose: true
 
       - name: Report the output from the get-next-semver step
         if: ${{ steps.get-next-semver.outputs.next-version }}

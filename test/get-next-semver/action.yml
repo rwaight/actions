@@ -178,7 +178,7 @@ runs:
             echo "Using the GitHub CLI to print release information"
             echo "See https://cli.github.com/manual/gh_release_list for information about the command. "
             echo ""
-            echo "Debug enabled, running additional 'gh release' commands"
+            echo "Verbose mode enabled, running additional 'gh release' commands"
             echo ""
             echo "::group::running 'gh release list' ... "
             gh release list
@@ -245,7 +245,7 @@ runs:
             echo ""
             echo "Using the CLI to get tag information"
             echo ""
-            echo "Debug enabled, running additional 'git describe' commands"
+            echo "Verbose mode enabled, running additional 'git describe' commands"
             echo ""
             echo "::group::running 'git describe --abbrev=0 --tags' ... "
             echo "this command will get the tag from the current branch"
@@ -261,7 +261,7 @@ runs:
             git describe --tags
             echo "::endgroup::"
             echo ""
-            echo "Debug enabled, running additional 'git tag' commands"
+            echo "Verbose mode enabled, running additional 'git tag' commands"
             echo ""
             echo "::group::running 'git tag --sort=-taggerdate | tail -1' ... "
             echo "this command will sort the tags by '-taggerdate' "
