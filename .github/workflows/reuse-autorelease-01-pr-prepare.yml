@@ -1,4 +1,4 @@
-name: Reuse - Autorelease 01 Prepare Release
+name: Reuse - Autorelease 01 Prepare Release PR
 #run-name: prepare-release
 run-name: prepare
 # This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
@@ -15,6 +15,7 @@ on:
     # All of the 'inputs' below are passed from the caller workflow.
     inputs:
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       DRY_RUN:
         description: 'Perform a "dry run" or not.  Mainly, if the workflow should actually open a pull request. '
         required: false
@@ -28,12 +29,14 @@ on:
         # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
         type: string
         default: 'false'
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       GH_APP_BOT_NAME:
         description: 'The name of the GitHub App. '
         #default: 'github-actions[bot]'
         default: 'rw-actions-bot[bot]'
         required: false
         type: string
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       JSON_VARS_FILE:
         description: >-
           The name and path of the variables file that will be sent to Packer, this should be in json format.
@@ -41,21 +44,39 @@ on:
         default: 'not-set'
         required: true
         type: string
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       JSON_VARS_IMAGE_FIELD:
         description: 'The image ID field that should be updated within the JSON variables file. '
         default: 'reviewed_image_id'
         required: false
         type: string
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       JSON_VARS_TYPE_FIELD:
         description: 'The type field that should be updated within the JSON variables file. '
         default: 'release_type'
         required: false
         type: string
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       JSON_VARS_VERSION_FIELD:
         description: 'The version field that should be updated within the JSON variables file. '
         default: 'my_custom_version'
         required: false
         type: string
+      # new variable for 'reuse-autorelease-01-pr-prepare'
+      NOTIFY_SLACK:
+        description: 'Determine if a Slack message should be sent, defaults to sending a message (true)'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.NOTIFY_SLACK) }}
+        type: string
+        default: 'true'
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       PACKER_TEMPLATE_CONVERT:
         description: >-
           The name and path of the production template file that will be sent to Packer. 
@@ -63,6 +84,7 @@ on:
         default: 'not-set'
         required: true
         type: string
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       RELEASE_TEMPLATE_FILE:
         description: >-
           The name of the release drafter template (config) `.yml` file that is stored
@@ -71,21 +93,33 @@ on:
         default: 'release-drafter.yml'
         required: true
         type: string
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       RELEASE_TYPE:
-        description: 'Release type'
+        description: >-
+          The release type, should be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod. 
+          For production releases, select the appropriate major, minor, or patch. 
+          To convert a prerelease to production, select pretoprod (example: change 0.2.1-rc1 to 0.2.1). 
+          For prereleases, select prerelease to increment an existing prerelease (example: increment 0.2.1-rc1 to 0.2.1-rc2); 
+          select premajor to create a new premajor prerelease (example: increment 0.2.1 to 1.0.0-rc1);
+          select preminor to create a new preminor prerelease (example: increment 0.2.1 to 0.3.0-rc1); or 
+          select prepatch to create a new prepatch prerelease (example: increment 0.2.1 to 0.2.2-rc1). 
+          Note that the only tested pre-release identifier is `rc` at this time.
         required: true
         type: string
         default: patch
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       RELEASE_PRE_ID:
         description: 'Pre-release identifier (only for pre-release builds)'
         required: false
         type: string
         default: 'rc'
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       REVIEWED_IMAGE_ID:
         description: 'The ID of the image that will be converted'
         default: 'not-set'
         required: true
         type: string
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       WORKFLOW_SUMMARY:
         description: 'Determine if the workflow should output to the summary page, a boolean that defaults to false'
         required: false
@@ -99,6 +133,7 @@ on:
         # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
         type: string
         default: 'true'
+      # new variable for 'reuse-autorelease-01-pr-prepare'
       VERBOSE:
         description: 'Determine if the workflow should run debug tasks, a boolean that defaults to false'
         required: false
@@ -116,31 +151,42 @@ on:
     secrets:
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
       # All of the 'secrets' below are passed from the caller workflow.
+      # new secret for 'reuse-autorelease-01-pr-prepare'
       ACTIONS_TOKEN:
         description: 'A token used within the builder actions.'
         required: false
+      # new secret for 'reuse-autorelease-01-pr-prepare'
       AWS_ACCESS_KEY:
         description: 'The AWS Access Key ID.'
         required: true
+      # new secret for 'reuse-autorelease-01-pr-prepare'
       AWS_SECRET_KEY:
         description: 'The AWS Access Key Secret for the builder.'
         required: true
+      # new secret for 'reuse-autorelease-01-pr-prepare'
       GH_APP_BOT_UID:
         description: >-
           The UID of the GitHub App, not to be confused with GitHub App ID. 
           Can be found using the approach from: https://github.com/orgs/community/discussions/24664#discussioncomment-3880274
         required: false
+      # new secret for 'reuse-autorelease-01-pr-prepare'
       GH_APP_ID:
         description: 'The GitHub App ID.'
         required: false
+      # new secret for 'reuse-autorelease-01-pr-prepare'
       GH_APP_KEY:
         description: 'The private key of the GitHub App.'
         required: false
+      # new secret for 'reuse-autorelease-01-pr-prepare'
+      SLACK_WEBHOOK:
+        description: 'A token used with the slackapi/slack-github-action.'
+        required: false
 
 jobs:
-  reuse-prepare-release:
+
+  prepare-pr:
     #name: Prepare ${{ inputs.RELEASE_TYPE }} release pull request
-    name: Prepare ${{ inputs.RELEASE_TYPE }} release pull request
+    name: prepare-${{ inputs.RELEASE_TYPE }}-release-pr
     runs-on: ubuntu-latest
     outputs:
       job-status: ${{ job.status }}
@@ -172,11 +218,12 @@ jobs:
     env:
       VERBOSE: ${{ inputs.VERBOSE || 'true' }}
     steps:
-      # https://github.com/actions/create-github-app-token
-      - name: Creating a GitHub App Token from actions/create-github-app-token
+
+      - name: Create a GitHub App Token
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
         uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        # https://github.com/actions/create-github-app-token
         id: app-token
         with:
           # required
@@ -194,6 +241,7 @@ jobs:
 
       - name: repo-version-info | Run rwaight/actions git/repo-version-info
         id: repo-version-info
+        #uses: rwaight/actions/git/repo-version-info@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         uses: rwaight/actions/git/repo-version-info@main
         with:
           #gh-token: ${{ secrets.GITHUB_TOKEN }}
@@ -219,12 +267,13 @@ jobs:
       - name: get-next-semver | Run rwaight/actions test/get-next-semver
         id: get-next-semver
         #continue-on-error: true
+        #uses: rwaight/actions/test/get-next-semver@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         uses: rwaight/actions/test/get-next-semver@main
         with:
           gh-token: ${{ steps.app-token.outputs.token }}
           pre-release-id: ${{ inputs.RELEASE_PRE_ID }}
           release-type: ${{ inputs.RELEASE_TYPE }}
-          action-verbose: true
+          verbose: true
 
       - name: get-next-semver | Print outputs
         if: ${{ steps.get-next-semver.outputs.next-version }}
@@ -293,7 +342,7 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: release-drafter | Run rwaight/actions release-drafter
-        #uses: rwaight/actions/releases/release-drafter@v1
+        #uses: rwaight/actions/releases/release-drafter@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         uses: rwaight/actions/releases/release-drafter@main
         id: release-drafter
         with:
@@ -363,7 +412,7 @@ jobs:
           vars-field: '${{ inputs.JSON_VARS_VERSION_FIELD }}'
           #gh-token: ${{ steps.app-token.outputs.token }}
           vars-new-value: ${{ steps.get-next-semver.outputs.next-version }}
-          action-verbose: true
+          verbose: true
 
       - name: update-version-field | Print outputs
         if: ${{ steps.update-version-field.outputs.new-value }}
@@ -384,7 +433,7 @@ jobs:
           vars-field: '${{ inputs.JSON_VARS_TYPE_FIELD }}'
           #gh-token: ${{ steps.app-token.outputs.token }}
           vars-new-value: ${{ inputs.RELEASE_TYPE }}
-          action-verbose: true
+          verbose: true
 
       - name: update-type-field | Print outputs
         if: ${{ steps.update-type-field.outputs.new-value }}
@@ -405,7 +454,7 @@ jobs:
           vars-field: '${{ inputs.JSON_VARS_IMAGE_FIELD }}'
           #gh-token: ${{ steps.app-token.outputs.token }}
           vars-new-value: ${{ inputs.REVIEWED_IMAGE_ID }}
-          action-verbose: true
+          verbose: true
 
       - name: update-image-id-field | Print outputs
         if: ${{ steps.update-image-id-field.outputs.new-value }}
@@ -423,7 +472,8 @@ jobs:
 
       - name: Generate pull request template
         id: pr-template
-        uses: rwaight/actions/utilities/render-template@v0.1.31
+        #uses: rwaight/actions/utilities/render-template@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/utilities/render-template@main
         with:
           template: assets/autorelease/prepare-release-pr.md
           vars: |
@@ -432,8 +482,10 @@ jobs:
             bot_name: ${{ inputs.GH_APP_BOT_NAME }}
             next_tag: ${{ steps.get-next-semver.outputs.next-tag }}
             next_version: ${{ steps.get-next-semver.outputs.next-version }}
-            release_body: ${{ steps.release-drafter.outputs.body }}
+            release_body: 'see body in ${{ steps.release-drafter.outputs.html_url }}'
             release_url: ${{ steps.release-drafter.outputs.html_url }}
+          #release_body: ${{ steps.release-drafter.outputs.body }}
+          ## need to find out why the 'body' from release drafter is not printing properly...
 
       - name: Dry Run | Not creating a pull request
         id: print-notice-no-pr
@@ -443,6 +495,7 @@ jobs:
 
       - name: Create pull request using rwaight/actions github/create-pull-request
         id: create-release-pr
+        #uses: rwaight/actions/github/create-pull-request@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         uses: rwaight/actions/github/create-pull-request@main
         if: ${{ inputs.DRY_RUN=='false' }}
         with:
@@ -476,113 +529,72 @@ jobs:
           echo "::notice title=Release PR Prepared::A release PR has been created, please merge it to continue with the release process: ${{ steps.create-release-pr.outputs.pull-request-url }}"
           echo "::notice title=Draft release prepared::A release draft has been created, please review it as part of the release process: ${{ steps.release-drafter.outputs.html_url }}"
 
-  call-build:
-    # call the build workflow
-    name: Call the build workflow
-    #uses: rwaight/actions/.github/workflows/reuse-build.yml@v2 # use the hash instead of the version number
-    uses: rwaight/actions/.github/workflows/reuse-build.yml@main
-    needs: [prepare-release]
-    if: (github.repository_owner == 'rwaight')
-    with:
-      build_method: 'to-main'  # the autorelease 'pr-merged' workflow will set 'to-prod' as the build_method
-      #build_version: ${{ needs.prepare-release.outputs.next-tag }} # the build workflow should come to the same conclusion...
-      create_ami: 'false'
-      dry_run: ${{ inputs.DRY_RUN }}
-      reviewed_image: ${{ inputs.REVIEWED_IMAGE_ID }}
-      #release_type: ${{ inputs.RELEASE_TYPE }}
-      verbose: ${{ inputs.VERBOSE }}
-    #secrets: inherit
-    secrets:
-      ACTIONS_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
-      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      GH_APP_BOT_UID: ${{ secrets.GH_APP_BOT_UID }}
-      GH_APP_ID: ${{ secrets.GH_APP_ID }}
-      GH_APP_KEY: ${{ secrets.GH_APP_KEY }}
-      
-
-  print-build-results:
-    name: Print the build results
+  print-outputs:
+    name: Print the prepare-release outputs
     runs-on: ubuntu-latest
-    needs: [prepare-release, call-build]
+    needs: [prepare-pr]
     env:
-      prepare-job-status: ${{ needs.prepare-release.outputs.job-status }}
-      latest-release: ${{ needs.prepare-release.outputs.latest-release }}
-      latest-tag: ${{ needs.prepare-release.outputs.latest-tag }}
-      # output from the 'get-next-semver' step
-      current-tag: ${{ needs.prepare-release.outputs.current-tag }}
-      current-version: ${{ needs.prepare-release.outputs.current-version }}
-      next-tag: ${{ needs.prepare-release.outputs.next-tag }}
-      next-version: ${{ needs.prepare-release.outputs.next-version }}
-      is-next-prerelease: ${{ needs.prepare-release.outputs.is-next-prerelease }}
-      # output from the 'bump-json-version' step
-      current-release-version: ${{ needs.prepare-release.outputs.current-release-version }}
-      next-release-version: ${{ needs.prepare-release.outputs.next-release-version }}
-      old-json-version: ${{ needs.prepare-release.outputs.old-json-version }}
-      new-json-version: ${{ needs.prepare-release.outputs.new-json-version }}
-      # output from the 'release-drafter' step
-      release-id: ${{ needs.prepare-release.outputs.id }}
-      release-name: ${{ needs.prepare-release.outputs.name }}
-      release-tag-name: ${{ needs.prepare-release.outputs.tag_name }}
-      release-html-url: ${{ needs.prepare-release.outputs.html_url }}
-      release-upload-url: ${{ needs.prepare-release.outputs.upload_url }}
-      release-major-version: ${{ needs.prepare-release.outputs.major_version }}
-      release-minor-version: ${{ needs.prepare-release.outputs.minor_version }}
-      release-patch-version: ${{ needs.prepare-release.outputs.patch_version }}
-      release-resolved-version: ${{ needs.prepare-release.outputs.resolved_version }}
-      ##
-      BUILD_JOB_STATUS: ${{ needs.call-build.outputs.BUILD_JOB_STATUS }}
-      BUILD_TYPE: ${{ needs.call-build.outputs.BUILD_TYPE }}
-      BUILD_METHOD: ${{ needs.call-build.outputs.BUILD_METHOD }}
-      BUILD_VERSION: ${{ needs.call-build.outputs.BUILD_VERSION }}
-      BUILD_OUTCOME: ${{ needs.call-build.outputs.BUILD_OUTCOME }}
-      REVIEWED_IMAGE: ${{ needs.call-build.outputs.REVIEWED_IMAGE }}
+      # prepare-pr #
+      prepare-job-status: ${{ needs.prepare-pr.outputs.job-status }}
+      # prepare-pr # output from the 'repo-version-info' step
+      latest-release: ${{ needs.prepare-pr.outputs.latest-release }}
+      latest-tag: ${{ needs.prepare-pr.outputs.latest-tag }}
+      # prepare-pr # output from the 'get-next-semver' step
+      current-tag: ${{ needs.prepare-pr.outputs.current-tag }}
+      current-version: ${{ needs.prepare-pr.outputs.current-version }}
+      next-tag: ${{ needs.prepare-pr.outputs.next-tag }}
+      next-version: ${{ needs.prepare-pr.outputs.next-version }}
+      is-next-prerelease: ${{ needs.prepare-pr.outputs.is-next-prerelease }}
+      # prepare-pr # output from the 'bump-json-version' step
+      current-release-version: ${{ needs.prepare-pr.outputs.current-release-version }}
+      next-release-version: ${{ needs.prepare-pr.outputs.next-release-version }}
+      old-json-version: ${{ needs.prepare-pr.outputs.old-json-version }}
+      new-json-version: ${{ needs.prepare-pr.outputs.new-json-version }}
+      # prepare-pr # output from the 'release-drafter' step
+      release-id: ${{ needs.prepare-pr.outputs.release-id }}
+      release-name: ${{ needs.prepare-pr.outputs.release-name }}
+      release-tag-name: ${{ needs.prepare-pr.outputs.release-tag-name }}
+      release-html-url: ${{ needs.prepare-pr.outputs.release-html-url }}
+      release-upload-url: ${{ needs.prepare-pr.outputs.release-upload-url }}
+      release-major-version: ${{ needs.prepare-pr.outputs.release-major-version }}
+      release-minor-version: ${{ needs.prepare-pr.outputs.release-minor-version }}
+      release-patch-version: ${{ needs.prepare-pr.outputs.release-patch-version }}
+      release-resolved-version: ${{ needs.prepare-pr.outputs.release-resolved-version }}
+      # verbose input #
       VERBOSE: ${{ inputs.VERBOSE || 'true' }}
     steps:
 
-      - name: Print outputs from the 'prepare-release' job
+      - name: Print outputs from the 'prepare-pr' job
         if: ${{ env.prepare-job-status }}
         run: |
-          echo "outputs from the 'prepare-release' job "
+          echo "outputs from the 'prepare-pr' job "
           echo ""
-          echo "  prepare-job-status: ${{ needs.prepare-release.outputs.job-status }} "
-          echo "  latest-release: ${{ needs.prepare-release.outputs.latest-release }} "
-          echo "  latest-tag: ${{ needs.prepare-release.outputs.latest-tag }} "
+          echo "  prepare-job-status: ${{ needs.prepare-pr.outputs.job-status }} "
+          echo "  latest-release: ${{ needs.prepare-pr.outputs.latest-release }} "
+          echo "  latest-tag: ${{ needs.prepare-pr.outputs.latest-tag }} "
           echo ""
           echo "output from the 'get-next-semver' step "
-          echo "  current-tag: ${{ needs.prepare-release.outputs.current-tag }} "
-          echo "  current-version: ${{ needs.prepare-release.outputs.current-version }} "
-          echo "  next-tag: ${{ needs.prepare-release.outputs.next-tag }} "
-          echo "  next-version: ${{ needs.prepare-release.outputs.next-version }} "
-          echo "  is-next-prerelease: ${{ needs.prepare-release.outputs.is-next-prerelease }} "
+          echo "  current-tag: ${{ needs.prepare-pr.outputs.current-tag }} "
+          echo "  current-version: ${{ needs.prepare-pr.outputs.current-version }} "
+          echo "  next-tag: ${{ needs.prepare-pr.outputs.next-tag }} "
+          echo "  next-version: ${{ needs.prepare-pr.outputs.next-version }} "
+          echo "  is-next-prerelease: ${{ needs.prepare-pr.outputs.is-next-prerelease }} "
           echo ""
           echo "output from the 'bump-json-version' step "
-          echo "  current-release-version: ${{ needs.prepare-release.outputs.current-release-version }} "
-          echo "  next-release-version: ${{ needs.prepare-release.outputs.next-release-version }} "
-          echo "  old-json-version: ${{ needs.prepare-release.outputs.old-json-version }} "
-          echo "  new-json-version: ${{ needs.prepare-release.outputs.new-json-version }} "
+          echo "  current-release-version: ${{ needs.prepare-pr.outputs.current-release-version }} "
+          echo "  next-release-version: ${{ needs.prepare-pr.outputs.next-release-version }} "
+          echo "  old-json-version: ${{ needs.prepare-pr.outputs.old-json-version }} "
+          echo "  new-json-version: ${{ needs.prepare-pr.outputs.new-json-version }} "
           echo ""
           echo "output from the 'release-drafter' step "
-          echo "  release-id: ${{ needs.prepare-release.outputs.release-id }} "
-          echo "  release-name: ${{ needs.prepare-release.outputs.release-name }} "
-          echo "  release-tag-name: ${{ needs.prepare-release.outputs.release-tag-name }} "
-          echo "  release-html-url: ${{ needs.prepare-release.outputs.release-html-url }} "
-          echo "  release-upload-url: ${{ needs.prepare-release.outputs.release-upload-url }} "
-          echo "  release-major-version: ${{ needs.prepare-release.outputs.release-major-version }} "
-          echo "  release-minor-version: ${{ needs.prepare-release.outputs.release-minor-version }} "
-          echo "  release-patch-version: ${{ needs.prepare-release.outputs.release-patch-version }} "
-          echo "  release-resolved-version: ${{ needs.prepare-release.outputs.release-resolved-version }} "
+          echo "  release-id: ${{ needs.prepare-pr.outputs.release-id }} "
+          echo "  release-name: ${{ needs.prepare-pr.outputs.release-name }} "
+          echo "  release-tag-name: ${{ needs.prepare-pr.outputs.release-tag-name }} "
+          echo "  release-html-url: ${{ needs.prepare-pr.outputs.release-html-url }} "
+          echo "  release-upload-url: ${{ needs.prepare-pr.outputs.release-upload-url }} "
+          echo "  release-major-version: ${{ needs.prepare-pr.outputs.release-major-version }} "
+          echo "  release-minor-version: ${{ needs.prepare-pr.outputs.release-minor-version }} "
+          echo "  release-patch-version: ${{ needs.prepare-pr.outputs.release-patch-version }} "
+          echo "  release-resolved-version: ${{ needs.prepare-pr.outputs.release-resolved-version }} "
           echo ""
 
-      - name: Print outputs from the 'call-build' job
-        if: ${{ env.BUILD_OUTCOME }}
-        run: |
-          echo "outputs from the 'call-build' job "
-          echo ""
-          echo "BUILD_JOB_STATUS: ${{ needs.call-build.outputs.BUILD_JOB_STATUS }} "
-          echo "BUILD_TYPE: ${{ needs.call-build.outputs.BUILD_TYPE }} "
-          echo "BUILD_METHOD: ${{ needs.call-build.outputs.BUILD_METHOD }} "
-          echo "BUILD_VERSION: ${{ needs.call-build.outputs.BUILD_VERSION }} "
-          echo "BUILD_OUTCOME: ${{ needs.call-build.outputs.BUILD_OUTCOME }} "
-          echo "REVIEWED_IMAGE: ${{ needs.call-build.outputs.REVIEWED_IMAGE }} "
-          echo ""
