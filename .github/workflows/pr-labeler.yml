@@ -65,18 +65,17 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
-        #uses: actions/checkout@v4.1.3
 
       - name: Forked repo | Exit workflow early in forked repo
         id: check-repo-owner
         if: (github.repository_owner != 'rwaight')
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
+          ##echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
           gh run cancel ${{ github.run_id }}
           echo "The 'check-repo-owner' step is finishing and this workflow will now exit. "
           gh run watch ${{ github.run_id }}
-          exit 0
+          exit 1
         # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
         env:
           GH_TOKEN: ${{ github.token }}
@@ -107,11 +106,12 @@ jobs:
           echo ""
           echo "The 'check-for-any-labels' step has completed. "
 
-      - name: Autorelease | Set the label scope to 'semver'
+      - name: Autorelease | Set the label scope to 'version' for semver checking
         #name: Autorelease | Check 'autorelease' branch
         id: set-label-scope-semver
         #if: contains('refs/heads/autorelease', github.ref)
-        if: ${{ contains('refs/heads/autorelease', github.ref) }}
+        # this does not work #if: ${{ contains('refs/heads/autorelease', github.ref) }}
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
         # if: | 
         #   contains('
         #     refs/heads/autorelease
@@ -120,8 +120,8 @@ jobs:
         run: |
           ## the double number signs below are for line spacing and readability only
           ##
-          echo "Setting GHA_LABEL_SCOPE to 'semver' ... "
-          echo "GHA_LABEL_SCOPE=semver" >> $GITHUB_ENV
+          echo "Setting GHA_LABEL_SCOPE to 'version' ... "
+          echo "GHA_LABEL_SCOPE=version" >> $GITHUB_ENV
           ##
           ## The head branch should be named autorelease/<version>
           if ! [[ "${{ github.event.pull_request.head.ref }}" =~ ^autorelease\/[A-Za-z0-9.+-]+$ ]]; then
@@ -142,9 +142,53 @@ jobs:
           fi
           echo "The 'set-label-scope-semver' step has completed. "
 
+      - name: Autorelease | parse the branch name
+        id: autorelease-parse-branch-name
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
+        run: |
+          echo "starting the 'autorelease-parse-branch-name' step. "
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+              ##
+              echo "next thing to do is to output whichever match group, so it can be tested... "
+          else
+              echo "the head ref did not match the regex, but the branch name starts with 'autorelease'."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=pr-labeler,title=autorelease-parse-branch-name::the head ref did not match the regex, but the branch name starts with 'autorelease'."
+          fi
+          ##
+          echo "completing the 'autorelease-parse-branch-name' step. "
+
       - name: Set the label scope to 'type'
         id: set-label-scope-type
-        if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
         run: |
           ## the double number signs below are for line spacing and readability only
           ##
@@ -159,8 +203,8 @@ jobs:
         run: |
           ## the double number signs below are for line spacing and readability only
           ##
-          if [ '${{ env.GHA_LABEL_SCOPE }}' == 'semver' ]; then
-              echo "The label scope is 'semver'. "
+          if [ '${{ env.GHA_LABEL_SCOPE }}' == 'version' ]; then
+              echo "The label scope is 'version'. "
           ##
           elif [ '${{ env.GHA_LABEL_SCOPE }}' == 'type' ]; then
               echo "The label scope is 'type'. "
@@ -182,11 +226,10 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
         uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
-        #uses: actions/create-github-app-token@v1.10.0
         id: app-token
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
-          (github.repository == 'rwaight/actions') &&
+          (github.repository_owner == 'rwaight') &&
           (github.actor!= 'dependabot[bot]') &&
           (contains(github.head_ref, 'dependabot-') == false)
         with:
@@ -200,7 +243,6 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
-        #uses: actions/checkout@v4.1.3
         id: checkout
         # Skip running on forks or Dependabot since neither has access to secrets
         if: steps.app-token.outcome != 'skipped'
@@ -222,11 +264,10 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
-        #uses: actions/checkout@v4.1.3
         id: checkout-dependabot
         # Run for Dependabot with the default token
         if: |
-          (github.repository == 'rwaight/actions') &&
+          (github.repository_owner == 'rwaight') &&
           (github.actor== 'dependabot[bot]') &&
           (contains(github.head_ref, 'dependabot-') == true)
         with:
@@ -246,18 +287,16 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/labeler
         # An action for automatically labelling pull requests
         uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
-        #uses: actions/labeler@v5.0.0
         id: label-pull-request
         with:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
         uses: rwaight/actions/test/check-semver-labels@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
-        #uses: rwaight/actions/test/check-semver-labels@v0.1.26
-        #uses: rwaight/actions/test/check-semver-labels@main
         id: check-semver-labels
         #if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
-        if: contains('refs/heads/autorelease', github.ref)
+        # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
         with:
           gh-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           allow-failure: true
@@ -268,10 +307,9 @@ jobs:
 
       - name: Check for type labels
         uses: rwaight/actions/github/label-checker@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
-        #uses: rwaight/actions/github/label-checker@v0.1.26
-        #uses: rwaight/actions/github/label-checker@main
         id: check-type-labels
-        if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
         with:
           allow_failure: true
           prefix_mode: true
@@ -295,8 +333,8 @@ jobs:
           echo "test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels" >> $GITHUB_ENV
           echo "test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels" >> "$GITHUB_OUTPUT"
           ##
-          if [ '${{ env.GHA_LABEL_SCOPE }}' == 'semver' ]; then
-              echo "The label scope is 'semver'. "
+          if [ '${{ env.GHA_LABEL_SCOPE }}' == 'version' ]; then
+              echo "The label scope is 'version'. "
               label_check=${{ steps.check-semver-labels.outputs.label_check }}
               echo "label_check=${{ steps.check-semver-labels.outputs.label_check }}" >> $GITHUB_ENV
               echo "label_check=${{ steps.check-semver-labels.outputs.label_check }}" >> "$GITHUB_OUTPUT"
@@ -344,8 +382,6 @@ jobs:
       # look for a comment 
       - name: Find Comment
         uses: rwaight/actions/chatops/find-comment@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
-        #uses: rwaight/actions/chatops/find-comment@v0.1.26
-        #uses: rwaight/actions/chatops/find-comment@main
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
@@ -359,8 +395,6 @@ jobs:
         # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
         uses: rwaight/actions/utilities/render-template@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
-        #uses: rwaight/actions/utilities/render-template@v0.1.26
-        #uses: rwaight/actions/utilities/render-template@main
         if: steps.write-results.outcome != 'skipped'
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
@@ -378,8 +412,6 @@ jobs:
       - name: Create or update comment
         id: comment-on-pr
         uses: rwaight/actions/chatops/create-or-update-comment@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
-        #uses: rwaight/actions/chatops/create-or-update-comment@v0.1.26
-        #uses: rwaight/actions/chatops/create-or-update-comment@main
         if: steps.comment-template.outcome != 'skipped'
         with:
           body: ${{ steps.comment-template.outputs.result }}
