@@ -293,7 +293,7 @@ jobs:
 
       - name: Autorelease | Check for semantic version labels
         uses: rwaight/actions/test/check-semver-labels@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
-        id: check-semver-labels
+        id: check-version-labels
         #if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
         # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
@@ -334,16 +334,16 @@ jobs:
           echo "test_name=check-${{ env.GHA_LABEL_SCOPE }}-labels" >> "$GITHUB_OUTPUT"
           ##
           if [ '${{ env.GHA_LABEL_SCOPE }}' == 'version' ]; then
-              echo "The label scope is 'version'. "
-              label_check=${{ steps.check-semver-labels.outputs.label_check }}
-              echo "label_check=${{ steps.check-semver-labels.outputs.label_check }}" >> $GITHUB_ENV
-              echo "label_check=${{ steps.check-semver-labels.outputs.label_check }}" >> "$GITHUB_OUTPUT"
-              step_outcome=${{ steps.check-semver-labels.outcome }}
-              echo "step_outcome=${{ steps.check-semver-labels.outcome }}" >> $GITHUB_ENV
-              echo "step_outcome=${{ steps.check-semver-labels.outcome }}" >> "$GITHUB_OUTPUT"
+              echo "The label scope is '${{ env.GHA_LABEL_SCOPE }}' (should be 'version'). "
+              label_check=${{ steps.check-version-labels.outputs.semver-check-results }}
+              echo "label_check=${{ steps.check-version-labels.outputs.semver-check-results }}" >> $GITHUB_ENV
+              echo "label_check=${{ steps.check-version-labels.outputs.semver-check-results }}" >> "$GITHUB_OUTPUT"
+              step_outcome=${{ steps.check-version-labels.outcome }}
+              echo "step_outcome=${{ steps.check-version-labels.outcome }}" >> $GITHUB_ENV
+              echo "step_outcome=${{ steps.check-version-labels.outcome }}" >> "$GITHUB_OUTPUT"
           ##
           elif [ '${{ env.GHA_LABEL_SCOPE }}' == 'type' ]; then
-              echo "The label scope is 'type'. "
+              echo "The label scope is '${{ env.GHA_LABEL_SCOPE }}' (should be 'type'). "
               label_check=${{ steps.check-type-labels.outputs.label_check }}
               echo "label_check=${{ steps.check-type-labels.outputs.label_check }}" >> $GITHUB_ENV
               echo "label_check=${{ steps.check-type-labels.outputs.label_check }}" >> "$GITHUB_OUTPUT"
@@ -355,8 +355,8 @@ jobs:
               exit 1
           fi
           ##
-          if [ '${{ env.MY_WORKFLOW_DEBUG }}' == 'true' ]; then
-              echo "debug and verbose info... "
+          if [ 'true' == 'true' ]; then
+              echo "verbose info... "
               echo ""
               echo "the '${{ env.test_name }}' step info... "
               echo "  label_check:  ${{ env.label_check }} "
@@ -368,12 +368,12 @@ jobs:
               echo ""
           fi
           ##
-          echo "checking the contains autorelease ..."
-          echo "${{ contains('refs/heads/autorelease', github.ref) }} "
+          echo "checking if the head.ref startsWith autorelease ..."
+          echo "${{ startsWith(github.event.pull_request.head.ref, 'autorelease') }} "
           echo "look above, what is that?"
           echo ""
-          echo "checking the NOT contains autorelease ..."
-          echo "${{ ! contains('refs/heads/autorelease', github.ref) }} "
+          echo "checking if the head.ref NOT startsWith autorelease ..."
+          echo "${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }} "
           echo "look above, what is that?"
           echo ""
           ##
