@@ -71,7 +71,7 @@ jobs:
           json-vars-file: 'hello'
           json-vars-field: true
           release-type: ${{ inputs.release-type }}
-          action-verbose: true
+          verbose: true
 
       - name: Report the output from the calculate-and-bump-json step
         if: ${{ steps.calculate-and-bump-json.outputs.next-release-version }}
