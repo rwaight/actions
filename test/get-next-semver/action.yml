@@ -477,9 +477,35 @@ runs:
             echo "something is wrong with a conditional, setting 'is_next_prerelease' to 'false' .. "
             is_next_prerelease=false
         fi
+        ## check for a valid version here...
+        ##
+        VERSION="${next_tag_version}"
+        ##  
+        RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        if [[ $VERSION =~ $RE ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
+                echo "VERSION is: $VERSION "
+                echo "RE is     : $RE "
+                echo "MAJOR is  : $MAJOR "
+                echo "MINOR is  : $MINOR "
+                echo "PATCH is  : $PATCH "
+                echo "PRERELEASE: $PRERELEASE"
+            fi
+        else
+            ## Fail the workflow if the '${next_tag_version}' is not valid
+            echo "::error file=get-next-semver,title=⛔ set-next-tag,hint::Unable to set the tag version to '$VERSION', it is not in a valid format"
+            exit 1
+        fi
+        if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+        ##
         echo "next_tag_version=${next_tag_version}" >> "$GITHUB_OUTPUT"
         echo "next_tag_version=${next_tag_version}" >> $GITHUB_ENV
         #
+        ## eventually, should check to make sure '${is_next_prerelease}' equals '${pre}'
         echo "is_next_prerelease=${is_next_prerelease}" >> "$GITHUB_OUTPUT"
         echo "is_next_prerelease=${is_next_prerelease}" >> $GITHUB_ENV
         if [ '${{ inputs.verbose }}' == 'true' ]; then
