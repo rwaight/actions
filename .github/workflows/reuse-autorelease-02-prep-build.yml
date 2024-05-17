@@ -180,7 +180,9 @@ on:
 
 
 jobs:
-  reuse-next-version:
+## this needs to be updated to allow inputs from the 'reuse-autorelease-01-prepare-release' outputs
+
+  reuse-next-version:           # should be removed from this as it is now in 'reuse-autorelease-01-prepare-release'
     #name: Get next version for ${{ inputs.RELEASE_TYPE }} release
     name: get-next-version
     runs-on: ubuntu-latest
@@ -325,7 +327,7 @@ jobs:
         run: |
           echo "::notice title=Calling the builder::The build workflow has been called to see if the image can be converted.  If the image is converted, then the release process will continue. "
 
-  reuse-verify-reviewed-image:
+  reuse-verify-reviewed-image:  # should only exist in this workflow, but currently also exists in 'reuse-autorelease-01-prepare-release'
     #name: Verify the reviewed image ID
     name: verify-reviewed-image
     runs-on: ubuntu-latest
