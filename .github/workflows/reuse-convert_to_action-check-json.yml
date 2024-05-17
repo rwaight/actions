@@ -1,0 +1,227 @@
+name: Reuse - Autorelease Check JSON File
+#run-name: check-json-file
+run-name: check-file
+# This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
+# NOTE: Because of how re-usable workflows handle inputs, all of the booleans must be treated as strings
+# see https://github.com/actions/runner/issues/1483 and https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+
+on:
+  # 'workflow_call' will allow other GitHub workflows to call this workflow
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#creating-a-reusable-workflow
+  # if we need to define inputs, then we need to review the docs in the link below
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-of-onworkflow_callinputs
+  workflow_call:
+    # Inputs and secrets: # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+    # All of the 'inputs' below are passed from the caller workflow.
+    inputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+      # # new variable for 'reuse-autorelease-check-json'
+      # DRY_RUN:
+      #   description: 'Perform a "dry run" or not. This workflow does not need to perform a dry run.'
+      #   required: false
+      #   #default: false
+      #   #type: boolean
+      #   # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+      #   # see https://github.com/actions/runner/issues/1483
+      #   # if this is set to boolean, then the actual value will be 'null'
+      #   # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+      #   # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+      #   # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
+      #   type: string
+      #   default: 'false'
+      # new variable for 'reuse-autorelease-check-json'
+      JSON_VARS_FILE:
+        description: >-
+          The name and path of the variables file that will be sent to Packer, this should be in json format.
+          Example: `./image-variables.json`
+        default: 'not-set'
+        required: true
+        type: string
+      # new variable for 'reuse-autorelease-check-json'
+      JSON_VARS_IMAGE_FIELD:
+        description: 'The image ID field that should be updated within the JSON variables file. '
+        default: 'reviewed_image_id'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-check-json'
+      JSON_VARS_TYPE_FIELD:
+        description: 'The type field that should be updated within the JSON variables file. '
+        default: 'release_type'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-check-json'
+      JSON_VARS_VERSION_FIELD:
+        description: 'The version field that should be updated within the JSON variables file. '
+        default: 'my_custom_version'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-check-json'
+      WORKFLOW_SUMMARY:
+        description: 'Determine if the workflow should output to the summary page, a boolean that defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
+        type: string
+        default: 'true'
+      # new variable for 'reuse-autorelease-check-json'
+      VERBOSE:
+        description: 'Determine if the workflow should run debug tasks, a boolean that defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.VERBOSE) }}
+        type: string
+        default: 'false'
+
+    secrets:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
+      # All of the 'secrets' below are passed from the caller workflow.
+      # # new secret for 'reuse-autorelease-check-json'
+      # ACTIONS_TOKEN:
+      #   description: 'A token used within the builder actions.'
+      #   required: false
+      # # new secret for 'reuse-autorelease-check-json'
+      # GH_APP_BOT_UID:
+      #   description: >-
+      #     The UID of the GitHub App, not to be confused with GitHub App ID. 
+      #     Can be found using the approach from: https://github.com/orgs/community/discussions/24664#discussioncomment-3880274
+      #   required: false
+      # new secret for 'reuse-autorelease-check-json'
+      GH_APP_ID:
+        description: 'The GitHub App ID.'
+        required: false
+      # new secret for 'reuse-autorelease-check-json'
+      GH_APP_KEY:
+        description: 'The private key of the GitHub App.'
+        required: false
+
+    # Outputs
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-outputs-from-a-reusable-workflow
+    outputs:
+      # Map the workflow outputs to job outputs
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_calloutputs
+      # job-status:
+      #   description: 'the status of the reuse-get-info job'
+      #   value: ${{ jobs.reuse-get-info.outputs.job-status }}
+      merged-version:  # output from the 'version-from-file' step
+        description: 'the value of the version field from the JSON file'
+        value: ${{ jobs.check-json-file.outputs.autorelease-file-version }}
+      merged-type:  # output from the 'type-from-file' step
+        description: 'the value of the type field from the JSON file'
+        value: ${{ jobs.check-json-file.outputs.autorelease-file-type }}
+      merged-reviewed-id:  # output from the 'reviewed-id-from-file' step
+        description: 'the value of the reviewed image ID field from the JSON file'
+        value: ${{ jobs.check-json-file.outputs.reviewed-image-id }}
+
+jobs:
+
+  check-json-file:
+    # get the version, type, and reviewed image id from the JSON_VARS_FILE
+    name: get-field-values
+    runs-on: ubuntu-latest
+    outputs:
+      merged-version: ${{ steps.version-from-file.outputs.autorelease-file-version }}
+      merged-type: ${{ steps.type-from-file.outputs.autorelease-file-type }}
+      merged-reviewed-id: ${{ steps.reviewed-id-from-file.outputs.reviewed-image-id }}
+    steps:
+
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 1
+
+      - name: Creating a GitHub App Token from actions/create-github-app-token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        # https://github.com/actions/create-github-app-token
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        with:
+          #ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Get autorelease type from the '${{ inputs.JSON_VARS_FILE }}' file
+        id: type-from-file
+        run: |
+          ## Get release type from the '${{ inputs.JSON_VARS_FILE }}' file 
+          echo "Starting the 'type-from-file' step... "
+          echo "Getting the value of the '${{ inputs.JSON_VARS_TYPE_FIELD }}' field "
+          get_autorelease_file_type=$(jq --raw-output .${{ inputs.JSON_VARS_TYPE_FIELD }} ${{ inputs.JSON_VARS_FILE }})
+          echo "  ${{ inputs.JSON_VARS_TYPE_FIELD }}:   ${get_autorelease_file_type} "
+          echo ""
+          echo "Setting 'autorelease-file-type' to ${get_autorelease_file_type} "
+          echo "autorelease-file-type=${get_autorelease_file_type}" >> $GITHUB_OUTPUT
+          echo "autorelease-file-type=${get_autorelease_file_type}" >> $GITHUB_ENV
+          #
+          echo "Finishing the 'type-from-file' step... "
+
+      - name: Get the autorelease version from the '${{ inputs.JSON_VARS_FILE }}' file
+        id: version-from-file
+        run: |
+          ## Get the autorelease version from the '${{ inputs.JSON_VARS_FILE }}' file
+          echo "Starting the 'version-from-file' step... "
+          echo "Getting the value of the '${{ inputs.JSON_VARS_VERSION_FIELD }}' field "
+          get_autorelease_file_version=$(jq --raw-output .${{ inputs.JSON_VARS_VERSION_FIELD }} ${{ inputs.JSON_VARS_FILE }})
+          echo "  ${{ inputs.JSON_VARS_VERSION_FIELD }}:   ${get_autorelease_file_version} "
+          echo ""
+          echo "Setting 'autorelease-file-version' to ${get_autorelease_file_version} "
+          echo "autorelease-file-version=${get_autorelease_file_version}" >> $GITHUB_OUTPUT
+          echo "autorelease-file-version=${get_autorelease_file_version}" >> $GITHUB_ENV
+          #
+          echo "Finishing the 'version-from-file' step... "
+
+      - name: Get the autorelease reviewed image ID from the '${{ inputs.JSON_VARS_FILE }}' file
+        id: reviewed-id-from-file
+        run: |
+          ## Get the reviewed image ID from the '${{ inputs.JSON_VARS_FILE }}' file
+          echo "Starting the 'reviewed-id-from-file' step... "
+          echo "Getting the value of the '${{ inputs.JSON_VARS_IMAGE_FIELD }}' field "
+          get_reviewed_image_id=$(jq --raw-output .${{ inputs.JSON_VARS_IMAGE_FIELD }} ${{ inputs.JSON_VARS_FILE }})
+          echo "  ${{ inputs.JSON_VARS_IMAGE_FIELD }}:   ${get_reviewed_image_id} "
+          echo ""
+          echo "Setting 'reviewed-image-id' to ${get_reviewed_image_id} "
+          echo "reviewed-image-id=${get_reviewed_image_id}" >> $GITHUB_OUTPUT
+          echo "reviewed-image-id=${get_reviewed_image_id}" >> $GITHUB_ENV
+          #
+          echo "Finishing the 'reviewed-id-from-file' step... "
+
+      - name: Print the job outputs
+        id: print-job-outputs
+        run: |
+          ## Print the job outputs
+          echo "Starting the 'print-job-outputs' step... "
+          echo ""
+          echo "  merged-reviewed-id is set to:  ${{ env.merged-reviewed-id }}  "
+          echo "  merged-type is set to       :  ${{ env.merged-type }}  "
+          echo "  merged-version is set to    :  ${{ env.merged-version }}  "
+          echo ""
+          echo "FYSA, the job outputs do not have the same variable name as the step outputs... "
+          echo ""
+          echo "Completing the 'print-job-outputs' step... "
+        env:
+          merged-version: ${{ steps.version-from-file.outputs.autorelease-file-version }}
+          merged-type: ${{ steps.type-from-file.outputs.autorelease-file-type }}
+          merged-reviewed-id: ${{ steps.reviewed-id-from-file.outputs.reviewed-image-id }}

@@ -1,0 +1,152 @@
+name: Reuse - Autorelease Verify Image ID
+#run-name: verify-reviewed-image-id
+run-name: verify-id
+# This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
+# NOTE: Because of how re-usable workflows handle inputs, all of the booleans must be treated as strings
+# see https://github.com/actions/runner/issues/1483 and https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+
+on:
+  # 'workflow_call' will allow other GitHub workflows to call this workflow
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#creating-a-reusable-workflow
+  # if we need to define inputs, then we need to review the docs in the link below
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-of-onworkflow_callinputs
+  workflow_call:
+    # Inputs and secrets: # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+    # All of the 'inputs' below are passed from the caller workflow.
+    inputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+      # # new variable for 'reuse-autorelease-verify-image'
+      # DRY_RUN:
+      #   description: 'Perform a "dry run" or not. This workflow does not need to perform a dry run.'
+      #   required: false
+      #   #default: false
+      #   #type: boolean
+      #   # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+      #   # see https://github.com/actions/runner/issues/1483
+      #   # if this is set to boolean, then the actual value will be 'null'
+      #   # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+      #   # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+      #   # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
+      #   type: string
+      #   default: 'false'
+      # new variable for 'reuse-autorelease-verify-image'
+      REVIEWED_IMAGE_ID:
+        description: 'The ID of the image that will be converted'
+        default: 'not-set'
+        required: true
+        type: string
+      # new variable for 'reuse-autorelease-verify-image'
+      WORKFLOW_SUMMARY:
+        description: 'Determine if the workflow should output to the summary page, a boolean that defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
+        type: string
+        default: 'true'
+      # new variable for 'reuse-autorelease-verify-image'
+      VERBOSE:
+        description: 'Determine if the workflow should run debug tasks, a boolean that defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.VERBOSE) }}
+        type: string
+        default: 'false'
+
+    secrets:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
+      # All of the 'secrets' below are passed from the caller workflow.
+      # # new secret for 'reuse-autorelease-verify-image'
+      # ACTIONS_TOKEN:
+      #   description: 'A token used within the builder actions.'
+      #   required: false
+      # new secret for 'reuse-autorelease-verify-image'
+      AWS_ACCESS_KEY:
+        description: 'The AWS Access Key ID for the builder.'
+        required: true
+      # new secret for 'reuse-autorelease-verify-image'
+      AWS_SECRET_KEY:
+        description: 'The AWS Access Key Secret for the builder.'
+        required: true
+      # # new secret for 'reuse-autorelease-verify-image'
+      # GH_APP_BOT_UID:
+      #   description: >-
+      #     The UID of the GitHub App, not to be confused with GitHub App ID. 
+      #     Can be found using the approach from: https://github.com/orgs/community/discussions/24664#discussioncomment-3880274
+      #   required: false
+      # new secret for 'reuse-autorelease-verify-image'
+      GH_APP_ID:
+        description: 'The GitHub App ID.'
+        required: false
+      # new secret for 'reuse-autorelease-verify-image'
+      GH_APP_KEY:
+        description: 'The private key of the GitHub App.'
+        required: false
+
+    # Outputs
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-outputs-from-a-reusable-workflow
+    outputs:
+      # Map the workflow outputs to job outputs
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_calloutputs
+      # new output for 'reuse-autorelease-verify-image'
+      job-status:
+        description: 'the status of the reuse-get-info job'
+        value: ${{ jobs.reuse-get-info.outputs.job-status }}
+
+jobs:
+
+  ## verify the naming convention of the image ID
+  ## then maybe connect to AWS and make sure it exists??
+  ## add other steps for GCP
+
+  verify-image:
+    #name: Verify the reviewed image ID
+    #name: verify-reviewed-image
+    name: verify-id
+    runs-on: ubuntu-latest
+    outputs:
+      job-status: ${{ job.status }}
+    env:
+      VERBOSE: ${{ inputs.VERBOSE || 'true' }}
+    steps:
+
+      - name: Verbose | Print the REVIEWED_IMAGE_ID
+        if: inputs.VERBOSE=='true'
+        id: verbose-print-image-id
+        shell: bash
+        run: | 
+          ## Print the inputs if inputs.VERBOSE=='true'
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'verbose-print-image-id' step. "
+          echo ""
+          echo "REVIEWED_IMAGE_ID is:  ${{ inputs.REVIEWED_IMAGE_ID }} "
+          ##
+          echo "completing the 'verbose-print-image-id' step. "
+
+      - name: Validate the 'REVIEWED_IMAGE_ID' is not 'not-set'
+        id: validate-image-id-is-not-not-set
+        if: ${{ inputs.REVIEWED_IMAGE_ID == 'not-set' }}
+        shell: bash
+        run: |
+          echo "::error title=⛔ error hint::Invalid reviewed image ID, it can not be set to '${{ inputs.REVIEWED_IMAGE_ID }}'."
+          exit 1
+
+      - name: Validate the 'REVIEWED_IMAGE_ID' starts with 'ami-'
+        id: validate-image-id-startswith-ami-dash
+        if: ${{ ! startsWith(inputs.REVIEWED_IMAGE_ID, 'ami-') }}
+        shell: bash
+        run: |
+          echo "::error title=⛔ error hint::Invalid reviewed image ID, it must start with 'ami-'."
+          exit 1

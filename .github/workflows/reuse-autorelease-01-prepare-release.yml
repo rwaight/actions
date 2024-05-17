@@ -1,0 +1,404 @@
+name: Reuse - Autorelease 01 Prepare Release
+run-name: 01-prepare
+# This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
+# NOTE: Because of how re-usable workflows handle inputs, all of the booleans must be treated as strings
+# see https://github.com/actions/runner/issues/1483 and https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+
+on:
+  # 'workflow_call' will allow other GitHub workflows to call this workflow
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#creating-a-reusable-workflow
+  # if we need to define inputs, then we need to review the docs in the link below
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-of-onworkflow_callinputs
+  workflow_call:
+    # Inputs and secrets: # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+    # All of the 'inputs' below are passed from the caller workflow.
+    inputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+      # new variable for 'reuse-autorelease-01-prep-build'
+      DRY_RUN:
+        description: 'Perform a "dry run" or not.'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
+        type: string
+        default: 'false'
+      # new variable for 'reuse-autorelease-01-prep-build'
+      GH_APP_BOT_NAME:
+        description: 'The name of the GitHub App. '
+        #default: 'github-actions[bot]'
+        default: 'rw-actions-bot[bot]'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-01-prep-build'
+      JSON_VARS_FILE:
+        description: >-
+          The name and path of the variables file that will be sent to Packer, this should be in json format.
+          Example: `./image-variables.json`
+        default: 'not-set'
+        required: true
+        type: string
+      # new variable for 'reuse-autorelease-01-prep-build'
+      JSON_VARS_IMAGE_FIELD:
+        description: 'The image ID field that should be updated within the JSON variables file. '
+        default: 'reviewed_image_id'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-01-prep-build'
+      JSON_VARS_TYPE_FIELD:
+        description: 'The type field that should be updated within the JSON variables file. '
+        default: 'release_type'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-01-prep-build'
+      JSON_VARS_VERSION_FIELD:
+        description: 'The version field that should be updated within the JSON variables file. '
+        default: 'my_custom_version'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-01-prep-build'
+      NOTIFY_SLACK:
+        description: 'Determine if a Slack message should be sent, defaults to sending a message (true)'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.NOTIFY_SLACK) }}
+        type: string
+        default: 'true'
+      # new variable for 'reuse-autorelease-01-prep-build'
+      PACKER_TEMPLATE_CONVERT:
+        description: >-
+          The name and path of the production template file that will be sent to Packer. 
+          Example: `packer/packer-convert.pkr.hcl`
+        default: 'not-set'
+        required: true
+        type: string
+      # new variable for 'reuse-autorelease-01-prep-build'
+      RELEASE_TEMPLATE_FILE:
+        description: >-
+          The name of the release drafter template (config) `.yml` file that is stored
+          in the `.github` directory. Only provide the file name, do not provide the path.
+          Example: release-template_repo-name.yml
+        default: 'release-drafter.yml'
+        required: true
+        type: string
+      # new variable for 'reuse-autorelease-01-prep-build'
+      RELEASE_TYPE:
+        description: 'Release type'
+        required: true
+        type: string
+        default: patch
+      # new variable for 'reuse-autorelease-01-prep-build'
+      RELEASE_PRE_ID:
+        description: 'Pre-release identifier (only for pre-release builds)'
+        required: false
+        type: string
+        default: 'rc'
+      # new variable for 'reuse-autorelease-01-prep-build'
+      REVIEWED_IMAGE_ID:
+        description: 'The ID of the image that will be converted'
+        default: 'not-set'
+        required: true
+        type: string
+      # new variable for 'reuse-autorelease-01-prep-build'
+      WORKFLOW_SUMMARY:
+        description: 'Determine if the workflow should output to the summary page, a boolean that defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
+        type: string
+        default: 'true'
+      # new variable for 'reuse-autorelease-01-prep-build'
+      VERBOSE:
+        description: 'Determine if the workflow should run debug tasks, a boolean that defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.VERBOSE) }}
+        type: string
+        default: 'false'
+
+    secrets:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
+      # All of the 'secrets' below are passed from the caller workflow.
+      # new secret for 'reuse-autorelease-01-prep-build'
+      ACTIONS_TOKEN:
+        description: 'A token used within the builder actions.'
+        required: false
+      # new secret for 'reuse-autorelease-01-prep-build'
+      AWS_ACCESS_KEY:
+        description: 'The AWS Access Key ID for the builder.'
+        required: true
+      # new secret for 'reuse-autorelease-01-prep-build'
+      AWS_SECRET_KEY:
+        description: 'The AWS Access Key Secret for the builder.'
+        required: true
+      # new secret for 'reuse-autorelease-01-prep-build'
+      GH_APP_BOT_UID:
+        description: >-
+          'The UID of the GitHub App, not to be confused with GitHub App ID. 
+          Can be found using the approach from: https://github.com/orgs/community/discussions/24664#discussioncomment-3880274 '
+        required: false
+      # new secret for 'reuse-autorelease-01-prep-build'
+      GH_APP_ID:
+        description: 'The GitHub App ID'
+        required: false
+      # new secret for 'reuse-autorelease-01-prep-build'
+      GH_APP_KEY:
+        description: 'The private key of the GitHub App'
+        required: false
+      # new secret for 'reuse-autorelease-01-prep-build'
+      SLACK_WEBHOOK:
+        description: 'A token used with the slackapi/slack-github-action.'
+        required: false
+      # new secret for 'reuse-autorelease-01-prep-build'
+      SSH_KEY_FILE:
+        description: 'The SSH private key file'
+        required: false
+
+    # Outputs
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-outputs-from-a-reusable-workflow
+    outputs:
+      # Map the workflow outputs to job outputs
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_calloutputs
+      #
+      # 'reuse-next-version' # outputs from the 'repo-version-info' step
+      latest-release:  # output from the 'repo-version-info' step
+        description: 'The latest version found with `gh release`.'
+        value: ${{ jobs.reuse-next-version.outputs.latest-release }}
+      latest-tag:  # output from the 'repo-version-info' step
+        description: 'The latest tag found with `git`.'
+        value: ${{ jobs.reuse-next-version.outputs.latest-tag }}
+      # 'reuse-next-version' # outputs from the 'get-next-semver' step
+      current-tag:  # output from the 'get-next-semver' step
+        description: 'The current tag from the repo.'
+        value: ${{ jobs.reuse-next-version.outputs.current-tag }}
+      current-version:  # output from the 'get-next-semver' step
+        description: 'The current GitHub release version in the repo.'
+        value: ${{ jobs.reuse-next-version.outputs.current-version }}
+      next-tag:  # output from the 'get-next-semver' step
+        description: 'The calculated next-release tag in the repo, based on the provided inputs.'
+        value: ${{ jobs.reuse-next-version.outputs.next-tag }}
+      next-version:  # output from the 'get-next-semver' step
+        description: 'The calculated next version, without the `v`` prefix, based on the `next-tag`.'
+        value: ${{ jobs.reuse-next-version.outputs.next-version }}
+      is-next-prerelease:  # output from the 'get-next-semver' step
+        description: 'If the calculated next-release version is a prerelease (true) or not (false), based on the provided inputs.'
+        value: ${{ jobs.reuse-next-version.outputs.is-next-prerelease }}
+
+jobs:
+
+# #### 01. prepare-release
+#
+# Check inputs, get next version, determine next steps
+# - for repos with packer, this is called from 'prep-build'?
+#
+# 1. check the user inputs             (tbd???)
+# 2. get the next version              (reuse-next-version)
+# 3. determine the next step for inputs and outputs... (tbd???)
+
+  reuse-next-version:
+    #name: Get next version for ${{ inputs.RELEASE_TYPE }} release
+    name: get-next-version
+    runs-on: ubuntu-latest
+    outputs:
+      job-status: ${{ job.status }}
+      # output from the 'repo-version-info' step
+      latest-release: ${{ steps.repo-version-info.outputs.latest-release }}
+      latest-tag: ${{ steps.repo-version-info.outputs.latest-tag }}
+      # output from the 'get-next-semver' step
+      current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+      current-version: ${{ steps.get-next-semver.outputs.current-version }}
+      next-tag: ${{ steps.get-next-semver.outputs.next-tag }}
+      next-version: ${{ steps.get-next-semver.outputs.next-version }}
+      is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+    env:
+      VERBOSE: ${{ inputs.VERBOSE || 'true' }}
+    steps:
+
+      - name: Create a GitHub App Token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        # https://github.com/actions/create-github-app-token
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        with:
+          fetch-depth: '0'
+          #ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: repo-version-info | Run rwaight/actions git/repo-version-info
+        id: repo-version-info
+        #uses: rwaight/actions/git/repo-version-info@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/git/repo-version-info@main
+        with:
+          #gh-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-token: ${{ steps.app-token.outputs.token }}
+
+      - name: repo-version-info | Print outputs
+        id: print-repo-info
+        if: |
+          ${{ steps.repo-version-info.outputs.latest-tag }} || 
+          ${{ steps.repo-version-info.outputs.latest-release }}
+        run: |
+          ## Print repo version information
+          echo "Here is the info from the repo-version-info step: "
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}"
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}"
+          ##
+          echo "### Output from the \`repo-version-info\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- latest release: ${{ steps.repo-version-info.outputs.latest-release }}" >> $GITHUB_STEP_SUMMARY
+          echo "- latest tag: ${{ steps.repo-version-info.outputs.latest-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+
+      - name: get-next-semver | Run rwaight/actions test/get-next-semver
+        id: get-next-semver
+        #continue-on-error: true
+        #uses: rwaight/actions/test/get-next-semver@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/test/get-next-semver@main
+        with:
+          gh-token: ${{ steps.app-token.outputs.token }}
+          pre-release-id: ${{ inputs.RELEASE_PRE_ID }}
+          release-type: ${{ inputs.RELEASE_TYPE }}
+          verbose: ${{ inputs.VERBOSE }}
+
+      - name: get-next-semver | Print outputs
+        if: ${{ steps.get-next-semver.outputs.next-version }}
+        run: |
+          ## Report the output from the get-next-semver step
+          echo "The output from the 'get-next-semver' step was: "
+          echo "- current tag       : ${{ env.current-tag }} "
+          echo "- current version   : ${{ env.current-version }} "
+          echo "- next tag          : ${{ env.next-tag }} "
+          echo "- next version      : ${{ env.next-version }} "
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} "
+          ##
+          echo "### Output from the \`get-next-semver\` step" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- current tag       : ${{ env.current-tag }} " >> $GITHUB_STEP_SUMMARY
+          echo "- current version   : ${{ env.current-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next tag          : ${{ env.next-tag }} " >> $GITHUB_STEP_SUMMARY
+          echo "- next version      : ${{ env.next-version }} " >> $GITHUB_STEP_SUMMARY
+          echo "- is next prerelease: ${{ env.is-next-prerelease }} " >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        env:
+          current-tag: ${{ steps.get-next-semver.outputs.current-tag }}
+          current-version: ${{ steps.get-next-semver.outputs.current-version }}
+          next-tag: ${{ steps.get-next-semver.outputs.next-tag }}
+          next-version: ${{ steps.get-next-semver.outputs.next-version }}
+          is-next-prerelease: ${{ steps.get-next-semver.outputs.is-next-prerelease }}
+
+      - name: Set up git config
+        id: set-up-git
+        # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+        # user: 'my-bot-name <noreply@github.com>'
+        run: |
+          ## Run 'git --version' then 'git config'
+          git --version
+          ## Configure git to login as the ${{ inputs.GH_APP_BOT_NAME }}
+          git config user.name ${{ inputs.GH_APP_BOT_NAME }}
+          git config user.email ${{ secrets.GH_APP_BOT_UID }}+${{ inputs.GH_APP_BOT_NAME }}@users.noreply.github.com
+          echo "the 'set-up-git' step has completed. "
+
+      - name: Ensure 'actions:autorelease' label exists
+        run: |
+          LABEL=$(gh label list --search "actions:autorelease" --limit 1 --json name --jq '.[].name')
+          echo "  the value of LABEL is '${LABEL}'. "
+          if [[ -z "$LABEL" ]]; then
+            echo "Creating 'actions:autorelease' label"
+            gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="actions:autorelease" -f color="baa938" -f description="This is an automatically-created PR to trigger a release"
+          else
+            echo "the 'actions:autorelease' label already exists"
+          fi
+        env:
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+
+      - name: Ensure 'version:${{ inputs.RELEASE_TYPE }}' label exists
+        run: |
+          LABEL=$(gh label list --search "version:${{ inputs.RELEASE_TYPE }}" --limit 1 --json name --jq '.[].name')
+          echo "  the value of LABEL is '${LABEL}'. "
+          if [[ -z "$LABEL" ]]; then
+            echo "Creating 'version:${{ inputs.RELEASE_TYPE }}' label"
+            gh api --silent repos/$GITHUB_REPOSITORY/labels -f name="version:${{ inputs.RELEASE_TYPE }}" -f color="baa938" -f description="Related to a ''${{ inputs.RELEASE_TYPE }}'' version release"
+          else
+            echo "the 'version:${{ inputs.RELEASE_TYPE }}' label already exists"
+          fi
+        env:
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+
+      - name: Output summary
+        run: |
+          echo "::notice title=Calling the builder::The build workflow has been called to see if the image can be converted.  If the image is converted, then the release process will continue. "
+
+  reuse-verify-reviewed-image:
+    #name: Verify the reviewed image ID
+    name: verify-reviewed-image
+    runs-on: ubuntu-latest
+    outputs:
+      job-status: ${{ job.status }}
+    env:
+      VERBOSE: ${{ inputs.VERBOSE || 'true' }}
+    steps:
+
+      - name: Verbose | Print the REVIEWED_IMAGE_ID
+        if: inputs.VERBOSE=='true'
+        id: verbose-print-image-id
+        shell: bash
+        run: | 
+          ## Print the inputs if inputs.VERBOSE=='true'
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'verbose-print-image-id' step. "
+          echo ""
+          echo "REVIEWED_IMAGE_ID is:  ${{ inputs.REVIEWED_IMAGE_ID }} "
+          ##
+          echo "completing the 'verbose-print-image-id' step. "
+
+      - name: Validate the 'REVIEWED_IMAGE_ID' is not 'not-set'
+        id: validate-image-id-is-not-not-set
+        if: ${{ inputs.REVIEWED_IMAGE_ID == 'not-set' }}
+        shell: bash
+        run: |
+          echo "::error title=⛔ error hint::Invalid reviewed image ID, it can not be set to '${{ inputs.REVIEWED_IMAGE_ID }}'."
+          exit 1
+
+      - name: Validate the 'REVIEWED_IMAGE_ID' starts with 'ami-'
+        id: validate-image-id-startswith-ami-dash
+        if: ${{ ! startsWith(inputs.REVIEWED_IMAGE_ID, 'ami-') }}
+        shell: bash
+        run: |
+          echo "::error title=⛔ error hint::Invalid reviewed image ID, it must start with 'ami-'."
+          exit 1
