@@ -1,0 +1,1449 @@
+name: Reuse - Autorelease 04 PR Merged
+#run-name: pull-request-merged
+run-name: pr-merged
+# This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
+# NOTE: Because of how re-usable workflows handle inputs, all of the booleans must be treated as strings
+
+on:
+  # 'workflow_call' will allow other GitHub workflows to call this workflow
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#creating-a-reusable-workflow
+  # if we need to define inputs, then we need to review the docs in the link below
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-of-onworkflow_callinputs
+  workflow_call:
+    # Inputs and secrets: # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+    inputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+      # All of the 'inputs' below are passed from the caller workflow.
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      DRY_RUN:
+        description: 'Perform a "dry run" or not.  Mainly, if the workflow should actually create the new tag. '
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
+        type: string
+        default: 'false'
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      GH_APP_BOT_NAME:
+        description: 'The name of the GitHub App. '
+        #default: 'github-actions[bot]'
+        default: 'rw-actions-bot[bot]'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      JSON_VARS_FILE:
+        description: >-
+          The name and path of the variables file that will be sent to Packer, this should be in json format.
+          Example: `./image-variables.json`
+        default: 'not-set'
+        required: true
+        type: string
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      JSON_VARS_IMAGE_FIELD:
+        description: 'The image ID field that should be updated within the JSON variables file. '
+        default: 'reviewed_image_id'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      JSON_VARS_TYPE_FIELD:
+        description: 'The type field that should be updated within the JSON variables file. '
+        default: 'release_type'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      JSON_VARS_VERSION_FIELD:
+        description: 'The version field that should be updated within the JSON variables file. '
+        default: 'my_custom_version'
+        required: false
+        type: string
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      NOTIFY_SLACK:
+        description: 'Determine if a Slack message should be sent, defaults to sending a message (true)'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.NOTIFY_SLACK) }}
+        type: string
+        default: 'true'
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      WORKFLOW_SUMMARY:
+        description: 'Determine if the workflow should output to the summary page, a boolean that defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
+        type: string
+        default: 'true'
+      # new variable for 'reuse-autorelease-04-pr-merged'
+      VERBOSE:
+        description: 'Determine if the workflow should run debug tasks, a boolean that defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.VERBOSE) }}
+        type: string
+        default: 'false'
+
+    secrets:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
+      # All of the 'secrets' below are passed from the caller workflow.
+      # new secret for 'reuse-autorelease-04-pr-merged'
+      ACTIONS_TOKEN:
+        description: 'A token used within the autorelease actions.'
+        required: false
+      # new secret for 'reuse-autorelease-04-pr-merged'
+      GH_APP_BOT_UID:
+        description: >-
+          'The UID of the GitHub App, not to be confused with GitHub App ID. 
+          Can be found using the approach from: https://github.com/orgs/community/discussions/24664#discussioncomment-3880274 '
+        required: false
+      # new secret for 'reuse-autorelease-04-pr-merged'
+      GH_APP_ID:
+        description: 'The GitHub App ID'
+        required: false
+      # new secret for 'reuse-autorelease-04-pr-merged'
+      GH_APP_KEY:
+        description: 'The private key of the GitHub App'
+        required: false
+      # new secret for 'reuse-autorelease-04-pr-merged'
+      SLACK_WEBHOOK:
+        description: 'A token used with the slackapi/slack-github-action.'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+
+# steps
+#   1. get the version from the autorelease branch;                             (check-autorelease-branch)    ## done  -- good to go
+#   2. get the version, type, and reviewed image id from the JSON_VARS_FILE;    (check-json-file)             ## done  -- good to go
+#   3. get the commit SHA's from the merged pull request;                       (check-commit-sha)            ## done  -- good to go
+#   4. validate the versions match (between autorelease and the file);          (validate-version)            ## done  -- good to go (should be)
+#   5. create the tag with the new version;                                     (create-tag)                  ## done  -- good to go (should be)
+#   ## after the tag is created, the builder should run
+#   ## after the builder runs, triggered by the new tag, the completed build job should update the draft release with the image ID
+
+      # single digit version filter pattern:  'v[0-9].[0-9].[0-9]'
+      #    example: `startsWith('v[0-9].[0-9].[0-9]', github.ref_name)`
+      # the filter pattern will need to be updated to allow double digits, using either: 
+      #    specify 2 digits with a second range followed by `?`:
+      #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+      #    or keep the single digit, but match one or more with `+`:
+      #        'v[0-9]+.[0-9]+.[0-9]+'
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+
+  check-autorelease-branch:                 #   1. get the version from the autorelease branch;
+    # get the version from the autorelease branch
+    name: get-version
+    runs-on: ubuntu-latest
+    #was#if: |
+    #was#  (github.event.pull_request.merged == true) && 
+    #was#  contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #was#  startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+    #was#  contains(github.event.pull_request.head.ref, 'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?')
+    # the filter pattern will need to be updated to allow double digits, using either: 
+    #    specify 2 digits with a second range followed by `?`:
+    #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+    #    or keep the single digit, but match one or more with `+`:
+    #        'v[0-9]+.[0-9]+.[0-9]+'
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'autorelease')
+    #if: (github.event.pull_request.merged == true)  # use this for testing
+    outputs:
+      job-status: ${{ job.status }}
+      branch-version: ${{ steps.get-autorelease-version.outputs.release-version }}
+      head-ref: ${{ steps.get-autorelease-version.outputs.head-ref }}
+      auto-name: ${{ steps.get-autorelease-version.outputs.auto-name }}
+      full-version: ${{ steps.get-autorelease-version.outputs.full-version }}
+      release-version: ${{ steps.get-autorelease-version.outputs.release-version }}
+      full-ver-number: ${{ steps.get-autorelease-version.outputs.full-ver-number }}
+      major: ${{ steps.get-autorelease-version.outputs.major }}
+      minor: ${{ steps.get-autorelease-version.outputs.minor }}
+      patch: ${{ steps.get-autorelease-version.outputs.patch }}
+      prerelease: ${{ steps.get-autorelease-version.outputs.prerelease }}
+      is-prerelease: ${{ steps.get-autorelease-version.outputs.is-prerelease }}
+    steps:
+
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 1
+
+      - name: autorelease | use bash to check the branch name
+        id: bash-check-branch-name
+        if: github.event.pull_request.merged == true
+        run: |
+          echo "starting the 'bash-check-branch-name' step. "
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+              ##
+              echo "next thing to do is to output whichever match group, so it can be tested... "
+          else
+              echo "the head ref did not match the regex "
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=bash-check-branch-name::the head ref did not match the regex."
+          fi
+          ##
+          echo "completing the 'bash-check-branch-name' step. "
+
+      - name: autorelease | startsWith github.event.pull_request.head.ref conditional
+        id: autorelease-if-startswith-head-ref
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
+        # NOTE: you must use single quotes with the 'startsWith' or 'contains' functions, using double
+        #       quotes with either the 'startsWith' or 'contains' functions causes the workflow to fail
+        run: |
+          echo "starting the 'autorelease-if-startswith-head-ref' step. "
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "the head ref did not match the regex, but the branch matched with single quotes."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=autorelease-if-startswith-head-ref::the head ref did not match the regex, but the branch matched with single quotes."
+          fi
+          ##
+          echo "completing the 'autorelease-if-startswith-head-ref' step. "
+
+      - name: version syntax | contains github.event.pull_request.head.ref conditional
+        id: version-if-contains-head-ref-filter-pattern
+        if: contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+        # NOTE: you must use the proper filter pattern in order to use either the 'startsWith' or 'contains' functions
+        #       a working example is 'v[0-9].[0-9].[0-9]', but using 'v*.*.*' does not work
+        run: |
+          echo "starting the 'version-if-contains-head-ref-filter-pattern' step. "
+          echo "this means that 'github.event.pull_request.head.ref' contains 'v[0-9].[0-9].[0-9]' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "the head ref did not match the regex, but the branch contains 'v[0-9].[0-9].[0-9]' single quotes."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=version-if-contains-head-ref-filter-pattern::the head ref did not match the regex, but the branch contains 'v[0-9].[0-9].[0-9]' single quotes."
+          fi
+          ##
+          echo "completing the 'version-if-contains-head-ref-filter-pattern' step. "
+
+      - name: Get the version from the autorelease branch
+        id: get-autorelease-version
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
+        # NOTE: you must use single quotes with the 'startsWith' or 'contains' functions, using double
+        #       quotes with either the 'startsWith' or 'contains' functions causes the workflow to fail
+        run: |
+          # Head branch should be named autorelease/<version>
+          echo "starting the 'get-autorelease-version' step. "
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                  echo "verbose mode enabled ... "
+                  echo "HEAD_REF is: ${HEAD_REF} "
+                  echo "RE_AUTO is : ${RE_AUTO} "
+                  echo ""
+                  echo "AUTO_NAME is: ${AUTO_NAME} "
+                  echo "FULL_VER is : ${FULL_VER} "
+                  echo "VER_NO_V is : ${VER_NO_V} "
+                  echo ""
+                  echo "MAJOR is  : ${MAJOR} "
+                  echo "MINOR is  : ${MINOR} "
+                  echo "PATCH is  : ${PATCH} "
+                  echo "PRERELEASE: ${PRERELEASE}"
+              fi
+              ##
+              echo "next thing to do is to output whichever match group, so it can be tested... "
+          else
+              echo "::error file=reuse-autorelease-04-pr-merged,title=⛔ get-autorelease-version::The autorelease branch, '$HEAD_REF', is not in a valid format"
+              exit 1
+          fi
+          ##
+          if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+          ##
+          ### full head branch name: HEAD_REF      (should be 'autorelease/v*.*.*')
+          echo "head-ref=${HEAD_REF}" >> $GITHUB_OUTPUT
+          echo "head-ref=${HEAD_REF}" >> $GITHUB_ENV
+          ##
+          ### beginning of branch name: AUTO_NAME   (should just be 'autorelease')
+          echo "auto-name=${AUTO_NAME}" >> $GITHUB_OUTPUT
+          echo "auto-name=${AUTO_NAME}" >> $GITHUB_ENV
+          ##
+          ### full version:  FULL_VER                 (should be 'v*.*.*')
+          echo "full-version=${FULL_VER}" >> $GITHUB_OUTPUT
+          echo "full-version=${FULL_VER}" >> $GITHUB_ENV
+          ### release version (what the other jobs are looking for ... )
+          echo "release-version=${FULL_VER}" >> $GITHUB_OUTPUT
+          echo "release-version=${FULL_VER}" >> $GITHUB_ENV
+          ##
+          ### full version, no 'v' prefix:  VER_NO_V   (should be '*.*.*')
+          echo "full-ver-number=${VER_NO_V}" >> $GITHUB_OUTPUT
+          echo "full-ver-number=${VER_NO_V}" >> $GITHUB_ENV
+          ##
+          ### major:  MAJOR         (should be the numerical value of the major version only)
+          echo "major=${MAJOR}" >> $GITHUB_OUTPUT
+          echo "major=${MAJOR}" >> $GITHUB_ENV
+          ##
+          ### minor:  MINOR         (should be the numerical value of the minor version only)
+          echo "minor=${MINOR}" >> $GITHUB_OUTPUT
+          echo "minor=${MINOR}" >> $GITHUB_ENV
+          ##
+          ### patch:  PATCH         (should be the numerical value of the patch version only)
+          echo "patch=${PATCH}" >> $GITHUB_OUTPUT
+          echo "patch=${PATCH}" >> $GITHUB_ENV
+          ##
+          ### prerelease:  PRERELEASE     (should be the prerelease identifier and prerelease number, example: '-rc1')
+          echo "prerelease=${PRERELEASE}" >> $GITHUB_OUTPUT
+          echo "prerelease=${PRERELEASE}" >> $GITHUB_ENV
+          ##
+          ### is-prerelease:  pre         (should be 'true' or 'false', if the version is a pre-release)
+          echo "is-prerelease=${pre}" >> $GITHUB_OUTPUT
+          echo "is-prerelease=${pre}" >> $GITHUB_ENV
+          ##
+          if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "completing the 'get-autorelease-version' step. "; fi
+
+      - name: Print the job outputs
+        id: print-job-outputs
+        run: |
+          ## Print the job outputs
+          echo "Starting the 'print-job-outputs' step... "
+          echo ""
+          echo "  branch-version is set to          :  ${{ env.branch-version }}  "
+          echo ""
+          echo "FYSA, the job output does not have the same variable name as the step output... "
+          echo "  the outputs from 'get-autorelease-version' step are ... "
+          echo "      head-ref is : ${{ env.head-ref }} "
+          echo "      auto-name is: ${{ env.auto-name }} "
+          echo ""
+          echo "      full-version is   : ${{ env.full-version }} "
+          echo "      release-version is: ${{ env.release-version }} "
+          echo ""
+          echo "      full-ver-number is: ${{ env.full-ver-number }} "
+          echo ""
+          echo "      major is     : ${{ env.major }} "
+          echo "      minor is     : ${{ env.minor }} "
+          echo "      patch is     : ${{ env.patch }} "
+          echo "      prerelease is: ${{ env.prerelease }} "
+          echo "      is-prerelease: ${{ env.is-prerelease }} "
+          echo ""
+          echo "Completing the 'print-job-outputs' step... "
+        env:
+          branch-version: ${{ steps.get-autorelease-version.outputs.release-version }}
+          head-ref: ${{ steps.get-autorelease-version.outputs.head-ref }}
+          auto-name: ${{ steps.get-autorelease-version.outputs.auto-name }}
+          full-version: ${{ steps.get-autorelease-version.outputs.full-version }}
+          release-version: ${{ steps.get-autorelease-version.outputs.release-version }}
+          full-ver-number: ${{ steps.get-autorelease-version.outputs.full-ver-number }}
+          major: ${{ steps.get-autorelease-version.outputs.major }}
+          minor: ${{ steps.get-autorelease-version.outputs.minor }}
+          patch: ${{ steps.get-autorelease-version.outputs.patch }}
+          prerelease: ${{ steps.get-autorelease-version.outputs.prerelease }}
+          is-prerelease: ${{ steps.get-autorelease-version.outputs.is-prerelease }}
+
+  check-json-file:                          #   2. get the version, type, and reviewed image id from the JSON_VARS_FILE;
+    # get the version, type, and reviewed image id from the JSON_VARS_FILE
+    name: check-json-file
+    runs-on: ubuntu-latest
+    #was#if: |
+    #was#  (github.event.pull_request.merged == true) && 
+    #was#  contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #was#  startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+    #was#  contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'autorelease')
+    #if: (github.event.pull_request.merged == true)  # use this for testing
+    outputs:
+      job-status: ${{ job.status }}
+      merged-version: ${{ steps.version-from-file.outputs.autorelease-file-version }}
+      merged-type: ${{ steps.type-from-file.outputs.autorelease-file-type }}
+      merged-reviewed-id: ${{ steps.reviewed-id-from-file.outputs.reviewed-image-id }}
+    steps:
+
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now exit. "
+          exit 1
+
+      - name: autorelease | startsWith github.event.pull_request.head.ref conditional
+        id: autorelease-if-startswith-head-ref
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
+        # NOTE: you must use single quotes with the 'startsWith' or 'contains' functions, using double
+        #       quotes with either the 'startsWith' or 'contains' functions causes the workflow to fail
+        run: |
+          echo "starting the 'autorelease-if-startswith-head-ref' step. "
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "the head ref did not match the regex, but the branch matched with single quotes."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=autorelease-if-startswith-head-ref::the head ref did not match the regex, but the branch matched with single quotes."
+          fi
+          ##
+          echo "completing the 'autorelease-if-startswith-head-ref' step. "
+
+      - name: version syntax | contains github.event.pull_request.head.ref conditional
+        id: version-if-contains-head-ref-filter-pattern
+        if: contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+        # NOTE: you must use the proper filter pattern in order to use either the 'startsWith' or 'contains' functions
+        #       a working example is 'v[0-9].[0-9].[0-9]', but using 'v*.*.*' does not work
+        run: |
+          echo "starting the 'version-if-contains-head-ref-filter-pattern' step. "
+          echo "this means that 'github.event.pull_request.head.ref' contains 'v[0-9].[0-9].[0-9]' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "the head ref did not match the regex, but the branch contains 'v[0-9].[0-9].[0-9]' single quotes."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=version-if-contains-head-ref-filter-pattern::the head ref did not match the regex, but the branch contains 'v[0-9].[0-9].[0-9]' single quotes."
+          fi
+          ##
+          echo "completing the 'version-if-contains-head-ref-filter-pattern' step. "
+
+      - name: Create an app token using actions/create-github-app-token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        # https://github.com/actions/create-github-app-token
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        with:
+          #ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Get autorelease type from the '${{ inputs.JSON_VARS_FILE }}' file
+        id: type-from-file
+        run: |
+          ## Get release type from the '${{ inputs.JSON_VARS_FILE }}' file 
+          echo "Starting the 'type-from-file' step... "
+          echo "Getting the value of the '${{ inputs.JSON_VARS_TYPE_FIELD }}' field "
+          get_autorelease_file_type=$(jq --raw-output .${{ inputs.JSON_VARS_TYPE_FIELD }} ${{ inputs.JSON_VARS_FILE }})
+          echo "  ${{ inputs.JSON_VARS_TYPE_FIELD }}:   ${get_autorelease_file_type} "
+          echo ""
+          echo "Setting 'autorelease-file-type' to ${get_autorelease_file_type} "
+          echo "autorelease-file-type=${get_autorelease_file_type}" >> $GITHUB_OUTPUT
+          echo "autorelease-file-type=${get_autorelease_file_type}" >> $GITHUB_ENV
+          #
+          echo "Finishing the 'type-from-file' step... "
+        # env:
+        #   json-file: '${{ inputs.JSON_VARS_FILE }}'
+        #   type-field: '${{ inputs.JSON_VARS_TYPE_FIELD }}'
+
+      - name: Get the autorelease version from the '${{ inputs.JSON_VARS_FILE }}' file
+        id: version-from-file
+        run: |
+          ## Get the autorelease version from the '${{ inputs.JSON_VARS_FILE }}' file
+          echo "Starting the 'version-from-file' step... "
+          echo "Getting the value of the '${{ inputs.JSON_VARS_VERSION_FIELD }}' field "
+          get_autorelease_file_version=$(jq --raw-output .${{ inputs.JSON_VARS_VERSION_FIELD }} ${{ inputs.JSON_VARS_FILE }})
+          echo "  ${{ inputs.JSON_VARS_VERSION_FIELD }}:   ${get_autorelease_file_version} "
+          echo ""
+          echo "Setting 'autorelease-file-version' to ${get_autorelease_file_version} "
+          echo "autorelease-file-version=${get_autorelease_file_version}" >> $GITHUB_OUTPUT
+          echo "autorelease-file-version=${get_autorelease_file_version}" >> $GITHUB_ENV
+          #
+          echo "Finishing the 'version-from-file' step... "
+
+      - name: Get the autorelease reviewed image ID from the '${{ inputs.JSON_VARS_FILE }}' file
+        id: reviewed-id-from-file
+        run: |
+          ## Get the reviewed image ID from the '${{ inputs.JSON_VARS_FILE }}' file
+          echo "Starting the 'reviewed-id-from-file' step... "
+          echo "Getting the value of the '${{ inputs.JSON_VARS_IMAGE_FIELD }}' field "
+          get_reviewed_image_id=$(jq --raw-output .${{ inputs.JSON_VARS_IMAGE_FIELD }} ${{ inputs.JSON_VARS_FILE }})
+          echo "  ${{ inputs.JSON_VARS_IMAGE_FIELD }}:   ${get_reviewed_image_id} "
+          echo ""
+          echo "Setting 'reviewed-image-id' to ${get_reviewed_image_id} "
+          echo "reviewed-image-id=${get_reviewed_image_id}" >> $GITHUB_OUTPUT
+          echo "reviewed-image-id=${get_reviewed_image_id}" >> $GITHUB_ENV
+          #
+          echo "Finishing the 'reviewed-id-from-file' step... "
+
+      - name: Print the job outputs
+        id: print-job-outputs
+        run: |
+          ## Print the job outputs
+          echo "Starting the 'print-job-outputs' step... "
+          echo ""
+          echo "  merged-reviewed-id is set to:  ${{ env.merged-reviewed-id }}  "
+          echo "  merged-type is set to       :  ${{ env.merged-type }}  "
+          echo "  merged-version is set to    :  ${{ env.merged-version }}  "
+          echo ""
+          echo "FYSA, the job outputs do not have the same variable name as the step outputs... "
+          echo ""
+          echo "Completing the 'print-job-outputs' step... "
+        env:
+          merged-version: ${{ steps.version-from-file.outputs.autorelease-file-version }}
+          merged-type: ${{ steps.type-from-file.outputs.autorelease-file-type }}
+          merged-reviewed-id: ${{ steps.reviewed-id-from-file.outputs.reviewed-image-id }}
+
+  check-commit-sha:                         #   3. get the commit SHA's from the merged pull request;
+    # get the commit SHA's from the merged pull request
+    name: get-commit-sha
+    runs-on: ubuntu-latest
+    #was#if: |
+    #was#  (github.event.pull_request.merged == true) && 
+    #was#  contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #was#  startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+    #was#  contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'autorelease')
+    #if: (github.event.pull_request.merged == true)  # use this for testing
+    outputs:
+      job-status: ${{ job.status }}
+      pr-sha: ${{ steps.pr-commit.outputs.sha }}
+      main-sha: ${{ steps.main-commit.outputs.sha }}
+    steps:
+
+      - name: Create an app token using actions/create-github-app-token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        # https://github.com/actions/create-github-app-token
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        with:
+          #ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up git config
+        id: set-up-git
+        # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+        # user: 'my-bot-name <noreply@github.com>'
+        run: |
+          ## Run 'git --version' then 'git config'
+          git --version
+          ## Configure git to login as the ${{ inputs.GH_APP_BOT_NAME }}
+          git config user.name ${{ inputs.GH_APP_BOT_NAME }}
+          git config user.email ${{ secrets.GH_APP_BOT_UID }}+${{ inputs.GH_APP_BOT_NAME }}@users.noreply.github.com
+          echo "the 'set-up-git' step has completed. "
+
+      - name: Get PR commit SHA
+        id: pr-commit
+        if: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "getting the PR commit SHA"
+          echo "the value of 'github.event.pull_request.head.sha' is '${{ github.event.pull_request.head.sha }}' "
+          git rev-parse ${{ github.event.pull_request.head.sha }}
+          pr_sha=$(git rev-parse ${{ github.event.pull_request.head.sha }})
+          echo "the PR SHA is ${pr_sha}"
+          echo "sha=${pr_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get main branch commit SHA
+        id: main-commit
+        if: ${{ github.event.pull_request.base.sha }}
+        run: |
+          echo "getting the main commit SHA"
+          echo "the value of 'github.event.pull_request.base.sha' is '${{ github.event.pull_request.base.sha }}' "
+          git rev-parse ${{ github.event.pull_request.base.sha }}
+          main_sha=$(git rev-parse ${{ github.event.pull_request.base.sha }})
+          echo "the main SHA is ${main_sha}"
+          echo "sha=${main_sha}" >> $GITHUB_OUTPUT
+
+      - name: Print the PR commit and main branch commit SHAs
+        id: print-info
+        run: |
+          ## Print the PR commit and main branch commit SHAs
+          echo "PR commit SHA: ${{ steps.pr-commit.outputs.sha }}"
+          echo "Main branch commit SHA: ${{ steps.main-commit.outputs.sha }}"
+
+  validate-version:                         #   4. validate the versions match (between autorelease and the file);
+    runs-on: ubuntu-latest
+    needs: [check-autorelease-branch, check-json-file]
+    #was#if: |
+    #was#  (github.event.pull_request.merged == true) && 
+    #was#  contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #was#  startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+    #was#  contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'autorelease')
+    #if: (github.event.pull_request.merged == true)  # use this for testing
+    outputs:
+      job-status: ${{ job.status }}
+      valid-version: ${{ steps.compare-versions-branch-to-merged.outputs.valid-version }}
+      do-versions-match: ${{ steps.compare-versions-branch-to-merged.outputs.do-versions-match }}
+      pre-id: ${{ steps.check-prerelease.outputs.pre-id }}
+      is-pre: ${{ steps.check-prerelease.outputs.is-pre || 'false' }}
+    env:
+      # outputs from 'check-autorelease-branch' #
+      branch-version: ${{ needs.check-autorelease-branch.outputs.branch-version }}  # this should be the same as the 'release-version'
+      full-version: ${{ needs.check-autorelease-branch.outputs.full-version }}
+      release-version: ${{ needs.check-autorelease-branch.outputs.release-version }}
+      prerelease: ${{ needs.check-autorelease-branch.outputs.prerelease }}
+      is-prerelease: ${{ needs.check-autorelease-branch.outputs.is-prerelease }}
+      # outputs from 'check-json-file' #
+      merged-version: ${{ needs.check-json-file.outputs.merged-version }}
+      merged-type: ${{ needs.check-json-file.outputs.merged-type }}
+      merged-reviewed-id: ${{ needs.check-json-file.outputs.merged-reviewed-id }}
+    steps:
+
+      - name: Print variables from needed jobs
+        id: print-vars-from-jobs
+        run: |
+          ## Print variables from needed jobs
+          echo "Starting the 'print-vars-from-jobs' step... "
+          echo ""
+          echo "  Here is where we need to validate the version matches between the 'check-autorelease-branch' job and the 'check-json-file' job "
+          echo ""
+          echo "  outputs from the 'check-autorelease-branch' job "
+          echo "      branch-version is :  ${{ env.branch-version }} "
+          echo "      full-version is   :  ${{ env.full-version }} "
+          echo "      release-version is:  ${{ env.release-version }} "
+          echo "      is-prerelease is  :  ${{ env.is-prerelease }} "
+          echo "      prerelease is     :  ${{ env.prerelease }} "
+          echo ""
+          echo "  outputs from the 'check-json-file' job "
+          echo "      merged-version is    : ${{ env.merged-version }} "
+          echo "      merged-type is       : ${{ env.merged-type }} "
+          echo "      merged-reviewed-id is: ${{ env.merged-reviewed-id }} "
+          echo ""
+          echo "Completing the 'print-vars-from-jobs' step... "
+        env:
+          # outputs from 'check-autorelease-branch' #
+          branch-version: ${{ needs.check-autorelease-branch.outputs.branch-version }}
+          full-version: ${{ needs.check-autorelease-branch.outputs.full-version }}
+          release-version: ${{ needs.check-autorelease-branch.outputs.release-version }}
+          # outputs from 'check-json-file' #
+          merged-version: ${{ needs.check-json-file.outputs.merged-version }}
+          merged-type: ${{ needs.check-json-file.outputs.merged-type }}
+          merged-reviewed-id: ${{ needs.check-json-file.outputs.merged-reviewed-id }}
+
+      - name: Print required variables
+        id: print-required-variables
+        run: |
+          ## Print variables from needed jobs
+          echo "Starting the 'print-required-variables' step... "
+          echo ""
+          echo "  Here is where we need to validate the version matches between the 'check-autorelease-branch' job and the 'check-json-file' job "
+          echo ""
+          echo "  outputs from the 'check-autorelease-branch' job "
+          echo "      branch-version is:  ${{ env.branch-version }} "
+          echo "      is-prerelease is :  ${{ env.is-prerelease }} "
+          echo "      prerelease is    :  ${{ env.prerelease }} "
+          echo ""
+          echo "  outputs from the 'check-json-file' job "
+          echo "      merged-version is:  ${{ env.merged-version }} "
+          echo ""
+          echo "Completing the 'print-required-variables' step... "
+        env:
+          # outputs from 'check-autorelease-branch' #
+          branch-version: ${{ needs.check-autorelease-branch.outputs.branch-version }}
+          is-prerelease: ${{ needs.check-autorelease-branch.outputs.is-prerelease }}
+          prerelease: ${{ needs.check-autorelease-branch.outputs.prerelease }}
+          #full-version: ${{ needs.check-autorelease-branch.outputs.full-version }}
+          #release-version: ${{ needs.check-autorelease-branch.outputs.release-version }}
+          # outputs from 'check-json-file' #
+          merged-version: ${{ needs.check-json-file.outputs.merged-version }}
+          #merged-type: ${{ needs.check-json-file.outputs.merged-type }}
+          #merged-reviewed-id: ${{ needs.check-json-file.outputs.merged-reviewed-id }}
+
+      - name: Compare the autorelease branch version to the merged (json file) version
+        id: compare-versions-branch-to-merged
+        shell: bash
+        run: |
+          ## Compare the autorelease branch version to the merged (json file) version
+          ## the double number signs below are for line spacing and readability only
+          ##
+          if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+              echo "starting the 'compare-versions-branch-to-merged' step. "
+              echo "branch-version is:  ${{ env.branch-version }} "
+              echo "merged-version is:  ${{ env.merged-version }} "
+          fi
+          ## The 'merged-version' has to have a 'v' prepended when it is evaluated
+          ##
+          if [ '${{ env.branch-version }}' == 'v${{ env.merged-version }}' ]; then
+              echo "the 'branch-version' is set to '${{ env.branch-version }}' and matches "
+              echo "  the 'merged-version', when prepending with 'v', which is set to 'v${{ env.merged-version }}'. "
+              # 'branch-version' does have the 'v' prefix; 'merged-version' does NOT have the 'v' prefix
+              versions_validated=${{ env.branch-version }}
+              # might need to pass the version without the 'v' so that the number is valid for the 'release-tag-updater' action
+              #versions_validated=${{ env.merged-version }}
+              versions_branch_and_merged_match=true
+              if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                  echo "setting the value of 'valid-version' to '${versions_validated}' and sending it to GitHub output"
+                  echo "valid-version=${versions_validated}" >> $GITHUB_OUTPUT
+                  echo "valid-version=${versions_validated}" >> $GITHUB_ENV
+                  echo "setting the value of 'valid_version' to '${versions_validated}' and sending it to GitHub output"
+                  echo "valid_version=${versions_validated}" >> $GITHUB_OUTPUT
+                  echo "valid_version=${versions_validated}" >> $GITHUB_ENV
+              fi
+          else
+              echo "the 'branch-version' is set to '${{ env.branch-version }}' and DOES NOT MATCH "
+              echo "  the 'merged-version', when prepending with 'v', which is set to '${{ env.merged-version }}'. "
+              versions_branch_and_merged_match=false
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=validate-version::the autorelease branch version DOES NOT MATCH the merged file version."
+          fi
+          ##
+          if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+              echo "setting the value of 'does_branch_and_merged_match' to '${versions_branch_and_merged_match}' and sending it to GitHub output"
+          fi
+          echo "does_branch_and_merged_match=${versions_branch_and_merged_match}" >> $GITHUB_OUTPUT
+          echo "does_branch_and_merged_match=${versions_branch_and_merged_match}" >> $GITHUB_ENV
+          if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+              echo "The does_branch_and_merged_match variable has been set to \`$versions_branch_and_merged_match\`"
+              echo "writing $versions_branch_and_merged_match to the 'do-versions-match' GitHub output"
+              echo "writing $versions_branch_and_merged_match to the 'does-branch-match-merged' GitHub output"
+          fi
+          echo "do-versions-match=${versions_branch_and_merged_match}" >> $GITHUB_OUTPUT
+          echo "do-versions-match=${versions_branch_and_merged_match}" >> $GITHUB_ENV
+          ##
+          echo "does-branch-match-merged=${versions_branch_and_merged_match}" >> $GITHUB_OUTPUT
+          echo "does-branch-match-merged=${versions_branch_and_merged_match}" >> $GITHUB_ENV
+          ##
+          if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "completing the 'compare-versions-branch-to-merged' step. "; fi
+        env:
+          branch-version: ${{ needs.check-autorelease-branch.outputs.branch-version }}
+          merged-version: ${{ needs.check-json-file.outputs.merged-version }}
+
+      - name: Check the prerelease syntax
+        id: check-prerelease
+        if: ${{ needs.check-autorelease-branch.outputs.is-prerelease == 'true' }}
+        run: |
+          echo "starting the 'check-prerelease' step. "
+          ## The regex for '-rc' should be:  (\-rc[0-9]{1,2})
+          ####    the regex used to capture prerelease (in the 'get-autorelease-version' job) is: (-[0-9A-Za-z.+-]*)
+          echo ""
+          echo "prerelease   :  ${{ needs.check-autorelease-branch.outputs.prerelease }}"
+          echo "is-prerelease:  ${{ needs.check-autorelease-branch.outputs.is-prerelease }}"
+          PRERELEASE="${{ needs.check-autorelease-branch.outputs.prerelease }}"
+          pre="${{ needs.check-autorelease-branch.outputs.is-prerelease }}"
+          ##  
+          RE_PRESUFFIX='^(\-rc[0-9]{1,2})'
+          if [[ $PRERELEASE =~ $RE_PRESUFFIX ]]; then
+              PREID="${BASH_REMATCH[1]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "PREID: $PREID"
+              fi
+          else
+              echo "the prerelease value does not match the exprected regex"
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=check-prerelease::the prerelease value does not match the exprected regex."
+          fi
+          ##
+          ##
+          ### prerelease:  PRERELEASE     (should be the prerelease identifier and prerelease number, example: '-rc1')
+          echo "PRERELEASE is set to ${PRERELEASE} and will be sent to GitHub output as 'pre-id' ... "
+          echo "pre-id=${PRERELEASE}" >> $GITHUB_OUTPUT
+          echo "pre-id=${PRERELEASE}" >> $GITHUB_ENV
+          ##
+          ### is-prerelease:  pre         (should be 'true' or 'false', if the version is a pre-release)
+          echo "pre is set to ${pre} and will be sent to GitHub output as 'is-pre' ... "
+          echo "is-pre=${pre}" >> $GITHUB_OUTPUT
+          echo "is-pre=${pre}" >> $GITHUB_ENV
+          ##
+          if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "completing the 'check-prerelease' step. "; fi
+
+      - name: Print the job outputs
+        id: print-job-outputs
+        run: |
+          ## Print the job outputs
+          echo "Starting the 'print-job-outputs' step... "
+          echo ""
+          echo "  valid-version is set to    :   ${{ env.valid-version }}  "
+          echo "  do-versions-match is set to:   ${{ env.do-versions-match }}  "
+          echo "  pre-id is set to           :   ${{ env.pre-id }}  "
+          echo "  is-pre is set to           :   ${{ env.is-pre }}  "
+          echo "     note: if 'is-pre' shows as false, that is because it is set as a fallback value in the workflow... "
+          echo ""
+          echo "FYSA, the job output does not have the same variable name as the step output... "
+          echo ""
+          echo "Completing the 'print-job-outputs' step... "
+        env:
+          valid-version: ${{ steps.compare-versions-branch-to-merged.outputs.valid-version }}
+          do-versions-match: ${{ steps.compare-versions-branch-to-merged.outputs.do-versions-match }}
+          pre-id: ${{ steps.check-prerelease.outputs.pre-id }}
+          is-pre: ${{ steps.check-prerelease.outputs.is-pre || 'false' }}
+
+  create-tag:                               #   5. create the tag with the new version;
+    runs-on: ubuntu-latest
+    needs: [check-commit-sha, validate-version]
+    if: (needs.validate-version.outputs.valid-version || needs.validate-version.outputs.do-versions-match == 'true')
+    #was#if: |
+    #was#  (github.event.pull_request.merged == true) && 
+    #was#  contains(github.event.pull_request.labels.*.name, 'actions:autorelease') && 
+    #was#  startsWith(github.event.pull_request.head.ref, 'autorelease') && 
+    #was#  contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+    #nope#if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'autorelease')
+    #nope#if: (github.event.pull_request.merged == true)  # use this for testing
+    env:
+      # we probably should not use the outputs from the 'check-autorelease-branch' and 'check-json-file' jobs
+      # only use the valid version from the 'validate-version' job
+      # check-commit-sha #
+      pr-sha: ${{ needs.check-commit-sha.outputs.pr-sha }}
+      main-sha: ${{ needs.check-commit-sha.outputs.main-sha }}
+      # validate-version #
+      valid-version: ${{ needs.validate-version.outputs.valid-version }}
+      do-versions-match: ${{ needs.validate-version.outputs.do-versions-match }}
+      pre-id: ${{ needs.validate-version.outputs.pre-id }}
+      is-pre: ${{ needs.validate-version.outputs.is-pre }}
+    steps:
+
+      - name: Print required variables to create the tag
+        id: print-required-vars-for-tag
+        run: |
+          ## Print required variables to create the tag
+          echo "Starting the 'print-required-vars-for-tag' step... "
+          echo ""
+          echo "  outputs from the 'check-commit-sha' job "
+          echo "      pr-sha is  :  ${{ env.pr-sha }} "
+          echo "      main-sha is:  ${{ env.main-sha }} "
+          echo ""
+          echo "  outputs from the 'validate-version' job "
+          echo "      valid-version is    :  ${{ env.valid-version }} "
+          echo "      do-versions-match is:  ${{ env.do-versions-match }} "
+          echo "      pre-id is           :  ${{ env.pre-id }} "
+          echo "      is-pre is           :  ${{ env.is-pre }} "
+          echo ""
+          echo "Completing the 'print-required-vars-for-tag' step... "
+        env:
+          # check-commit-sha #
+          pr-sha: ${{ needs.check-commit-sha.outputs.pr-sha }}
+          main-sha: ${{ needs.check-commit-sha.outputs.main-sha }}
+          # validate-version #
+          valid-version: ${{ needs.validate-version.outputs.valid-version }}
+          do-versions-match: ${{ needs.validate-version.outputs.do-versions-match }}
+          pre-id: ${{ needs.validate-version.outputs.pre-id }}
+          is-pre: ${{ needs.validate-version.outputs.is-pre }}
+
+      - name: Create an app token using actions/create-github-app-token
+        # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+        # GitHub Action for creating a GitHub App installation access token.
+        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        # https://github.com/actions/create-github-app-token
+        id: app-token
+        with:
+          # required
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        with:
+          #ref: ${{ github.head_ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Extra | Get tag version
+        id: get-tag-version
+        if: (github.ref_type == 'tag')
+        run: |
+          echo "starting step 'get-tag-version' "
+          VERSION="${{ github.event.release.tag_name || github.ref_name }}"
+          ##
+          RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+          if [[ $VERSION =~ $RE ]]; then
+              MAJOR="${BASH_REMATCH[1]}"
+              MINOR="${BASH_REMATCH[2]}"
+              PATCH="${BASH_REMATCH[3]}"
+              PRERELEASE="${BASH_REMATCH[4]}"
+              if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                  echo "VERSION is: $VERSION "
+                  echo "RE is     : $RE "
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "::error file=reuse-autorelease-04-pr-merged.yml,title=⛔ get-tag-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
+              exit 1
+          fi
+          ##
+          if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+          ##
+          ##echo "full-version-tag=$VERSION" >> $GITHUB_OUTPUT
+          ##echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+          echo "full-version-ref=$VERSION" >> $GITHUB_OUTPUT
+          echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+          echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+          echo "completing the 'get-tag-version' step "
+
+      - name: Extra | get-tag-version | Print outputs
+        id: check-get-tag-version
+        #if: (github.ref_type == 'tag')
+        if: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        run: |
+          echo "## get-tag-version outputs"
+          echo "Full version: ${{ env.FULL_VERSION_REF }} "
+          echo "Major ref   : ${{ env.MAJOR_REF }} "
+          echo "Minor ref   : ${{ env.MINOR_REF }} "
+          echo "Patch ref   : ${{ env.PATCH_REF }} "
+          echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
+          echo ""
+        env:
+          #FULL_VERSION_TAG: ${{ steps.get-tag-version.outputs.full-version-tag }}
+          FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+          MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
+          MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
+          PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
+          IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+
+      - name: Create the ${{ needs.validate-version.outputs.valid-version }} tag
+        #name: 🏷️ Create/update tag
+        uses: actions/github-script@v7
+        if: ${{ needs.validate-version.outputs.valid-version }}
+        id: create-version-tag
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ needs.validate-version.outputs.valid-version }}',
+              sha: context.sha
+            }).catch(err => {
+              if (err.status !== 422) throw err;
+              github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'tags/${{ needs.validate-version.outputs.valid-version }}',
+                sha: context.sha
+              });
+            })
+          result-encoding: string
+        env:
+          valid-version: ${{ needs.validate-version.outputs.valid-version }}
+
+      # # the 'release-tag-updater' action does not create tags, only updates the major and minor tags
+      # - name: Create the prerelease ${{ needs.validate-version.outputs.valid-version }} tag
+      #   id: create-prerelease-tag
+      #   #uses: rwaight/actions/releases/release-tag-updater@use_version_commit_hash_here
+      #   uses: rwaight/actions/releases/release-tag-updater@main
+      #   if: ${{ needs.validate-version.outputs.is-pre == 'true' }}
+      #   with:
+      #     dry-run: ${{ inputs.DRY_RUN }}
+      #     #tag: 1.2.3
+      #     tag: ${{ needs.validate-version.outputs.valid-version }}
+      #     prefix-regex: 'v?'
+      #     suffix-regex: '\-rc[0-9]{1,2}'   # might need to test this out... 
+      #     fail-on-non-semver-tag: true # default is false
+      #     update-major: false    # there is a separate workflow to update the major tag, when a release is published
+      #     update-minor: false    # there is a separate workflow to update the minor tag, when a release is published
+      #     skip-repo-setup: true  # default is false
+      #     # release drafter is creating the release, this is only creating the tag
+      #     create-release: false           # default is true
+      #     create-release-as-draft: false  # default is false
+      #     github-token: ${{ steps.app-token.outputs.token }}
+      #   env:
+      #     valid-version: ${{ needs.validate-version.outputs.valid-version }}
+
+      # # the 'release-tag-updater' action does not create tags, only updates the major and minor tags
+      # - name: Create the ${{ needs.validate-version.outputs.valid-version }} tag
+      #   id: create-release-tag
+      #   #uses: rwaight/actions/releases/release-tag-updater@use_version_commit_hash_here
+      #   uses: rwaight/actions/releases/release-tag-updater@main
+      #   if: ${{ needs.validate-version.outputs.is-pre == 'false' }}
+      #   # might need to change the 'if' to be `${{ needs.validate-version.outputs.is-pre != 'true' }}`
+      #   with:
+      #     dry-run: ${{ inputs.DRY_RUN }}
+      #     #tag: 1.2.3
+      #     tag: ${{ needs.validate-version.outputs.valid-version }} # this might have to be the release version minus the 'v'
+      #     prefix-regex: 'v?'
+      #     fail-on-non-semver-tag: true # default is false
+      #     update-major: false    # there is a separate workflow to update the major tag, when a release is published
+      #     update-minor: false    # there is a separate workflow to update the minor tag, when a release is published
+      #     skip-repo-setup: true  # default is false
+      #     # release drafter is creating the release, this is only creating the tag
+      #     create-release: false           # default is true
+      #     create-release-as-draft: false  # default is false
+      #     github-token: ${{ steps.app-token.outputs.token }}
+      #   env:
+      #     valid-version: ${{ needs.validate-version.outputs.valid-version }}
+
+      - name: autorelease | Display Instructions
+        run: |
+          echo "::notice title=version ${{ env.valid-version }} tag created::The version ${{ env.valid-version }} tag has been created, check the 'Autorelease 03 - Build Prod' workflow to ensure the build starts. "
+          echo "::notice title=the tag MIGHT NOT have been created::Check the output of the 'create-tag' step to ensure the tag was created... "
+          echo "::notice title=the tag MIGHT NOT have been created::if the tag was not created, then we need to use a different action to create the tag... "
+        env:
+          valid-version: ${{ needs.validate-version.outputs.valid-version }}
+
+  always-run:                ## extra workflow -- done
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: merged | github.event.pull_request.merged conditional (no quotes)
+        id: does-pr-merged-equal-true
+        if: github.event.pull_request.merged == true
+        run: |
+          echo "this means that 'github.event.pull_request.merged' equals true (no quotes) "
+
+      - name: autorelease | use bash to check the branch name
+        id: bash-check-branch-name
+        if: github.event.pull_request.merged == true
+        run: |
+          echo "starting the 'bash-check-branch-name' step. "
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+              ##
+              echo "next thing to do is to output whichever match group, so it can be tested... "
+          else
+              echo "the head ref did not match the regex "
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              ##echo "::warning file=reuse-autorelease-04-pr-merged,title=bash-check-branch-name::the head ref did not match the regex."
+          fi
+          ##
+          echo "completing the 'bash-check-branch-name' step. "
+
+      - name: autorelease | startsWith github.event.pull_request.head.ref conditional
+        id: autorelease-if-startswith-head-ref
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease')
+        # NOTE: you must use single quotes with the 'startsWith' or 'contains' functions, using double
+        #       quotes with either the 'startsWith' or 'contains' functions causes the workflow to fail
+        run: |
+          echo "starting the 'autorelease-if-startswith-head-ref' step. "
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "the head ref did not match the regex, but the branch matched with single quotes."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=autorelease-if-startswith-head-ref::the head ref did not match the regex, but the branch matched with single quotes."
+          fi
+          ##
+          echo "completing the 'autorelease-if-startswith-head-ref' step. "
+
+      - name: version syntax | contains github.event.pull_request.head.ref conditional
+        id: version-if-contains-head-ref-filter-pattern
+        if: contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+        # NOTE: you must use the proper filter pattern in order to use either the 'startsWith' or 'contains' functions
+        #       a working example is 'v[0-9].[0-9].[0-9]', but using 'v*.*.*' does not work
+        run: |
+          echo "starting the 'version-if-contains-head-ref-filter-pattern' step. "
+          echo "this means that 'github.event.pull_request.head.ref' contains 'v[0-9].[0-9].[0-9]' (single quotes) "
+          echo ""
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          ##  
+          RE_AUTO='^(autorelease)\/([vV]?(([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?))'
+          if [[ $HEAD_REF =~ $RE_AUTO ]]; then
+              AUTO_NAME="${BASH_REMATCH[1]}"
+              FULL_VER="${BASH_REMATCH[2]}"
+              VER_NO_V="${BASH_REMATCH[3]}"
+              MAJOR="${BASH_REMATCH[4]}"
+              MINOR="${BASH_REMATCH[5]}"
+              PATCH="${BASH_REMATCH[6]}"
+              PRERELEASE="${BASH_REMATCH[7]}"
+              ##
+              if [ 'true' == 'true' ]; then
+                  echo "HEAD_REF is: $HEAD_REF "
+                  echo "RE_AUTO is : $RE_AUTO "
+                  echo ""
+                  echo "AUTO_NAME is: $AUTO_NAME "
+                  echo "FULL_VER is : $FULL_VER "
+                  echo "VER_NO_V is : $VER_NO_V "
+                  echo ""
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE"
+              fi
+          else
+              echo "the head ref did not match the regex, but the branch contains 'v[0-9].[0-9].[0-9]' single quotes."
+              ## use the warning below once the 'autorelease' startsWith conditionals are working
+              echo "::warning file=reuse-autorelease-04-pr-merged,title=version-if-contains-head-ref-filter-pattern::the head ref did not match the regex, but the branch contains 'v[0-9].[0-9].[0-9]' single quotes."
+          fi
+          ##
+          echo "completing the 'version-if-contains-head-ref-filter-pattern' step. "
+
+      - name: dev | startsWith github.event.pull_request.head.ref conditional
+        id: dev-startswith-head-ref-single-quotes
+        if: startsWith(github.event.pull_request.head.ref, 'dev')
+        # NOTE: you must use single quotes with the 'startsWith' or 'contains' functions, using double
+        #       quotes with either the 'startsWith' or 'contains' functions causes the workflow to fail
+        run: |
+          echo "this means that 'github.event.pull_request.head.ref' starts with 'dev' (single quotes) "
+
+      - name: autorelease and version | startsWith and contains conditional
+        id: autorelease-and-version-head-ref-single-quotes
+        if: startsWith(github.event.pull_request.head.ref, 'autorelease') && contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+        # NOTE: you must use single quotes with the 'startsWith' or 'contains' functions, using double
+        #       quotes with either the 'startsWith' or 'contains' functions causes the workflow to fail
+        # NOTE: you must use the proper filter pattern in order to use either the 'startsWith' or 'contains' functions
+        #       a working example is 'v[0-9].[0-9].[0-9]', but using 'v*.*.*' does not work
+        run: |
+          echo "this means that the: "
+          echo "     'github.event.pull_request.head.ref' starts with 'autorelease' (single quotes) "
+          echo "  AND  "
+          echo "     'github.event.pull_request.head.ref' contains 'v[0-9].[0-9].[0-9]' (single quotes) "
+
+      - name: dev and version | startsWith and contains conditional
+        id: dev-and-version-head-ref-single-quotes
+        if: startsWith(github.event.pull_request.head.ref, 'dev') && contains(github.event.pull_request.head.ref, 'v[0-9].[0-9].[0-9]')
+        # NOTE: you must use single quotes with the 'startsWith' or 'contains' functions, using double
+        #       quotes with either the 'startsWith' or 'contains' functions causes the workflow to fail
+        # NOTE: you must use the proper filter pattern in order to use either the 'startsWith' or 'contains' functions
+        #       a working example is 'v[0-9].[0-9].[0-9]', but using 'v*.*.*' does not work
+        run: |
+          echo "this means that the: "
+          echo "     'github.event.pull_request.head.ref' starts with 'dev' (single quotes) "
+          echo "  AND  "
+          echo "     'github.event.pull_request.head.ref' contains 'v[0-9].[0-9].[0-9]' (single quotes) "
+
+      - name: label autorelease | contains github.event.pull_request.labels.*.name conditional
+        id: label-autorelease-contains-label-name-single-quotes
+        if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
+        run: |
+          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'actions:autorelease' label (single quotes) "
+
+      - name: label group test | contains github.event.pull_request.labels.*.name conditional
+        id: label-group-test-contains-label-name-single-quotes
+        if: contains(github.event.pull_request.labels.*.name, 'group:test')
+        run: |
+          echo "this means that 'github.event.pull_request.labels.*.name' contains the 'group:test' label (single quotes) "
+
+  github-context:            ## extra workflow -- done
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Verbose | Output the runner environment and GitHub context
+        id: verbose-print-env-and-context
+        run: | 
+          ## Print the runner environment and GitHub context if inputs.VERBOSE=='true'
+          ## the double number signs below are for line spacing and readability only
+          ##
+          echo "starting the 'verbose-print-env-and-context' step. "
+          echo ""
+          echo "::group::Runner Environment"
+          echo "## Runner Environment"
+          env | sort
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "::group::GitHub context"
+          echo "## GitHub context"
+          echo "$GITHUB_CONTEXT"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          ##
+          echo "printing other github info:"
+          echo "event pr head ref:  ${{ github.event.pull_request.head.ref }}"
+          echo ""
+          echo ""
+          echo "::group::GitHub labels"
+          echo "## GitHub labels"
+          echo "$GITHUB_LABELS"
+          echo "\n"
+          echo "::endgroup::"
+          echo ""
+          echo "completing the 'verbose-print-env-and-context' step. "
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_LABELS: ${{ toJson(github.event.pull_request.labels) }}
+
+      - name: View context attributes
+        # Verified creator: https://github.com/marketplace/actions/github-script
+        # This action makes it easy to quickly write a script in your workflow that uses the GitHub API and the workflow run context.
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: console.log(context)
+
+      - name: Extra | Print Labels from the PR
+        # Verified creator: https://github.com/marketplace/actions/github-script
+        # This action makes it easy to quickly write a script in your workflow that uses the GitHub API and the workflow run context.
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          #github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const { data: pullRequest } = await github.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const labels = pullRequest.labels.map(label => label.name);
+            console.log('Labels:', labels.join(', '));
+
+      - name: Extra | Print the version label from the PR
+        id: get-version-label
+        if: contains(github.event.pull_request.labels.*.name, 'version:')
+        continue-on-error: true
+        run: |
+          ## Print the version label from the PR
+          echo "The 'version:' label exists in the pull request."
+          echo "now we need to find out how to grab that as a value... "
+          ##
+          echo "attempting to get the version label from the pull request with bash... "
+          version_label=$(echo "${{ github.event.pull_request.labels.*.name }}" | grep -o 'version:[^,]*' | sed 's/version://')
+          echo "version_label was set to ${version_label}"
+          echo "going to output the version label"
+          echo "version_label=${version_label}" >> $GITHUB_OUTPUT
+          echo ""
+
+  not-applicable:            ## extra workflow -- done
+    # do nothing else because this is not an autorelease branch
+    #name: do nothing else because this is not an autorelease branch
+    runs-on: ubuntu-latest
+    if: |
+      !(contains(github.event.pull_request.labels.*.name, 'actions:autorelease')) && 
+      !(startsWith(github.event.pull_request.head.ref, 'autorelease'))
+    steps:
+
+      - name: Nothing to do, this is not an autorelease branch
+        id: print-something
+        run: |
+          # Nothing to do, this is not an autorelease branch
+          echo "nothing else to do, this is not an autorelease branch"
+          echo "going to get the commit SHAs for the pull request"
+
+      - name: Checkout files from commit tree with the default token
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+
+      - name: Get PR commit SHA
+        continue-on-error: true
+        id: pr-commit
+        if: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "getting the PR commit SHA"
+          echo "the value of 'github.event.pull_request.head.sha' is '${{ github.event.pull_request.head.sha }}' "
+          git rev-parse ${{ github.event.pull_request.head.sha }}
+          pr_sha=$(git rev-parse ${{ github.event.pull_request.head.sha }})
+          echo "the PR SHA is ${pr_sha}"
+          echo "sha=${pr_sha}" >> $GITHUB_OUTPUT
+
+      - name: Get main branch commit SHA
+        continue-on-error: true
+        id: main-commit
+        if: ${{ github.event.pull_request.base.sha }}
+        run: |
+          echo "getting the main commit SHA"
+          echo "the value of 'github.event.pull_request.base.sha' is '${{ github.event.pull_request.base.sha }}' "
+          git rev-parse ${{ github.event.pull_request.base.sha }}
+          main_sha=$(git rev-parse ${{ github.event.pull_request.base.sha }})
+          echo "the main SHA is ${main_sha}"
+          echo "sha=${main_sha}" >> $GITHUB_OUTPUT
+
+      - name: Compare SHAs
+        continue-on-error: true
+        id: print-info
+        run: |
+          ## Print the PR commit and main branch commit SHAs
+          echo "PR commit SHA: ${{ steps.pr-commit.outputs.sha }}"
+          echo "Main branch commit SHA: ${{ steps.main-commit.outputs.sha }}"
