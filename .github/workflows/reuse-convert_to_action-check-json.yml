@@ -131,6 +131,7 @@ jobs:
     name: get-field-values
     runs-on: ubuntu-latest
     outputs:
+      job-status: ${{ job.status }}
       merged-version: ${{ steps.version-from-file.outputs.autorelease-file-version }}
       merged-type: ${{ steps.type-from-file.outputs.autorelease-file-type }}
       merged-reviewed-id: ${{ steps.reviewed-id-from-file.outputs.reviewed-image-id }}
