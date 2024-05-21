@@ -20,6 +20,37 @@ The autorelease process currently leverages [GitHub's reusable workflows](https:
     - See https://github.com/orgs/community/discussions/15935
     > Reusable workflows are YAML-formatted files, very similar to any other workflow file. As with other workflow files, you locate reusable workflows in the `.github/workflows` directory of a repository. Subdirectories of the `workflows` directory are not supported.
 
+#### GitHub Credentials
+
+Using **autorelease** requires a GitHub token to access the GitHub API. You configure this token via the `ACTIONS_TOKEN` secret **and** the `GH_APP_ID` and `GH_APP_KEY` secrets.
+
+In the future, you _might_ have the option to specify if you want to use a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) or authenticate with a GitHub app (bot).
+
+> [!WARNING]  
+> You will need to specify the both **token secrets** for your workflows to run the **autorelease** workflows.
+
+All resources created by the **autorelease** workflows will not trigger future GitHub actions workflows, 
+and workflows normally triggered by the applicable "autorelease" events will also not run.  From GitHub's 
+[triggering a workflow docs](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow):
+
+> When you use the repository's `GITHUB_TOKEN` to perform tasks, events triggered by the `GITHUB_TOKEN`
+> will not create a new workflow run. This prevents you from accidentally creating recursive workflow runs.
+
+You will want to need a GitHub Actions secret with a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+if you want GitHub Actions run on the applicable "autorelease" events.
+
+#### Workflow Permissions
+
+The **autorelease** workflows _should specify the permissions needed_; however, if they do not then they will need the following permissions:
+
+```yml
+permissions:
+  contents: write
+  pull-requests: write
+```
+
+#### Workflow Numbering Order
+
 The numbering for autorelease workflows should be as follows
 
 ### Step 1
@@ -129,3 +160,34 @@ The process starts when the **release is published manually by the person review
 2. (wish-list item) send a notification (maybe on Slack, Discord, etc)
 3. (wish-list item) **if applicable** make updates with any needed IDs or artifacts from the release, then open a PR with post-release notes??
 4. celebrate!
+
+
+## Details about specific jobs and actions
+
+
+### Calculating the next version
+
+Autorelease currently uses the `test/get-next-semver` action to determine the next version.
+- Details about how the **next version** is calculated can be found in the [**next-tag** section of the `get-next-semver` README](../test/get-next-semver/README.md#next-tag)
+- The only time the "next version" will match the "build version" is when a full version tag is created.
+
+
+### Calculating the build version
+
+Autorelease _will use_ the `builders/set-version` action to determine the build version.
+- The default **build version** is calculated based on the output from running the command `git describe --tags --match "v[0-9].[0-9].[0-9]*"`
+- The only time the "next version" will match the "build version" is when a full version tag is created.
+
+
+### Filtering for the full version tag in an action
+
+**Note** the filter pattern will need to be updated to allow double digits, either:
+- specify 2 digits with a second range followed by `?`: 
+    - using: `'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'`
+- or keep the single digit, but match one or more with `+`:
+    - using: `'v[0-9]+.[0-9]+.[0-9]+'`
+
+See [GitHub's filter pattern cheat sheet](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet) for more info.
+
+**important**: using `'v*.*.*'` does not work.  For example, using `if: contains('refs/tags/v*.*.*', github.ref) && github.ref_type == 'tag'` will not ever be true since `'v*.*.*'` is not the proper syntax.  You must use `v[0-9].[0-9].[0-9]` (or one of the options above) instead.
+

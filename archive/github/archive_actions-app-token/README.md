@@ -9,7 +9,7 @@ jobs:
   auto-format:
     runs-on: ubuntu-latest
     steps:
-      - name: Creating a GitHub App Token from actions/create-github-app-token
+      - name: Create a GitHub App Token
         # https://github.com/actions/create-github-app-token/commit/f2acddfb5195534d487896a656232b016a682f3c
         uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c
         #uses: actions/create-github-app-token@v1.9.0

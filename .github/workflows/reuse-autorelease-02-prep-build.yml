@@ -1,4 +1,6 @@
-name: Reuse - Autorelease 01 Prepare Build
+name: Reuse - Autorelease 02 Prepare Build
+# this is workflow 02 in the autorelease process, it should be called by either 'reuse-autorelease-01-prepare-release' or the 'autorelease-01' workflow in the caller repo
+# autorelease notes:  https://github.com/rwaight/actions/blob/main/docs/autorelease-process-notes.md
 #run-name: prepare-build
 run-name: check-build
 # This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
@@ -181,6 +183,16 @@ on:
 
 jobs:
 ## this needs to be updated to allow inputs from the 'reuse-autorelease-01-prepare-release' outputs
+
+# Autorelease Process
+## Autorelease Reusable Workflows
+### Step 1
+#### 02. prep-build
+# steps                   **if applicable**
+#   1. validate the reviewed image ID    (reuse-verify-reviewed-image)
+#   2. call 'test-build'
+#   3. gather build results
+#   4. send results to 'prepare-pr'
 
   reuse-next-version:           # should be removed from this as it is now in 'reuse-autorelease-01-prepare-release'
     #name: Get next version for ${{ inputs.RELEASE_TYPE }} release

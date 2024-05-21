@@ -13,13 +13,13 @@ See the `inputs` configured in the [action.yml](action.yml) file.
 
 ### Outputs
 
-See the `inputs` configured in the [action.yml](action.yml) file.
+See the `outputs` configured in the [action.yml](action.yml) file.
 
 
 ## Example Usage
 
 Create a file named `.github/workflows/my-workflow.yml` with the following:
-```
+```yml
 name: Run a GitHub workflow
 
 on:
