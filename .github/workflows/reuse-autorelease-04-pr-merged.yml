@@ -1,4 +1,5 @@
 name: Reuse - Autorelease 04 PR Merged
+# this is workflow 04 in the autorelease process, it should be called by a workflow named 'Autorelease Step 2 - PR Merged'
 #run-name: pull-request-merged
 run-name: pr-merged
 # This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
@@ -135,6 +136,10 @@ permissions:
 
 jobs:
 
+# Autorelease Process
+## Autorelease Reusable Workflows
+### Step 2
+#### 04. pr-merged
 # steps
 #   1. get the version from the autorelease branch;                             (check-autorelease-branch)    ## done  -- good to go
 #   2. get the version, type, and reviewed image id from the JSON_VARS_FILE;    (check-json-file)             ## done  -- good to go
