@@ -17,7 +17,7 @@ on:
     # All of the 'inputs' below are passed from the caller workflow.
     inputs:
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       DRY_RUN:
         description: 'Perform a "dry run" or not.'
         required: false
@@ -31,14 +31,14 @@ on:
         # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
         type: string
         default: 'false'
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       GH_APP_BOT_NAME:
         description: 'The name of the GitHub App. '
         #default: 'github-actions[bot]'
         default: 'rw-actions-bot[bot]'
         required: false
         type: string
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       JSON_VARS_FILE:
         description: >-
           The name and path of the variables file that will be sent to Packer, this should be in json format.
@@ -46,25 +46,25 @@ on:
         default: 'not-set'
         required: true
         type: string
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       JSON_VARS_IMAGE_FIELD:
         description: 'The image ID field that should be updated within the JSON variables file. '
         default: 'reviewed_image_id'
         required: false
         type: string
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       JSON_VARS_TYPE_FIELD:
         description: 'The type field that should be updated within the JSON variables file. '
         default: 'release_type'
         required: false
         type: string
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       JSON_VARS_VERSION_FIELD:
         description: 'The version field that should be updated within the JSON variables file. '
         default: 'my_custom_version'
         required: false
         type: string
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       NOTIFY_SLACK:
         description: 'Determine if a Slack message should be sent, defaults to sending a message (true)'
         required: false
@@ -78,7 +78,7 @@ on:
         # example to cast this as a boolean: ${{ fromJSON(inputs.NOTIFY_SLACK) }}
         type: string
         default: 'true'
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       PACKER_TEMPLATE_CONVERT:
         description: >-
           The name and path of the production template file that will be sent to Packer. 
@@ -86,7 +86,7 @@ on:
         default: 'not-set'
         required: true
         type: string
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       RELEASE_TEMPLATE_FILE:
         description: >-
           The name of the release drafter template (config) `.yml` file that is stored
@@ -95,25 +95,25 @@ on:
         default: 'release-drafter.yml'
         required: true
         type: string
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       RELEASE_TYPE:
         description: 'Release type'
         required: true
         type: string
         default: patch
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       RELEASE_PRE_ID:
         description: 'Pre-release identifier (only for pre-release builds)'
         required: false
         type: string
         default: 'rc'
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       REVIEWED_IMAGE_ID:
         description: 'The ID of the image that will be converted'
         default: 'not-set'
         required: true
         type: string
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       WORKFLOW_SUMMARY:
         description: 'Determine if the workflow should output to the summary page, a boolean that defaults to false'
         required: false
@@ -127,7 +127,7 @@ on:
         # example to cast this as a boolean: ${{ fromJSON(inputs.WORKFLOW_SUMMARY) }}
         type: string
         default: 'true'
-      # new variable for 'reuse-autorelease-01-prep-build'
+      # new variable for 'reuse-autorelease-01-prepare-release'
       VERBOSE:
         description: 'Determine if the workflow should run debug tasks, a boolean that defaults to false'
         required: false
@@ -145,37 +145,37 @@ on:
     secrets:
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
       # All of the 'secrets' below are passed from the caller workflow.
-      # new secret for 'reuse-autorelease-01-prep-build'
+      # new secret for 'reuse-autorelease-01-prepare-release'
       ACTIONS_TOKEN:
         description: 'A token used within the builder actions.'
         required: false
-      # new secret for 'reuse-autorelease-01-prep-build'
+      # new secret for 'reuse-autorelease-01-prepare-release'
       AWS_ACCESS_KEY:
         description: 'The AWS Access Key ID for the builder.'
         required: true
-      # new secret for 'reuse-autorelease-01-prep-build'
+      # new secret for 'reuse-autorelease-01-prepare-release'
       AWS_SECRET_KEY:
         description: 'The AWS Access Key Secret for the builder.'
         required: true
-      # new secret for 'reuse-autorelease-01-prep-build'
+      # new secret for 'reuse-autorelease-01-prepare-release'
       GH_APP_BOT_UID:
         description: >-
           'The UID of the GitHub App, not to be confused with GitHub App ID. 
           Can be found using the approach from: https://github.com/orgs/community/discussions/24664#discussioncomment-3880274 '
         required: false
-      # new secret for 'reuse-autorelease-01-prep-build'
+      # new secret for 'reuse-autorelease-01-prepare-release'
       GH_APP_ID:
         description: 'The GitHub App ID'
         required: false
-      # new secret for 'reuse-autorelease-01-prep-build'
+      # new secret for 'reuse-autorelease-01-prepare-release'
       GH_APP_KEY:
         description: 'The private key of the GitHub App'
         required: false
-      # new secret for 'reuse-autorelease-01-prep-build'
+      # new secret for 'reuse-autorelease-01-prepare-release'
       SLACK_WEBHOOK:
         description: 'A token used with the slackapi/slack-github-action.'
         required: false
-      # new secret for 'reuse-autorelease-01-prep-build'
+      # new secret for 'reuse-autorelease-01-prepare-release'
       SSH_KEY_FILE:
         description: 'The SSH private key file'
         required: false
