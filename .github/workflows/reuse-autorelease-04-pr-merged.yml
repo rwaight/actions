@@ -1,5 +1,7 @@
 name: Reuse - Autorelease 04 PR Merged
 # this is workflow 04 in the autorelease process, it should be called by a workflow named 'Autorelease Step 2 - PR Merged'
+# the 'on' event criteria should be: on: pull_request: {branches: [main], types: [closed]}
+# autorelease notes:  https://github.com/rwaight/actions/blob/main/docs/autorelease-process-notes.md
 #run-name: pull-request-merged
 run-name: pr-merged
 # This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency

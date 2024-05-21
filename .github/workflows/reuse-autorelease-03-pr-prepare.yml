@@ -1,6 +1,8 @@
-name: Reuse - Autorelease 01 Prepare Release PR
+name: Reuse - Autorelease 03 Prepare Release PR
+# this is workflow 03 in the autorelease process, it should be called by either 'reuse-autorelease-01-prepare-release' or 'reuse-autorelease-02-prep-build'
+# autorelease notes:  https://github.com/rwaight/actions/blob/main/docs/autorelease-process-notes.md
 #run-name: prepare-release
-run-name: prepare
+run-name: release-pr
 # This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
 # NOTE: Because of how re-usable workflows handle inputs, all of the booleans must be treated as strings
 # see https://github.com/actions/runner/issues/1483 and https://github.com/actions/runner/issues/1483#issuecomment-1031671517
@@ -183,6 +185,20 @@ on:
         required: false
 
 jobs:
+
+# Autorelease Process
+## Autorelease Reusable Workflows
+### Step 1
+#### 03. prepare-pr
+# steps
+#   1. prepare the release items    (prepare-pr)
+#      # - prepare and create the initial release draft
+#      # - prepare and create the release pull request
+#   2. print the prepare-release outputs
+#   3. (wish-list item) update the repo changelog
+#      # - for repos with builds, this would also update the "build log"
+#   4. (wish-list item) check to make sure no other PRs are opened (or pushes to the default branch)
+#      # - it would probably be part of this job... and would **auto-close the release pull request**, since a change was made??
 
   prepare-pr:
     #name: Prepare ${{ inputs.RELEASE_TYPE }} release pull request

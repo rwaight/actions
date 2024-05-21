@@ -1,5 +1,8 @@
 name: Reuse - Autorelease 01 Prepare Release
-run-name: 01-prepare
+# this is workflow 01 in the autorelease process, it should be called the 'autorelease-01' workflow in the caller repo
+# autorelease notes:  https://github.com/rwaight/actions/blob/main/docs/autorelease-process-notes.md
+#run-name: prepare-release
+run-name: prepare
 # This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
 # NOTE: Because of how re-usable workflows handle inputs, all of the booleans must be treated as strings
 # see https://github.com/actions/runner/issues/1483 and https://github.com/actions/runner/issues/1483#issuecomment-1031671517
@@ -209,7 +212,11 @@ on:
 
 jobs:
 
-# #### 01. prepare-release
+# Autorelease Process
+## Autorelease Reusable Workflows
+### Step 1
+#### 01. prepare-release
+# steps
 #
 # Check inputs, get next version, determine next steps
 # - for repos with packer, this is called from 'prep-build'?
