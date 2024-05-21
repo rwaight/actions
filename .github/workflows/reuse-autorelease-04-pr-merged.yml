@@ -996,7 +996,9 @@ jobs:
 
       - name: Create the ${{ needs.validate-version.outputs.valid-version }} tag
         #name: 🏷️ Create/update tag
-        uses: actions/github-script@v7
+        # Verified creator: https://github.com/marketplace/actions/github-script
+        # This action makes it easy to quickly write a script in your workflow that uses the GitHub API and the workflow run context.
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         if: ${{ needs.validate-version.outputs.valid-version }}
         id: create-version-tag
         with:
