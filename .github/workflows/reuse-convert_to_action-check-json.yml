@@ -145,7 +145,7 @@ jobs:
           echo "This workflow will now exit. "
           exit 1
 
-      - name: Creating a GitHub App Token from actions/create-github-app-token
+      - name: Create a GitHub App Token
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
         uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
