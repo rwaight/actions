@@ -85,8 +85,24 @@ runs:
         fetch-depth: 0
         token: ${{ inputs.gh-token }}
 
-    - name: This should run when there are tags pushed
+    - name: Extra | This should run when there are tags pushed
       if: github.ref_type == 'tag'
+      shell: bash
+      run: |
+        echo "The ref_type is: ${{ github.ref_type }}"
+        echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
+        echo "GitHub ref: ${{ github.ref }}"
+        echo "GitHub ref_name: ${{ github.ref_name }}"
+        echo "GitHub ref_type: ${{ github.ref_type }}"
+
+    - name: Extra | This should run when the ref_type is 'tag' and the tag starts with the proper numbering syntax
+      if: github.ref_type == 'tag' && startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
+      # the filter pattern will need to be updated to allow double digits, using either: 
+      #    specify 2 digits with a second range followed by `?`:
+      #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+      #    or keep the single digit, but match one or more with `+`:
+      #        'v[0-9]+.[0-9]+.[0-9]+'
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
       shell: bash
       run: |
         echo "The ref_type is: ${{ github.ref_type }}"
@@ -125,6 +141,7 @@ runs:
       if: (github.ref_type == 'tag')
       shell: bash
       run: |
+        echo "starting step 'get-tag-version' "
         VERSION="${{ github.event.release.tag_name || github.ref_name }}"
         ##
         RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
@@ -139,20 +156,23 @@ runs:
                 echo "MAJOR is  : $MAJOR "
                 echo "MINOR is  : $MINOR "
                 echo "PATCH is  : $PATCH "
-                echo "PRERELEASE: $PRERELEASE"
+                echo "PRERELEASE: $PRERELEASE "
             fi
         else
-            echo "::error::Version '$VERSION' is not in a valid format" && exit 1
+            echo "::error file=set-version-action.yml,title=⛔ set-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
+            exit 1
         fi
         ##
         if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
         ##
-        echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+        ##echo "full-version-tag=$VERSION" >> $GITHUB_OUTPUT
+        ##echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+        echo "full-version-ref=$VERSION" >> $GITHUB_OUTPUT
         echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
         echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
         echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
         echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
-        echo "completing the 'get-tag-version' step "
+        echo "completing the 'get-tag-version' step. "
 
     - name: get-tag-version | Print outputs
       id: check-get-tag-version
@@ -160,72 +180,146 @@ runs:
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
       shell: bash
       run: |
+        echo "starting step 'check-get-tag-version' "
         echo "## get-tag-version outputs"
-        echo "Full version: ${{ env.FULL_VERSION }} "
+        echo "Full version: ${{ env.FULL_VERSION_REF }} "
         echo "Major ref   : ${{ env.MAJOR_REF }} "
         echo "Minor ref   : ${{ env.MINOR_REF }} "
         echo "Patch ref   : ${{ env.PATCH_REF }} "
         echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
         echo ""
+        echo "completing the 'check-get-tag-version' step. "
       env:
-        FULL_VERSION: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        #FULL_VERSION_TAG: ${{ steps.get-tag-version.outputs.full-version-tag }}
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
         MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
         MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
         PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
         IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
 
-    - name: BUILD_VERSION | Check for tag (push event), set the build version to the tag version
+    - name: tag-version | Use 'full-version-ref' from 'get-tag-version' to set the build version
       # This step is run when the branch is a 'v*.*.*' tag
       id: set-build-version-full-version-tag
-      #if: |
-      #  ${{ steps.get-tag-version.outputs.full-version-ref }} && 
-      #  ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
-      #was#if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
-      if: (contains('refs/tags/v*.*.*', github.ref) && github.ref_type == 'tag' && github.event_name=='push')
-      #if: {{ github.ref == 'ref/head/v*' }}
+      #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
+      if: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      #try this next#if: startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
+      # the filter pattern will need to be updated to allow double digits, using either: 
+      #    specify 2 digits with a second range followed by `?`:
+      #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+      #    or keep the single digit, but match one or more with `+`:
+      #        'v[0-9]+.[0-9]+.[0-9]+'
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
       shell: bash
       run: |
-        echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION }}'..."
-        echo "BUILD_VERSION=${{ env.FULL_VERSION }}" >> $GITHUB_ENV
+        echo "starting step 'set-build-version-full-version-tag' "
+        echo ""
+        echo "event name:  ${{ github.event_name }} "
+        echo "ref       :  ${{ github.ref }}"
+        echo "ref name  :  ${{ github.ref_name }} "
+        echo "ref type  :  ${{ github.ref_type }} "
+        echo ""
+        echo "release tag_name: ${{ github.event.release.tag_name }} "
+        echo ""
+        echo "## get-tag-version outputs"
+        echo "Full version: ${{ env.FULL_VERSION_REF }} "
+        echo ""
+        echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}'..."
+        echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
-        echo ""
+        echo "completing the 'set-build-version-full-version-tag' step. "
       env:
-        FULL_VERSION: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
-    - name: BUILD_VERSION | Check for tag (not push), set the build version to the tag version
+    - name: tag-version | Duplicate check for the 'full-version-ref' from 'get-tag-version'
       # This step is run when the branch is a 'v*.*.*' tag
-      id: set-build-version-full-version-tag-fallback
+      id: set-build-version-duplicate-check
+      #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
+      if: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      #try this next#if: startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
+      # the filter pattern will need to be updated to allow double digits, using either: 
+      #    specify 2 digits with a second range followed by `?`:
+      #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+      #    or keep the single digit, but match one or more with `+`:
+      #        'v[0-9]+.[0-9]+.[0-9]+'
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+      shell: bash
+      run: |
+        echo "starting step 'set-build-version-duplicate-check' "
+        echo ""
+        echo "event name:  ${{ github.event_name }} "
+        echo "ref       :  ${{ github.ref }}"
+        echo "ref name  :  ${{ github.ref_name }} "
+        echo "ref type  :  ${{ github.ref_type }} "
+        echo ""
+        echo "release tag_name: ${{ github.event.release.tag_name }} "
+        echo ""
+        echo "## get-tag-version outputs"
+        echo "Full version: ${{ env.FULL_VERSION_REF }} "
+        echo ""
+        if [[ '${{ github.event_name }}' == 'push' ]]; then
+            echo "the 'github.event_name' is 'push', going to set the version to '${{ env.FULL_VERSION_REF }}' "
+            ##
+            echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}'..."
+            echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
+            ##
+            echo "Setting EVAL_BUILD_VERSION to true..."
+            echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
+            ##
+        elif [[ '${{ github.event_name }}' != 'push' ]]; then
+            echo "the 'github.event_name' is NOT 'push', going to set the version to '${{ env.FULL_VERSION_REF }}' "
+            ##
+            echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}'..."
+            echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
+            echo "Setting EVAL_BUILD_VERSION to true..."
+            echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
+        else
+            echo "something strange is happening, not changing anything... "
+        fi
+        echo "completing the 'set-build-version-duplicate-check' step. "
+      env:
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+
+    - name: tag-version | Check for a semver compliant tag to set the build version
+      # This step is run when the branch is a 'v*.*.*' tag
+      id: set-build-version-fallback-semver-compliant-tag
       #if: |
       #  ${{ steps.get-tag-version.outputs.full-version-ref }} && ${{ env.EVAL_BUILD_VERSION=='false' }}
       #  ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') }}
-      #was#if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (env.EVAL_BUILD_VERSION=='false') }}
-      if: (contains('refs/tags/v*.*.*', github.ref) && github.ref_type == 'tag' && env.EVAL_BUILD_VERSION=='false')
+      #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (env.EVAL_BUILD_VERSION=='false') }}
+      if: (contains('refs/tags/v[0-9].[0-9].[0-9]', github.ref) && github.ref_type == 'tag' && env.EVAL_BUILD_VERSION=='false')
       #if: {{ github.ref == 'ref/head/v*' }}
       shell: bash
       run: |
-        echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION }}'..."
-        echo "BUILD_VERSION=${{ env.FULL_VERSION }}" >> $GITHUB_ENV
+        echo "starting step 'set-build-version-fallback-semver-compliant-tag' "
+        echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}' ..."
+        echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-version-fallback-semver-compliant-tag' step. "
       env:
-        FULL_VERSION: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
     - name: simple-semver | Look for simple semver with git describe
       # name: 02b | Run 'git describe --tags --match "v[0-9].[0-9].[0-9]*"'
       id: simple-semver
       #if: (env.EVAL_BUILD_VERSION=='false' || inputs.strategy=='simple')
+      # the filter pattern might need to be updated to allow double digits, using either: 
+      #    specify 2 digits with a second range followed by `?`:
+      #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+      #    or keep the single digit, but match one or more with `+`:
+      #        'v[0-9]+.[0-9]+.[0-9]+'
       if: ${{ always() }}
       shell: bash
       run: |
-        echo "starting the 'simple-semver' step... "
+        echo "starting the 'simple-semver' step ... "
         git describe --tags --match "v[0-9].[0-9].[0-9]*"
         semver_simple=$(git describe --tags --match "v[0-9].[0-9].[0-9]*")
         echo "setting the value of 'simple-semver' to '${semver_simple}' and sending it to GitHub output"
         echo "simple-semver=${semver_simple}" >> $GITHUB_ENV
         echo "simple-semver=${semver_simple}" >> $GITHUB_OUTPUT
-        echo "finishing the 'simple-semver' step... "
+        echo "finishing the 'simple-semver' step ... "
 
     - name: simple-semver | Print output
       id: check-simple-semver
@@ -238,7 +332,7 @@ runs:
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
 
-    - name: BUILD_VERSION | Set the build version using simple-semver output
+    - name: simple-semver | Set the build version using simple-semver output
       id: set-build-version-using-simple-semver
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='simple' && ${{ steps.simple-semver.outputs.simple-semver }})
       shell: bash
@@ -254,6 +348,11 @@ runs:
     - name: wildcard-semver | Look for wildcard semver with git describe
       # name: 06a | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"'
       id: wildcard-semver
+      # the filter pattern might need to be updated to allow double digits, using either: 
+      #    specify 2 digits with a second range followed by `?`:
+      #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+      #    or keep the single digit, but match one or more with `+`:
+      #        'v[0-9]+.[0-9]+.[0-9]+'
       if: (env.EVAL_BUILD_VERSION=='false' || inputs.strategy=='wildcard')
       shell: bash
       run: |
@@ -276,7 +375,7 @@ runs:
       env:
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
 
-    - name: BUILD_VERSION | Set the build version using wildcard-semver output
+    - name: wildcard-semver | Set the build version using wildcard-semver output
       id: set-build-version-using-wildcard-semver
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='wildcard' && ${{ steps.wildcard-semver.outputs.wildcard-semver }})
       shell: bash
@@ -345,10 +444,12 @@ runs:
       id: set-version-output
       shell: bash
       run: |
+        echo "starting the 'set-version-output' step ... "
         echo "The BUILD_VERSION has been set to '${{ env.BUILD_VERSION }}' ... "
         echo "BUILD_VERSION=${{ env.BUILD_VERSION }}" >> "$GITHUB_OUTPUT"
+        echo "finishing the 'set-version-output' step ... "
       env:
-        FULL_VERSION: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
         MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
         MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
         PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
