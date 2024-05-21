@@ -90,7 +90,7 @@ jobs:
       - name: Get latest release info
         id: query-latest-release
         continue-on-error: true
-        uses: rwaight/actions/git/keep-a-changelog-action@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/git/keep-a-changelog-action@b128f20a02a31ae114421ffff7ab0ea3bea12edc # v0.1.33
         #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
         #uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
@@ -112,7 +112,7 @@ jobs:
       - name: Get unreleased changes release info
         id: query-unreleased-changes
         continue-on-error: true
-        uses: rwaight/actions/git/keep-a-changelog-action@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/git/keep-a-changelog-action@b128f20a02a31ae114421ffff7ab0ea3bea12edc # v0.1.33
         #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
         #uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
@@ -134,7 +134,7 @@ jobs:
       - name: Get latest-or-unreleased changes release info
         id: query-latest-or-unreleased-changes
         continue-on-error: true
-        uses: rwaight/actions/git/keep-a-changelog-action@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/git/keep-a-changelog-action@b128f20a02a31ae114421ffff7ab0ea3bea12edc # v0.1.33
         #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.26
         #uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
@@ -160,8 +160,8 @@ jobs:
       # https://github.com/release-flow/keep-a-changelog-action
       - name: Update changelog using inputs.release-type (${{ github.event.inputs.release-type }})
         id: update-changelog
-        uses: rwaight/actions/git/keep-a-changelog-action@bd2234d2665c0db7fff5b9b65e904bf58b63bd11
-        #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.31
+        uses: rwaight/actions/git/keep-a-changelog-action@b128f20a02a31ae114421ffff7ab0ea3bea12edc
+        #uses: rwaight/actions/git/keep-a-changelog-action@v0.1.33
         #uses: rwaight/actions/git/keep-a-changelog-action@main
         with:
           # https://github.com/release-flow/keep-a-changelog-action/blob/main/docs/bump.md
