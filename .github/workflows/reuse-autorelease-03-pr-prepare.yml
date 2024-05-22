@@ -531,6 +531,10 @@ jobs:
           #labels: actions:autorelease, version:${{ github.event.inputs.RELEASE_TYPE }}
           labels: actions:autorelease, skip-changelog, version:${{ inputs.RELEASE_TYPE }}
           #labels: actions:autorelease, skip-changelog
+          assignees: ${{ github.actor }}
+          reviewers: ${{ github.actor }}
+          # https://docs.github.com/en/github/setting-up-and-managing-organizations-and-teams/about-teams#team-visibility
+          # team-reviewers: 
           #token: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ steps.app-token.outputs.token }}
 
