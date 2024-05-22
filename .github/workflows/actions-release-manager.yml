@@ -27,8 +27,8 @@ on:
         required: true
         default: false
         type: boolean
-      debug_output:
-        description: 'Debug output'
+      verbose:
+        description: 'Verbose output'
         required: true
         default: false
         type: boolean
@@ -51,7 +51,7 @@ jobs:
     # previously, when including 'push' to 'main' caused two release drafts to be created
     #    #(github.event_name=='push' && github.ref == 'refs/heads/main')
     env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      VERBOSE: ${{ inputs.verbose || 'false' }}
       #IS_PRERELEASE: ${{ inputs.is_prerelease || 'false' }}
     steps:
       - name: Exit workflow in forked repo
@@ -251,11 +251,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
 
 
-      - name: Run workflow debug
-        id: run-workflow-debug
-        if: env.MY_WORKFLOW_DEBUG=='true'
+      - name: Verbose | Print info
+        id: verbose-print-info
+        if: env.VERBOSE=='true'
         run: |
-          echo "workflow debug was set to true... you should probably put something here for debug purposes. "
+          echo "verbose was set to true... you should probably put something here for verbose purposes. "
           echo ""
           echo "The GitHub event_name is: ${{ github.event_name }}"
           echo "The GitHub ref is: ${{ github.ref }}"
@@ -263,7 +263,7 @@ jobs:
           echo ""
           echo "For more information, see the GitHub Actions Contexts docs, which are located at: "
           echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
-          echo "The 'run-workflow-debug' step is now complete. "
+          echo "The 'verbose-print-info' step is now complete. "
         continue-on-error: true
 
 
@@ -272,75 +272,105 @@ jobs:
     name: Update major and minor tags on release
     runs-on: ubuntu-latest
     outputs:
-      RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+      #RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ steps.get-release-version.outputs.full-version-ref }}
+      FULL_VERSION_REF: ${{ steps.get-release-version.outputs.full-version-ref }}
+      MAJOR_REF: ${{ steps.get-release-version.outputs.major-ref }}
+      MINOR_REF: ${{ steps.get-release-version.outputs.minor-ref }}
+      PATCH_REF: ${{ steps.get-release-version.outputs.patch-ref }}
+      MAJOR_NUM: ${{ steps.get-release-version.outputs.major-num }}
+      MINOR_NUM: ${{ steps.get-release-version.outputs.minor-num }}
+      PATCH_NUM: ${{ steps.get-release-version.outputs.patch-num }}
+      PRERELEASE: ${{ steps.get-release-version.outputs.prerelease }}
+      IS_PRERELEASE: ${{ steps.get-release-version.outputs.is-prerelease }}
     permissions:
       contents: write
     if: | 
       (github.repository_owner == 'rwaight') &&
       (github.event_name=='release' && github.event.action=='published')
     env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      VERBOSE: ${{ inputs.verbose || 'false' }}
     steps:
-      - name: Check-out the repository under GITHUB_WORKSPACE
+
+      - name: Checkout files from commit tree
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
-        #uses: actions/checkout@v4.1.3
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
 
-      - name: Get release version
+      - name: get-release-version
         id: get-release-version
         run: |
-          VERSION="${{ github.event.release.tag_name }}"
+          echo "starting step 'get-release-version' "
+          VERSION="${{ github.event.release.tag_name || github.ref_name }}"
           ##
           RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
           if [[ $VERSION =~ $RE ]]; then
-            MAJOR="${BASH_REMATCH[1]}"
-            MINOR="${BASH_REMATCH[2]}"
-            PATCH="${BASH_REMATCH[3]}"
-            PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ env.MY_WORKFLOW_DEBUG }}' == 'true' ]; then
-              echo "VERSION is: $VERSION "
-              echo "RE is     : $RE "
-              echo "MAJOR is  : $MAJOR "
-              echo "MINOR is  : $MINOR "
-              echo "PATCH is  : $PATCH "
-              echo "PRERELEASE: $PRERELEASE"
-            fi
+              MAJOR="${BASH_REMATCH[1]}"
+              MINOR="${BASH_REMATCH[2]}"
+              PATCH="${BASH_REMATCH[3]}"
+              PRERELEASE="${BASH_REMATCH[4]}"
+              if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                  echo "VERSION is: $VERSION "
+                  echo "RE is     : $RE "
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE "
+              fi
           else
-            echo "::error::Version '$VERSION' is not in a valid format" && exit 1
+              echo "::error file=actions-release-manager.yml,title=⛔ get-release-version error hint::Version '$VERSION' is not in a valid format."
+              exit 1
           fi
-
+          ##
           if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
-          if [[ -f $GITHUB_OUTPUT ]]; then
-            echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
-            echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
-            echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
-            echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
-            echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
-          else
-            echo "::set-output name=major-ref::v$MAJOR"
-            echo "::set-output name=minor-ref::v$MINOR"
-            echo "::set-output name=is-prerelease::$pre"
-          fi
+          ##
+          echo "full-version-ref=$VERSION" >> $GITHUB_OUTPUT
+          ##
+          echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+          echo "major-num=$MAJOR" >> $GITHUB_OUTPUT
+          ##
+          echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+          echo "minor-num=$MINOR" >> $GITHUB_OUTPUT
+          ##
+          echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+          echo "patch-num=$PATCH" >> $GITHUB_OUTPUT
+          ##
+          echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+          ##
+          echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+          ##
+          echo "completing the 'get-release-version' step "
 
-      - name: Check output from get-release-version
+      - name: get-release-version | Print outputs
         id: check-get-release-version
+        if: ${{ steps.get-release-version.outputs.full-version-ref }}
+        run: |
+          echo "starting step 'check-get-release-version' "
+          echo "## get-release-version outputs"
+          echo "Full version : ${{ env.FULL_VERSION_REF }} "
+          echo "Major ref    : ${{ env.MAJOR_REF }} "
+          echo "Minor ref    : ${{ env.MINOR_REF }} "
+          echo "Patch ref    : ${{ env.PATCH_REF }} "
+          echo "Prerelease   : ${{ env.PRERELEASE }} "
+          echo "Is prerelease: ${{ env.IS_PRERELEASE }} "
+          echo ""
+          echo "Major num    : ${{ env.MAJOR_NUM }} "
+          echo "Minor num    : ${{ env.MINOR_NUM }} "
+          echo "Patch num    : ${{ env.PATCH_NUM }} "
+          echo ""
+          echo "completing the 'check-get-release-version' step. "
         env:
-          FULL_VERSION: ${{ steps.get-release-version.outputs.full-version-ref }}
+          FULL_VERSION_REF: ${{ steps.get-release-version.outputs.full-version-ref }}
           MAJOR_REF: ${{ steps.get-release-version.outputs.major-ref }}
           MINOR_REF: ${{ steps.get-release-version.outputs.minor-ref }}
           PATCH_REF: ${{ steps.get-release-version.outputs.patch-ref }}
+          MAJOR_NUM: ${{ steps.get-release-version.outputs.major-num }}
+          MINOR_NUM: ${{ steps.get-release-version.outputs.minor-num }}
+          PATCH_NUM: ${{ steps.get-release-version.outputs.patch-num }}
+          PRERELEASE: ${{ steps.get-release-version.outputs.prerelease }}
           IS_PRERELEASE: ${{ steps.get-release-version.outputs.is-prerelease }}
-        run: |
-          echo "## get-release-version outputs"
-          echo "Full version: ${{ env.FULL_VERSION }} "
-          echo "Major ref   : ${{ env.MAJOR_REF }} "
-          echo "Minor ref   : ${{ env.MINOR_REF }} "
-          echo "Patch ref   : ${{ env.PATCH_REF }} "
-          echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
-          echo ""
 
-      - name: Set MY_REF and RELEASE_VERSION environmental variable and output
+      - name: Deprecate me | Set MY_REF and RELEASE_VERSION environmental variable and output
         id: release-vars-output
         run: |
           echo "## deprecate this step in favor of the 'get-release-version' step "
@@ -350,15 +380,19 @@ jobs:
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
           echo "deprecate this step in favor of the 'get-release-version' step "
 
-      - name: Check output from release-vars-output
+      - name: Deprecate me | Check output from release-vars-output
         env:
           MY_REF: ${{ steps.release-vars-output.outputs.MY_REF }}
           RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
         run: |
+          echo "deprecate the 'release-vars-output' step in favor of the 'get-release-version' step "
+          echo ""
           echo "## RELEASE_VERSION variables"
           echo "curly brackets with env:  ${{ env.RELEASE_VERSION }} "
           echo "bash env (dollar sign) :  $RELEASE_VERSION "
           echo "github steps output    :  ${{ steps.release-vars-output.outputs.RELEASE_VERSION }} "
+          echo ""
+          echo "deprecate the 'release-vars-output' step in favor of the 'get-release-version' step "
           echo ""
           echo "## MY_REF variables"
           echo "curly brackets with env:  ${{ env.MY_REF }} "
@@ -367,7 +401,7 @@ jobs:
           echo ""
           echo "deprecate the 'release-vars-output' step in favor of the 'get-release-version' step "
 
-      - name: This should run when there are tags pushed
+      - name: Extra | This should run when there are tags pushed
         if: github.ref_type == 'tag'
         run: |
           echo "## GitHub context information "
@@ -382,7 +416,7 @@ jobs:
           echo "    tag_name: ${{ github.event.release.tag_name }} "
           echo ""
 
-      - name: This should run when a release is published
+      - name: Extra | This should run when a release is published
         if: ${{ github.event.release.tag_name }}
         run: |
           echo "## GitHub context information "
@@ -404,11 +438,11 @@ jobs:
           echo "https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=published#release"
           echo ""
 
-      - name: Run workflow debug
-        id: run-workflow-debug
-        if: env.MY_WORKFLOW_DEBUG=='true'
+      - name: Verbose | Print info
+        id: verbose-print-info
+        if: env.VERBOSE=='true'
         run: |
-          echo "workflow debug was set to true... you should probably put something here for debug purposes. "
+          echo "verbose was set to true... you should probably put something here for verbose purposes. "
           echo ""
           echo "The GitHub event_name is: ${{ github.event_name }}"
           echo "The GitHub ref is: ${{ github.ref }}"
@@ -416,23 +450,30 @@ jobs:
           echo ""
           echo "For more information, see the GitHub Actions Contexts docs, which are located at: "
           echo "https://docs.github.com/en/actions/learn-github-actions/contexts#github-context"
-          echo "The 'run-workflow-debug' step is now complete. "
+          echo "The 'verbose-print-info' step is now complete. "
         continue-on-error: true
 
       - name: Prerelease notice
         #if: fromJSON(steps.get-release-version.outputs.is-prerelease)
         if: github.event.release.prerelease == true
         run: |
-          echo "::notice::Pre-release version detected, not moving ref ${{ steps.get-release-version.outputs.major-ref }}"
+          echo "::notice::Pre-release version detected, not moving major ref ${{ steps.get-release-version.outputs.major-ref }} or minor ref ${{ steps.get-release-version.outputs.minor-ref }}"
+
+      - name: Do not update major and minor release tags for prerelease
+        if: (github.ref_type == 'tag' && github.event.release.prerelease == true)
+        run: |
+          echo "this workflow will NOT update the major and minor release tags for prerelease"
+          echo "The ref_type is: ${{ github.ref_type }}"
+          echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
 
       - name: Update major and minor release tags for ${{ steps.get-release-version.outputs.full-version-ref }}
-        #old-name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
         id: release-tag-updater
         uses: rwaight/actions/releases/release-tag-updater@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         #uses: rwaight/actions/releases/release-tag-updater@v0.1.26
         #uses: rwaight/actions/releases/release-tag-updater@main
+        if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
+        #if: github.event.release.prerelease == false
         with:
-          #tag: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
           tag: ${{ steps.get-release-version.outputs.full-version-ref }}
           prefix-regex: 'v?'
           fail-on-non-semver-tag: true # default is false
@@ -440,8 +481,6 @@ jobs:
           update-minor: true
           skip-repo-setup: true # default is false
           create-release: false # default is true
-        #if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
-        if: github.event.release.prerelease == false
 
   # Run the 'not-repo-owner' job if the repository_owner is not correct
   not-repo-owner:
@@ -449,7 +488,7 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.repository_owner != 'rwaight')
     env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      VERBOSE: ${{ inputs.verbose || 'false' }}
     steps:
       - name: Print a message based on a condition
         id: print-message
