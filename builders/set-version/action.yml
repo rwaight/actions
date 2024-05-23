@@ -97,7 +97,7 @@ runs:
 
     - name: Extra | This should run when the ref_type is 'tag' and the tag starts with the proper numbering syntax
       if: github.ref_type == 'tag' && startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
-      # the filter pattern will need to be updated to allow double digits, using either: 
+      # the 'v[0-9].[0-9].[0-9]' filter pattern will need to be updated to allow double digits, using either: 
       #    specify 2 digits with a second range followed by `?`:
       #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
       #    or keep the single digit, but match one or more with `+`:
@@ -203,7 +203,7 @@ runs:
       #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
       #try this next#if: startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
-      # the filter pattern will need to be updated to allow double digits, using either: 
+      # the 'v[0-9].[0-9].[0-9]' filter pattern will need to be updated to allow double digits, using either: 
       #    specify 2 digits with a second range followed by `?`:
       #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
       #    or keep the single digit, but match one or more with `+`:
@@ -237,7 +237,7 @@ runs:
       #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
       #try this next#if: startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
-      # the filter pattern will need to be updated to allow double digits, using either: 
+      # the 'v[0-9].[0-9].[0-9]' filter pattern will need to be updated to allow double digits, using either: 
       #    specify 2 digits with a second range followed by `?`:
       #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
       #    or keep the single digit, but match one or more with `+`:
@@ -305,7 +305,7 @@ runs:
       # name: 02b | Run 'git describe --tags --match "v[0-9].[0-9].[0-9]*"'
       id: simple-semver
       #if: (env.EVAL_BUILD_VERSION=='false' || inputs.strategy=='simple')
-      # the filter pattern will need to be updated to allow double digits, using either: 
+      # the 'v[0-9].[0-9].[0-9]' filter pattern will need to be updated to allow double digits, using either: 
       #    specify 2 digits with a second range followed by `?`:
       #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
       #    or keep the single digit, but match one or more with `+`:
