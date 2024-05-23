@@ -27,10 +27,16 @@ inputs:
     description: 'The prefix for the semver labels used in the repo'
     required: false
     default: 'version:'
-  my_action_debug:
+  my_action_debug:  # this needs to be removed as deprecated by the 'verbose' input
     description: 'Determine if the workflow should run debug tasks, defaults to false'
     required: false
     default: 'false'
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false. '
+    required: false
+    #default: 'false'
+    # https://github.com/actions/github-script/issues/264#issuecomment-1496635479
+    default: ${{ (env.RUNNER_DEBUG == '1' && 'true') || 'false' }}
 
 outputs:
   semver-check-results:

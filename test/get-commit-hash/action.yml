@@ -15,7 +15,9 @@ inputs:
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
-    default: 'false'
+    #default: 'false'
+    # https://github.com/actions/github-script/issues/264#issuecomment-1496635479
+    default: ${{ (env.RUNNER_DEBUG == '1' && 'true') || 'false' }}
 
 outputs:
   current-version-tag:
