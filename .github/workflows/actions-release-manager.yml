@@ -50,8 +50,8 @@ jobs:
       )
     # previously, when including 'push' to 'main' caused two release drafts to be created
     #    #(github.event_name=='push' && github.ref == 'refs/heads/main')
-    env:
-      VERBOSE: ${{ inputs.verbose || 'false' }}
+    #env:
+    #  VERBOSE: ${{ inputs.verbose || 'false' }}
       #IS_PRERELEASE: ${{ inputs.is_prerelease || 'false' }}
     steps:
       - name: Exit workflow in forked repo
@@ -253,7 +253,7 @@ jobs:
 
       - name: Verbose | Print info
         id: verbose-print-info
-        if: env.VERBOSE=='true'
+        if: inputs.verbose=='true'
         run: |
           echo "verbose was set to true... you should probably put something here for verbose purposes. "
           echo ""
@@ -288,8 +288,8 @@ jobs:
     if: | 
       (github.repository_owner == 'rwaight') &&
       (github.event_name=='release' && github.event.action=='published')
-    env:
-      VERBOSE: ${{ inputs.verbose || 'false' }}
+    #env:
+    #  VERBOSE: ${{ inputs.verbose || 'false' }}
     steps:
 
       - name: Checkout files from commit tree
@@ -440,7 +440,7 @@ jobs:
 
       - name: Verbose | Print info
         id: verbose-print-info
-        if: env.VERBOSE=='true'
+        if: inputs.verbose=='true'
         run: |
           echo "verbose was set to true... you should probably put something here for verbose purposes. "
           echo ""
@@ -487,8 +487,8 @@ jobs:
     name: Print a random note
     runs-on: ubuntu-latest
     if: (github.repository_owner != 'rwaight')
-    env:
-      VERBOSE: ${{ inputs.verbose || 'false' }}
+    #env:
+    #  VERBOSE: ${{ inputs.verbose || 'false' }}
     steps:
       - name: Print a message based on a condition
         id: print-message
