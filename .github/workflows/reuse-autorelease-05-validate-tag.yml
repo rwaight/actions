@@ -1,6 +1,14 @@
 name: Reuse - Autorelease 05 Validate Tag
-# this is workflow 05 in the autorelease process, it should be called by a workflow named 'Autorelease Step 3 - Build Prod' (from the caller repo)
+# this is workflow 05 in the autorelease process:
+#   - For repos without builds, this should be the `autorelease-03-prep-release` workflow file
+#   - For repos **with** builds, this workflow will be called by `reuse-autorelease-06-build-prod`, which should be the `autorelease-03-build-prod` workflow file
 # the 'on' event criteria should be: on: push: tags: ['v*.*.*']
+# ```
+# on:
+#   push:
+#     tags:
+#       - 'v*.*.*'
+# ```
 # autorelease notes:  https://github.com/rwaight/actions/blob/main/docs/autorelease-process-notes.md
 #run-name: validate-tag
 run-name: check-tag
