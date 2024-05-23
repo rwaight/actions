@@ -1,6 +1,15 @@
 name: Reuse - Autorelease 06 Build Prod
-# this is workflow 06 in the autorelease process, it should be called by 'reuse-autorelease-05-validate-tag'
-# autorelease notes:  
+# this is workflow 06 in the autorelease process, it should be called by a workflow named 'Autorelease Step 3 - Build Prod' (from the caller repo)
+# this workflow SHOULD ONLY BE CALLED BY REPOS WITH BUILD REQUIREMENTS
+#   * this workflow calls the 'reuse-autorelease-05-validate-tag' workflow first, before starting the build process
+#   * the 'on' event criteria should be: on: push: tags: ['v*.*.*']
+# ```
+# on:
+#   push:
+#     tags:
+#       - 'v*.*.*'
+# ```
+# autorelease notes:  https://github.com/rwaight/actions/blob/main/docs/autorelease-process-notes.md
 #run-name: build-prod
 run-name: build-prod
 # This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
