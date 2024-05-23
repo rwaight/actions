@@ -431,14 +431,24 @@ jobs:
       BUILD_METHOD: ${{ needs.test-build.outputs.BUILD_METHOD }}
       BUILD_TYPE: ${{ needs.test-build.outputs.BUILD_TYPE }}
       BUILD_VERSION: ${{ needs.test-build.outputs.BUILD_VERSION }}
-      CREATED_IMAGE_ID: ${{ needs.test-build.outputs.CREATED_IMAGE_ID }}
-      CREATED_IMAGE_TYPE: ${{ needs.test-build.outputs.CREATED_IMAGE_TYPE }}
-      FORCE_FAILED_BUILD: ${{ needs.test-build.outputs.FORCE_FAILED_BUILD }}
-      FORCE_FAILED_VALIDATE: ${{ needs.test-build.outputs.FORCE_FAILED_VALIDATE }}
+      CREATED_IMAGE_ID: ${{ needs.test-build.outputs.CREATED_IMAGE_ID }}                        # should be empty
+      CREATED_IMAGE_TYPE: ${{ needs.test-build.outputs.CREATED_IMAGE_TYPE }}                    # should be empty
+      CREATED_IMAGE_JSON_ARTIFACT: ${{ needs.test-build.outputs.CREATED_IMAGE_JSON_ARTIFACT }}  # should be empty
+      CREATED_IMAGE_INFO_ARTIFACT: ${{ needs.test-build.outputs.CREATED_IMAGE_INFO_ARTIFACT }}  # should be empty
+      FORCE_FAILED_BUILD: ${{ needs.test-build.outputs.FORCE_FAILED_BUILD }}                    # should be empty
+      FORCE_FAILED_VALIDATE: ${{ needs.test-build.outputs.FORCE_FAILED_VALIDATE }}              # should be empty
+      IMAGE_SKIP_CREATE: ${{ needs.test-build.outputs.IMAGE_SKIP_CREATE }}
+      IMAGE_SKIP_NOTE: ${{ needs.test-build.outputs.IMAGE_SKIP_NOTE }}
       JOB_STATUS_BUILD: ${{ needs.test-build.outputs.JOB_STATUS_BUILD }}
-      PACKER_BUILD_OUTCOME: ${{ needs.test-build.outputs.PACKER_BUILD_OUTCOME }}
+      JOB_STATUS_VALIDATE: ${{ needs.test-build.outputs.JOB_STATUS_VALIDATE }}
       PACKER_VALIDATE_OUTCOME: ${{ needs.test-build.outputs.PACKER_VALIDATE_OUTCOME }}
+      PACKER_BUILD_OUTCOME: ${{ needs.test-build.outputs.PACKER_BUILD_OUTCOME }}
+      PR_NUMBER: ${{ needs.test-build.outputs.PR_NUMBER }}          # should be empty
+      PR_BRANCH: ${{ needs.test-build.outputs.PR_BRANCH }}          # should be empty
+      PR_COMMENT_ID: ${{ needs.test-build.outputs.PR_COMMENT_ID }}  # should be empty
+      REVIEWED_IMAGE_ID: ${{ needs.test-build.outputs.REVIEWED_IMAGE_ID }}
       # input
+      INPUT_REVIEWED_IMAGE_ID: ${{ inputs.REVIEWED_IMAGE_ID }}
       VERBOSE: ${{ inputs.VERBOSE || 'true' }}
     steps:
 
@@ -462,17 +472,73 @@ jobs:
           echo ""
 
       - name: Print outputs from the 'test-build' job
-        if: ${{ env.PACKER_BUILD_OUTCOME }}
+        id: print-outputs-from-test-build-job
+        #if: ${{ env.PACKER_BUILD_OUTCOME }}
         run: |
+          ## Print outputs from the 'test-build' job
+          echo "Starting the 'print-outputs-from-test-build-job' step... "
           echo "outputs from the 'test-build' job "
           echo ""
-          echo "JOB_STATUS_BUILD: ${{ needs.test-build.outputs.JOB_STATUS_BUILD }} "
-          echo "BUILD_TYPE: ${{ needs.test-build.outputs.BUILD_TYPE }} "
-          echo "BUILD_METHOD: ${{ needs.test-build.outputs.BUILD_METHOD }} "
-          echo "BUILD_VERSION: ${{ needs.test-build.outputs.BUILD_VERSION }} "
-          echo "PACKER_BUILD_OUTCOME: ${{ needs.test-build.outputs.PACKER_BUILD_OUTCOME }} "
-          echo "REVIEWED_IMAGE: ${{ needs.test-build.outputs.REVIEWED_IMAGE }} "
+          echo "  job status outputs:  "
+          echo "      JOB_STATUS_BUILD    :  ${{ env.JOB_STATUS_BUILD }} "
+          echo "      FORCE_FAILED_BUILD  :  ${{ env.FORCE_FAILED_BUILD }} "
+          echo "      PACKER_BUILD_OUTCOME:  ${{ env.PACKER_BUILD_OUTCOME }} "
           echo ""
+          echo "      JOB_STATUS_VALIDATE    :  ${{ env.JOB_STATUS_VALIDATE }} "
+          echo "      FORCE_FAILED_VALIDATE  :  ${{ env.FORCE_FAILED_VALIDATE }} "
+          echo "      PACKER_VALIDATE_OUTCOME:  ${{ env.PACKER_VALIDATE_OUTCOME }} "
+          echo ""
+          echo "  build variable outputs:  "
+          echo "      BUILD_METHOD     :  ${{ env.BUILD_METHOD }} "
+          echo "      BUILD_TYPE       :  ${{ env.BUILD_TYPE }} "
+          echo "      BUILD_VERSION    :  ${{ env.BUILD_VERSION }} "
+          echo ""
+          echo "      REVIEWED_IMAGE_ID:  ${{ env.REVIEWED_IMAGE_ID }} "
+          echo ""
+          echo "      IMAGE_SKIP_CREATE:  ${{ env.IMAGE_SKIP_CREATE }} "
+          echo "      IMAGE_SKIP_NOTE  :  ${{ env.IMAGE_SKIP_NOTE }} "
+          echo ""
+          echo "  created image outputs:  "
+          echo "      CREATED_IMAGE_ID:  ${{ env.CREATED_IMAGE_ID }} "
+          echo "      CREATED_IMAGE_TYPE:  ${{ env.CREATED_IMAGE_TYPE }} "
+          echo ""
+          echo "      CREATED_IMAGE_JSON_ARTIFACT:  ${{ env.CREATED_IMAGE_JSON_ARTIFACT }} "
+          echo "      CREATED_IMAGE_INFO_ARTIFACT:  ${{ env.CREATED_IMAGE_INFO_ARTIFACT }} "
+          echo ""
+          echo "  pull request info outputs:  "
+          echo "      PR_NUMBER    :  ${{ env.PR_NUMBER }} "
+          echo "      PR_BRANCH    :  ${{ env.PR_BRANCH }} "
+          echo "      PR_COMMENT_ID:  ${{ env.PR_COMMENT_ID }} "
+          echo ""
+          echo "  reviewed image output from build (duplicate):  "
+          echo "      REVIEWED_IMAGE_ID:  ${{ env.REVIEWED_IMAGE_ID }} "
+          echo ""
+          echo "  reviewed image input:  "
+          echo "      INPUT_REVIEWED_IMAGE_ID:  ${{ env.INPUT_REVIEWED_IMAGE_ID }} "
+          echo ""
+        env:
+          # input
+          INPUT_REVIEWED_IMAGE_ID: ${{ inputs.REVIEWED_IMAGE_ID }}
+          # outputs from 'test-build' #
+          BUILD_METHOD: ${{ needs.test-build.outputs.BUILD_METHOD }}
+          BUILD_TYPE: ${{ needs.test-build.outputs.BUILD_TYPE }}
+          BUILD_VERSION: ${{ needs.test-build.outputs.BUILD_VERSION }}
+          CREATED_IMAGE_ID: ${{ needs.test-build.outputs.CREATED_IMAGE_ID }}                        # should be empty
+          CREATED_IMAGE_TYPE: ${{ needs.test-build.outputs.CREATED_IMAGE_TYPE }}                    # should be empty
+          CREATED_IMAGE_JSON_ARTIFACT: ${{ needs.test-build.outputs.CREATED_IMAGE_JSON_ARTIFACT }}  # should be empty
+          CREATED_IMAGE_INFO_ARTIFACT: ${{ needs.test-build.outputs.CREATED_IMAGE_INFO_ARTIFACT }}  # should be empty
+          FORCE_FAILED_BUILD: ${{ needs.test-build.outputs.FORCE_FAILED_BUILD }}                    # should be empty
+          FORCE_FAILED_VALIDATE: ${{ needs.test-build.outputs.FORCE_FAILED_VALIDATE }}              # should be empty
+          IMAGE_SKIP_CREATE: ${{ needs.test-build.outputs.IMAGE_SKIP_CREATE }}
+          IMAGE_SKIP_NOTE: ${{ needs.test-build.outputs.IMAGE_SKIP_NOTE }}
+          JOB_STATUS_BUILD: ${{ needs.test-build.outputs.JOB_STATUS_BUILD }}
+          JOB_STATUS_VALIDATE: ${{ needs.test-build.outputs.JOB_STATUS_VALIDATE }}
+          PACKER_VALIDATE_OUTCOME: ${{ needs.test-build.outputs.PACKER_VALIDATE_OUTCOME }}
+          PACKER_BUILD_OUTCOME: ${{ needs.test-build.outputs.PACKER_BUILD_OUTCOME }}
+          PR_NUMBER: ${{ needs.test-build.outputs.PR_NUMBER }}
+          PR_BRANCH: ${{ needs.test-build.outputs.PR_BRANCH }}
+          PR_COMMENT_ID: ${{ needs.test-build.outputs.PR_COMMENT_ID }}
+          REVIEWED_IMAGE_ID: ${{ needs.test-build.outputs.REVIEWED_IMAGE_ID }}
 
   prepare-pr:
     #name: Call the 'reuse-autorelease-03-pr-prepare' workflow
@@ -501,9 +567,9 @@ jobs:
       GH_APP_ID: ${{ secrets.GH_APP_ID }}
       GH_APP_KEY: ${{ secrets.GH_APP_KEY }}
 
-  print-prepare-results:
-    #name: Print the prepare results
-    name: prepare-results
+  print-build-and-prepare-results:
+    #name: Print the build results and prepare-pr results
+    name: print-results
     runs-on: ubuntu-latest
     needs: [reuse-next-version, test-build, prepare-pr]
     #if: (github.repository_owner == 'rwaight' && inputs.VERBOSE=='true')
@@ -541,14 +607,24 @@ jobs:
       BUILD_METHOD: ${{ needs.test-build.outputs.BUILD_METHOD }}
       BUILD_TYPE: ${{ needs.test-build.outputs.BUILD_TYPE }}
       BUILD_VERSION: ${{ needs.test-build.outputs.BUILD_VERSION }}
-      CREATED_IMAGE_ID: ${{ needs.test-build.outputs.CREATED_IMAGE_ID }}
-      CREATED_IMAGE_TYPE: ${{ needs.test-build.outputs.CREATED_IMAGE_TYPE }}
-      FORCE_FAILED_BUILD: ${{ needs.test-build.outputs.FORCE_FAILED_BUILD }}
-      FORCE_FAILED_VALIDATE: ${{ needs.test-build.outputs.FORCE_FAILED_VALIDATE }}
+      CREATED_IMAGE_ID: ${{ needs.test-build.outputs.CREATED_IMAGE_ID }}                        # should be empty
+      CREATED_IMAGE_TYPE: ${{ needs.test-build.outputs.CREATED_IMAGE_TYPE }}                    # should be empty
+      CREATED_IMAGE_JSON_ARTIFACT: ${{ needs.test-build.outputs.CREATED_IMAGE_JSON_ARTIFACT }}  # should be empty
+      CREATED_IMAGE_INFO_ARTIFACT: ${{ needs.test-build.outputs.CREATED_IMAGE_INFO_ARTIFACT }}  # should be empty
+      FORCE_FAILED_BUILD: ${{ needs.test-build.outputs.FORCE_FAILED_BUILD }}                    # should be empty
+      FORCE_FAILED_VALIDATE: ${{ needs.test-build.outputs.FORCE_FAILED_VALIDATE }}              # should be empty
+      IMAGE_SKIP_CREATE: ${{ needs.test-build.outputs.IMAGE_SKIP_CREATE }}
+      IMAGE_SKIP_NOTE: ${{ needs.test-build.outputs.IMAGE_SKIP_NOTE }}
       JOB_STATUS_BUILD: ${{ needs.test-build.outputs.JOB_STATUS_BUILD }}
-      PACKER_BUILD_OUTCOME: ${{ needs.test-build.outputs.PACKER_BUILD_OUTCOME }}
+      JOB_STATUS_VALIDATE: ${{ needs.test-build.outputs.JOB_STATUS_VALIDATE }}
       PACKER_VALIDATE_OUTCOME: ${{ needs.test-build.outputs.PACKER_VALIDATE_OUTCOME }}
+      PACKER_BUILD_OUTCOME: ${{ needs.test-build.outputs.PACKER_BUILD_OUTCOME }}
+      PR_NUMBER: ${{ needs.test-build.outputs.PR_NUMBER }}          # should be empty
+      PR_BRANCH: ${{ needs.test-build.outputs.PR_BRANCH }}          # should be empty
+      PR_COMMENT_ID: ${{ needs.test-build.outputs.PR_COMMENT_ID }}  # should be empty
+      REVIEWED_IMAGE_ID: ${{ needs.test-build.outputs.REVIEWED_IMAGE_ID }}
       # input
+      INPUT_REVIEWED_IMAGE_ID: ${{ inputs.REVIEWED_IMAGE_ID }}
       VERBOSE: ${{ inputs.VERBOSE || 'true' }}
     steps:
 
@@ -572,17 +648,73 @@ jobs:
           echo ""
 
       - name: Print outputs from the 'test-build' job
-        if: ${{ env.PACKER_BUILD_OUTCOME }}
+        id: print-outputs-from-test-build-job
+        #if: ${{ env.PACKER_BUILD_OUTCOME }}
         run: |
+          ## Print outputs from the 'test-build' job
+          echo "Starting the 'print-outputs-from-test-build-job' step... "
           echo "outputs from the 'test-build' job "
           echo ""
-          echo "JOB_STATUS_BUILD: ${{ needs.test-build.outputs.JOB_STATUS_BUILD }} "
-          echo "BUILD_TYPE: ${{ needs.test-build.outputs.BUILD_TYPE }} "
-          echo "BUILD_METHOD: ${{ needs.test-build.outputs.BUILD_METHOD }} "
-          echo "BUILD_VERSION: ${{ needs.test-build.outputs.BUILD_VERSION }} "
-          echo "REVIEWED_IMAGE: ${{ needs.test-build.outputs.REVIEWED_IMAGE }} "
-          echo "PACKER_BUILD_OUTCOME: ${{ needs.test-build.outputs.PACKER_BUILD_OUTCOME }} "
+          echo "  job status outputs:  "
+          echo "      JOB_STATUS_BUILD    :  ${{ env.JOB_STATUS_BUILD }} "
+          echo "      FORCE_FAILED_BUILD  :  ${{ env.FORCE_FAILED_BUILD }} "
+          echo "      PACKER_BUILD_OUTCOME:  ${{ env.PACKER_BUILD_OUTCOME }} "
           echo ""
+          echo "      JOB_STATUS_VALIDATE    :  ${{ env.JOB_STATUS_VALIDATE }} "
+          echo "      FORCE_FAILED_VALIDATE  :  ${{ env.FORCE_FAILED_VALIDATE }} "
+          echo "      PACKER_VALIDATE_OUTCOME:  ${{ env.PACKER_VALIDATE_OUTCOME }} "
+          echo ""
+          echo "  build variable outputs:  "
+          echo "      BUILD_METHOD     :  ${{ env.BUILD_METHOD }} "
+          echo "      BUILD_TYPE       :  ${{ env.BUILD_TYPE }} "
+          echo "      BUILD_VERSION    :  ${{ env.BUILD_VERSION }} "
+          echo ""
+          echo "      REVIEWED_IMAGE_ID:  ${{ env.REVIEWED_IMAGE_ID }} "
+          echo ""
+          echo "      IMAGE_SKIP_CREATE:  ${{ env.IMAGE_SKIP_CREATE }} "
+          echo "      IMAGE_SKIP_NOTE  :  ${{ env.IMAGE_SKIP_NOTE }} "
+          echo ""
+          echo "  created image outputs:  "
+          echo "      CREATED_IMAGE_ID:  ${{ env.CREATED_IMAGE_ID }} "
+          echo "      CREATED_IMAGE_TYPE:  ${{ env.CREATED_IMAGE_TYPE }} "
+          echo ""
+          echo "      CREATED_IMAGE_JSON_ARTIFACT:  ${{ env.CREATED_IMAGE_JSON_ARTIFACT }} "
+          echo "      CREATED_IMAGE_INFO_ARTIFACT:  ${{ env.CREATED_IMAGE_INFO_ARTIFACT }} "
+          echo ""
+          echo "  pull request info outputs:  "
+          echo "      PR_NUMBER    :  ${{ env.PR_NUMBER }} "
+          echo "      PR_BRANCH    :  ${{ env.PR_BRANCH }} "
+          echo "      PR_COMMENT_ID:  ${{ env.PR_COMMENT_ID }} "
+          echo ""
+          echo "  reviewed image output from build (duplicate):  "
+          echo "      REVIEWED_IMAGE_ID:  ${{ env.REVIEWED_IMAGE_ID }} "
+          echo ""
+          echo "  reviewed image input:  "
+          echo "      INPUT_REVIEWED_IMAGE_ID:  ${{ env.INPUT_REVIEWED_IMAGE_ID }} "
+          echo ""
+        env:
+          # input
+          INPUT_REVIEWED_IMAGE_ID: ${{ inputs.REVIEWED_IMAGE_ID }}
+          # outputs from 'test-build' #
+          BUILD_METHOD: ${{ needs.test-build.outputs.BUILD_METHOD }}
+          BUILD_TYPE: ${{ needs.test-build.outputs.BUILD_TYPE }}
+          BUILD_VERSION: ${{ needs.test-build.outputs.BUILD_VERSION }}
+          CREATED_IMAGE_ID: ${{ needs.test-build.outputs.CREATED_IMAGE_ID }}                        # should be empty
+          CREATED_IMAGE_TYPE: ${{ needs.test-build.outputs.CREATED_IMAGE_TYPE }}                    # should be empty
+          CREATED_IMAGE_JSON_ARTIFACT: ${{ needs.test-build.outputs.CREATED_IMAGE_JSON_ARTIFACT }}  # should be empty
+          CREATED_IMAGE_INFO_ARTIFACT: ${{ needs.test-build.outputs.CREATED_IMAGE_INFO_ARTIFACT }}  # should be empty
+          FORCE_FAILED_BUILD: ${{ needs.test-build.outputs.FORCE_FAILED_BUILD }}                    # should be empty
+          FORCE_FAILED_VALIDATE: ${{ needs.test-build.outputs.FORCE_FAILED_VALIDATE }}              # should be empty
+          IMAGE_SKIP_CREATE: ${{ needs.test-build.outputs.IMAGE_SKIP_CREATE }}
+          IMAGE_SKIP_NOTE: ${{ needs.test-build.outputs.IMAGE_SKIP_NOTE }}
+          JOB_STATUS_BUILD: ${{ needs.test-build.outputs.JOB_STATUS_BUILD }}
+          JOB_STATUS_VALIDATE: ${{ needs.test-build.outputs.JOB_STATUS_VALIDATE }}
+          PACKER_VALIDATE_OUTCOME: ${{ needs.test-build.outputs.PACKER_VALIDATE_OUTCOME }}
+          PACKER_BUILD_OUTCOME: ${{ needs.test-build.outputs.PACKER_BUILD_OUTCOME }}
+          PR_NUMBER: ${{ needs.test-build.outputs.PR_NUMBER }}
+          PR_BRANCH: ${{ needs.test-build.outputs.PR_BRANCH }}
+          PR_COMMENT_ID: ${{ needs.test-build.outputs.PR_COMMENT_ID }}
+          REVIEWED_IMAGE_ID: ${{ needs.test-build.outputs.REVIEWED_IMAGE_ID }}
 
       - name: Print outputs from the 'prepare-pr' job
         if: ${{ env.prepare-job-status }}
