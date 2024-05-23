@@ -475,10 +475,10 @@ jobs:
           echo ""
 
   prepare-pr:
-    #name: Call the 'reuse-autorelease-01-pr-prepare' workflow
+    #name: Call the 'reuse-autorelease-03-pr-prepare' workflow
     name: release-pr
-    #uses: rwaight/actions.github/workflows/reuse-autorelease-01-pr-prepare.yml@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
-    uses: rwaight/actions.github/workflows/reuse-autorelease-01-pr-prepare.yml@main
+    #uses: rwaight/actions.github/workflows/reuse-autorelease-03-pr-prepare.yml@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+    uses: rwaight/actions.github/workflows/reuse-autorelease-03-pr-prepare.yml@main
     needs: [test-build]
     if: (github.repository_owner == 'rwaight' && needs.test-build.outputs.PACKER_BUILD_OUTCOME == 'success')
     with: 
