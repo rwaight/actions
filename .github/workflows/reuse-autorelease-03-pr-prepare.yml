@@ -482,6 +482,21 @@ jobs:
           previous-value: ${{ steps.update-image-id-field.outputs.previous-value }}
           new-value: ${{ steps.update-image-id-field.outputs.new-value }}
 
+      - name: Write the release drafter 'body' to the release notes file
+        id: write-release-notes-to-file
+        continue-on-error: true
+        env:
+          #NOTES_FILE_PATH: 'docs/release_notes'
+          #NOTES_FILE_NAME: 'autorelease-notes-${{ steps.get-next-semver.outputs.next-tag }}.md'
+          RELEASE_NOTES_FILE: 'docs/release_notes/autorelease-notes-${{ steps.get-next-semver.outputs.next-tag }}.md'
+        run: |
+          ## Write the release drafter 'body' to the release notes file
+          echo "starting the 'write-release-notes-to-file' step ... "
+          echo ""
+          echo -n "${{ steps.release-drafter.outputs.body }}" > ${{ env.RELEASE_NOTES_FILE }}
+          echo ""
+          echo "completing the 'write-release-notes-to-file' step ... "
+
       - name: Verbose | File structure after the multiple changelog actions
         if: env.VERBOSE=='true'
         run: ls -Rla
@@ -514,10 +529,15 @@ jobs:
         #uses: rwaight/actions/github/create-pull-request@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         uses: rwaight/actions/github/create-pull-request@main
         if: ${{ inputs.DRY_RUN=='false' }}
+        env:
+          #NOTES_FILE_PATH: 'docs/release_notes'
+          #NOTES_FILE_NAME: 'autorelease-notes-${{ steps.get-next-semver.outputs.next-tag }}.md'
+          RELEASE_NOTES_FILE: 'docs/release_notes/autorelease-notes-${{ steps.get-next-semver.outputs.next-tag }}.md'
         with:
           commit-message: 'chore: update vars for release ${{ steps.get-next-semver.outputs.next-tag }}'
           add-paths: |
             ${{ inputs.JSON_VARS_FILE }}
+            ${{ env.RELEASE_NOTES_FILE }}
           #committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' # this is the default
           #committer: 'releasebot <noreply@github.com>'
           committer: '${{ inputs.GH_APP_BOT_NAME }} <${{ secrets.GH_APP_BOT_UID }}+${{ inputs.GH_APP_BOT_NAME }}@users.noreply.github.com>'
