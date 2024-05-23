@@ -488,12 +488,19 @@ jobs:
         id: write-release-notes-to-file
         continue-on-error: true
         env:
-          #NOTES_FILE_PATH: 'docs/release_notes'
+          NOTES_FILE_PATH: 'docs/release_notes'
           #NOTES_FILE_NAME: 'autorelease-notes-${{ steps.get-next-semver.outputs.next-tag }}.md'
           RELEASE_NOTES_FILE: 'docs/release_notes/autorelease-notes-${{ steps.get-next-semver.outputs.next-tag }}.md'
         run: |
           ## Write the release drafter 'body' to the release notes file
           echo "starting the 'write-release-notes-to-file' step ... "
+          if [ -d ${{ env.NOTES_FILE_PATH }} ]; then
+              echo "the ${{ env.NOTES_FILE_PATH }} directory exists ... "
+          else
+              echo "the ${{ env.NOTES_FILE_PATH }} directory DOES NOT exist, going to create it. "
+              mkdir -p ${{ env.NOTES_FILE_PATH }}
+              echo "the ${{ env.NOTES_FILE_PATH }} directory has been created. "
+          fi
           echo ""
           echo -n "${{ steps.release-drafter.outputs.body }}" > ${{ env.RELEASE_NOTES_FILE }}
           echo ""
