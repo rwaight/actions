@@ -30,7 +30,13 @@ concurrency:
   #cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
 
 env:
+  # https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging#enabling-step-debug-logging
+  # https://github.com/actions/runner/pull/253
+  # https://github.com/actions/github-script/issues/264
+  # https://github.com/nektos/act/issues/1006
   ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
+  #RUNNER_DEBUG: ${{ env.RUNNER_DEBUG }}
+  CHECK_RUNNER_DEBUG: ${{ (env.RUNNER_DEBUG == '1' && 'true') || 'false' }}
 
 jobs:
   pr-labeler:
@@ -43,6 +49,8 @@ jobs:
     if: github.event_name == 'pull_request'
     env:
       VERBOSE: 'true'
+      GH_ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
+      GH_RUNNER_DEBUG: ${{ env.RUNNER_DEBUG }}
     permissions:
       # the `actions: write` permission might need to be added if
       #   the `gh run cancel` does not work
@@ -93,6 +101,9 @@ jobs:
           echo "  VERBOSE            is set to:  ${{ env.VERBOSE }} "
           echo "  ACTIONS_STEP_DEBUG is set to:  ${{ env.ACTIONS_STEP_DEBUG }} "
           echo ""
+          echo "  GH_ACTIONS_STEP_DEBUG is set to:  ${{ env.GH_ACTIONS_STEP_DEBUG }} "
+          echo "  GH_RUNNER_DEBUG       is set to:  ${{ env.GH_RUNNER_DEBUG }} "
+          echo ""
           echo "::group::runner directory and file contents"
           echo "this is the current working directory, it was not set to anything specific ... "
           pwd
@@ -101,6 +112,9 @@ jobs:
           echo ""
           echo "::endgroup::"
           echo "end of verbose step"
+        env:
+          GH_ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
+          GH_RUNNER_DEBUG: ${{ env.RUNNER_DEBUG }}
 
       # # Save this in case we want to exit the workflow if it is called by 'rw-actions-bot[bot]'
       # - name: Exit workflow if called by 'rw-actions-bot[bot]'
