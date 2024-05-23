@@ -29,6 +29,9 @@ concurrency:
   #https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-on-specific-branches
   #cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
 
+env:
+  ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
+
 jobs:
   pr-labeler:
     #name: PR Labeler
@@ -38,6 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     # the 'if' statement below is not needed at this time, but would be if the 'on' section above changes
     if: github.event_name == 'pull_request'
+    env:
+      VERBOSE: 'true'
     permissions:
       # the `actions: write` permission might need to be added if
       #   the `gh run cancel` does not work
@@ -79,6 +84,23 @@ jobs:
         # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Verbose | Print some info to test verbose mode or ACTIONS_STEP_DEBUG
+        if: (env.VERBOSE=='true' || env.ACTIONS_STEP_DEBUG=='true' || env.ACTIONS_STEP_DEBUG==true)
+        run: |
+          echo "Print some info to test verbose mode or ACTIONS_STEP_DEBUG"
+          echo ""
+          echo "  VERBOSE            is set to:  ${{ env.VERBOSE }} "
+          echo "  ACTIONS_STEP_DEBUG is set to:  ${{ env.ACTIONS_STEP_DEBUG }} "
+          echo ""
+          echo "::group::runner directory and file contents"
+          echo "this is the current working directory, it was not set to anything specific ... "
+          pwd
+          echo "below are the file contents... "
+          ls -R
+          echo ""
+          echo "::endgroup::"
+          echo "end of verbose step"
 
       # # Save this in case we want to exit the workflow if it is called by 'rw-actions-bot[bot]'
       # - name: Exit workflow if called by 'rw-actions-bot[bot]'
@@ -355,7 +377,7 @@ jobs:
               exit 1
           fi
           ##
-          if [ 'true' == 'true' ]; then
+          if [ '${{ env.VERBOSE }}' == 'true' ]; then
               echo "verbose info... "
               echo ""
               echo "the '${{ env.test_name }}' step info... "
