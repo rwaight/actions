@@ -87,10 +87,12 @@ jobs:
           ls -la
           echo "look for the 'commitlint.config.js' file in the output above"
           echo "::endgroup::"
+          echo "::group::software versions used in this workflow"
           git --version
           node --version
           npm --version
           npx commitlint --version
+          echo "::endgroup::"
 
       - name: Validate current commit (last commit) with commitlint
         if: github.event_name == 'push'
@@ -113,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.repository_owner != 'rwaight')
     env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+      VERBOSE: ${{ inputs.verbose || 'false' }}
     steps:
       - name: Print a message based on a condition
         id: print-message
