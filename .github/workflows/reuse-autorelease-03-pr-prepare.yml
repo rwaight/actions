@@ -464,6 +464,8 @@ jobs:
       - name: Update the ${{ inputs.JSON_VARS_IMAGE_FIELD }} field using rwaight/actions test/update-json-field
         id: update-image-id-field
         continue-on-error: true
+        #if: (inputs.REVIEWED_IMAGE_ID!='not-set')
+        if: ${{ inputs.REVIEWED_IMAGE_ID != 'not-set' }}
         uses: rwaight/actions/test/update-json-field@main
         with:
           json-file: '${{ inputs.JSON_VARS_FILE }}'
@@ -497,6 +499,46 @@ jobs:
           echo ""
           echo "completing the 'write-release-notes-to-file' step ... "
 
+      - name: Select the proper render template file
+        id: select-template-file
+        continue-on-error: true
+        env:
+          TEMPLATE_FILE_BUILD: 'prepare-build-release-pr.md'
+          TEMPLATE_FILE_NON_BUILD: 'prepare-release-pr.md'
+        run: |
+          ## Select the proper render template file
+          echo "starting the 'select-template-file' step ... "
+          echo ""
+          if [[ "${{ inputs.REVIEWED_IMAGE_ID }}" == "not-set" ]]; then
+              echo "if 'not-set' statement in the 'select-template-file' step ... "
+              echo "the 'REVIEWED_IMAGE_ID' input is set to '${{ inputs.REVIEWED_IMAGE_ID }}' "
+              echo ""
+              echo "setting the 'template_file' variable to '${{ env.TEMPLATE_FILE_NON_BUILD }}' ... "
+              template_file=${{ env.TEMPLATE_FILE_NON_BUILD }}
+              echo "template_file=${template_file}" >> $GITHUB_ENV
+              echo "template_file=${template_file}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ inputs.REVIEWED_IMAGE_ID }}" != "not-set" ]]; then
+              echo "elif not equals 'not-set' statement in the 'select-template-file' step ... "
+              echo "the 'REVIEWED_IMAGE_ID' input is set to '${{ inputs.REVIEWED_IMAGE_ID }}' "
+              echo ""
+              echo "setting the 'template_file' variable to '${{ env.TEMPLATE_FILE_BUILD }}' ... "
+              template_file=${{ env.TEMPLATE_FILE_BUILD }}
+              echo "template_file=${template_file}" >> $GITHUB_ENV
+              echo "template_file=${template_file}" >> "$GITHUB_OUTPUT"
+          else
+              echo "else statement in the 'select-template-file' step ... "
+              echo "the 'REVIEWED_IMAGE_ID' input is set to '${{ inputs.REVIEWED_IMAGE_ID }}' "
+              echo ""
+              echo "setting the 'template_file' variable to '${{ env.TEMPLATE_FILE_NON_BUILD }}' ... "
+              template_file=${{ env.TEMPLATE_FILE_NON_BUILD }}
+              echo "template_file=${template_file}" >> $GITHUB_ENV
+              echo "template_file=${template_file}" >> "$GITHUB_OUTPUT"
+          fi
+          ##
+          echo "the 'template_file' variable was set to '${template_file}' ... "
+          ##
+          echo "completing the 'select-template-file' step ... "
+
       - name: Verbose | File structure after the multiple changelog actions
         if: env.VERBOSE=='true'
         run: ls -Rla
@@ -506,7 +548,8 @@ jobs:
         #uses: rwaight/actions/utilities/render-template@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
         uses: rwaight/actions/utilities/render-template@main
         with:
-          template: assets/autorelease/prepare-release-pr.md
+          #template: assets/autorelease/prepare-release-pr.md
+          template: 'assets/autorelease/${{ steps.select-template-file.outputs.template_file }}'
           vars: |
             foo: this
             bar: that
@@ -514,7 +557,9 @@ jobs:
             next_tag: ${{ steps.get-next-semver.outputs.next-tag }}
             next_version: ${{ steps.get-next-semver.outputs.next-version }}
             release_body: 'see body in ${{ steps.release-drafter.outputs.html_url }}'
+            release_type: ${{ inputs.RELEASE_TYPE }}
             release_url: ${{ steps.release-drafter.outputs.html_url }}
+            reviewed_image_id: ${{ inputs.REVIEWED_IMAGE_ID }}
           #release_body: ${{ steps.release-drafter.outputs.body }}
           ## need to find out why the 'body' from release drafter is not printing properly...
 
