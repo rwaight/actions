@@ -116,13 +116,13 @@ on:
       #   value: ${{ jobs.reuse-get-info.outputs.job-status }}
       merged-version:  # output from the 'version-from-file' step
         description: 'the value of the version field from the JSON file'
-        value: ${{ jobs.check-json-file.outputs.autorelease-file-version }}
+        value: ${{ jobs.check-json-file.outputs.merged-version }}
       merged-type:  # output from the 'type-from-file' step
         description: 'the value of the type field from the JSON file'
-        value: ${{ jobs.check-json-file.outputs.autorelease-file-type }}
+        value: ${{ jobs.check-json-file.outputs.merged-type }}
       merged-reviewed-id:  # output from the 'reviewed-id-from-file' step
         description: 'the value of the reviewed image ID field from the JSON file'
-        value: ${{ jobs.check-json-file.outputs.reviewed-image-id }}
+        value: ${{ jobs.check-json-file.outputs.merged-reviewed-id }}
 
 jobs:
 
