@@ -568,7 +568,8 @@ jobs:
             release_url: ${{ steps.release-drafter.outputs.html_url }}
             reviewed_image_id: ${{ inputs.REVIEWED_IMAGE_ID }}
           #release_body: ${{ steps.release-drafter.outputs.body }}
-          ## need to find out why the 'body' from release drafter is not printing properly...
+          ## cannot pass '${{ steps.release-drafter.outputs.body }}' to render-template due to formatting errors
+          ## pass `body` as multiline in the 'create-release-pr' step, using `body: |`
 
       - name: Dry Run | Not creating a pull request
         id: print-notice-no-pr
@@ -599,7 +600,12 @@ jobs:
           title: '[autorelease] release ${{ steps.get-next-semver.outputs.next-tag }}'
           # Be careful of newlines here. We need to use the literal block chomping style (|) so that the
           # contents of the release notes don't get chomped. See https://yaml-multiline.info/
-          body: ${{ steps.pr-template.outputs.result }}
+          body: |
+            ${{ steps.pr-template.outputs.result }}
+
+            ${{ steps.release-drafter.outputs.body }}
+          # cannot pass '${{ steps.release-drafter.outputs.body }}' to render-template due to formatting errors
+          #body: ${{ steps.release-drafter.outputs.body }}
           #labels: actions:autorelease, version:${{ github.event.inputs.RELEASE_TYPE }}
           labels: actions:autorelease, skip-changelog, version:${{ inputs.RELEASE_TYPE }}
           #labels: actions:autorelease, skip-changelog
