@@ -221,9 +221,10 @@ jobs:
 # Check inputs, get next version, determine next steps
 # - for repos with packer, this is called from 'prep-build'?
 #
-# 1. check the user inputs             (tbd???)
-# 2. get the next version              (reuse-next-version)
-# 3. determine the next step for inputs and outputs... (tbd???)
+# 1. check the user inputs               (tbd???)
+# 2. get the next version                (reuse-next-version)
+# 3. make sure the proper labels exist   (check-repo???)
+# 4. determine the next step for inputs and outputs... (tbd???)
 
   reuse-next-version:
     #name: Get next version for ${{ inputs.RELEASE_TYPE }} release
