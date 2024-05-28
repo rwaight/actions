@@ -1,0 +1,417 @@
+name: Reuse - [autorelease] Set Build Version
+#run-name: 'Set the build version'
+run-name: set-build-version
+# This workflow was created so that other GitHub repos can call this reusable workflow and improve our build consistency
+# NOTE: Because of how re-usable workflows handle inputs, all of the booleans must be treated as strings
+
+on: 
+  workflow_call:
+    # Inputs and secrets: # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+    # Inputs:             # https://docs.github.com/en/enterprise-cloud@latest/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+    inputs:
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callinputs
+      # # keep the 'GH_APP_BOT_NAME' input in this file for future use
+      # # new variable for 'reuse-convert_to_action-set-build-version'
+      # GH_APP_BOT_NAME:
+      #   description: 'The name of the GitHub App.'
+      #   #default: 'github-actions[bot]'
+      #   default: 'rw-actions-bot[bot]'
+      #   required: false
+      #   type: string
+      # # keep the 'GH_APP_BOT_NAME' input in this file for future use
+      VERBOSE:
+        description: 'Determine if the workflow should run verbose tasks, defaults to false'
+        required: false
+        #default: false
+        #type: boolean
+        # set the input as a 'string' as a workaround for boolean inputs, until GitHub figures its life out
+        # see https://github.com/actions/runner/issues/1483
+        # if this is set to boolean, then the actual value will be 'null'
+        # Need to keep this as a string, but then below use 'fromJSON' to cast this as a boolean
+        # see https://github.com/actions/runner/issues/1483#issuecomment-1031671517
+        # example to cast this as a boolean: ${{ fromJSON(inputs.VERBOSE) }}
+        type: string
+        #default: 'false'
+        # automatically enable 'verbose' mode if `RUNNER_DEBUG`  is set to `1` or `true`
+        # https://github.com/actions/github-script/issues/264#issuecomment-1496635479
+        default: ${{ (env.RUNNER_DEBUG == '1' && 'true') || 'false' }}
+
+    # Secrets
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_callsecrets
+    #secrets:
+    # this workflow does not need any secrets
+
+    # Outputs
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-outputs-from-a-reusable-workflow
+    outputs:
+      # Map the workflow outputs to job outputs
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_calloutputs
+      job-status:
+        description: the status of the 'set-build-version' job
+        value: ${{ jobs.set-build-version.outputs.job-status }}
+      build-version:
+        description: The calculated build version.
+        value: ${{ jobs.set-build-version.outputs.BUILD_VERSION }}
+
+env:
+  # https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging#enabling-step-debug-logging
+  # https://github.com/actions/runner/pull/253
+  # https://github.com/actions/github-script/issues/264
+  # https://github.com/nektos/act/issues/1006
+  ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
+  #RUNNER_DEBUG: ${{ env.RUNNER_DEBUG }}
+  CHECK_RUNNER_DEBUG: ${{ (env.RUNNER_DEBUG == '1' && 'true') || 'false' }}
+
+permissions:
+  contents: read
+  #contents: write
+  # issues: write
+  # pull-requests: write
+
+jobs:
+
+  set-build-version:
+    name: set-version
+    runs-on: ubuntu-latest
+    # install software list available at:
+    # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#installed-software
+    outputs:
+      BUILD_VERSION: ${{ steps.set-version-output.outputs.BUILD_VERSION }}
+    if: (github.repository_owner == 'rwaight')
+    env:
+      VERBOSE: ${{ inputs.VERBOSE }}
+      GH_ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
+      GH_RUNNER_DEBUG: ${{ env.RUNNER_DEBUG }}
+    steps:
+
+      - name: Exit workflow in forked repo
+        id: check-repo-owner
+        if: (github.repository_owner != 'rwaight')
+        run: |
+          echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
+          echo "This workflow will now fail and exit. "
+          echo "::error file=reuse-convert_to_action-set-build-version.yml,title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
+          exit 1
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+
+      - name: This should run when there are tags pushed
+        if: github.ref_type == 'tag'
+        run: |
+          echo "The ref_type is: ${{ github.ref_type }}"
+          echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
+          echo "GitHub ref: ${{ github.ref }}"
+          echo "GitHub ref_name: ${{ github.ref_name }}"
+          echo "GitHub ref_type: ${{ github.ref_type }}"
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        id: checkout-without-token
+        continue-on-error: true
+        with:
+          fetch-depth: 0
+        #env:
+        #  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # # see if we can calculate the BUILD_VERSION without needing to checkout the repo with an app token
+      # - name: Create an App Token
+      #   # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+      #   # GitHub Action for creating a GitHub App installation access token.
+      #   uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+      #   id: app-token
+      #   if: |
+      #     steps.checkout-without-token.outcome == 'skipped' || 
+      #     steps.checkout-without-token.outcome == 'failure'
+      #   with:
+      #     # required
+      #     app-id: ${{ secrets.GH_APP_ID }}
+      #     private-key: ${{ secrets.GH_APP_KEY }}
+      #     # create a token for all repositories in the current owner's installation
+      #     owner: ${{ github.repository_owner }}
+
+      # # see if we can calculate the BUILD_VERSION without needing to checkout the repo with an app token
+      # - name: Checkout files from commit tree with the default GitHub token
+      #   # Verified creator: https://github.com/marketplace/actions/checkout
+      #   # GitHub Action for checking out a repo
+      #   uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+      #   id: checkout-with-token
+      #   # if the 'checkout-without-token' step outcome is 'skipped' or 'failure'
+      #   # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
+      #   if: |
+      #     steps.checkout-without-token.outcome == 'skipped' || 
+      #     steps.checkout-without-token.outcome == 'failure'
+      #   with:
+      #     fetch-depth: 0
+      #     token: ${{ steps.app-token.outputs.token }}
+
+      - name: Fetch the tags from the repo
+        id: git-fetch
+        # error: 'fatal: --unshallow on a complete repository does not make sense'
+        #run: "git fetch --force --prune --unshallow --tags"
+        # end error for the command above
+        shell: bash
+        run: |
+          echo "starting the 'git-fetch' step... "
+          git fetch --force --prune --tags
+          echo "finishing the 'git-fetch' step... "
+
+      - name: Set environmental variables used to evaluate the build version
+        id: set-eval-version-env-vars
+        # Ensure that the needed environmental variables are set
+        #   - 'EVAL_BUILD_VERSION' is set to 'false'
+        #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          echo "Setting EVAL_BUILD_VERSION to false..."
+          echo "EVAL_BUILD_VERSION=false" >> $GITHUB_ENV
+          echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
+          echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
+          echo ""
+
+      - name: get-tag-version
+        id: get-tag-version
+        if: (github.ref_type == 'tag')
+        run: |
+          echo "starting step 'get-tag-version' "
+          VERSION="${{ github.event.release.tag_name || github.ref_name }}"
+          ##
+          RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+          if [[ $VERSION =~ $RE ]]; then
+              MAJOR="${BASH_REMATCH[1]}"
+              MINOR="${BASH_REMATCH[2]}"
+              PATCH="${BASH_REMATCH[3]}"
+              PRERELEASE="${BASH_REMATCH[4]}"
+              if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                  echo "VERSION is: $VERSION "
+                  echo "RE is     : $RE "
+                  echo "MAJOR is  : $MAJOR "
+                  echo "MINOR is  : $MINOR "
+                  echo "PATCH is  : $PATCH "
+                  echo "PRERELEASE: $PRERELEASE "
+              fi
+          else
+              echo "::error file=reuse-convert_to_action-set-build-version.yml,title=⛔ set-build-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
+              exit 1
+          fi
+          ##
+          if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+          ##
+          ##echo "full-version-tag=$VERSION" >> $GITHUB_OUTPUT
+          ##echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+          echo "full-version-ref=$VERSION" >> $GITHUB_OUTPUT
+          echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+          echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+          echo "completing the 'get-tag-version' step. "
+
+      - name: get-tag-version | Print outputs
+        id: check-get-tag-version
+        #if: (github.ref_type == 'tag')
+        if: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        run: |
+          echo "starting step 'check-get-tag-version' "
+          echo "## get-tag-version outputs"
+          echo "Full version: ${{ env.FULL_VERSION_REF }} "
+          echo "Major ref   : ${{ env.MAJOR_REF }} "
+          echo "Minor ref   : ${{ env.MINOR_REF }} "
+          echo "Patch ref   : ${{ env.PATCH_REF }} "
+          echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
+          echo ""
+        env:
+          #FULL_VERSION_TAG: ${{ steps.get-tag-version.outputs.full-version-tag }}
+          FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+          MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
+          MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
+          PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
+          IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+
+      - name: BUILD_VERSION | Check for tag (push event), set the build version to the tag version
+        # This step is run when the branch is a 'v*.*.*' tag
+        id: set-build-version-full-version-tag
+        #if: |
+        #  ${{ steps.get-tag-version.outputs.full-version-ref }} && 
+        #  ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
+        #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
+        if: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        #try this next#if: startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
+        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+        #if: {{ github.ref == 'ref/head/v*' }}
+        run: |
+          echo "starting step 'set-build-version-full-version-tag' "
+          echo ""
+          echo "event name:  ${{ github.event_name }} "
+          echo "ref       :  ${{ github.ref }}"
+          echo "ref name  :  ${{ github.ref_name }} "
+          echo "ref type  :  ${{ github.ref_type }} "
+          echo ""
+          echo "release tag_name: ${{ github.event.release.tag_name }} "
+          echo ""
+          echo "## get-tag-version outputs"
+          echo "Full version: ${{ env.FULL_VERSION_REF }} "
+          echo ""
+          if [[ '${{ github.event_name }}' == 'push' ]]; then
+              echo "the 'github.event_name' is 'push', going to set the version to '${{ env.FULL_VERSION_REF }}' "
+              ##
+              echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}'..."
+              echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
+              ##
+              echo "Setting EVAL_BUILD_VERSION to true..."
+              echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
+              ##
+          elif [[ '${{ github.event_name }}' != 'push' ]]; then
+              echo "the 'github.event_name' is NOT 'push', going to set the version to '${{ env.FULL_VERSION_REF }}' "
+              ##
+              echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}'..."
+              echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
+              echo "Setting EVAL_BUILD_VERSION to true..."
+              echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
+          else
+              echo "something strange is happening, not changing anything... "
+          fi
+          echo ""
+        env:
+          FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+
+      - name: BUILD_VERSION | Check for tags (not push), set the build version to the tag version
+        # This step is run when the branch is a 'v*.*.*' tag
+        id: set-build-version-full-version-tag-fallback
+        #if: |
+        #  ${{ steps.get-tag-version.outputs.full-version-ref }} && ${{ env.EVAL_BUILD_VERSION=='false' }}
+        #  ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') }}
+        #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
+        if: (github.ref_type == 'tag' && env.EVAL_BUILD_VERSION=='false')
+        #if: {{ github.ref == 'ref/head/v*' }}
+        #try this next#if: startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
+        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+        run: |
+          echo "starting step 'set-build-version-full-version-tag-fallback' "
+          echo "event name:  ${{ github.event_name }} "
+          echo "ref       :  ${{ github.ref }}"
+          echo "ref name  :  ${{ github.ref_name }} "
+          echo "ref type  :  ${{ github.ref_type }} "
+          echo ""
+          echo "release tag_name: ${{ github.event.release.tag_name }}"
+          echo ""
+          echo "## get-tag-version outputs"
+          echo "Full version: ${{ env.FULL_VERSION_REF }} "
+          echo ""
+          echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}'..."
+          echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
+          echo "Setting EVAL_BUILD_VERSION to true..."
+          echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
+          echo ""
+        env:
+          FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+  
+      - name: simple-semver | Look for simple semver with git describe
+        # name: 02b | Run 'git describe --tags --match "v[0-9].[0-9].[0-9]*"'
+        id: simple-semver
+        #if: env.EVAL_BUILD_VERSION=='false'
+        run: |
+          echo "starting the 'simple-semver' step... "
+          git describe --tags --match "v[0-9].[0-9].[0-9]*"
+          semver_simple=$(git describe --tags --match "v[0-9].[0-9].[0-9]*")
+          echo "setting the value of 'simple-semver' to '${semver_simple}' and sending it to GitHub output"
+          echo "simple-semver=${semver_simple}" >> $GITHUB_ENV
+          echo "simple-semver=${semver_simple}" >> $GITHUB_OUTPUT
+          echo "finishing the 'simple-semver' step... "
+
+      - name: simple-semver | Print output
+        id: check-simple-semver
+        if: ${{ steps.simple-semver.outputs.simple-semver }}
+        run: |
+          echo "## simple-semver outputs"
+          echo "simple-semver: ${{ env.semver_simple }} "
+          echo ""
+        env:
+          semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
+
+      - name: wildcard-semver | Look for wildcard semver with git describe
+        # name: 06a | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"'
+        id: wildcard-semver
+        #if: env.EVAL_BUILD_VERSION=='false'
+        run: |
+          echo "starting the 'wildcard-semver' step... "
+          git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"
+          semver_wildcard=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*")
+          echo "setting the value of 'wildcard-semver' to '${semver_wildcard}' and sending it to GitHub output"
+          echo "wildcard-semver=${semver_wildcard}" >> $GITHUB_ENV
+          echo "wildcard-semver=${semver_wildcard}" >> $GITHUB_OUTPUT
+          echo "finishing the 'wildcard-semver' step... "
+
+      - name: wildcard-semver | Print output
+        id: check-wildcard-semver
+        if: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+        run: |
+          echo "## wildcard-semver outputs"
+          echo "wildcard-semver: ${{ env.semver_wildcard }} "
+          echo ""
+        env:
+          semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+
+      - name: BUILD_VERSION | Fallback value - Set the build version to the simple-semver output
+        # This step is run when the build is not production
+        if: env.EVAL_BUILD_VERSION=='false' || ${{ env.BUILD_VERSION == '' }} || env.BUILD_VERSION == ''
+        id: set-fallback-version
+        run: |
+          ## Compare the simple and wildcard semver versions
+          ## the double number signs below are for line spacing and readability only
+          ##
+          if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+              echo "starting the 'set-fallback-version' step. "
+              echo "semver_simple is  :  ${{ env.semver_simple }} "
+              echo "semver_wildcard is:  ${{ env.semver_wildcard }} "
+          fi
+          ##
+          if [ '${{ env.semver_simple }}' == '${{ env.semver_wildcard }}' ]; then
+              echo "the variable 'semver_simple' is set to '${{ env.semver_simple }}' and matches "
+              echo "  the variable 'semver_wildcard', which is set to '${{ env.semver_wildcard }}'. "
+              simple_and_wildcard_match=true
+          else
+              echo "the variable 'semver_simple' is set to '${{ env.semver_simple }}' and DOES NOT MATCH "
+              echo "  the variable 'semver_wildcard', which is set to '${{ env.semver_wildcard }}'. "
+              simple_and_wildcard_match=false
+          fi
+          echo "do_the_semver_values_match=${simple_and_wildcard_match}" >> "$GITHUB_OUTPUT"
+          echo "do_the_semver_values_match=${simple_and_wildcard_match}" >> $GITHUB_ENV
+          if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+              echo "The do_the_semver_values_match variable has been set to \`$simple_and_wildcard_match\`"
+          fi
+          echo "going to set the build version to the value of 'semver_simple' ... "
+          echo "Setting BUILD_VERSION to '${{ env.semver_simple }}'..."
+          echo "BUILD_VERSION=${{ env.semver_simple }}" >> $GITHUB_ENV
+          echo "Setting EVAL_BUILD_VERSION to true..."
+          echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
+          echo ""
+          echo "**NOTE**: BUILD_VERSION was set to the fallback value." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        env:
+          semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
+          semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+
+      - name: Error if the build version was not set
+        if: ${{ env.BUILD_VERSION == '' }}
+        run: |
+          echo "The build version was not set correctly. "
+          echo "This workflow will now fail and exit. "
+          echo "::error file=reuse-convert_to_action-set-build-version.yml,title=⛔ error in the '${{ github.workflow }}' workflow hint::Build version not set correctly "
+          exit 1
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+
+      # Output the build version
+      - name: Output the build version
+        id: set-version-output
+        run: |
+          echo "The BUILD_VERSION has been set to '${{ env.BUILD_VERSION }}' ... "
+          echo "BUILD_VERSION=${{ env.BUILD_VERSION }}" >> "$GITHUB_OUTPUT"
+        env:
+          FULL_VERSION: ${{ steps.get-tag-version.outputs.full-version-ref }}
+          MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
+          MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
+          PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
+          IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+          semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
+          semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
