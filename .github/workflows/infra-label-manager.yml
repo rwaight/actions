@@ -82,7 +82,7 @@ jobs:
       - name: Create an App Token for ${{ matrix.repo }}
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1 # v1.10.0
+        uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
         #uses: actions/create-github-app-token@v1.10.0
         id: app-token
         with:
@@ -108,7 +108,7 @@ jobs:
           (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
           (github.event_name=='workflow_call' && inputs.sync_labels==false) || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==false)
-        uses: rwaight/actions/github/repository-dispatch@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/github/repository-dispatch@130cf7b531a919de678759798a1aee9474dbeb47 # v0.1.34
         #uses: rwaight/actions/github/repository-dispatch@v0.1.26
         #uses: rwaight/actions/github/repository-dispatch@main
         with:
@@ -122,7 +122,7 @@ jobs:
           (github.event_name=='workflow_call' && inputs.sync_labels==true) ||
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
         id: call-sync-labels
-        uses: rwaight/actions/github/repository-dispatch@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+        uses: rwaight/actions/github/repository-dispatch@130cf7b531a919de678759798a1aee9474dbeb47 # v0.1.34
         #uses: rwaight/actions/github/repository-dispatch@v0.1.26
         #uses: rwaight/actions/github/repository-dispatch@main
         with:
@@ -203,8 +203,8 @@ jobs:
   #     - name: Create a GitHub App Token
   #       # Verified creator: https://github.com/marketplace/actions/create-github-app-token
   #       # GitHub Action for creating a GitHub App installation access token.
-  #       #uses: actions/create-github-app-token@a0de6af83968303c8c955486bf9739a57d23c7f1
-  #       uses: actions/create-github-app-token@v1.10.0
+  #       #uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856
+  #       uses: actions/create-github-app-token@v1.10.1
   #       id: app-token
   #       with:
   #         # required
@@ -222,8 +222,8 @@ jobs:
   #     - name: Send '${{ env.EVENT }}' dispatch to ${{ matrix.repo }}
   #       #if: (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
   #       id: call-sync-labels
-  #       #uses: rwaight/actions/github/repository-dispatch@bd2234d2665c0db7fff5b9b65e904bf58b63bd11
-  #       #uses: rwaight/actions/github/repository-dispatch@v0.1.31
+  #       #uses: rwaight/actions/github/repository-dispatch@130cf7b531a919de678759798a1aee9474dbeb47
+  #       #uses: rwaight/actions/github/repository-dispatch@v0.1.34
   #       uses: rwaight/actions/github/repository-dispatch@main
   #       with:
   #         token: ${{ steps.app-token.outputs.token }}
