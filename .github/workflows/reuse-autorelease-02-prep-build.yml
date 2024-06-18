@@ -227,7 +227,7 @@ jobs:
       - name: Checkout files from commit tree
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: '0'
           #ref: ${{ github.head_ref }}
