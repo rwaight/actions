@@ -86,7 +86,7 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/docker-setup-qemu
         # GitHub Action to install QEMU static binaries
         #uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3
-        uses: docker/setup-qemu-action@v3.1.0
+        uses: docker/setup-qemu-action@v3.2.0
 
       - name: Setup Docker Buildx
         # Verified creator: https://github.com/marketplace/actions/docker-setup-buildx
