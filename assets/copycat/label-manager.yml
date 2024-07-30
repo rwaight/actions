@@ -93,7 +93,7 @@ jobs:
           (github.event_name=='repository_dispatch' && github.event.action=='export-labels') ||
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
-        uses: rwaight/actions/github/export-label-config@v0.1.34   # can use version specific or main
+        uses: rwaight/actions/github/export-label-config@v0.1.35   # can use version specific or main
         #uses: rwaight/actions/github/export-label-config@main  # can use version specific or main
         with:
           # This is needed if you're dealing with private repos.
@@ -111,7 +111,7 @@ jobs:
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
           )
-        uses: rwaight/actions/github/label-sync@v0.1.34 # can use version specific or main
+        uses: rwaight/actions/github/label-sync@v0.1.35 # can use version specific or main
         #uses: rwaight/actions/github/label-sync@main # can use version specific or main
         with:
           config-file: |
