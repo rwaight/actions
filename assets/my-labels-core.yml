@@ -80,6 +80,25 @@
   description: 'Action changes or updates made by dependabot'
   aliases: []
 #
+##### area: labels
+# The area: labels have not been formally defined
+#           currently using https://github.com/dart-lang/sdk/labels?q=area as a refrerence
+-
+  name: 'area:infrastructure'
+  color: 'B1BFAE'
+  description: 'Use area:infrastructure for SDK infrastructure issues, like continuous integration bot changes.'
+  aliases: []
+-
+  name: 'area:meta'
+  color: 'B1BFAE'
+  description: 'Cross-cutting, high-level issues (for tracking many other implementation issues, ...).'
+  aliases: []
+-
+  name: 'area:test'
+  color: 'B1BFAE'
+  description: 'Cross-cutting test issues (use area: labels for specific failures; not used for package:test).'
+  aliases: []
+#
 ##### impacts: labels
 # The impacts: labels have not been formally defined
 -
