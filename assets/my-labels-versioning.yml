@@ -19,7 +19,7 @@
   aliases: []
 -
   name: 'version:major'
-  color: 'bfd4f2'
+  color: 'BFD4F2'
   description: 'Bump repo release ''major'' version'
   aliases: []
 -
@@ -34,7 +34,7 @@
   aliases: []
 -
   name: 'version:premajor'
-  color: 'bfd4f2'
+  color: 'BFD4F2'
   description: 'Bump repo release ''premajor'' version'
   aliases: []
 -
@@ -49,6 +49,6 @@
   aliases: []
 -
   name: 'version:pretoprod'
-  color: 'C7B3F1'
+  color: '70226A'
   description: 'Bump repo release ''pretoprod'' version'
   aliases: []
