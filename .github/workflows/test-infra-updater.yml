@@ -90,7 +90,7 @@ jobs:
         uses: rwaight/actions/utilities/paths-filter@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
         #uses: rwaight/actions/utilities/paths-filter@v0.1.26
         #uses: rwaight/actions/utilities/paths-filter@main
-        id: filter
+        id: filter-changes
         with:
           # should not need to use base##base: ${{ github.ref }}
           #ref: ${{ github.ref }}
