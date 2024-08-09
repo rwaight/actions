@@ -33,16 +33,12 @@ jobs:
       artifact-url: ${{ steps.task-upload-artifact.outputs.artifact-url }}
     steps:
 
-      # Checkout repo A
-      - name: Checkout files from commit tree
+      - name: Checkout files from source repo
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         # with:
         #   fetch-depth: 0
-
-      # Make changes / build artifact
-      - run: ...
 
       - name: Create a 'last-updated' text file
         run: date +%s > assets/last-updated.txt
