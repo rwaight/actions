@@ -66,6 +66,9 @@ jobs:
 
   pull-request:
     needs: [upload]
+    permissions:
+      pull-requests: write
+      contents: write
     runs-on: ubuntu-latest
     steps:
 
