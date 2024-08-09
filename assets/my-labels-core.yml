@@ -11,17 +11,17 @@
 # The following labels were part of GitHub repos by default
 -
   name: 'bug'
-  color: 'd73a4a'
+  color: 'D73A4A'
   description: 'Something is not working'
   aliases: []
 -
   name: 'documentation'
-  color: '0075ca'
+  color: '0075CA'
   description: 'Improvements or additions to documentation'
   aliases: []
 -
   name: 'duplicate'
-  color: 'cfd3d7'
+  color: 'CFD3D7'
   description: 'This issue or pull request already exists'
   aliases: []
 -
