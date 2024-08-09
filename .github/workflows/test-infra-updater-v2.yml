@@ -128,7 +128,7 @@ jobs:
         with:
           # commit info
           commit-message: 'chore: update assets from ?'
-          committer: '${{ inputs.GH_APP_BOT_NAME }} <${{ secrets.GH_APP_BOT_UID }}+${{ inputs.GH_APP_BOT_NAME }}@users.noreply.github.com>'
+          committer: 'rw-actions-bot[bot] <${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com>'
           # PR info
           branch: 'autoupdate/test-infra-updater-v2'
           title: '[autoupdate] test-infra-updater-v2'
