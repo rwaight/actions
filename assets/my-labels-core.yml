@@ -71,12 +71,12 @@
 # The actions: labels have not been formally defined
 -
   name: 'actions:autorelease'
-  color: 'baa938'
+  color: 'BAA938'
   description: 'This is an automatically-created PR to trigger a release'
   aliases: []
 -
   name: 'actions:autoupdate'
-  color: 'baa938'
+  color: 'BAA938'
   description: 'This is an automatically-created PR to update files in a repo'
   aliases: []
 -
