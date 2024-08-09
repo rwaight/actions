@@ -86,6 +86,12 @@ jobs:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          # create a token for all repositories in the current owner's installation
+          # https://github.com/actions/create-github-app-token#create-a-token-for-all-repositories-in-the-current-owners-installation
+          owner: ${{ github.repository_owner }}
+          # create a token for multiple repositories in the current owner's installation
+          # https://github.com/actions/create-github-app-token#create-a-token-for-multiple-repositories-in-the-current-owners-installation
+          #repositories: "actions,test-actions"
 
       - name: Checkout remote repo
         # Verified creator: https://github.com/marketplace/actions/checkout
