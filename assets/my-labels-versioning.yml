@@ -32,3 +32,23 @@
   color: 'C7B3F1'
   description: 'Bump repo release ''patch'' version'
   aliases: []
+-
+  name: 'version:premajor'
+  color: 'bfd4f2'
+  description: 'Bump repo release ''premajor'' version'
+  aliases: []
+-
+  name: 'version:preminor'
+  color: 'C7B3E5'
+  description: 'Bump repo release ''preminor'' version'
+  aliases: []
+-
+  name: 'version:prepatch'
+  color: 'C7B3F1'
+  description: 'Bump repo release ''prepatch'' version'
+  aliases: []
+-
+  name: 'version:pretoprod'
+  color: 'C7B3F1'
+  description: 'Bump repo release ''pretoprod'' version'
+  aliases: []
