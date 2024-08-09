@@ -83,7 +83,15 @@ jobs:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
           private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
-      
+
+      - name: Checkout remote repo
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          repository: rwaight/test-actions
+          token: ${{ steps.app-token.outputs.token }}
+
       - name: Configure Git
         id: configure-git
         #if: ${{ steps.app-token.outputs.token }}
@@ -95,14 +103,6 @@ jobs:
           git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
           git status
           echo "the 'set-up-git' step has completed. "
-
-      - name: Checkout remote repo
-        # Verified creator: https://github.com/marketplace/actions/checkout
-        # GitHub Action for checking out a repo
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-        with:
-          repository: rwaight/test-actions
-          token: ${{ steps.app-token.outputs.token }}
 
       - name: Download the artifacts from the upload job
         id: task-download-artifact
