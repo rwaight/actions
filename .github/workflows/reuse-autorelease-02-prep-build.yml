@@ -382,8 +382,8 @@ jobs:
   test-build:
     # Call the 'reuse-build' workflow
     name: test-convert
-    #uses: rwaight/actions.github/workflows/reuse-build.yml@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
-    uses: rwaight/actions.github/workflows/reuse-build.yml@main
+    #uses: rwaight/actions/.github/workflows/reuse-build.yml@bd2234d2665c0db7fff5b9b65e904bf58b63bd11 # v0.1.31
+    uses: rwaight/actions/.github/workflows/reuse-build.yml@main
     needs: [reuse-next-version, reuse-verify-reviewed-image]
     if: (github.repository_owner == 'rwaight')
     with:
