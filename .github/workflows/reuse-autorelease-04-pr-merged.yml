@@ -565,7 +565,7 @@ jobs:
       - name: Create an app token using actions/create-github-app-token
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
+        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
         # https://github.com/actions/create-github-app-token
         id: app-token
         with:
@@ -667,7 +667,7 @@ jobs:
       - name: Create an app token using actions/create-github-app-token
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
+        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
         # https://github.com/actions/create-github-app-token
         id: app-token
         with:
@@ -985,7 +985,7 @@ jobs:
       - name: Create an app token using actions/create-github-app-token
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
+        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
         # https://github.com/actions/create-github-app-token
         id: app-token
         with:
