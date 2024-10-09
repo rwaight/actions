@@ -10,10 +10,18 @@ branding:
 inputs:
   gh-token:
     description: >-
-      The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT), may be needed to run
+      The `GITHUB_TOKEN` or a `repo` scoped Personal Access Token (PAT) that is used to run
       the `gh release` command depending on permissions granted to the default GitHub token.
     required: true
     default: ${{ github.token }}
+  include-drafts:
+    description: 'Include draft releases in the search, defaults to false. Only used with the `gh-release` strategy.'
+    required: false
+    default: 'false'
+  include-pre-releases:
+    description: 'Include pre-releases in the search, defaults to false.'
+    required: false
+    default: 'false'
   pre-release-id:
     description: >-
       Pre-release identifier (only for pre-release builds).
@@ -32,6 +40,14 @@ inputs:
       Note that the only tested pre-release identifier is `rc` at this time.
     required: true
     default: 'not-set'
+  strategy:
+    description: >-
+      The strategy to use for getting the version information, options:
+      - 'branch-tag': Use the latest tag from the branch
+      - 'repo-tag': Use the latest tag from the all branches in the repo
+      - 'gh-release': Use the latest release from the repo
+    required: false
+    default: 'branch-tag'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
@@ -146,9 +162,12 @@ runs:
         ##
         echo "starting the 'verbose-print-inputs' step. "
         echo ""
-        echo "pre-release-id is:  ${{ inputs.pre-release-id }} "
-        echo "release-type is  :  ${{ inputs.release-type }} "
-        echo "verbose is       :  ${{ inputs.verbose }} "
+        echo "include-drafts is      :  ${{ inputs.include-drafts }} "
+        echo "include-pre-releases is:  ${{ inputs.include-pre-releases }} "
+        echo "pre-release-id is      :  ${{ inputs.pre-release-id }} "
+        echo "release-type is        :  ${{ inputs.release-type }} "
+        echo "strategy is            :  ${{ inputs.strategy }} "
+        echo "verbose is             :  ${{ inputs.verbose }} "
         ##
         echo "completing the 'verbose-print-inputs' step. "
 
