@@ -68,6 +68,59 @@ runs:
       shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the my_workflow_debug variable is set to true.
 
+    - name: Print verbose information about git tags
+      id: print-tag-information
+      # eventually only run this job when:  inputs.my_workflow_debug=='true'
+      #if: inputs.my_workflow_debug=='true'
+      shell: bash
+      run: |
+        echo "Using git to obtain branch tag information"
+        echo ""
+        ########
+        ########
+        echo "::group::running 'git describe' commands "
+        #
+        echo "running the command:   git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0 "
+        git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0
+        echo ""
+        ## the command below was added on 08OCT2024 -- filter '-rc.*'
+        echo "running the command:   git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc.*' --first-parent --abbrev=0 "
+        git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc.*' --first-parent --abbrev=0
+        echo ""
+        ## the command below was added on 08OCT2024
+        echo "running the command:   git describe --tags --match 'v*.*.*' --first-parent --abbrev=0 "
+        git describe --tags --match 'v*.*.*' --first-parent --abbrev=0
+        echo ""
+        ## the command below was added on 09OCT2024 -- filter '-rc*'
+        echo "running the command:   git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc*' --first-parent --abbrev=0 "
+        git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc*' --first-parent --abbrev=0
+        echo ""
+        echo "running 'git describe --tags \`git rev-list --tags --max-count=1\`' ... "
+        git describe --tags `git rev-list --tags --max-count=1`
+        echo ""
+        echo "running 'git describe --abbrev=0 --tags' ... "
+        git describe --abbrev=0 --tags
+        echo ""
+        echo ""
+        echo "::endgroup::"
+        echo ""
+        ########
+        ########
+        echo "::group::running 'git describe' commands "
+        #
+        echo ""
+        echo "::endgroup::"
+        echo ""
+        ########
+        ########
+        echo "::group::running 'git describe' commands "
+        #
+        echo ""
+        echo "::endgroup::"
+        echo ""
+        ##
+        echo "The 'get-branch-tags' step is complete."
+
     - name: Get the branch tags information with git
       id: get-branch-tags
       # eventually only run this job when:  inputs.strategy=='branch-tag'
@@ -77,7 +130,8 @@ runs:
         echo "Using git to obtain branch tag information"
         echo ""
         if [ '${{ inputs.strategy }}' == 'branch-tag' ]; then
-            echo "capturing branch tag information using 'git describe --tags' with the '--match' option "
+            ##
+            echo "Capturing branch tag information using 'git describe --tags' with the '--match' option "
             if [ '${{ inputs.include-pre-releases }}' == 'false' ]; then
                 echo "    and excluding pre-releases ... "
                 echo ""
@@ -107,7 +161,38 @@ runs:
         else
             echo "the 'strategy' is NOT 'branch-tag', so the latest-branch-tag will not be sent to GitHub output"
         fi
-        #
+        ##
+        echo ""
+        echo "The 'get-branch-tags' step is complete."
+
+    - name: Get the repo tags information with git
+      id: repo-tags-with-git
+      shell: bash
+      run: |
+        echo "Using git to print tag information"
+        echo "running 'git describe --tags' ... "
+        git describe --tags
+        echo ""
+        echo "running 'git tag -l | tail -1' ... "
+        git tag -l | tail -1
+        echo ""
+        ## the command below was added on 08OCT2024
+        echo "running 'git tag -l --sort=-creatordate | head -n 1' "
+        git tag -l --sort=-creatordate | head -n 1
+        echo ""
+        ## the command below was added on 08OCT2024
+        echo "running 'git tag -l v* | tail -n1' "
+        git tag -l v* | tail -n1
+        echo ""
+        ## the command below was added on 08OCT2024
+        echo "running the command:    git tag --sort=-refname | awk 'match($0, /^v[0-9]+\.[0-9]+\.[0-9]+$/)' | head -n 1 "
+        git tag --sort=-refname | awk 'match($0, /^v[0-9]+\.[0-9]+\.[0-9]+$/)' | head -n 1
+        echo ""
+        ## the command below was added on 08OCT2024
+        echo "running 'git log --first-parent --pretty=%d | grep -m1 tag:' "
+        git log --first-parent --pretty=%d | grep -m1 tag:
+        echo ""
+        ## the command below was added on 08OCT2024
         echo "running the command:   git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0 "
         git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0
         echo ""
@@ -123,7 +208,41 @@ runs:
         echo "running the command:   git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc*' --first-parent --abbrev=0 "
         git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc*' --first-parent --abbrev=0
         echo ""
-        
+        ## the command below was added on 10OCT2024 -- no release candidates
+        echo "running the command:   git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+$' "
+        git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+$'
+        echo "    running the same command but adding ' | tail -1'  to the end "
+        git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+$' | tail -1
+        echo ""
+        ## the command below was added on 10OCT2024 -- releases AND release candidates
+        echo "running the command:   git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+' "
+        git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+'
+        echo "    running the same command but adding ' | tail -1'  to the end "
+        git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+' | tail -1
+        echo ""
+        ## the command below was added on 10OCT2024 -- ONLY release candidates
+        echo "running the command:   git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+-' "
+        git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+-'
+        echo "    running the same command but adding ' | tail -1'  to the end "
+        git tag --sort=committerdate | grep -E '[0-9]+\.[0-9]+\.[0-9]+-' | tail -1
+        echo ""
+        ##
+        ## the command below was added on 10OCT2024
+        echo "running the command:   git tag --sort=committerdate | awk 'match($0, /^v[0-9]+\.[0-9]+\.[0-9]+$/)' "
+        git tag --sort=committerdate | awk 'match($0, /^v[0-9]+\.[0-9]+\.[0-9]+$/)'
+        echo "    running the same command but adding ' | tail -1'  to the end "
+        git tag --sort=committerdate | awk 'match($0, /^v[0-9]+\.[0-9]+\.[0-9]+$/)' | tail -1
+        echo ""
+        ##
+        echo "running 'git tag --sort=committerdate | grep -E '[0-9]' | tail -1 | cut -b 2-7' ... "
+        echo "    this will remove the 'v' prefix"
+        git tag --sort=committerdate | grep -E '[0-9]' | tail -1 | cut -b 2-7
+        echo ""
+        echo "running 'git tag --sort=-taggerdate | tail -1' ... "
+        git tag --sort=-taggerdate | tail -1
+        echo ""
+        echo "running 'git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1' ... "
+        git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1
         echo ""
         echo "running 'git describe --tags \`git rev-list --tags --max-count=1\`' ... "
         git describe --tags `git rev-list --tags --max-count=1`
@@ -132,19 +251,21 @@ runs:
         git describe --abbrev=0 --tags
         echo ""
         if [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
-            echo "capturing the latest-tag from git "
+            echo "capturing the latest-repo-tag from git "
             latest_repo_tag=$(git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1)
             echo "The latest repo tag is \`$latest_repo_tag\`"
             echo "latest-repo-tag=${latest_repo_tag}" >> "$GITHUB_OUTPUT"
             echo "latest-repo-tag=${latest_repo_tag}" >> $GITHUB_ENV
         else
-            echo "the 'strategy' is NOT 'repo-tag', so the latest-tag will not be sent to GitHub output"
+            echo "the 'strategy' is NOT 'repo-tag', so the latest-repo-tag will not be sent to GitHub output"
         fi
         echo ""
-        echo "The 'get-branch-tags' step is complete."
+        echo "The 'repo-tags-with-git' step is complete."
 
     - name: Get the repo tags information with git
-      id: repo-tags-with-git
+      id: get-repo-tags
+      # eventually only run this job when:  inputs.strategy=='branch-tag'
+      #if: inputs.strategy=='branch-tag'
       shell: bash
       run: |
         echo "Using git to print tag information"
