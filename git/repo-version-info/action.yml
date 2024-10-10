@@ -68,6 +68,81 @@ runs:
       shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the my_workflow_debug variable is set to true.
 
+    - name: Get the branch tags information with git
+      id: get-branch-tags
+      # eventually only run this job when:  inputs.strategy=='branch-tag'
+      #if: inputs.strategy=='branch-tag'
+      shell: bash
+      run: |
+        echo "Using git to obtain branch tag information"
+        echo ""
+        if [ '${{ inputs.strategy }}' == 'branch-tag' ]; then
+            echo "capturing branch tag information using 'git describe --tags' with the '--match' option "
+            if [ '${{ inputs.include-pre-releases }}' == 'false' ]; then
+                echo "    and excluding pre-releases ... "
+                echo ""
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --first-parent --abbrev=0 "
+                latest_branch_tag=$(git describe --tags --match 'v*.*.*' --first-parent --abbrev=0)
+                echo "The latest branch tag is \`$latest_branch_tag\`"
+                echo "latest-branch-tag=${latest_branch_tag}" >> "$GITHUB_OUTPUT"
+                echo "latest-branch-tag=${latest_branch_tag}" >> $GITHUB_ENV
+            #
+            elif [ '${{ inputs.include-pre-releases }}' == 'true' ]; then
+                echo "    and including pre-releases using the '${{ inputs.pre-release-id }}' identifier ... "
+                echo ""
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --first-parent --abbrev=0 "
+                latest_branch_tag=$(git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --first-parent --abbrev=0)
+                echo "The latest branch tag is \`$latest_branch_tag\`"
+                echo "latest-branch-tag=${latest_branch_tag}" >> "$GITHUB_OUTPUT"
+                echo "latest-branch-tag=${latest_branch_tag}" >> $GITHUB_ENV
+            else
+                # this should never happen
+                echo "the ELSE statement is running, defaulting to excluding pre-releases "
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --first-parent --abbrev=0 "
+                latest_branch_tag=$(git describe --tags --match 'v*.*.*' --first-parent --abbrev=0)
+                echo "The latest branch tag is \`$latest_branch_tag\`"
+                echo "latest-branch-tag=${latest_branch_tag}" >> "$GITHUB_OUTPUT"
+                echo "latest-branch-tag=${latest_branch_tag}" >> $GITHUB_ENV
+            fi
+        else
+            echo "the 'strategy' is NOT 'branch-tag', so the latest-branch-tag will not be sent to GitHub output"
+        fi
+        #
+        echo "running the command:   git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0 "
+        git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0
+        echo ""
+        ## the command below was added on 08OCT2024 -- filter '-rc.*'
+        echo "running the command:   git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc.*' --first-parent --abbrev=0 "
+        git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc.*' --first-parent --abbrev=0
+        echo ""
+        ## the command below was added on 08OCT2024
+        echo "running the command:   git describe --tags --match 'v*.*.*' --first-parent --abbrev=0 "
+        git describe --tags --match 'v*.*.*' --first-parent --abbrev=0
+        echo ""
+        ## the command below was added on 09OCT2024 -- filter '-rc*'
+        echo "running the command:   git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc*' --first-parent --abbrev=0 "
+        git describe --tags --match 'v*.*.*' --match 'v*.*.*-*' --match 'v*.*.*-rc*' --first-parent --abbrev=0
+        echo ""
+        
+        echo ""
+        echo "running 'git describe --tags \`git rev-list --tags --max-count=1\`' ... "
+        git describe --tags `git rev-list --tags --max-count=1`
+        echo ""
+        echo "running 'git describe --abbrev=0 --tags' ... "
+        git describe --abbrev=0 --tags
+        echo ""
+        if [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
+            echo "capturing the latest-tag from git "
+            latest_repo_tag=$(git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1)
+            echo "The latest repo tag is \`$latest_repo_tag\`"
+            echo "latest-repo-tag=${latest_repo_tag}" >> "$GITHUB_OUTPUT"
+            echo "latest-repo-tag=${latest_repo_tag}" >> $GITHUB_ENV
+        else
+            echo "the 'strategy' is NOT 'repo-tag', so the latest-tag will not be sent to GitHub output"
+        fi
+        echo ""
+        echo "The 'get-branch-tags' step is complete."
+
     - name: Get the repo tags information with git
       id: repo-tags-with-git
       shell: bash
@@ -154,13 +229,13 @@ runs:
         git describe --abbrev=0 --tags
         echo ""
         if [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
-            echo "capturing the latest-tag from git "
+            echo "capturing the latest-repo-tag from git "
             latest_repo_tag=$(git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1)
             echo "The latest repo tag is \`$latest_repo_tag\`"
             echo "latest-repo-tag=${latest_repo_tag}" >> "$GITHUB_OUTPUT"
             echo "latest-repo-tag=${latest_repo_tag}" >> $GITHUB_ENV
         else
-            echo "the 'strategy' is NOT 'repo-tag', so the latest-tag will not be sent to GitHub output"
+            echo "the 'strategy' is NOT 'repo-tag', so the latest-repo-tag will not be sent to GitHub output"
         fi
         echo ""
         echo "The 'repo-tags-with-git' step is complete."
@@ -258,6 +333,7 @@ runs:
         #
         echo "The 'set-action-outputs' step is complete."
       env:
+        latest-branch-tag: ${{ steps.get-branch-tags.outputs.latest-branch-tag }}
         latest-release: ${{ steps.releases-with-gh-cli.outputs.latest-release }}
         latest-repo-tag: ${{ steps.repo-tags-with-git.outputs.latest-repo-tag }}
 
