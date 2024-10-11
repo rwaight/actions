@@ -418,7 +418,7 @@ jobs:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           edit-mode: replace
           issue-number: ${{ github.event.number }}
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Output comment ID
         if: steps.comment-on-pr.outcome != 'skipped'
