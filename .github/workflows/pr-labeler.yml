@@ -229,9 +229,8 @@ jobs:
         id: app-token
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
-          (github.repository_owner == 'rwaight') &&
-          (github.actor!= 'dependabot[bot]') &&
-          (contains(github.head_ref, 'dependabot-') == false)
+          (github.actor != 'dependabot[bot]' &&
+          startsWith(github.event.pull_request.head.ref, 'dependabot') == false)
         with:
           # required
           app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
@@ -267,9 +266,8 @@ jobs:
         id: checkout-dependabot
         # Run for Dependabot with the default token
         if: |
-          (github.repository_owner == 'rwaight') &&
-          (github.actor== 'dependabot[bot]') &&
-          (contains(github.head_ref, 'dependabot-') == true)
+          (github.actor == 'dependabot[bot]' &&
+          startsWith(github.event.pull_request.head.ref, 'dependabot') == true)
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
