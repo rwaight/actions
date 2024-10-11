@@ -19,7 +19,7 @@ inputs:
     required: false
     default: 'false'
   include-pre-releases:
-    description: 'Include pre-releases in the search, defaults to false.'
+    description: 'Include pre-releases in the search, defaults to false unless the release-type is `pre*`.'
     required: false
     default: 'false'
   pre-release-id:
