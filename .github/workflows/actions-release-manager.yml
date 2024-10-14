@@ -351,6 +351,7 @@ jobs:
           echo "deprecate this step in favor of the 'get-release-version' step "
 
       - name: Check output from release-vars-output
+        id: check-release-vars-output
         env:
           MY_REF: ${{ steps.release-vars-output.outputs.MY_REF }}
           RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
@@ -368,6 +369,7 @@ jobs:
           echo "deprecate the 'release-vars-output' step in favor of the 'get-release-version' step "
 
       - name: This should run when there are tags pushed
+        id: verbose-ref-type-tag
         if: github.ref_type == 'tag'
         run: |
           echo "## GitHub context information "
@@ -383,6 +385,7 @@ jobs:
           echo ""
 
       - name: This should run when a release is published
+        id: verbose-event-release
         if: ${{ github.event.release.tag_name }}
         run: |
           echo "## GitHub context information "
