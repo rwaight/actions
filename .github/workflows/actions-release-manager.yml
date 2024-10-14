@@ -375,6 +375,22 @@ jobs:
           echo ""
           echo "deprecate the 'release-vars-output' step in favor of the 'get-release-version' step "
 
+      - name: Is this an old v0.0.x - v0.1.x tag?
+        id: check-old-tags
+        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+        if: ${{ startsWith(github.ref_name, 'v0.[0-1].[0-9]+') }} && github.ref_type == 'tag'
+        # the conditional should only run when the tag is v1.0.x or v1.1.x
+        run: |
+          echo "This is an old tag: ${{ github.ref_name }} "
+          echo ""
+          echo "The GitHub variables are: "
+          echo "  release.tag_name  : ${{ github.event.release.tag_name }} "
+          echo "  release.prerelease: ${{ github.event.release.prerelease }} "
+          echo "  ref               : ${{ github.ref }} "
+          echo "  ref_name          : ${{ github.ref_name }} "
+          echo "  ref_type          : ${{ github.ref_type }} "
+          echo ""
+
       - name: This should run when there are tags pushed
         id: verbose-ref-type-tag
         if: github.ref_type == 'tag'
