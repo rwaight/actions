@@ -38,6 +38,13 @@ on:
       #   default: false
       #   type: boolean
 
+env:
+  # boolean variables based on the tag name (ref_name)
+  OLD_VERSION_TAG: ${{ startsWith(github.ref_name, 'v0.[0-1].[0-9]+') }}
+  IS_NOT_OLD_TAG: ${{ ! startsWith(github.ref_name, 'v0.[0-1].[0-9]+') }}
+  IS_CURRENT_TAG: ${{ ! startsWith(github.ref_name, 'v0.[2-9].[0-9]+') }}
+  IS_0_DOT_2_TAG: ${{ startsWith(github.ref_name, 'v0.2.[0-9]+') }}
+
 jobs:
   # run 'update-release-draft', but only: manual (workflow_dispatch); or closed pull_request; 
   update-release-draft:
