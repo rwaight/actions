@@ -38,6 +38,14 @@ on:
       #   default: false
       #   type: boolean
 
+env:
+  # boolean variables based on the tag name (ref_name)
+  OLD_VERSION_TAG: ${{ startsWith(github.ref_name, 'v0.[0-1].[0-9]+') }}
+  IS_NOT_OLD_TAG: ${{ ! startsWith(github.ref_name, 'v0.[0-1].[0-9]+') }}
+  IS_CURRENT_TAG: ${{ ! startsWith(github.ref_name, 'v0.[2-9].[0-9]+') }}
+  IS_0_DOT_2_TAG: ${{ startsWith(github.ref_name, 'v0.2.[0-9]+') }}
+  # the variables above should be used to determine if the major tag should be updated
+
 jobs:
   # run 'update-release-draft', but only: manual (workflow_dispatch); or closed pull_request; 
   update-release-draft:
@@ -66,7 +74,6 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
-        #uses: actions/checkout@v4.1.3
         with:
           fetch-depth: '0'
 
@@ -86,7 +93,6 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
         uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
-        #uses: actions/create-github-app-token@v1.10.0
         id: app-token
         with:
           # required
@@ -285,7 +291,6 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
-        #uses: actions/checkout@v4.1.3
 
       - name: Get release version
         id: get-release-version
@@ -351,6 +356,7 @@ jobs:
           echo "deprecate this step in favor of the 'get-release-version' step "
 
       - name: Check output from release-vars-output
+        id: check-release-vars-output
         env:
           MY_REF: ${{ steps.release-vars-output.outputs.MY_REF }}
           RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
@@ -367,7 +373,24 @@ jobs:
           echo ""
           echo "deprecate the 'release-vars-output' step in favor of the 'get-release-version' step "
 
+      - name: Is this an old v0.0.x - v0.1.x tag?
+        id: check-old-tags
+        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+        if: ${{ startsWith(github.ref_name, 'v0.[0-1].[0-9]+') }} && github.ref_type == 'tag'
+        # the conditional should only run when the tag is v1.0.x or v1.1.x
+        run: |
+          echo "This is an old tag: ${{ github.ref_name }} "
+          echo ""
+          echo "The GitHub variables are: "
+          echo "  release.tag_name  : ${{ github.event.release.tag_name }} "
+          echo "  release.prerelease: ${{ github.event.release.prerelease }} "
+          echo "  ref               : ${{ github.ref }} "
+          echo "  ref_name          : ${{ github.ref_name }} "
+          echo "  ref_type          : ${{ github.ref_type }} "
+          echo ""
+
       - name: This should run when there are tags pushed
+        id: verbose-ref-type-tag
         if: github.ref_type == 'tag'
         run: |
           echo "## GitHub context information "
@@ -383,6 +406,7 @@ jobs:
           echo ""
 
       - name: This should run when a release is published
+        id: verbose-event-release
         if: ${{ github.event.release.tag_name }}
         run: |
           echo "## GitHub context information "
@@ -436,7 +460,8 @@ jobs:
           tag: ${{ steps.get-release-version.outputs.full-version-ref }}
           prefix-regex: 'v?'
           fail-on-non-semver-tag: true # default is false
-          update-major: true
+          #update-major: true
+          update-major: ${{ env.IS_CURRENT_TAG }}
           update-minor: true
           skip-repo-setup: true # default is false
           create-release: false # default is true
