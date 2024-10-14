@@ -462,7 +462,8 @@ jobs:
           tag: ${{ steps.get-release-version.outputs.full-version-ref }}
           prefix-regex: 'v?'
           fail-on-non-semver-tag: true # default is false
-          update-major: true
+          #update-major: true
+          update-major: ${{ env.IS_CURRENT_TAG }}
           update-minor: true
           skip-repo-setup: true # default is false
           create-release: false # default is true
