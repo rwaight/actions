@@ -182,7 +182,7 @@ jobs:
 
       # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
       - name: Run rwaight/actions/releases/release-drafter
-        uses: rwaight/actions/releases/release-drafter@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/releases/release-drafter@2f3e0d1d86944af1878f91b9536c9bf3de229b54 # v0.1.37
         #uses: rwaight/actions/releases/release-drafter@v0.1.26
         #uses: rwaight/actions/releases/release-drafter@main
         id: draft-release
@@ -452,7 +452,7 @@ jobs:
       - name: Update major and minor release tags for ${{ steps.get-release-version.outputs.full-version-ref }}
         #old-name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
         id: release-tag-updater
-        uses: rwaight/actions/releases/release-tag-updater@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/releases/release-tag-updater@2f3e0d1d86944af1878f91b9536c9bf3de229b54 # v0.1.37
         #uses: rwaight/actions/releases/release-tag-updater@v0.1.26
         #uses: rwaight/actions/releases/release-tag-updater@main
         with:
