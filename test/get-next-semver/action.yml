@@ -216,6 +216,32 @@ runs:
         ##
         echo "The 'add-inputs-to-env' step has finished."
 
+    - name: Determine if pre-releases are included
+      id: determine-prereleases
+      shell: bash
+      run: | 
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ env.RELEASE_TYPE }}' == 'prerelease' ]; then
+            echo "the 'release-type' is 'prerelease', setting 'prerelease_eval' to true. "
+            prerelease_eval=true
+        elif [[ "${{ env.RELEASE_TYPE }}" == "pre"* ]]; then
+            echo "the 'release-type' is one of 'premajor/preminor/prepatch/pretoprod', setting 'prerelease_eval' to true. "
+            prerelease_eval=true
+        elif [ '${{ env.INCLUDE_PRE_RELEASES }}' == 'true' ]; then
+            echo "the input 'include-pre-releases' is true, setting 'prerelease_eval' to true. "
+            prerelease_eval=true
+        else
+            echo "not including pre-releases, setting 'prerelease_eval' to false. "
+            prerelease_eval=false
+        fi
+        ##
+        echo "setting the value of 'prerelease_eval' to '${prerelease_eval}' and sending it to GitHub output"
+        echo "prerelease_eval=${prerelease_eval}" >> $GITHUB_ENV
+        echo "prerelease_eval=${prerelease_eval}" >> $GITHUB_OUTPUT
+        ##
+        echo "The 'determine-prereleases' step has finished."
+
     - name: Get the current release version
       id: get-current-release
       shell: bash
