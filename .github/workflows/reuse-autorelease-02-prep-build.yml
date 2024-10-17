@@ -240,6 +240,11 @@ jobs:
         with:
           #gh-token: ${{ secrets.GITHUB_TOKEN }}
           gh-token: ${{ steps.app-token.outputs.token }}
+          include-drafts: false
+          include-pre-releases: false
+          my_workflow_debug: false
+          #pre-release-id: 'rc'  # the default is 'rc'
+          strategy: 'branch-tag'
 
       - name: repo-version-info | Print outputs
         id: print-repo-info
