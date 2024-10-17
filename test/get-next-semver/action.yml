@@ -184,6 +184,38 @@ runs:
         echo "::notice file=get-next-semver,title=blank-pre-release-id::The pre-release-id value is blank, it is not using the default value."
         echo "completing the 'blank-pre-release-id' step. "
 
+    - name: Add inputs to the environment
+      id: add-inputs-to-env
+      shell: bash
+      run: | 
+        ## the double number signs below are for line spacing and readability only
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo " Setting input 'include-drafts' to env var 'INCLUDE_DRAFTS'. "; fi
+        echo "INCLUDE_DRAFTS=${{ inputs.include-drafts }}" >> $GITHUB_ENV
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo " Setting input 'include-pre-releases' to env var 'INCLUDE_PRE_RELEASES'. "; fi
+        echo "INCLUDE_PRE_RELEASES=${{ inputs.include-pre-releases }}" >> $GITHUB_ENV
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo " Setting input 'pre-release-id' to env var 'PRE_RELEASE_ID'. "; fi
+        echo "PRE_RELEASE_ID=${{ inputs.pre-release-id }}" >> $GITHUB_ENV
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo " Setting input 'release-type' to env var 'RELEASE_TYPE'. "; fi
+        echo "RELEASE_TYPE=${{ inputs.release-type }}" >> $GITHUB_ENV
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo " Setting input 'strategy' to env var 'STRATEGY'. "; fi
+        echo "STRATEGY=${{ inputs.strategy }}" >> $GITHUB_ENV
+        ##
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
+            echo " Setting input 'verbose' to env var 'VERBOSE'. "; fi
+        echo "VERBOSE=${{ inputs.verbose }}" >> $GITHUB_ENV
+        ##
+        echo "The 'add-inputs-to-env' step has finished."
+
     - name: Get the current release version
       id: get-current-release
       shell: bash
