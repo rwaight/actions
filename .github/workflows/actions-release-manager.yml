@@ -45,6 +45,13 @@ env:
   IS_CURRENT_TAG: ${{ startsWith(github.ref_name, 'v0.[2-9].[0-9]+') }}
   IS_0_DOT_2_TAG: ${{ startsWith(github.ref_name, 'v0.2.[0-9]+') }}
   # the variables above should be used to determine if the major tag should be updated
+  # when a minor (or major) version is incremented, then the 'IS_CURRENT_TAG' variable should be updated
+  ### the 'v[0-9].[0-9].[0-9]' filter pattern will need to be updated to allow double digits, using either: 
+  ###    specify 2 digits with a second range followed by `?`:
+  ###        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+  ###    or keep the single digit, but match one or more with `+`:
+  ###        'v[0-9]+.[0-9]+.[0-9]+'
+  ### https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
 
 jobs:
   # run 'update-release-draft', but only: manual (workflow_dispatch); or closed pull_request; 
@@ -275,8 +282,10 @@ jobs:
 
   # run 'update-tags-on-release', but only when a release is published
   update-tags-on-release:
-    name: Update major and minor tags on release
+    name: Update tags on release
     runs-on: ubuntu-latest
+    env:
+      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
     outputs:
       RELEASE_VERSION: ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
     permissions:
@@ -284,8 +293,6 @@ jobs:
     if: | 
       (github.repository_owner == 'rwaight') &&
       (github.event_name=='release' && github.event.action=='published')
-    env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
     steps:
       - name: Check-out the repository under GITHUB_WORKSPACE
         # Verified creator: https://github.com/marketplace/actions/checkout
@@ -373,10 +380,12 @@ jobs:
           echo ""
           echo "deprecate the 'release-vars-output' step in favor of the 'get-release-version' step "
 
-      - name: Is this an old v0.0.x - v0.1.x tag?
+      - name: Is this an old version tag?
+        #name: Is this an old v0.0.x - v0.1.x tag?
         id: check-old-tags
         # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-        if: ${{ startsWith(github.ref_name, 'v0.[0-1].[0-9]+') }} && github.ref_type == 'tag'
+        #if: ${{ startsWith(github.ref_name, 'v0.[0-1].[0-9]+') }} && github.ref_type == 'tag'
+        if: env.OLD_VERSION_TAG=='true' && github.ref_type == 'tag'
         # the conditional should only run when the tag is v1.0.x or v1.1.x
         run: |
           echo "This is an old tag: ${{ github.ref_name }} "
@@ -449,9 +458,34 @@ jobs:
         run: |
           echo "::notice::Pre-release version detected, not moving ref ${{ steps.get-release-version.outputs.major-ref }}"
 
-      - name: Update major and minor release tags for ${{ steps.get-release-version.outputs.full-version-ref }}
-        #old-name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
+      - name: Determine which tags to update
+        # Determine if only the 'minor' tag will be updated or if both 'major' and 'minor' tags will be updated
+        id: determine-tags-to-update
+        run: |
+          echo "## Determine which tags to update "
+          echo ""
+          if [ '${{ env.IS_CURRENT_TAG }}' == 'true' ]; then
+              echo "This is a current tag, so the major tag will be updated. "
+              update_major=true
+          else
+              echo "This is NOT a current tag, so the major tag WILL NOT be updated. "
+              update_major=false
+          fi
+          echo "  setting the value of 'update_major' to '${update_major}' and sending it to GitHub output"
+          echo "update_major=${update_major}" >> $GITHUB_ENV
+          echo "update_major=${update_major}" >> $GITHUB_OUTPUT
+          ##
+          echo "the 'determine-tags-to-update' step has completed. "
+
+      - name: Update release tags for ${{ steps.get-release-version.outputs.full-version-ref }}
+        #old-name: Update major and minor release tags for ${{ steps.get-release-version.outputs.full-version-ref }}
+        #old-old-name: Update major and minor release tags for ${{ steps.release-vars-output.outputs.RELEASE_VERSION }}
         id: release-tag-updater
+        #if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
+        #if: github.event.release.prerelease == false
+        if: |
+          (github.ref_type == 'tag' && github.event.release.prerelease == false && 
+          steps.check-old-tags.outcome == 'skipped' )
         uses: rwaight/actions/releases/release-tag-updater@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
         #uses: rwaight/actions/releases/release-tag-updater@v0.1.26
         #uses: rwaight/actions/releases/release-tag-updater@main
@@ -461,12 +495,14 @@ jobs:
           prefix-regex: 'v?'
           fail-on-non-semver-tag: true # default is false
           #update-major: true
-          update-major: ${{ env.IS_CURRENT_TAG }}
+          #update-major: ${{ env.IS_CURRENT_TAG }}
+          update-major: ${{ steps.determine-tags-to-update.outputs.update_major }}
           update-minor: true
           skip-repo-setup: true # default is false
           create-release: false # default is true
-        #if: (github.ref_type == 'tag' && github.event.release.prerelease == false)
-        if: github.event.release.prerelease == false
+          # if permissions error using '@main', then use 'github-token' parameter
+          # github-token: ${{ steps.app-token.outputs.token }}
+          # otherwise, see if setting 'github-token' will allow us to use the '@v1' tag
 
   # Run the 'not-repo-owner' job if the repository_owner is not correct
   not-repo-owner:
