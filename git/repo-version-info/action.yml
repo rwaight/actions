@@ -220,7 +220,7 @@ runs:
         ########
         echo "::group::running 'git describe' commands, set one in 'repo-tags-with-git' "
         echo ""
-        the command below was added on 08OCT2024
+        ## the command below was added on 08OCT2024
         echo "running the command:   git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0 "
         git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0
         echo ""
