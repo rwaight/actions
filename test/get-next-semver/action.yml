@@ -282,16 +282,82 @@ runs:
             echo ""
         fi
         ##
-        if [ '${{ inputs.release-type }}' == 'prerelease' ]; then
-            echo "capturing the latest pre-release from the GitHub CLI, as the 'release-type' is 'prerelease'. "
-            current_release_version=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName")
-        elif [[ "${{ inputs.release-type }}" == "pre"* ]]; then
-            echo "capturing the latest premajor/preminor/prepatch/pretoprod from the GitHub CLI, as the 'release-type' is one of 'premajor/preminor/prepatch/pretoprod'. "
-            current_release_version=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName")
-            # https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
+        if [ '${{ inputs.strategy }}' == 'branch-tag' ]; then
+            ##
+            echo "Capturing branch tag information using 'git describe --tags --first-parent' with the '--match' option "
+            if [ '${{ env.prerelease_eval }}' == 'false' ]; then
+                echo "    and excluding pre-releases ... "
+                echo ""
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --first-parent --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --first-parent --abbrev=0)
+            elif [ '${{ env.prerelease_eval }}' == 'true' ]; then
+                echo "    and including pre-releases using the '${{ inputs.pre-release-id }}' identifier ... "
+                echo ""
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --first-parent --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --first-parent --abbrev=0)
+            else
+                # this should never happen
+                echo "the ELSE statement is running, defaulting to excluding pre-releases "
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --first-parent --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --first-parent --abbrev=0)
+            fi
+            ##
+        elif [ '${{ inputs.strategy }}' == 'gh-release' ]; then
+            ##
+            echo "capturing the latest-release from the GitHub CLI "
+            if [ '${{ inputs.release-type }}' == 'prerelease' ]; then
+                echo "capturing the latest pre-release from the GitHub CLI, as the 'release-type' is 'prerelease'. "
+                current_release_version=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName")
+            elif [[ "${{ inputs.release-type }}" == "pre"* ]]; then
+                echo "capturing the latest premajor/preminor/prepatch/pretoprod from the GitHub CLI, as the 'release-type' is one of 'premajor/preminor/prepatch/pretoprod'. "
+                current_release_version=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r ".[].tagName")
+                # https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
+            else
+                echo "capturing the latest (current) release from the GitHub CLI "
+                current_release_version=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+            fi
+            ##
+        elif [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
+            ##
+            echo "Capturing repo tag information using 'git describe --tags' with the '--match' option "
+            if [ '${{ env.prerelease_eval }}' == 'false' ]; then
+                echo "    and excluding pre-releases ... "
+                echo ""
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --abbrev=0)
+            elif [ '${{ env.prerelease_eval }}' == 'true' ]; then
+                echo "    and including pre-releases using the '${{ inputs.pre-release-id }}' identifier ... "
+                echo ""
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --abbrev=0)
+            else
+                # this should never happen
+                echo "the ELSE statement is running, defaulting to excluding pre-releases "
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --abbrev=0)
+            fi
+            ##
         else
-            echo "capturing the latest (current) release from the GitHub CLI "
-            current_release_version=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName")
+            ##
+            echo "the ELSE statement is running, defaulting to the 'branch tag' strategy "
+            echo "Capturing branch tag information using 'git describe --tags' with the '--match' option "
+            if [ '${{ env.prerelease_eval }}' == 'false' ]; then
+                echo "    and excluding pre-releases ... "
+                echo ""
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --first-parent --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --first-parent --abbrev=0)
+            elif [ '${{ env.prerelease_eval }}' == 'true' ]; then
+                echo "    and including pre-releases using the '${{ inputs.pre-release-id }}' identifier ... "
+                echo ""
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --first-parent --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --first-parent --abbrev=0)
+            else
+                # this should never happen
+                echo "the ELSE statement is running, defaulting to excluding pre-releases "
+                echo "    using the command:    git describe --tags --match 'v*.*.*' --first-parent --abbrev=0 "
+                current_release_version=$(git describe --tags --match 'v*.*.*' --first-parent --abbrev=0)
+            fi
+            ##
         fi
         ##
         if [ '${{ inputs.verbose }}' == 'true' ]; then
