@@ -167,8 +167,24 @@ runs:
 
     - name: Get the repo tags information with git
       id: repo-tags-with-git
+      # eventually only run this job when:  inputs.strategy=='repo-tag'
+      #if: inputs.strategy=='repo-tag'
       shell: bash
       run: |
+        echo "step id: repo-tags-with-git "
+        echo "Get the repo tags information with git "
+        echo ""
+        if [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
+            echo "capturing the latest-repo-tag from git "
+            latest_repo_tag=$(git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1)
+            echo "The latest repo tag is \`$latest_repo_tag\`"
+            echo "latest-repo-tag=${latest_repo_tag}" >> "$GITHUB_OUTPUT"
+            echo "latest-repo-tag=${latest_repo_tag}" >> $GITHUB_ENV
+        else
+            echo "the 'strategy' is NOT 'repo-tag', so the latest-repo-tag will not be sent to GitHub output"
+        fi
+        echo ""
+        echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
         echo "Using git to print tag information"
         ########
         echo "running 'git describe --tags' ... "
@@ -266,12 +282,30 @@ runs:
         echo "::endgroup::"
         echo ""
         ########
+        echo "::group::running 'git describe' commands, set two in 'repo-tags-with-git' "
         echo ""
         echo "running 'git describe --tags \`git rev-list --tags --max-count=1\`' ... "
         git describe --tags `git rev-list --tags --max-count=1`
         echo ""
         echo "running 'git describe --abbrev=0 --tags' ... "
         git describe --abbrev=0 --tags
+        echo ""
+        echo "::endgroup::"
+        echo ""
+        ########
+        echo ""
+        echo "The 'repo-tags-with-git' step is complete."
+
+    - name: Get the latest repo tags information with git
+      ## The output from this step is NOT USED
+      id: get-latest-repo-tags
+      # eventually only run this job when:  inputs.strategy=='branch-tag'
+      #if: inputs.strategy=='branch-tag'
+      shell: bash
+      run: |
+        echo "step id: get-latest-repo-tags "
+        echo "The output from this step is NOT USED"
+        echo "Get the latest repo tags information with git "
         echo ""
         if [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
             echo "capturing the latest-repo-tag from git "
@@ -283,18 +317,11 @@ runs:
             echo "the 'strategy' is NOT 'repo-tag', so the latest-repo-tag will not be sent to GitHub output"
         fi
         echo ""
-        echo "The 'repo-tags-with-git' step is complete."
-
-    - name: Get the repo tags information with git
-      id: get-repo-tags
-      # eventually only run this job when:  inputs.strategy=='branch-tag'
-      #if: inputs.strategy=='branch-tag'
-      shell: bash
-      run: |
+        echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
         echo "Using git to print tag information"
         echo ""
         ########
-        echo "::group::running 'git' commands in the 'get-repo-tags' step "
+        echo "::group::running 'git' commands in the 'get-latest-repo-tags' step "
         echo ""
         echo "running 'git describe --tags' ... "
         git describe --tags
@@ -381,49 +408,17 @@ runs:
         echo ""
         ########
         echo ""
-        if [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
-            echo "capturing the latest-repo-tag from git "
-            latest_repo_tag=$(git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1)
-            echo "The latest repo tag is \`$latest_repo_tag\`"
-            echo "latest-repo-tag=${latest_repo_tag}" >> "$GITHUB_OUTPUT"
-            echo "latest-repo-tag=${latest_repo_tag}" >> $GITHUB_ENV
-        else
-            echo "the 'strategy' is NOT 'repo-tag', so the latest-repo-tag will not be sent to GitHub output"
-        fi
-        echo ""
-        echo "The 'repo-tags-with-git' step is complete."
+        echo "The output from this step is NOT USED"
+        echo "The 'get-latest-repo-tags' step is complete."
 
     - name: Get the repo release information with the GitHub CLI
       id: releases-with-gh-cli
+      # eventually only run this job when:  inputs.strategy=='gh-release'
+      #if: inputs.strategy=='gh-release'
       shell: bash
       run: |
-        echo "Using the GitHub CLI to print release information"
-        echo "See https://cli.github.com/manual/gh_release_list for information about the command. "
-        echo "running 'gh release list' ... "
-        gh release list
-        echo ""
-        echo "::group::running 'gh release list --exclude-drafts' ... "
-        echo "running 'gh release list --exclude-drafts' ... "
-        gh release list --exclude-drafts
-        echo "::endgroup::"
-        echo ""
-        echo "::group::running 'gh release list --exclude-drafts --exclude-pre-releases' ... "
-        echo "running 'gh release list --exclude-drafts --exclude-pre-releases' ... "
-        gh release list --exclude-drafts --exclude-pre-releases
-        echo "::endgroup::"
-        echo ""
-        echo "::group::running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1' ... "
-        echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1' ... "
-        gh release list --exclude-drafts --exclude-pre-releases --limit 1
-        echo "::endgroup::"
-        echo ""
-        echo "To learn more about using the GitHub CLI with workflows... "
-        echo "See https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows "
-        echo ""
-        echo "::group::running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r \".[].tagName\"' ... "
-        echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r \".[].tagName\"' ... "
-        gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
-        echo "::endgroup::"
+        echo "step id: releases-with-gh-cli "
+        echo "Get the repo release information with the GitHub CLI "
         echo ""
         if [ '${{ inputs.strategy }}' == 'gh-release' ]; then
             echo "capturing the latest-release from the GitHub CLI "
@@ -458,6 +453,40 @@ runs:
         else
             echo "the 'strategy' is NOT 'gh-release', so the latest-release will not be sent to GitHub output"
         fi
+        echo ""
+        echo "Using the GitHub CLI to print release information"
+        echo "See https://cli.github.com/manual/gh_release_list for information about the command. "
+        echo ""
+        echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
+        echo ""
+        echo "::group::running 'gh release list' ... "
+        echo "running 'gh release list' ... "
+        gh release list
+        echo "::endgroup::"
+        echo ""
+        echo "::group::running 'gh release list --exclude-drafts' ... "
+        echo "running 'gh release list --exclude-drafts' ... "
+        gh release list --exclude-drafts
+        echo "::endgroup::"
+        echo ""
+        echo "::group::running 'gh release list --exclude-drafts --exclude-pre-releases' ... "
+        echo "running 'gh release list --exclude-drafts --exclude-pre-releases' ... "
+        gh release list --exclude-drafts --exclude-pre-releases
+        echo "::endgroup::"
+        echo ""
+        echo "::group::running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1' ... "
+        echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1' ... "
+        gh release list --exclude-drafts --exclude-pre-releases --limit 1
+        echo "::endgroup::"
+        echo ""
+        echo "To learn more about using the GitHub CLI with workflows... "
+        echo "See https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows "
+        echo ""
+        echo "::group::running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r \".[].tagName\"' ... "
+        echo "running 'gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r \".[].tagName\"' ... "
+        gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
+        echo "::endgroup::"
+        echo ""
         echo "The 'releases-with-gh-cli' step is complete."
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
@@ -468,21 +497,30 @@ runs:
       run: |
         echo "Using the '${{ inputs.strategy }}' strategy to determine the value of version"
         if [ '${{ inputs.strategy }}' == 'branch-tag' ]; then
-            echo "confirming that the strategy is 'branch-tag', going to set the output accordingly "
+            echo "confirming that the strategy is 'branch-tag' "
+            echo "Setting the 'version' to '${latest-branch-tag}' "
+            version=${latest-branch-tag}
         #
         elif [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
-            echo "confirming that the strategy is 'repo-tag', going to set the output accordingly "
+            echo "confirming that the strategy is 'repo-tag' "
+            echo "Setting the 'version' output to '${latest-repo-tag}' "
+            version=${latest-repo-tag}
         #
         elif [ '${{ inputs.strategy }}' == 'gh-release' ]; then
-            echo "confirming that the strategy is 'gh-release', going to set the output accordingly "
+            echo "confirming that the strategy is 'gh-release' "
             echo "Setting the 'version' output to '${latest-release}' "
-            echo "version=${latest-release}" >> $GITHUB_ENV
-            echo "version=${latest-release}" >> "$GITHUB_OUTPUT"
+            version=${latest-release}
         #
         else
             # this should never happen
             echo "the ELSE statement is running, defaulting to the 'branch-tag' strategy "
+            echo "Setting the 'version' to '${latest-branch-tag}' "
+            version=${latest-branch-tag}
         fi
+        #
+        echo "The 'version' variable has been set to \`${version}\`, sending to GitHub output"
+        echo "version=${version}" >> $GITHUB_ENV
+        echo "version=${version}" >> "$GITHUB_OUTPUT"
         #
         echo "The 'set-action-outputs' step is complete."
       env:
