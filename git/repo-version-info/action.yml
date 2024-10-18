@@ -193,6 +193,11 @@ runs:
         git log --first-parent --pretty=%d | grep -m1 tag:
         echo ""
         ## the command below was added on 08OCT2024
+        ## this command caused the GitHub runner to error with exit code 141: 'git log --first-parent --pretty=%d | grep -m1 tag:'
+        ## ## the command below was added on 08OCT2024
+        ## echo "running 'git log --first-parent --pretty=%d | grep -m1 tag:' "
+        ## git log --first-parent --pretty=%d | grep -m1 tag:
+        ## echo ""
         echo "running the command:   git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0 "
         git describe --tags --match '*.*.*' --match '*.*.*-*' --match '*.*.*-rc.*' --first-parent --abbrev=0
         echo ""
