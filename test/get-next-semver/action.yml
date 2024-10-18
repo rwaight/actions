@@ -228,6 +228,8 @@ runs:
         elif [[ "${{ env.RELEASE_TYPE }}" == "pre"* ]]; then
             echo "the 'release-type' is one of 'premajor/preminor/prepatch/pretoprod', setting 'prerelease_eval' to true. "
             prerelease_eval=true
+            # echo "capturing the latest tag from the CLI, as the 'release-type' is one of 'premajor/preminor/prepatch'. "
+            # https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
         elif [ '${{ env.INCLUDE_PRE_RELEASES }}' == 'true' ]; then
             echo "the input 'include-pre-releases' is true, setting 'prerelease_eval' to true. "
             prerelease_eval=true
@@ -439,17 +441,58 @@ runs:
             echo ""
         fi
         ##
-        echo "This step uses 'git describe' with 'git rev-list' to get tags across all branches, not just the current branch"
-        if [ '${{ inputs.release-type }}' == 'prerelease' ]; then
-            echo "capturing the latest tag from the CLI, as the 'release-type' is 'prerelease'. "
-            current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
-        elif [[ "${{ inputs.release-type }}" == "pre"* ]]; then
-            echo "capturing the latest tag from the CLI, as the 'release-type' is one of 'premajor/preminor/prepatch'. "
-            current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
-            # https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
+        if [ '${{ inputs.strategy }}' == 'branch-tag' ]; then
+            ##
+            echo "Capturing branch tag information using 'git describe --tags --first-parent' with the '--match' option "
+            if [ '${{ env.prerelease_eval }}' == 'false' ]; then
+                echo "    and excluding pre-releases ... "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' --abbrev=0 --first-parent `git rev-list --tags --max-count=1 --branches`)
+            elif [ '${{ env.prerelease_eval }}' == 'true' ]; then
+                echo "    and including pre-releases using the '${{ inputs.pre-release-id }}' identifier ... "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --abbrev=0 --first-parent `git rev-list --tags --max-count=1 --branches`)
+            else
+                # this should never happen
+                echo "the ELSE statement is running, defaulting to excluding pre-releases "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' --abbrev=0 --first-parent `git rev-list --tags --max-count=1 --branches`)
+            fi
+            ##
+        elif [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
+            ##
+            echo "Capturing repo tag information using 'git describe --tags' with the '--match' option "
+            echo ""
+            echo "This step uses 'git describe' with 'git rev-list' to get tags across all branches, not just the current branch"
+            if [ '${{ env.prerelease_eval }}' == 'false' ]; then
+                echo "    and excluding pre-releases ... "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' `git rev-list --tags --max-count=1`)
+            elif [ '${{ env.prerelease_eval }}' == 'true' ]; then
+                echo "    and including pre-releases using the '${{ inputs.pre-release-id }}' identifier ... "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' `git rev-list --tags --max-count=1`)
+            else
+                # this should never happen
+                echo "the ELSE statement is running, defaulting to excluding pre-releases "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' `git rev-list --tags --max-count=1`)
+            fi
+            ##
         else
+            echo "the ELSE statement is running, which will get the tag for the gh-release strategies "
             echo "capturing the latest (current) tag from the CLI "
-            current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
+            ## current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
+            echo ""
+            echo "This step uses 'git describe' with 'git rev-list' to get tags across all branches, not just the current branch"
+            if [ '${{ env.prerelease_eval }}' == 'false' ]; then
+                echo "    and excluding pre-releases ... "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' --abbrev=0 --first-parent `git rev-list --tags --max-count=1`)
+            elif [ '${{ env.prerelease_eval }}' == 'true' ]; then
+                echo "    and including pre-releases using the '${{ inputs.pre-release-id }}' identifier ... "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' --match 'v*.*.*-${{ inputs.pre-release-id }}*' --abbrev=0 --first-parent `git rev-list --tags --max-count=1`)
+                ## current_tag_version=$(git describe --tags `git rev-list --tags --max-count=1`)
+                ## https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
+            else
+                # this should never happen
+                echo "the ELSE statement is running, defaulting to excluding pre-releases "
+                current_tag_version=$(git describe --tags --match 'v*.*.*' --abbrev=0 --first-parent `git rev-list --tags --max-count=1`)
+            fi
+            ##
         fi
         ##
         if [ '${{ inputs.verbose }}' == 'true' ]; then
