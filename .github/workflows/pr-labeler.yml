@@ -109,14 +109,8 @@ jobs:
       - name: Autorelease | Set the label scope to 'version' for semver checking
         #name: Autorelease | Check 'autorelease' branch
         id: set-label-scope-semver
-        #if: contains('refs/heads/autorelease', github.ref)
-        # this does not work #if: ${{ contains('refs/heads/autorelease', github.ref) }}
+        # use startsWith instead of contains ##if: ${{ contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
-        # if: | 
-        #   contains('
-        #     refs/heads/autorelease
-        #     refs/heads/production
-        #   ', github.ref)
         run: |
           ## the double number signs below are for line spacing and readability only
           ##
@@ -187,7 +181,7 @@ jobs:
 
       - name: Set the label scope to 'type'
         id: set-label-scope-type
-        # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
         run: |
           ## the double number signs below are for line spacing and readability only
@@ -292,8 +286,7 @@ jobs:
       - name: Autorelease | Check for semantic version labels
         uses: rwaight/actions/test/check-semver-labels@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
         id: check-version-labels
-        #if: contains(github.event.pull_request.labels.*.name, 'actions:autorelease')
-        # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
         with:
           gh-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
@@ -306,7 +299,7 @@ jobs:
       - name: Check for type labels
         uses: rwaight/actions/github/label-checker@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
         id: check-type-labels
-        # this does not work #if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
+        # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
         with:
           allow_failure: true
