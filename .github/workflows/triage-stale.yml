@@ -1,4 +1,5 @@
 # This workflow currently runs the 'stale-issue-and-pr' action
+# This file is sourced from 'infra/assets/gh_workflows'
 name: Triage stale records
 run-name: Triage stale issues and PRs - ${{ github.event_name }}
 on:
@@ -34,6 +35,7 @@ jobs:
     # From GitHub: https://github.com/marketplace/actions/close-stale-issues
     # See https://github.com/actions/stale#readme for configuration options
     steps:
+
       - name: Exit workflow in forked repo
         id: check-repo-owner
         if: (github.repository_owner != 'rwaight')
