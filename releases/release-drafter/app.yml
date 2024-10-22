@@ -1,0 +1,8 @@
+default_events:
+  - push
+default_permissions:
+  contents: write
+  metadata: read
+  pull_requests: read
+url: https://github.com/rwaight/actions/release-drafter-serverless
+public: true
