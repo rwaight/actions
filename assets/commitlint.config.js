@@ -38,4 +38,5 @@ module.exports = {
     },
 
     helpUrl: 'https://github.com/conventional-changelog/commitlint/#what-is-commitlint'
+    // This file is sourced from 'infra/assets/gh_workflows'
 };
