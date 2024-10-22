@@ -1,10 +1,18 @@
 # This workflow runs the 'Export label config' and 'Sync labels' actions and includes user input
+# This file is sourced from 'infra/assets/gh_workflows'
 name: Label Manager
 run-name: Run ${{ github.event.action || 'label manager' }} from ${{ github.event_name }}
 on: 
+  # When any of the 'assets/my-labels-*.yml' files are updated
+  push:
+    branches:
+      - main
+    paths:
+      - 'assets/my-labels-*.yml'
+  # When called by a 'repository_dispatch' event
   repository_dispatch:
     types: [export-labels,sync-labels]
-  # You can run this with every event, but it's better to run it only when you actually need it.
+  # When called manually by a 'workflow_dispatch' event
   workflow_dispatch:
     inputs:
       export_labels:
@@ -22,6 +30,7 @@ on:
         required: true
         default: false
         type: boolean
+  # On a schedule: every six months, at 10:00 on the first of the month
   schedule:
     - cron: '0 10 1 */6 *'  # export labels once every six months, at 10:00 on the first of the month
 
@@ -85,7 +94,8 @@ jobs:
           (github.event_name=='workflow_dispatch' && inputs.export_labels==true) || 
           (github.event_name=='repository_dispatch' && github.event.action=='export-labels') ||
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
-          (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
+          (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
+          (github.event_name=='push' && github.ref_name=='main') 
         uses: rwaight/actions/github/export-label-config@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
         #uses: rwaight/actions/github/export-label-config@v0.1.26
         #uses: rwaight/actions/github/export-label-config@main
@@ -103,22 +113,24 @@ jobs:
         if: | 
           steps.export-label-config.outcome == 'success' && (
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
-          (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
+          (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
+          (github.event_name=='push' && github.ref_name=='main') 
           )
         uses: rwaight/actions/github/label-sync@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
         #uses: rwaight/actions/github/label-sync@v0.1.26
         #uses: rwaight/actions/github/label-sync@main
         with:
           config-file: |
-            https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
-            https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-actions.yml
-            https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-versioning.yml
-          ##  assets/my-labels-core.yml
-          ##  assets/my-labels-actions.yml
-          ##  assets/my-labels-versioning.yml
-          #
-          # The 'request-token' parameter is needed so the remote config-file values can be accessed
-          request-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+            assets/my-labels-core.yml
+            assets/my-labels-actions.yml
+            assets/my-labels-versioning.yml
+          ## use the repo's local labels in the 'assets/' directory
+          ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-core.yml
+          ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-actions.yml
+          ##  https://raw.githubusercontent.com/rwaight/actions/main/assets/my-labels-versioning.yml
+          ## #
+          ## # The 'request-token' parameter is needed so the remote config-file values can be accessed
+          ## request-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
           # If you want to delete any additional label, set this to true
           delete-other-labels: true
           # If you want the action just to show you the preview of the changes, without actually editing the labels, set this to true

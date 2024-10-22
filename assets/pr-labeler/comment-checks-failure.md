@@ -12,3 +12,4 @@ This sentence contains render template variables such as {{ .foo }} and {{ .bar 
 [1]: https://github.com/rwaight/actions/tree/main/chatops/create-or-update-comment#github-create-or-update-comment-action
 
 </details>
+
