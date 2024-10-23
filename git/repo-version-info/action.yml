@@ -530,28 +530,32 @@ runs:
     - name: Set action outputs
       id: set-action-outputs
       shell: bash
+      env:
+        latest-branch-tag: ${{ steps.get-branch-tags.outputs.latest-branch-tag }}
+        latest-release: ${{ steps.releases-with-gh-cli.outputs.latest-release }}
+        latest-repo-tag: ${{ steps.repo-tags-with-git.outputs.latest-repo-tag }}
       run: |
         echo "Using the '${{ inputs.strategy }}' strategy to determine the value of version"
         if [ '${{ inputs.strategy }}' == 'branch-tag' ]; then
             echo "confirming that the strategy is 'branch-tag' "
-            echo "Setting the 'version' to '${latest-branch-tag}' "
-            version=${latest-branch-tag}
+            echo "Setting the 'version' to '${{ env.latest-branch-tag }}' "
+            version=${{ env.latest-branch-tag }}
         #
         elif [ '${{ inputs.strategy }}' == 'repo-tag' ]; then
             echo "confirming that the strategy is 'repo-tag' "
-            echo "Setting the 'version' output to '${latest-repo-tag}' "
-            version=${latest-repo-tag}
+            echo "Setting the 'version' output to '${{ env.latest-repo-tag }}' "
+            version=${{ env.latest-repo-tag }}
         #
         elif [ '${{ inputs.strategy }}' == 'gh-release' ]; then
             echo "confirming that the strategy is 'gh-release' "
-            echo "Setting the 'version' output to '${latest-release}' "
-            version=${latest-release}
+            echo "Setting the 'version' output to '${{ env.latest-release }}' "
+            version=${{ env.latest-release }}
         #
         else
             # this should never happen
             echo "the ELSE statement is running, defaulting to the 'branch-tag' strategy "
-            echo "Setting the 'version' to '${latest-branch-tag}' "
-            version=${latest-branch-tag}
+            echo "Setting the 'version' to '${{ env.latest-branch-tag }}' "
+            version=${{ env.latest-branch-tag }}
         fi
         #
         echo "The 'version' variable has been set to \`${version}\`, sending to GitHub output"
@@ -559,8 +563,4 @@ runs:
         echo "version=${version}" >> "$GITHUB_OUTPUT"
         #
         echo "The 'set-action-outputs' step is complete."
-      env:
-        latest-branch-tag: ${{ steps.get-branch-tags.outputs.latest-branch-tag }}
-        latest-release: ${{ steps.releases-with-gh-cli.outputs.latest-release }}
-        latest-repo-tag: ${{ steps.repo-tags-with-git.outputs.latest-repo-tag }}
 
