@@ -108,6 +108,11 @@
   description: 'Impacting example actions and/or workflows'
   aliases: []
 -
+  name: 'impacts:infra'
+  color: '5F9188'
+  description: 'Impacting the ''infra'' directory'
+  aliases: []
+-
   name: 'impacts:repo'
   color: '5F9188'
   description: 'Impacting the ''.git'' or ''.github'' directory'

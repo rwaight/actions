@@ -71,17 +71,23 @@ impacts:actions:
   - changed-files:
     - any-glob-to-any-file: ['builders/**', 'chatops/**', 'composite/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
 
-# Add 'impacts:assets' label to any file changes within the 'assets' folder
+# Add 'impacts:assets' label to any file changes within the 'assets' folder or 'infra/assets' folder
 impacts:assets:
 - any:
   - changed-files:
-    - any-glob-to-any-file: 'assets/**'
+    - any-glob-to-any-file: ['assets/**', 'infra/assets/**']
 
 # Add 'impacts:examples' label to any file changes within the 'examples' folder
 impacts:examples:
 - any:
   - changed-files:
     - any-glob-to-any-file: 'examples/**'
+
+# Add 'impacts:infra' label to any file changes within the 'infra' folder
+impacts:infra:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'infra/**'
 
 # Add 'impacts:repo' label to file changes within the '.github' folder EXCEPT for the workflows sub-folder
 impacts:repo:
