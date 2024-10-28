@@ -1,5 +1,5 @@
 # This workflow currently runs the 'stale-issue-and-pr' action
-# This file is sourced from 'infra/assets/gh_workflows'
+# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/gh_workflows/triage-stale.yml'
 name: Triage stale records
 run-name: Triage stale issues and PRs - ${{ github.event_name }}
 on:

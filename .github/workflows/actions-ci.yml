@@ -1,6 +1,6 @@
 # attempt to adhere to a commit convention - https://commitlint.js.org/
 # from https://commitlint.js.org/guides/ci-setup.html#github-actions
-# This file is sourced from 'infra/assets/gh_workflows'
+# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/gh_workflows/actions-ci.yml'
 name: Commit manager
 run-name: Check commit conventions on ${{ github.event_name }}
 
@@ -33,7 +33,7 @@ jobs:
       - name: Checkout files from commit tree
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 

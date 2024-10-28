@@ -1,6 +1,6 @@
 # This configuration is used in the 'label-manager' workflow
 # Examples from https://github.com/actions/labeler?tab=readme-ov-file#basic-examples
-# This file is sourced from 'infra/assets/dot_gh'
+# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/dot_gh/labeler.yml'
 
 actions:autorelease:
 - any:

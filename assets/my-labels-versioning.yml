@@ -3,6 +3,8 @@
 ## These labels should be used in repos where release-drafter
 ##   is in use and where versioning is in place.
 #
+# This file is sourced from the 'infra' repo, the file location is: ''
+#
 ##### triage: labels
 -
   name: 'triage:version-needed'
