@@ -32,31 +32,31 @@ updates:
     reviewers:
       - "rwaight"
 
-  # attempt to update the github actions files within the 'assets/copycat' directory
-  - package-ecosystem: "github-actions"
-    commit-message:
-      # Prefix all commit messages with "chore(assets): "
-      prefix: "chore(assets): "
-    directory: "/assets/copycat/"
-    schedule:
-      # Runs once each month. This is on the first day of the month.
-      #interval: "monthly"
-      # Runs once each week. By default, this is on Monday. To modify this, use `schedule.day`.
-      interval: "weekly"
-      day: "wednesday"
-    labels:
-      - "actions:dependabot"
-      - "type:chore"
-      - "impacts:assets"
-    pull-request-branch-name:
-      # Separate sections of the branch name with a hyphen
-      separator: "-"
-    groups:
-      docker:
-        patterns:
-        - "docker*"
-      rwaight:
-        patterns:
-        - "rwaight*"
-    reviewers:
-      - "rwaight"
+  # # attempt to update the github actions files within the 'assets/copycat' directory
+  # - package-ecosystem: "github-actions"
+  #   commit-message:
+  #     # Prefix all commit messages with "chore(assets): "
+  #     prefix: "chore(assets): "
+  #   directory: "/assets/copycat/"
+  #   schedule:
+  #     # Runs once each month. This is on the first day of the month.
+  #     #interval: "monthly"
+  #     # Runs once each week. By default, this is on Monday. To modify this, use `schedule.day`.
+  #     interval: "weekly"
+  #     day: "wednesday"
+  #   labels:
+  #     - "actions:dependabot"
+  #     - "type:chore"
+  #     - "impacts:assets"
+  #   pull-request-branch-name:
+  #     # Separate sections of the branch name with a hyphen
+  #     separator: "-"
+  #   groups:
+  #     docker:
+  #       patterns:
+  #       - "docker*"
+  #     rwaight:
+  #       patterns:
+  #       - "rwaight*"
+  #   reviewers:
+  #     - "rwaight"
