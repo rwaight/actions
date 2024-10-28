@@ -1,6 +1,6 @@
 # GitHub Create or Update Comment Action
 
-The current version in this repo was based off of [**create-or-update-comment** commit `a6e9cd3`](https://github.com/peter-evans/create-or-update-comment/commit/a6e9cd36f51df4b62eda17117243a51ea193c133) (newer than [version 3.1.0](https://github.com/peter-evans/create-or-update-comment/releases/tag/v3.1.0))
+The current version in this repo was based off of [**create-or-update-comment** commit `71345be`](https://github.com/peter-evans/create-or-update-comment/commit/71345be0265236311c031f5c7866368bd1eff043) ([version 4.0.0](https://github.com/peter-evans/create-or-update-comment/releases/tag/v4.0.0))
 - This action is from https://github.com/peter-evans/create-or-update-comment.
 
 The [`peter-evans/create-or-update-comment`](https://github.com/peter-evans/create-or-update-comment) code has an MIT license:
@@ -119,7 +119,7 @@ If the find-comment action output `comment-id` returns an empty string, a new co
 If it returns a value, the comment already exists and the content is replaced.
 ```yml
     - name: Find Comment
-      uses: rwaight/actions/chatops/find-comment@v2
+      uses: rwaight/actions/chatops/find-comment@main
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -140,7 +140,7 @@ If it returns a value, the comment already exists and the content is replaced.
 If required, the create and update steps can be separated for greater control.
 ```yml
     - name: Find Comment
-      uses: rwaight/actions/chatops/find-comment@v2
+      uses: rwaight/actions/chatops/find-comment@main
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
