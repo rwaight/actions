@@ -7,6 +7,8 @@
 ##       has been migrated to the new label, across all repos,
 ##       it can then be deleted in this file.
 #
+# This file is sourced from the 'infra' repo, the file location is: ''
+#
 ##### default GitHub labels
 # The following labels were part of GitHub repos by default
 -
