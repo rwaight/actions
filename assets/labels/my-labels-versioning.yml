@@ -1,0 +1,56 @@
+## Versioning GitHub Labels
+##
+## These labels should be used in repos where release-drafter
+##   is in use and where versioning is in place.
+#
+# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/labels/my-labels-versioning.yml'
+#
+##### triage: labels
+-
+  name: 'triage:version-needed'
+  color: 'C01777'
+  description: 'Need to have the version determined'
+  aliases: []
+#
+##### version: labels
+# The version: labels have not been formally defined
+-
+  name: 'skip-changelog'
+  color: '415259'
+  description: 'Skip adding to release-drafter'
+  aliases: []
+-
+  name: 'version:major'
+  color: 'BFD4F2'
+  description: 'Bump repo release ''major'' version'
+  aliases: []
+-
+  name: 'version:minor'
+  color: 'C7B3E5'
+  description: 'Bump repo release ''minor'' version'
+  aliases: []
+-
+  name: 'version:patch'
+  color: 'C7B3F1'
+  description: 'Bump repo release ''patch'' version'
+  aliases: []
+-
+  name: 'version:premajor'
+  color: 'BFD4F2'
+  description: 'Bump repo release ''premajor'' version'
+  aliases: []
+-
+  name: 'version:preminor'
+  color: 'C7B3E5'
+  description: 'Bump repo release ''preminor'' version'
+  aliases: []
+-
+  name: 'version:prepatch'
+  color: 'C7B3F1'
+  description: 'Bump repo release ''prepatch'' version'
+  aliases: []
+-
+  name: 'version:pretoprod'
+  color: '70226A'
+  description: 'Bump repo release ''pretoprod'' version'
+  aliases: []

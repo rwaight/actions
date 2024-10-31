@@ -56,14 +56,14 @@ jobs:
           # echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.js
           # echo "the 'commitlint.config.js' file has been created. "
 
-      # https://commitlint.js.org/guides/getting-started.html
-      - name: Configure commitlint
-        id: configure-commitlint
-        run: |
-          echo "starting commitlint configuration. "
-          echo "copying 'commitlint.config.js' from the 'assets/' directory. "
-          cp assets/commitlint.config.js commitlint.config.js
-          echo "the 'commitlint.config.js' configuration has been copied to the current working directory. "
+      # # https://commitlint.js.org/guides/getting-started.html
+      # - name: Configure commitlint
+      #   id: configure-commitlint
+      #   run: |
+      #     echo "starting commitlint configuration. "
+      #     echo "copying 'commitlint.config.js' from the 'assets/' directory. "
+      #     cp assets/commitlint.config.js commitlint.config.js
+      #     echo "the 'commitlint.config.js' configuration has been copied to the current working directory. "
 
       # https://commitlint.js.org/guides/local-setup.html
       - name: Install husky
