@@ -19,6 +19,9 @@ on:
   schedule:
     - cron: '15 14 * * 2' # At 2:15pm UTC every Tuesday, used by 'stale-issue-and-pr'
 
+env:
+  # the owner of the repo, used in conditionals below
+  GH_OWNER: rwaight
 
 jobs:
   # Run 'Triage Issues and PRs', but only: At 2:15pm UTC every Tuesday; or manual (workflow_dispatch)
@@ -38,17 +41,17 @@ jobs:
 
       - name: Exit workflow in forked repo
         id: check-repo-owner
-        if: (github.repository_owner != 'rwaight')
+        if: ${{ github.repository_owner != env.GH_OWNER }}
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          echo "This workflow will now exit. "
-          exit 0
+          echo "This workflow will now fail and exit. "
+          echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
+          exit 1
 
       - name: Triage issues using actions/stale
         # Verified creator: https://github.com/marketplace/actions/close-stale-issues
         # Marks issues and pull requests that have not had recent interaction
         uses: actions/stale@28ca1036281a5e5922ead5184a1bbf96e5fc984e # v9.0.0
-        #uses: actions/stale@v9.0.0
         with:
           days-before-close: -1 # do not close issues or PRs
           days-before-issue-stale: 90

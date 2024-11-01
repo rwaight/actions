@@ -34,6 +34,10 @@ on:
   schedule:
     - cron: '0 10 1 */6 *'  # export labels once every six months, at 10:00 on the first of the month
 
+env:
+  # the owner of the repo, used in conditionals below
+  GH_OWNER: rwaight
+
 jobs:
   export-and-sync-labels:
     name: Export and sync repo labels
@@ -44,13 +48,16 @@ jobs:
       contents: write
       issues: write
     steps:
+
       - name: Exit workflow in forked repo
         id: check-repo-owner
-        if: (github.repository_owner != 'rwaight')
+        if: ${{ github.repository_owner != env.GH_OWNER }}
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          echo "This workflow will now exit. "
-          exit 0
+          echo "This workflow will now fail and exit. "
+          echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
+          exit 1
 
       # Create a GitHub App Token from actions/create-github-app-token
       # https://github.com/actions/create-github-app-token
