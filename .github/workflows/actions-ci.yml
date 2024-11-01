@@ -12,6 +12,10 @@ on:
       - '!v*'
   pull_request:
 
+env:
+  # the owner of the repo, used in conditionals below
+  GH_OWNER: rwaight
+
 jobs:
   commitlint:
     runs-on: ubuntu-22.04
@@ -20,15 +24,16 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+
       - name: Exit workflow in forked repo
         id: check-repo-owner
-        if: (github.repository_owner != 'rwaight')
+        if: ${{ github.repository_owner != env.GH_OWNER }}
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
           echo "This workflow will now fail and exit. "
           echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
-          exit 0
-        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+          exit 1
 
       - name: Checkout files from commit tree
         # Verified creator: https://github.com/marketplace/actions/checkout
