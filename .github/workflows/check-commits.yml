@@ -1,7 +1,8 @@
 # attempt to adhere to a commit convention - https://commitlint.js.org/
 # from https://commitlint.js.org/guides/ci-setup.html#github-actions
-# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/gh_workflows/actions-ci.yml'
-name: Commit manager
+# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/gh_workflows/check-commits.yml'
+
+name: Check commits
 run-name: Check commit conventions on ${{ github.event_name }}
 
 on:
@@ -13,10 +14,14 @@ on:
   pull_request:
 
 env:
+  VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
+  # the bot name without the '[bot]' suffix
+  GH_LOCAL_BOT_NAME: 'rw-actions-bot'
   # the owner of the repo, used in conditionals below
   GH_OWNER: rwaight
 
 jobs:
+
   commitlint:
     runs-on: ubuntu-22.04
     if: (github.repository_owner == 'rwaight')
@@ -45,7 +50,7 @@ jobs:
       - name: Setup Node.js environment
         # Verified creator: https://github.com/marketplace/actions/setup-node-js-environment
         # Set up your GitHub Actions workflow with a specific version of node.js
-        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
 
       # https://commitlint.js.org/guides/getting-started.html
       - name: Install commitlint
@@ -85,15 +90,20 @@ jobs:
 
       # https://commitlint.js.org/guides/ci-setup.html#github-actions
       - name: Print versions
+        id: print-versions
         run: |
           echo "::group::display file contents of current directory"
           ls -la
           echo "look for the 'commitlint.config.js' file in the output above"
           echo "::endgroup::"
+          echo ""
+          echo "::group::display the versions of the software on the runner"
           git --version
           node --version
           npm --version
           npx commitlint --version
+          echo "::endgroup::"
+          echo ""
 
       - name: Validate current commit (last commit) with commitlint
         if: github.event_name == 'push'

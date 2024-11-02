@@ -1,7 +1,15 @@
-# Automations Files
+# Asset Files
 
 This folder contains files used in GitHub automations.
 
-## Labels Files
+## Infra-sourced Asset Files
 
-The `my-labels-*` files can be used by the **label-sync** action (see [`rwaight/actions/github/label-sync`](https://github.com/rwaight/actions/tree/main/github/label-sync)).
+The following asset files and directories are sourced from the 'infra' repo in the `infra/assets/` directory:
+
+```bash
+./infra/assets/
+├── labels
+└── pr-labeler
+
+2 directories, 0 files
+```
