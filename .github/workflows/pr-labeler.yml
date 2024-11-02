@@ -1,4 +1,6 @@
 # This workflow currently runs the 'pr-labeler' action
+# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/gh_workflows/pr-labeler.yml'
+
 name: PR Labeler
 run-name: Label PR ${{ github.event.number }} on ${{ github.head_ref || github.ref_name }}
 on:
@@ -14,11 +16,18 @@ on:
       - review_requested
   # workflow_dispatch:
   #   inputs:
-  #     debug_output:
-  #       description: 'Debug output'
+  #     verbose_output:
+  #       description: 'Verbose output'
   #       required: true
   #       default: false
   #       type: boolean
+
+env:
+  VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
+  # the bot name without the '[bot]' suffix
+  GH_LOCAL_BOT_NAME: 'rw-actions-bot'
+  # the owner of the repo, used in conditionals below
+  GH_OWNER: rwaight
 
 # https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
@@ -31,9 +40,6 @@ concurrency:
 
 jobs:
   pr-labeler:
-    #name: PR Labeler
-    # commenting out the name with the '${{ github.event.number }}' as the job could
-    # not be selected as a required status check as part of protecting branches
     #name: Label pull request ${{ github.event.number }}
     runs-on: ubuntu-latest
     # the 'if' statement below is not needed at this time, but would be if the 'on' section above changes
@@ -54,31 +60,16 @@ jobs:
     #   group: ${{ github.workflow }}-${{ github.ref }}
     #   cancel-in-progress: true
     steps:
-      # Issuing 'exit 0' does not force the workflow to exit early
-      #   need to issue 'gh run cancel ${{ github.run_id }}'
-      #   and might need to change 'exit 0' to 'exit 1' or a non-zero numerical value
-      # https://github.com/orgs/community/discussions/82744#discussioncomment-8718646
-      - name: Forked repo | checkout using built-in token
-        if: (github.repository_owner != 'rwaight')
-        # Save this in case we want to exit the workflow if it is called by 'rw-actions-bot[bot]'
-        #if: (github.repository_owner != 'rwaight') || ${{ github.actor == 'rw-actions-bot[bot]' }}
-        # Verified creator: https://github.com/marketplace/actions/checkout
-        # GitHub Action for checking out a repo
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
 
-      - name: Forked repo | Exit workflow early in forked repo
+      - name: Exit workflow in forked repo
         id: check-repo-owner
-        if: (github.repository_owner != 'rwaight')
+        if: ${{ github.repository_owner != env.GH_OWNER }}
+        # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: |
           echo "This workflow was run in a forked repo. Unless this file is updated, none of the jobs will run. "
-          ##echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
-          gh run cancel ${{ github.run_id }}
-          echo "The 'check-repo-owner' step is finishing and this workflow will now exit. "
-          gh run watch ${{ github.run_id }}
+          echo "This workflow will now fail and exit. "
+          echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
           exit 1
-        # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       # # Save this in case we want to exit the workflow if it is called by 'rw-actions-bot[bot]'
       # - name: Exit workflow if called by 'rw-actions-bot[bot]'
@@ -90,6 +81,7 @@ jobs:
       #     gh run cancel ${{ github.run_id }}
       #     echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
       #     gh run watch ${{ github.run_id }}
+      #     exit 1
       #     exit 0
       #   # might need to include `gh run watch ${{ github.run_id }}` if 'gh run cancel' does not exit the workflow
       #   env:
@@ -284,7 +276,7 @@ jobs:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/test/check-semver-labels@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/test/check-semver-labels@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
         id: check-version-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
@@ -297,7 +289,7 @@ jobs:
           my_action_debug: true
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/github/label-checker@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
         id: check-type-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
@@ -372,7 +364,7 @@ jobs:
 
       # look for a comment 
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/chatops/find-comment@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
@@ -385,7 +377,7 @@ jobs:
       - name: Generate comment template
         # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
-        uses: rwaight/actions/utilities/render-template@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/utilities/render-template@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
         if: steps.write-results.outcome != 'skipped'
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
@@ -402,7 +394,7 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/chatops/create-or-update-comment@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/chatops/create-or-update-comment@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
         if: steps.comment-template.outcome != 'skipped'
         with:
           body: ${{ steps.comment-template.outputs.result }}

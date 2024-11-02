@@ -1,7 +1,9 @@
 # This workflow runs the 'Export label config' and 'Sync labels' actions and includes user input
 # This file is sourced from the 'infra' repo, the file location is: 'infra/assets/gh_workflows/label-manager.yml'
+
 name: Label Manager
 run-name: Run ${{ github.event.action || 'label manager' }} from ${{ github.event_name }}
+
 on: 
   # When any of the 'assets/my-labels-*.yml' files are updated
   push:
@@ -35,6 +37,9 @@ on:
     - cron: '0 10 1 */6 *'  # export labels once every six months, at 10:00 on the first of the month
 
 env:
+  VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
+  # the bot name without the '[bot]' suffix
+  GH_LOCAL_BOT_NAME: 'rw-actions-bot'
   # the owner of the repo, used in conditionals below
   GH_OWNER: rwaight
 
@@ -89,8 +94,8 @@ jobs:
         id: configure-git
         if: ${{ steps.app-token.outputs.token }}
         run: |
-          ##
-          ## Configure git to login as the RW Actions Bot.
+          ## Configure git to login as the rw-actions-bot
+          ## https://github.com/settings/installations
           git config user.name rw-actions-bot[bot]
           git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
 

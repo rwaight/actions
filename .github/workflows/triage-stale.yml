@@ -20,6 +20,9 @@ on:
     - cron: '15 14 * * 2' # At 2:15pm UTC every Tuesday, used by 'stale-issue-and-pr'
 
 env:
+  VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
+  # the bot name without the '[bot]' suffix
+  GH_LOCAL_BOT_NAME: 'rw-actions-bot'
   # the owner of the repo, used in conditionals below
   GH_OWNER: rwaight
 
