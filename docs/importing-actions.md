@@ -22,6 +22,8 @@ import=example-action
 cd $import
 # rename the '.github' directory
 mv .github __dot_github
+# copy and rename the '.yml' file(s) in the '__dot_github' directory
+for f in __dot_github/*.yml; do cp "$f" "$f.disabled"; done
 # copy and rename the '.md' file(s)
 for f in *.md; do cp "$f" "${import}__$f"; done
 # copy and rename the '.yml' file(s)
