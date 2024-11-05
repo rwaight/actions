@@ -276,7 +276,7 @@ jobs:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/test/check-semver-labels@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/test/check-semver-labels@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         id: check-version-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
@@ -289,7 +289,7 @@ jobs:
           my_action_debug: true
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/github/label-checker@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         id: check-type-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
@@ -364,7 +364,7 @@ jobs:
 
       # look for a comment 
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/chatops/find-comment@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
@@ -377,7 +377,7 @@ jobs:
       - name: Generate comment template
         # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
-        uses: rwaight/actions/utilities/render-template@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/utilities/render-template@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         if: steps.write-results.outcome != 'skipped'
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
@@ -394,7 +394,7 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/chatops/create-or-update-comment@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/chatops/create-or-update-comment@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         if: steps.comment-template.outcome != 'skipped'
         with:
           body: ${{ steps.comment-template.outputs.result }}

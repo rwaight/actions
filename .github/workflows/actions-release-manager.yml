@@ -189,7 +189,7 @@ jobs:
 
       # Drafts your next Release notes as Pull Requests are merged into the default branch (i.e., "main")
       - name: Run rwaight/actions/releases/release-drafter
-        uses: rwaight/actions/releases/release-drafter@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/releases/release-drafter@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         #uses: rwaight/actions/releases/release-drafter@v0.1.26
         #uses: rwaight/actions/releases/release-drafter@main
         id: draft-release
@@ -486,7 +486,7 @@ jobs:
         if: |
           (github.ref_type == 'tag' && github.event.release.prerelease == false && 
           steps.check-old-tags.outcome == 'skipped' )
-        uses: rwaight/actions/releases/release-tag-updater@79ddce0c5a5403251ec2c6d97389dd15f42a70f3 # v0.1.35
+        uses: rwaight/actions/releases/release-tag-updater@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         #uses: rwaight/actions/releases/release-tag-updater@v0.1.26
         #uses: rwaight/actions/releases/release-tag-updater@main
         with:
