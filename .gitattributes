@@ -2,10 +2,50 @@
 #  https://docs.github.com/en/get-started/getting-started-with-git/configuring-git-to-handle-line-endings#per-repository-settings
 
 # Set the default behavior, in case people don't have core.autocrlf set.
-* text=auto
+* text=auto eol=lf
+
+# from https://gist.github.com/niclaslindstedt/dae9e3f91e3f9707006d7f0dd394d3a4
+# Treat these as text files with linefeed endings
+*.txt        text eol=lf
+*.md         text eol=lf diff=markdown
+
+# from https://github.com/gitattributes/gitattributes/blob/master/.gitattributes
+# These files are text and should be normalized (Convert crlf => lf)
+*.gitattributes text eol=lf
+.gitignore      text eol=lf
 
 # Declare files that will always have LF line endings on checkout.
-*.js text eol=lf
-*.json text eol=lf
-*.yaml text eol=lf
-*.yml text eol=lf
+*.json       text eol=lf
+*.yaml       text eol=lf
+*.yml        text eol=lf
+
+# from https://github.com/mozilla/pdf.js/blob/master/.gitattributes
+# Force Unix line endings for most file formats (except binary files)
+*.js         text eol=lf
+*.jsm        text eol=lf
+*.css        text eol=lf
+*.html       text eol=lf
+*.md         text eol=lf
+*.ftl        text eol=lf
+*.config     text eol=lf
+*.inc        text eol=lf
+*.manifest   text eol=lf
+*.rdf        text eol=lf
+*.jade       text eol=lf
+*.coffee     text eol=lf
+
+# from https://github.com/mozilla/pdf.js/blob/master/.gitattributes
+# PDF files shall not modify CRLF line endings
+*.pdf -crlf
+
+# from https://github.com/mozilla/pdf.js/blob/master/.gitattributes
+# Linguist language overrides
+*.js linguist-language=JavaScript
+*.jsm linguist-language=JavaScript
+*.inc linguist-language=XML
+
+# from https://github.com/gitattributes/gitattributes/blob/master/Web.gitattributes
+# These files are text and should be normalized (Convert crlf => lf)
+*.css           text diff=css
+*.htm           text diff=html
+*.html          text diff=html
