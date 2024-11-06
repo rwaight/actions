@@ -1,12 +1,6 @@
-# GitHub Find Comment Action
-
-The current version in this repo was based off of [**find-comment** `v3.1.0`](https://github.com/peter-evans/find-comment/releases/tag/v3.1.0)
-- This action is from https://github.com/peter-evans/find-comment.
-
-The [`peter-evans/find-comment`](https://github.com/peter-evans/find-comment) code has an MIT license:
-> A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
-
-## Find Comment
+# Find Comment
+[![CI](https://github.com/peter-evans/find-comment/workflows/CI/badge.svg)](https://github.com/peter-evans/find-comment/actions?query=workflow%3ACI)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Find%20Comment-blue.svg?colorA=24292e&colorB=0366d6&style=flat&longCache=true&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAM6wAADOsB5dZE0gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAERSURBVCiRhZG/SsMxFEZPfsVJ61jbxaF0cRQRcRJ9hlYn30IHN/+9iquDCOIsblIrOjqKgy5aKoJQj4O3EEtbPwhJbr6Te28CmdSKeqzeqr0YbfVIrTBKakvtOl5dtTkK+v4HfA9PEyBFCY9AGVgCBLaBp1jPAyfAJ/AAdIEG0dNAiyP7+K1qIfMdonZic6+WJoBJvQlvuwDqcXadUuqPA1NKAlexbRTAIMvMOCjTbMwl1LtI/6KWJ5Q6rT6Ht1MA58AX8Apcqqt5r2qhrgAXQC3CZ6i1+KMd9TRu3MvA3aH/fFPnBodb6oe6HM8+lYHrGdRXW8M9bMZtPXUji69lmf5Cmamq7quNLFZXD9Rq7v0Bpc1o/tp0fisAAAAASUVORK5CYII=)](https://github.com/marketplace/actions/find-comment)
 
 A GitHub action to find an issue or pull request comment.
 
@@ -14,25 +8,14 @@ The action will output the comment ID of the comment matching the search criteri
 
 ## Usage
 
-### Find the first comment for a specific GitHub issue
-
-```yml
-      - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
-        id: fc
-        with:
-          issue-number: ${{ github.event.number }}
-          comment-author: 'github-actions[bot]'
-```
-
 ### Find the first comment containing the specified string
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
-          issue-number: ${{ github.event.number }}
+          issue-number: 1
           body-includes: search string 1
 ```
 
@@ -40,33 +23,22 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
-          issue-number: ${{ github.event.number }}
-          comment-author: my-custom-bot
-```
-
-### Find the first comment by the github-actions bot
-```yml
-      - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
-        id: fc
-        with:
-          issue-number: ${{ github.event.number }}
-          comment-author: 'github-actions[bot]'
+          issue-number: 1
+          comment-author: peter-evans
 ```
 
 ### Find the first comment containing the specified string AND by the specified author
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
-          #issue-number: 1
-          issue-number: ${{ github.event.number }}
-          comment-author: my-custom-bot
+          issue-number: 1
+          comment-author: peter-evans
           body-includes: search string 1
 ```
 
@@ -74,10 +46,10 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
-          issue-number: ${{ github.event.number }}
+          issue-number: 1
           body-regex: '^.*search string 1.*$'
 ```
 
@@ -85,10 +57,10 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
-          issue-number: ${{ github.event.number }}
+          issue-number: 1
           body-includes: search string 1
           direction: last
 ```
@@ -97,10 +69,10 @@ The action will output the comment ID of the comment matching the search criteri
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
-          issue-number: ${{ github.event.number }}
+          issue-number: 1
           body-includes: search string 1
           nth: 1 # second matching comment (0-indexed)
 ```
@@ -129,7 +101,7 @@ e.g. If `comment-id` is an empty string `steps.fc.outputs.comment-id == 0` evalu
 
 ```yml
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@main
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
           issue-number: 1
