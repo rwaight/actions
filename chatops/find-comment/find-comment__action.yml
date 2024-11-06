@@ -1,9 +1,5 @@
 name: 'Find Comment'
 description: 'Find an issue or pull request comment'
-branding:
-  icon: 'search'
-  color: 'blue'
-  # Ref: https://haya14busa.github.io/github-action-brandings/
 inputs:
   token:
     description: 'GITHUB_TOKEN or a repo scoped PAT.'
@@ -37,3 +33,6 @@ outputs:
 runs:
   using: 'node20'
   main: 'dist/index.js'
+branding:
+  icon: 'search'
+  color: 'gray-dark'
