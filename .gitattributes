@@ -18,21 +18,7 @@
 *.json       text eol=lf
 *.yaml       text eol=lf
 *.yml        text eol=lf
-
-# from https://github.com/mozilla/pdf.js/blob/master/.gitattributes
-# Force Unix line endings for most file formats (except binary files)
-*.js         text eol=lf
-*.jsm        text eol=lf
-*.css        text eol=lf
-*.html       text eol=lf
-*.md         text eol=lf
-*.ftl        text eol=lf
-*.config     text eol=lf
-*.inc        text eol=lf
-*.manifest   text eol=lf
-*.rdf        text eol=lf
-*.jade       text eol=lf
-*.coffee     text eol=lf
+*.config.js  text eol=lf
 
 # from https://github.com/mozilla/pdf.js/blob/master/.gitattributes
 # PDF files shall not modify CRLF line endings
@@ -44,8 +30,9 @@
 *.jsm linguist-language=JavaScript
 *.inc linguist-language=XML
 
-# from https://github.com/gitattributes/gitattributes/blob/master/Web.gitattributes
+# from https://github.com/mozilla/pdf.js/blob/master/.gitattributes
+#  and https://github.com/gitattributes/gitattributes/blob/master/Web.gitattributes
 # These files are text and should be normalized (Convert crlf => lf)
-*.css           text diff=css
-*.htm           text diff=html
-*.html          text diff=html
+*.css           text eol=lf diff=css
+*.htm           text eol=lf diff=html
+*.html          text eol=lf diff=html

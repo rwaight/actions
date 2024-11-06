@@ -4,5 +4,9 @@ The following `.github` files are sourced from the 'infra' repo in the `infra/as
 
 ```bash
 ./dot_gh/
+├── ISSUE_TEMPLATE
+│   ├── config.yml
+│   └── other.yml
+├── PULL_REQUEST_TEMPLATE.md
 └── labeler.yml
 ```

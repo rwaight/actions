@@ -71,12 +71,12 @@ jobs:
           echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
           exit 1
 
-      # # Save this in case we want to exit the workflow if it is called by 'rw-actions-bot[bot]'
-      # - name: Exit workflow if called by 'rw-actions-bot[bot]'
+      # # Save this in case we want to exit the workflow if it is called by '${{ env.GH_LOCAL_BOT_NAME }}[bot]'
+      # - name: Exit workflow if called by '${{ env.GH_LOCAL_BOT_NAME }}[bot]'
       #   id: check-actions-bot
-      #   if: ${{ github.actor == 'rw-actions-bot[bot]' }}
+      #   if: ${{ github.actor == '${{ env.GH_LOCAL_BOT_NAME }}[bot]' }}
       #   run: |
-      #     echo "This workflow was called by the 'rw-actions-bot[bot]' but should not run. "
+      #     echo "This workflow was called by the '${{ env.GH_LOCAL_BOT_NAME }}[bot]' but should not run. "
       #     echo "  if the workflow actually runs, then the 'exit 0' below will need to be changed to a non-zero. "
       #     gh run cancel ${{ github.run_id }}
       #     echo "The 'check-actions-bot' step is finishing and this workflow will now exit. "
@@ -219,8 +219,8 @@ jobs:
           startsWith(github.event.pull_request.head.ref, 'dependabot') == false)
         with:
           # required
-          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
-          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
           # create a token for all repositories in the current owner's installation
           owner: ${{ github.repository_owner }}
 
@@ -240,10 +240,11 @@ jobs:
         # Skip running on forks or Dependabot since neither has access to secrets
         if: steps.app-token.outcome != 'skipped'
         run: |
-          ##
-          ## Configure git to login as the RW Actions Bot.
-          git config user.name rw-actions-bot[bot]
-          git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          ## Configure git to login as the '${{ env.GH_LOCAL_BOT_NAME }}' Bot.
+          ## Ensure the bot is installed at: https://github.com/settings/installations
+          git config user.name ${{ env.GH_LOCAL_BOT_NAME }}[bot]
+          git config user.email ${{ secrets.GH_APP_BOT_UID }}+${{ env.GH_LOCAL_BOT_NAME }}[bot]@users.noreply.github.com
+          echo "the 'configure-git' step has completed. "
 
       - name: Checkout files from commit tree for dependabot
         # Verified creator: https://github.com/marketplace/actions/checkout
@@ -259,6 +260,7 @@ jobs:
 
       - name: Configure Git Credentials for github-actions bot
         id: configure-dependabot-git
+        # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
         # Run for Dependabot with the default token
         if: steps.checkout-dependabot.outcome != 'skipped'
         run: |
@@ -266,6 +268,7 @@ jobs:
           ## Configure git to login as the GitHub Actions Bot.
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          echo "the 'configure-dependabot-git' step has completed. "
 
       - name: Apply non-versioning labels
         # Verified creator: https://github.com/marketplace/actions/labeler
@@ -276,7 +279,7 @@ jobs:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/test/check-semver-labels@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/test/check-semver-labels@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         id: check-version-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
@@ -289,7 +292,7 @@ jobs:
           my_action_debug: true
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/github/label-checker@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         id: check-type-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
@@ -364,20 +367,20 @@ jobs:
 
       # look for a comment 
       - name: Find Comment
-        uses: rwaight/actions/chatops/find-comment@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/chatops/find-comment@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
         with:
           #issue-number: ${{ github.event.number }}
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'rw-actions-bot[bot]'
+          comment-author: '${{ env.GH_LOCAL_BOT_NAME }}[bot]'
           body-includes: The PR labeler checks
 
       - name: Generate comment template
         # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
-        uses: rwaight/actions/utilities/render-template@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/utilities/render-template@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         if: steps.write-results.outcome != 'skipped'
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
@@ -394,7 +397,7 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/chatops/create-or-update-comment@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/chatops/create-or-update-comment@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         if: steps.comment-template.outcome != 'skipped'
         with:
           body: ${{ steps.comment-template.outputs.result }}
