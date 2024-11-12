@@ -169,7 +169,21 @@ else
     echo "No inner directory found within extraction path."
 fi
 
+# for testing #read -p "Pause to look at the files...  Press Enter to continue. " 
+
 # to-do:  move the temporary directory to the final directory
+if [[ -d "${inner_dir}" ]]; then
+    destActionDir="${sourceActionGroup}/${sourceActionRepoName}"
+    if [[ -d "${destActionDir}" ]]; then
+        echo "  The destination path already exists: ${destActionDir} "
+    else
+        echo "  The destination path DOES NOT exist, creating directory: ${destActionDir} "
+        mkdir -p "${destActionDir}"
+    fi
+    #mv -f "${inner_dir}/*" "${destActionDir}"
+    rsync -a "${inner_dir}/" "${destActionDir}/"
+    rm -rf "${inner_dir}"
+fi
 
 # Clean up the temporary download directory
 rm -rf "$temp_dir"
