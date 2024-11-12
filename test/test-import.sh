@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Prompt for required inputs
-# read -p "Enter the GitHub repo owner: " sourceRepoOwner
-# read -p "Enter the GitHub repo name: " sourceRepoName
-# read -p "Enter the GitHub repo tag: " sourceRepoTag
-# read -p "Enter the GitHub repo commit: " sourceRepoCommit
+# read -p "Enter the GitHub repo owner: " sourceActionRepoOwner
+# read -p "Enter the GitHub repo name: " sourceActionRepoName
+# read -p "Enter the GitHub repo tag: " sourceActionRepoTag
+# read -p "Enter the GitHub repo commit: " sourceActionRepoCommit
 
 # Load environment variables from .env file
 if [[ -f .env ]]; then
@@ -32,12 +32,12 @@ fi
 #   - zip file:  https://github.com/gh_repo_owner/gh_repo_name/archive/refs/tags/v1.2.3.zip
 
 # Define the source repo and tag URLs
-source_action_name_tag="${sourceRepoName}-${sourceRepoTag}"
-source_tag_zip_url=https://github.com/${sourceRepoOwner}/${sourceRepoName}/archive/refs/tags/${sourceRepoTag}.zip
-source_tag_release_url=https://github.com/${sourceRepoOwner}/${sourceRepoName}/releases/tag/${sourceRepoTag}
-source_commit_files_url=https://github.com/${sourceRepoOwner}/${sourceRepoName}/tree/${sourceRepoCommit}
-source_commit_zip_url=https://github.com/${sourceRepoOwner}/${sourceRepoName}/archive/${sourceRepoCommit}.zip
-source_action_import_temp="temp-${sourceRepoName}"
+source_action_name_tag="${sourceActionRepoName}-${sourceActionRepoTag}"
+source_tag_zip_url=https://github.com/${sourceActionRepoOwner}/${sourceActionRepoName}/archive/refs/tags/${sourceActionRepoTag}.zip
+source_tag_release_url=https://github.com/${sourceActionRepoOwner}/${sourceActionRepoName}/releases/tag/${sourceActionRepoTag}
+source_commit_files_url=https://github.com/${sourceActionRepoOwner}/${sourceActionRepoName}/tree/${sourceActionRepoCommit}
+source_commit_zip_url=https://github.com/${sourceActionRepoOwner}/${sourceActionRepoName}/archive/${sourceActionRepoCommit}.zip
+#source_action_import_temp="temp-${sourceActionRepoName}"
 zip_url=${source_tag_zip_url}
 
 # Define the final extraction path
@@ -45,8 +45,15 @@ zip_url=${source_tag_zip_url}
 #extraction_path="${action_type_dir}/$sub_dir"
 #extraction_path="_pending_import/${source_action_name_tag}"
 #extraction_path="_pending_import/${source_action_import_temp}"
-extraction_path="_pending_import"
-mkdir -p "${extraction_path}"
+#extraction_path="_pending_import"
+extraction_path=${sourceActionGroup}
+
+if [[ -d "${extraction_path}" ]]; then
+    echo "  The extraction path already exists: ${extraction_path} "
+else
+    echo "  The extraction path DOES NOT exist, creating directory: ${extraction_path} "
+    mkdir -p "${extraction_path}"
+fi
 
 # # Form the final URL with the reference, if provided
 # if [[ -n "$ref" ]]; then
@@ -55,7 +62,7 @@ mkdir -p "${extraction_path}"
 
 # Create a temporary directory to download the .zip file
 temp_dir=$(mktemp -d)
-zip_file="$temp_dir/tempzip-${sourceRepoName}-${sourceRepoTag}.zip"
+zip_file="$temp_dir/tempzip-${sourceActionRepoName}-${sourceActionRepoTag}.zip"
 
 # Download the .zip file
 echo "Downloading .zip file from: ${zip_url}"
@@ -142,8 +149,8 @@ if [[ -n "${inner_dir}" ]]; then
             file=$(basename "$f")
             echo "found file: $f "
             echo "    the file basename is $file "
-            echo "    copying '$file' and renaming to '${sourceRepoName}__$file' "
-            cp "${inner_dir}/$file" "${inner_dir}/${sourceRepoName}__$file"
+            echo "    copying '$file' and renaming to '${sourceActionRepoName}__$file' "
+            cp "${inner_dir}/$file" "${inner_dir}/${sourceActionRepoName}__$file"
         done
         # copy and rename the '.yml' file(s)
         inner_yml_search=$(find ${inner_dir} -maxdepth 1 -type f -name '*.yml')
@@ -152,8 +159,8 @@ if [[ -n "${inner_dir}" ]]; then
             file=$(basename "$f")
             echo "found file: $f "
             echo "    the file basename is $file "
-            echo "    copying '$file' and renaming to '${sourceRepoName}__$file' "
-            cp "${inner_dir}/$file" "${inner_dir}/${sourceRepoName}__$file"
+            echo "    copying '$file' and renaming to '${sourceActionRepoName}__$file' "
+            cp "${inner_dir}/$file" "${inner_dir}/${sourceActionRepoName}__$file"
         done
     else
         echo "did not copy any of the '.md' or '.yml' files in the inner directory"
