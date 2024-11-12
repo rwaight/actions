@@ -45,8 +45,8 @@ zip_url=${source_tag_zip_url}
 #extraction_path="${action_type_dir}/$sub_dir"
 #extraction_path="_pending_import/${source_action_name_tag}"
 #extraction_path="_pending_import/${source_action_import_temp}"
-#extraction_path="_pending_import"
-extraction_path=${sourceActionGroup}
+extraction_path="_pending_import"
+#extraction_path=${sourceActionGroup}
 
 if [[ -d "${extraction_path}" ]]; then
     echo "  The extraction path already exists: ${extraction_path} "
