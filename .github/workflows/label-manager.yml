@@ -77,8 +77,8 @@ jobs:
         #uses: actions/create-github-app-token@v1.10.0
         with:
           # required
-          app-id: ${{ secrets.RW_ACTIONS_APP_ID }}
-          private-key: ${{ secrets.RW_ACTIONS_APP_KEY }}
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_KEY }}
           # create a token for all repositories in the current owner's installation
           owner: ${{ github.repository_owner }}
 
@@ -94,10 +94,11 @@ jobs:
         id: configure-git
         if: ${{ steps.app-token.outputs.token }}
         run: |
-          ## Configure git to login as the rw-actions-bot
-          ## https://github.com/settings/installations
-          git config user.name rw-actions-bot[bot]
-          git config user.email ${{ secrets.RW_ACTIONS_BOT_UID }}+rw-actions-bot[bot]@users.noreply.github.com
+          ## Configure git to login as the '${{ env.GH_LOCAL_BOT_NAME }}' Bot.
+          ## Ensure the bot is installed at: https://github.com/settings/installations
+          git config user.name ${{ env.GH_LOCAL_BOT_NAME }}[bot]
+          git config user.email ${{ secrets.GH_APP_BOT_UID }}+${{ env.GH_LOCAL_BOT_NAME }}[bot]@users.noreply.github.com
+          echo "the 'configure-git' step has completed. "
 
       - name: Export label config using rwaight/actions/github/export-label-config
         id: export-label-config
@@ -108,7 +109,7 @@ jobs:
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
           (github.event_name=='push' && github.ref_name=='main') 
-        uses: rwaight/actions/github/export-label-config@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/github/export-label-config@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         #uses: rwaight/actions/github/export-label-config@v0.1.26
         #uses: rwaight/actions/github/export-label-config@main
         with:
@@ -128,7 +129,7 @@ jobs:
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
           (github.event_name=='push' && github.ref_name=='main') 
           )
-        uses: rwaight/actions/github/label-sync@bb107b0a8f994fbf7d0be216086319b6a468a1da # v0.1.39
+        uses: rwaight/actions/github/label-sync@bb762f3adad37665df650af9f3d5418dfda071bf # v0.1.40
         #uses: rwaight/actions/github/label-sync@v0.1.26
         #uses: rwaight/actions/github/label-sync@main
         with:
