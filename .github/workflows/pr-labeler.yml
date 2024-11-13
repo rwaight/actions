@@ -34,6 +34,7 @@ concurrency:
   # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-or-runs-for-the-current-workflow
   group: ${{ github.workflow }}-${{ github.ref }}
   #cancel-in-progress: true
+  # to-do: use 'GH_LOCAL_BOT_NAME' ##cancel-in-progress: ${{ github.actor != '${{ env.GH_LOCAL_BOT_NAME }}[bot]' }}
   cancel-in-progress: ${{ github.actor != 'rw-actions-bot[bot]' }}
   #https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-on-specific-branches
   #cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
@@ -70,6 +71,31 @@ jobs:
           echo "This workflow will now fail and exit. "
           echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::This workflow was run in a forked repo"
           exit 1
+
+      - name: Show GitHub runner context
+        id: show-runner-context
+        ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+        env:
+          FOOBAR: ${{ runner.debug == '1' && 'foo' || 'bar' }}
+          # https://github.com/actions/runner/issues/2204#issuecomment-1287947031
+          # https://github.com/orgs/community/discussions/27627#discussioncomment-3302259
+          GH_RUNNER_LOG: "${{ runner.debug == '1' && 'INFO' || 'ERROR' }}"
+          GH_VAR_RUNNER_DEBUG1: ${{ runner.debug }}
+          GH_VAR_RUNNER_DEBUG2: ${{ env.RUNNER_DEBUG }}
+          GH_VAR_RUNNER_OS1: ${{ runner.os }}
+          GH_VAR_RUNNER_OS2: ${{ env.RUNNER_OS }}
+          GH_VAR_RUNNER_ARCH1: ${{ runner.arch }}
+          GH_VAR_RUNNER_ARCH2: ${{ env.RUNNER_ARCH }}
+        run: |
+          echo "FOOBAR is ${FOOBAR}"
+          echo "GH_RUNNER_LOG is ${GH_RUNNER_LOG}"
+          echo "GH_VAR_RUNNER_DEBUG1 is ${GH_VAR_RUNNER_DEBUG1}"
+          echo "GH_VAR_RUNNER_DEBUG2 is ${GH_VAR_RUNNER_DEBUG2}"
+          echo "GH_VAR_RUNNER_OS1 is ${GH_VAR_RUNNER_OS1}"
+          echo "GH_VAR_RUNNER_OS2 is ${GH_VAR_RUNNER_OS2}"
+          echo "GH_VAR_RUNNER_ARCH1 is ${GH_VAR_RUNNER_ARCH1}"
+          echo "GH_VAR_RUNNER_ARCH2 is ${GH_VAR_RUNNER_ARCH2}"
+        ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
 
       # # Save this in case we want to exit the workflow if it is called by '${{ env.GH_LOCAL_BOT_NAME }}[bot]'
       # - name: Exit workflow if called by '${{ env.GH_LOCAL_BOT_NAME }}[bot]'
@@ -365,8 +391,7 @@ jobs:
           ##
           echo "The 'write-results' step has finished. "
 
-      # look for a comment 
-      - name: Find Comment
+      - name: Look for a comment
         uses: rwaight/actions/chatops/find-comment@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
@@ -377,14 +402,27 @@ jobs:
           comment-author: '${{ env.GH_LOCAL_BOT_NAME }}[bot]'
           body-includes: The PR labeler checks
 
+      - name: Verbose | Output comment ID from the 'find-comment' step
+        if: ${{ steps.find-comment.outputs.comment-id }}
+        run: |
+          echo "Comment ID - ${{ steps.find-comment.outputs.comment-id }}"
+
       - name: Generate comment template
-        # need to use the 'label_check' outputs ('success' or 'failure' maybe?) to determine which file to use
         id: comment-template
         uses: rwaight/actions/utilities/render-template@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
-        if: steps.write-results.outcome != 'skipped'
+        # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
+        # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
+        # this should mean a comment is only added if there is a label check failure, otherwise update a comment
+        #   if it exists, to replace a label check failure comment with a success comment
+        if: ${{ steps.find-comment.outputs.comment-id || steps.write-results.outputs.label_check == 'failure' }}
+        #ran when success# #if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
+        #ran when success# #if: |
+        #ran when success# #  (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
+        #ran when success# #  ${{ steps.find-comment.outputs.comment-id }}
         with:
           #idea #template: assets/pr-labeler/comment-checks-${{ steps.check-type-labels.outputs.label_check }}.md
           #template: assets/pr-labeler/comment-checks-failure.md
+          # use the 'label_check' outputs ('success' or 'failure') to determine which file to use
           template: assets/pr-labeler/comment-checks-${{ steps.write-results.outputs.label_check }}.md
           vars: |
             foo: this
@@ -398,7 +436,15 @@ jobs:
       - name: Create or update comment
         id: comment-on-pr
         uses: rwaight/actions/chatops/create-or-update-comment@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
-        if: steps.comment-template.outcome != 'skipped'
+        # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
+        # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
+        # this should mean a comment is only added if there is a label check failure, otherwise update a comment
+        #   if it exists, to replace a label check failure comment with a success comment
+        if: ${{ steps.find-comment.outputs.comment-id || steps.write-results.outputs.label_check == 'failure' }}
+        #ran when success# #if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
+        #ran when success# #if: |
+        #ran when success# #  (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
+        #ran when success# #  ${{ steps.find-comment.outputs.comment-id }}
         with:
           body: ${{ steps.comment-template.outputs.result }}
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
