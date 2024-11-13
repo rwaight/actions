@@ -3,7 +3,7 @@ author: juliangruber
 description: 'A GitHub Action for finding pull requests'
 branding:
   icon: 'git-pull-request'
-  color: blue
+  color: purple
 inputs:
   github-token:
     description: 'GitHub Token'
