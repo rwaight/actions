@@ -183,7 +183,18 @@ runs:
         else
             echo "the 'strategy' is NOT 'repo-tag', so the latest-repo-tag will not be sent to GitHub output"
         fi
-        echo ""
+        ##
+        echo "The 'repo-tags-with-git' step is complete."
+
+    - name: Verbose | Get the repo tags information with git
+      id: verbose--extra--repo-tags-with-git
+      # eventually only run this job when:  inputs.strategy=='repo-tag'
+      #if: inputs.strategy=='repo-tag' && inputs.my_workflow_debug=='true'
+      if: inputs.my_workflow_debug=='true'
+      continue-on-error: true
+      shell: bash
+      run: |
+        echo "step id: verbose--extra--repo-tags-with-git "
         echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
         echo "Using git to print tag information"
         ########
@@ -293,8 +304,7 @@ runs:
         echo "::endgroup::"
         echo ""
         ########
-        echo ""
-        echo "The 'repo-tags-with-git' step is complete."
+        echo "The 'verbose--extra--repo-tags-with-git' step is complete."
 
     - name: Get the latest repo tags information with git
       ## The output from this step is NOT USED
@@ -317,6 +327,19 @@ runs:
             echo "the 'strategy' is NOT 'repo-tag', so the latest-repo-tag will not be sent to GitHub output"
         fi
         echo ""
+        ##
+        echo "The output from this step is NOT USED"
+        echo "The 'get-latest-repo-tags' step is complete."
+
+    - name: Verbose | Get the latest repo tags information with git
+      id: verbose--extra--get-latest-repo-tags
+      # eventually only run this job when:  inputs.strategy=='branch-tag'
+      #if: inputs.strategy=='branch-tag' && inputs.my_workflow_debug=='true'
+      if: inputs.my_workflow_debug=='true'
+      continue-on-error: true
+      shell: bash
+      run: |
+        echo "step id: verbose--extra--get-latest-repo-tags "
         echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
         echo "Using git to print tag information"
         echo ""
@@ -410,9 +433,7 @@ runs:
         echo "::endgroup::"
         echo ""
         ########
-        echo ""
-        echo "The output from this step is NOT USED"
-        echo "The 'get-latest-repo-tags' step is complete."
+        echo "The 'verbose--extra--get-latest-repo-tags' step is complete."
 
     - name: Get the repo release information with the GitHub CLI
       id: releases-with-gh-cli
@@ -460,6 +481,19 @@ runs:
         echo "Using the GitHub CLI to print release information"
         echo "See https://cli.github.com/manual/gh_release_list for information about the command. "
         echo ""
+        echo "The 'releases-with-gh-cli' step is complete."
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+
+    - name: Verbose | Get the repo release information with the GitHub CLI
+      id: verbose--extra--releases-with-gh-cli
+      # eventually only run this job when:  inputs.strategy=='gh-release'
+      #if: inputs.strategy=='gh-release' && inputs.my_workflow_debug=='true'
+      if: inputs.my_workflow_debug=='true'
+      continue-on-error: true
+      shell: bash
+      run: |
+        echo "step id: verbose--extra--releases-with-gh-cli "
         echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
         echo ""
         echo "::group::running 'gh release list' ... "
@@ -490,9 +524,8 @@ runs:
         gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName | jq -r ".[].tagName"
         echo "::endgroup::"
         echo ""
-        echo "The 'releases-with-gh-cli' step is complete."
-      env:
-        GH_TOKEN: ${{ inputs.gh-token }}
+        ########
+        echo "The 'verbose--extra--releases-with-gh-cli' step is complete."
 
     - name: Set action outputs
       id: set-action-outputs
