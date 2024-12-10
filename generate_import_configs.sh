@@ -11,11 +11,17 @@ elif [[ "$1" != "" && "$1" != "yaml" ]]; then
   exit 1
 fi
 
-# Directories to exclude
-exclude_dirs=("archive" "assets" "docs" "examples" "test")
+# Config file for excluded directories
+exclude_config_file="exclude_dirs.conf"
 
-# Optionally, target specific directories (uncomment and populate if needed)
-# target_dirs=("builders" "chatops" "git" "github" "releases" "utilities")
+# Check if the exclude config file exists
+if [[ -f "$exclude_config_file" ]]; then
+  # Read excluded directories into an array
+  mapfile -t exclude_dirs < "$exclude_config_file"
+else
+  echo "Exclude config file ($exclude_config_file) not found. No directories will be excluded."
+  exclude_dirs=()
+fi
 
 # Loop through all top-level directories
 for group_dir in */; do
@@ -26,12 +32,6 @@ for group_dir in */; do
     echo "Skipping excluded directory: $group_name"
     continue
   fi
-
-  # Uncomment this block to enable targeting specific directories
-  # if [[ -n "${target_dirs[*]}" && ! " ${target_dirs[*]} " =~ " $group_name " ]]; then
-  #   echo "Skipping directory not in target list: $group_name"
-  #   continue
-  # fi
 
   # Loop through all subdirectories (actions) within each group
   for action_dir in "$group_dir"*/; do
