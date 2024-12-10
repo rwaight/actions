@@ -32,6 +32,14 @@ if [[ -f "$target_config_file" ]]; then
   echo "Target config file ($target_config_file) found. Only target directories will be processed."
 fi
 
+# Function to prompt for input with a default value
+prompt_for_input() {
+  local prompt_message="$1"
+  local default_value="$2"
+  read -p "$prompt_message [$default_value]: " input_value
+  echo "${input_value:-$default_value}"
+}
+
 # Loop through all top-level directories
 for group_dir in */; do
   group_name=$(basename "$group_dir")
@@ -53,20 +61,32 @@ for group_dir in */; do
     action_name=$(basename "$action_dir")
     config_file="$action_dir/import-config.$file_format"
 
+    echo "Creating import-config for action: $group_name/$action_name"
+
+    # Prompt for input values for each field
+    source_name=$(prompt_for_input "Source action name" "")
+    source_author=$(prompt_for_input "Source author" "")
+    github_repo=$(prompt_for_input "Source GitHub repo" "")
+    github_url=$(prompt_for_input "Source GitHub URL" "")
+    current_version=$(prompt_for_input "Current source version used" "")
+    published_version=$(prompt_for_input "Current source published version" "")
+    update_available=$(prompt_for_input "Update available (true/false)" "false")
+    local_modifications=$(prompt_for_input "Local modifications (true/false)" "false")
+
     # Define the data structure
     config_content=$(cat <<EOL
 source:
-  name: ""
-  author: ""
-  github_repo: ""
-  github_url: ""
-  current_version: ""
-  published_version: ""
-  update_available: false
-group: $group_name
+  name: "$source_name"
+  author: "$source_author"
+  github_repo: "$github_repo"
+  github_url: "$github_url"
+  current_version: "$current_version"
+  published_version: "$published_version"
+  update_available: $update_available
+group: "$group_name"
 local:
-  name: $action_name
-  modifications: false
+  name: "$action_name"
+  modifications: $local_modifications
 EOL
     )
 
