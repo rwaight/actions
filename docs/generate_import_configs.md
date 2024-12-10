@@ -1,3 +1,12 @@
+# Generate Import Configs
+
+The script prioritizes the target directories if the file exists but falls back to excluding directories if it does not. Both behaviors can coexist with clear logic.
+- The script has an optional **target directories config file**
+
+---
+
+### Updated Script: Include Target and Exclude Configurations
+```bash
 #!/bin/bash
 
 # Default file format
@@ -83,3 +92,75 @@ EOL
 done
 
 echo "Finished generating import-config.$file_format files for all actions."
+```
+
+---
+
+### How It Works:
+1. **Target Config File (`target_dirs.conf`)**:
+   - If this file exists, only the directories listed in it will be processed.
+   - Example contents:
+     ```text
+     builders
+     github
+     utilities
+     ```
+
+2. **Exclude Config File (`exclude_dirs.conf`)**:
+   - If the `target_dirs.conf` is missing, the script will exclude the directories listed in `exclude_dirs.conf`.
+   - Example contents:
+     ```text
+     archive
+     assets
+     docs
+     ```
+
+3. **Processing Logic**:
+   - If `target_dirs.conf` exists, only the directories listed in it will be processed, regardless of the exclusion list.
+   - If `target_dirs.conf` does not exist, the script falls back to excluding directories from `exclude_dirs.conf`.
+
+4. **Fallback Behavior**:
+   - If neither file exists, all directories will be processed.
+
+---
+
+### Running the Script:
+1. Save the script as `generate_import_configs.sh`.
+2. Create one or both config files:
+   - `target_dirs.conf`: To specify directories to process explicitly.
+   - `exclude_dirs.conf`: To exclude specific directories.
+3. Make the script executable:
+   ```bash
+   chmod +x generate_import_configs.sh
+   ```
+4. Run the script:
+   - To create YAML files:
+     ```bash
+     ./generate_import_configs.sh
+     ```
+   - To create JSON files:
+     ```bash
+     ./generate_import_configs.sh json
+     ```
+
+---
+
+### Example Scenario:
+#### Config Files:
+- **`target_dirs.conf`:**
+  ```text
+  builders
+  github
+  releases
+  ```
+- **`exclude_dirs.conf`:**
+  ```text
+  archive
+  docs
+  assets
+  ```
+
+#### Behavior:
+- If `target_dirs.conf` exists, only `builders`, `github`, and `releases` will be processed.
+- If `target_dirs.conf` is missing, `archive`, `docs`, and `assets` will be excluded.
+
