@@ -11,10 +11,28 @@ elif [[ "$1" != "" && "$1" != "yaml" ]]; then
   exit 1
 fi
 
-# Loop through all top-level directories (groups)
+# Directories to exclude
+exclude_dirs=("archive" "assets" "docs" "examples" "test")
+
+# Optionally, target specific directories (uncomment and populate if needed)
+# target_dirs=("builders" "chatops" "git" "github" "releases" "utilities")
+
+# Loop through all top-level directories
 for group_dir in */; do
   group_name=$(basename "$group_dir")
   
+  # Check if the directory should be excluded
+  if [[ " ${exclude_dirs[*]} " =~ " $group_name " ]]; then
+    echo "Skipping excluded directory: $group_name"
+    continue
+  fi
+
+  # Uncomment this block to enable targeting specific directories
+  # if [[ -n "${target_dirs[*]}" && ! " ${target_dirs[*]} " =~ " $group_name " ]]; then
+  #   echo "Skipping directory not in target list: $group_name"
+  #   continue
+  # fi
+
   # Loop through all subdirectories (actions) within each group
   for action_dir in "$group_dir"*/; do
     action_name=$(basename "$action_dir")
