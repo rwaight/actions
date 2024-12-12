@@ -1,0 +1,15 @@
+name: bump-json-version
+description: placeholder
+group: test
+imported: false
+local:
+  author: rwaight
+  modifications: true
+specs:
+  action_file: action.yml
+  inputs: null
+  outputs: [current-release-version, next-release-version, old-json-version, new-json-version]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
