@@ -32,11 +32,15 @@ create_or_update_import_config() {
         return
     fi
 
+    # Extract the action file extension
+    action_file_extension=$(basename "$action_file")
+
     # Read first level keys of inputs, outputs, and runs from the action file
     inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     runs_using=$(yq e '.runs.using' "$action_file")
     runs_main=$(yq e '.runs.main' "$action_file")
+    if [[ "$runs_main" == "null" ]]; then unset runs_main; fi
 
     import_config_file="${group_dir}/${action_dir}/import-config.yml"
 
@@ -47,48 +51,71 @@ create_or_update_import_config() {
         # Read existing import-config.yml
         import_config=$(yq eval '.' "$import_config_file")
 
-        # Update inputs and outputs fields
-        import_config=$(echo "$import_config" | yq eval ".specs.inputs = [$inputs]" -)
-        import_config=$(echo "$import_config" | yq eval ".specs.outputs = [$outputs]" -)
+        # Update action_file, inputs, and outputs fields
+        yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
+        yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
+        yq -i '.specs.inputs style="flow"' "$import_config_file"
+        #import_config=$(echo "$import_config" | yq eval ".specs.inputs = [$inputs]" -)
+        yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
+        yq -i '.specs.outputs style="flow"' "$import_config_file"
+        #import_config=$(echo "$import_config" | yq eval ".specs.outputs = [$outputs]" -)
 
         # Update runs field if using and main are present
         if [[ -n $runs_using ]]; then
-            import_config=$(echo "$import_config" | yq eval ".specs.runs.using = \"$runs_using\"" -)
+            yq e -i ".specs.runs.using = \"$runs_using\"" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".specs.runs.using = \"$runs_using\"" -)
             if [[ -n $runs_main ]]; then
-                import_config=$(echo "$import_config" | yq eval ".specs.runs.main = \"$runs_main\"" -)
+                yq e -i ".specs.runs.main = \"$runs_main\"" "$import_config_file"
+                #import_config=$(echo "$import_config" | yq eval ".specs.runs.main = \"$runs_main\"" -)
             else
-                import_config=$(echo "$import_config" | yq eval "del(.specs.runs.main)" -)
+                yq e -i "del(.specs.runs.main)" "$import_config_file"
+                #import_config=$(echo "$import_config" | yq eval "del(.specs.runs.main)" -)
             fi
         fi
 
         # Check for updates if imported
-        if [[ $(echo "$import_config" | yq eval '.imported' -) == "true" ]]; then
-            source_action_author=$(echo "$import_config" | yq eval '.source.author' -)
-            source_repo_name=$(echo "$import_config" | yq eval '.source.repo_name' -)
+        if [[ $(yq e '.imported' "$import_config_file") == "true" ]]; then
+            source_action_author=$(yq e '.source.author' "$import_config_file")
+            #source_action_author=$(echo "$import_config" | yq eval '.source.author' -)
+            source_repo_name=$(yq e '.source.repo_name' "$import_config_file")
+            #source_repo_name=$(echo "$import_config" | yq eval '.source.repo_name' -)
             source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
-            current_version=$(echo "$import_config" | yq eval '.source.current_version' -)
+            current_version=$(yq e '.source.current_version' "$import_config_file")
+            #current_version=$(echo "$import_config" | yq eval '.source.current_version' -)
             latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
             update_available=false
             if [[ $current_version != $latest_version ]]; then
                 update_available=true
             fi
             # Update source fields
-            import_config=$(echo "$import_config" | yq eval ".source.latest_version = \"$latest_version\"" -)
-            import_config=$(echo "$import_config" | yq eval ".source.update_available = $update_available" -)
+            yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".source.latest_version = \"$latest_version\"" -)
+            yq e -i ".source.update_available = $update_available" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".source.update_available = $update_available" -)
         fi
 
-        # Write updated import-config.yml file
-        echo "$import_config" > "$import_config_file"
     else
         # Prompt the user to find out if the action is imported or locally-created
         read -p "Is the action in ${group_dir}/${action_dir} imported or locally-created (imported/local)? " action_type
 
+        # Set initial variables
         imported=false
         local_author="rwaight"
         modifications=false
 
+        # Create an empty import-config.yml file
+        touch "$import_config_file"
+
+        # Set initial fields
+        yq e -i ".name = \"$name\"" "$import_config_file"
+        yq e -i ".description = \"placeholder\"" "$import_config_file"
+        yq e -i ".group = \"$group\"" "$import_config_file"
+        yq e -i ".imported = false" "$import_config_file"
+
+        # Add local and source blocks
         if [[ $action_type == "imported" ]]; then
             imported=true
+            yq e -i ".imported = true" "$import_config_file"
             read -p "Enter source action name [default: $name]: " source_action_name
             source_action_name=${source_action_name:-$name}
             read -p "Enter source action author: " source_action_author
@@ -102,85 +129,35 @@ create_or_update_import_config() {
             if [[ $current_version != $latest_version ]]; then
                 update_available=true
             fi
+
+            yq e -i ".local.modifications = $modifications" "$import_config_file"
+            yq e -i ".source.action_name = \"$source_action_name\"" "$import_config_file"
+            yq e -i ".source.author = \"$source_action_author\"" "$import_config_file"
+            yq e -i ".source.repo_name = \"$source_repo_name\"" "$import_config_file"
+            yq e -i ".source.repo_url = \"$source_repo_url\"" "$import_config_file"
+            yq e -i ".source.current_version = \"$current_version\"" "$import_config_file"
+            yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
+            yq e -i ".source.update_available = $update_available" "$import_config_file"
         else
-            #read -p "Has there been any modifications? (true/false): " modifications
-            modifications=true  # Setting modifications to true directly
+            yq e -i ".local.author = \"$local_author\"" "$import_config_file"
+            yq e -i ".local.modifications = true" "$import_config_file"
         fi
 
-        # Create import-config.yml content with name, description, group, and imported fields
-        import_config=$(cat <<EOF
-name: $name
-description: ""
-group: $group
-imported: $imported
-EOF
-        )
-        #
-
-        # Add local and source blocks
-        if [[ $imported == "true" ]]; then
-            import_config+=$(
-cat <<EOF
-
-local:
-  modifications: $modifications
-source:
-  action_name: $source_action_name
-  author: $source_action_author
-  repo_name: $source_repo_name
-  repo_url: $source_repo_url
-  current_version: $current_version
-  latest_version: $latest_version
-  update_available: $update_available
-EOF
-            )
-        else
-            import_config+=$(
-cat <<EOF
-
-local:
-  author: $local_author
-  modifications: $modifications
-EOF
-            )
-        fi
-        #
-
-        # Add specs block, including inputs, outputs, and runs fields
-        specs_block=$(cat <<EOF
-
-specs:
-  inputs: [$inputs]
-  outputs: [$outputs]
-EOF
-        )
+        # Add specs block, including action_file, inputs, outputs, and runs fields
+        yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
+        yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
+        yq -i '.specs.inputs style="flow"' "$import_config_file"
+        yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
+        yq -i '.specs.outputs style="flow"' "$import_config_file"
         if [[ -n $runs_using ]]; then
-            specs_block+=$(cat <<EOF
-
-  runs:
-    using: "$runs_using"
-EOF
-            )
+            yq e -i ".specs.runs.using = \"$runs_using\"" "$import_config_file"
             if [[ -n $runs_main ]]; then
-                specs_block+=$(cat <<EOF
-
-    main: "$runs_main"
-EOF
-                )
+                yq e -i ".specs.runs.main = \"$runs_main\"" "$import_config_file"
             fi
         fi
-        import_config+="$specs_block"
 
-        # Add tests block to import-config.yml content
-        import_config+=$(cat <<EOF
-
-tests:
-  _comment: "reserved for future use"
-EOF
-        )
-
-        # Write import-config.yml file
-        echo "$import_config" > "$import_config_file"
+        # Add tests block
+        yq e -i ".tests._comment = \"reserved for future use\"" "$import_config_file"
     fi
 
     # # Sort the import-config.yml file alphabetically
