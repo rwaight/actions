@@ -34,23 +34,10 @@ create_or_update_import_config() {
 
         # Update runs field if using and main are present
         if [[ -n $runs_using && -n $runs_main ]]; then
-#             runs_block=$(cat <<EOF
-#   runs:
-#     using: "$runs_using"
-#     main: "$runs_main"
-# EOF
-#             )
-#             import_config=$(echo "$import_config" | yq eval - <(echo "$runs_block"))
             import_config=$(echo "$import_config" | yq eval ".specs.runs.using = \"$runs_using\"" -)
             import_config=$(echo "$import_config" | yq eval ".specs.runs.main = \"$runs_main\"" -)
         elif [[ -n $runs_using ]]; then
             import_config=$(echo "$import_config" | yq eval ".specs.runs.using = \"$runs_using\"" -)
-#             runs_block=$(cat <<EOF
-#   runs:
-#     using: "$runs_using"
-# EOF
-#             )
-#             import_config=$(echo "$import_config" | yq eval - <(echo "$runs_block"))
         fi
 
         # Check for updates if imported
@@ -177,12 +164,8 @@ EOF
         echo "$import_config" > "$import_config_file"
     fi
 
-    # # Sort the import-config.yml file alphabetically, preserving the order of 'name'
-    # temp_file=$(mktemp)
+    # # Sort the import-config.yml file alphabetically
     # yq eval --inplace 'sort_keys(..)' "$import_config_file"
-    # yq eval 'sort_keys(..)' "$import_config_file" > "$temp_file"
-    # mv "$temp_file" "$import_config_file"
-    # yq eval --inplace '.[0] as $item ireduce({}; . * $item)' "$import_config_file"
 
     echo "Processed import-config.yml for ${group_dir}/${action_dir}"
     echo ""
