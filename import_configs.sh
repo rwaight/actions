@@ -22,6 +22,7 @@ create_or_update_import_config() {
     import_config_file="${group_dir}/${action_dir}/import-config.yml"
 
     if [[ -f $import_config_file ]]; then
+        echo ""
         echo "Updating ${import_config_file}..."
 
         # Read existing import-config.yml
@@ -83,6 +84,7 @@ EOF
             read -p "Enter source GitHub repo name [default: $name]: " source_repo_name
             source_repo_name=${source_repo_name:-$name}
             source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
+            read -p "Have there been any local modifications? (true/false): " modifications
             read -p "Enter current version used: " current_version
             latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
             update_available=false
@@ -91,19 +93,17 @@ EOF
             fi
         else
             #read -p "Has there been any modifications? (true/false): " modifications
-            modifications=true
+            modifications=true  # Setting modifications to true directly
         fi
 
         # Create import-config.yml content
         import_config=$(cat <<EOF
-imported: $imported
 name: $name
 description: ""
 group: $group
-inputs: [$inputs]
-outputs: [$outputs]
+imported: $imported
 tests:
-  _comment: "reserved for future use"
+  comment: "reserved for future use"
 EOF
         )
 
@@ -111,16 +111,24 @@ EOF
         if [[ -n $runs_using && -n $runs_main ]]; then
             import_config+=$(
 cat <<EOF
-runs:
-  using: "$runs_using"
-  main: "$runs_main"
+
+specs:
+  inputs: [$inputs]
+  outputs: [$outputs]
+  runs:
+    using: "$runs_using"
+    main: "$runs_main"
 EOF
             )
         elif [[ -n $runs_using ]]; then
             import_config+=$(
 cat <<EOF
-runs:
-  using: "$runs_using"
+
+specs:
+  inputs: [$inputs]
+  outputs: [$outputs]
+  runs:
+    using: "$runs_using"
 EOF
             )
         fi
@@ -128,6 +136,9 @@ EOF
         if [[ $imported == "true" ]]; then
             import_config+=$(
 cat <<EOF
+
+local:
+  modifications: $modifications
 source:
   action_name: $source_action_name
   author: $source_action_author
@@ -153,7 +164,11 @@ EOF
         echo "$import_config" > "$import_config_file"
     fi
 
+    # Sort the import-config.yml file alphabetically
+    yq eval --inplace 'sort_keys(..)' "$import_config_file"
+
     echo "Processed import-config.yml for ${group_dir}/${action_dir}"
+    echo ""
 }
 
 # Iterate through each group directory
