@@ -52,11 +52,13 @@ create_or_update_import_config() {
         import_config=$(echo "$import_config" | yq eval ".specs.outputs = [$outputs]" -)
 
         # Update runs field if using and main are present
-        if [[ -n $runs_using && -n $runs_main ]]; then
+        if [[ -n $runs_using ]]; then
             import_config=$(echo "$import_config" | yq eval ".specs.runs.using = \"$runs_using\"" -)
-            import_config=$(echo "$import_config" | yq eval ".specs.runs.main = \"$runs_main\"" -)
-        elif [[ -n $runs_using ]]; then
-            import_config=$(echo "$import_config" | yq eval ".specs.runs.using = \"$runs_using\"" -)
+            if [[ -n $runs_main ]]; then
+                import_config=$(echo "$import_config" | yq eval ".specs.runs.main = \"$runs_main\"" -)
+            else
+                import_config=$(echo "$import_config" | yq eval "del(.specs.runs.main)" -)
+            fi
         fi
 
         # Check for updates if imported
@@ -145,31 +147,29 @@ EOF
         #
 
         # Add specs block, including inputs, outputs, and runs fields
-        if [[ -n $runs_using && -n $runs_main ]]; then
-            import_config+=$(
-cat <<EOF
+        specs_block=$(cat <<EOF
 
 specs:
   inputs: [$inputs]
   outputs: [$outputs]
+EOF
+        )
+        if [[ -n $runs_using ]]; then
+            specs_block+=$(cat <<EOF
+
   runs:
     using: "$runs_using"
+EOF
+            )
+            if [[ -n $runs_main ]]; then
+                specs_block+=$(cat <<EOF
+
     main: "$runs_main"
 EOF
-            )
-        elif [[ -n $runs_using ]]; then
-            import_config+=$(
-cat <<EOF
-
-specs:
-  inputs: [$inputs]
-  outputs: [$outputs]
-  runs:
-    using: "$runs_using"
-EOF
-            )
+                )
+            fi
         fi
-        #
+        import_config+="$specs_block"
 
         # Add tests block to import-config.yml content
         import_config+=$(cat <<EOF
