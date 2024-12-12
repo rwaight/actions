@@ -53,22 +53,22 @@ check_for_updates() {
 
                 # Step 2: Rename .yml files in __dot_github to have .disabled
                 for f in "$temp_dir/__dot_github"/*.yml; do
-                    [ -e "$f" ] && mv "$f" "$f.disabled"
+                    [ -e "$f" ] && mv "$f" "${f}.disabled"
                 done
 
                 # Step 3: Rename .yml files in __dot_github/workflows to have .disabled
                 for f in "$temp_dir/__dot_github/workflows"/*.yml; do
-                    [ -e "$f" ] && mv "$f" "$f.disabled"
+                    [ -e "$f" ] && mv "$f" "${f}.disabled"
                 done
 
                 # Step 4: Prepend repo_name to markdown files in top-level source directory
                 for f in "$temp_dir"/*.md; do
-                    [ -e "$f" ] && mv "$f" "${source_repo_name}__$f"
+                    [ -e "$f" ] && mv "$f" "$temp_dir/${source_repo_name}__$f"
                 done
 
                 # Step 5: Copy .yml files in top-level source directory with prepended repo_name
                 for f in "$temp_dir"/*.yml; do
-                    [ -e "$f" ] && cp "$f" "${source_repo_name}__$f"
+                    [ -e "$f" ] && cp "$f" "$temp_dir/${source_repo_name}__$f"
                 done
 
                 # Set the local action directory variable
