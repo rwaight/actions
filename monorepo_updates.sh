@@ -12,6 +12,11 @@ check_for_updates() {
         return
     fi
 
+    group=$(yq e '.group' "$config_file")
+    name=$(yq e '.name' "$config_file")
+
+    echo "Processing $group/$name..."
+
     imported=$(yq e '.imported' "$config_file")
 
     if [[ "$imported" == "true" ]]; then
@@ -19,6 +24,8 @@ check_for_updates() {
         current_version=$(yq e '.source.current_version' "$config_file")
         latest_version=$(yq e '.source.latest_version' "$config_file")
         update_available=$(yq e '.source.update_available' "$config_file")
+
+        echo "Checking for updates from $source_repo_url..."
 
         if [[ "$update_available" == "true" ]]; then
             echo "Update available for $config_file"
