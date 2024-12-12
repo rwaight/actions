@@ -3,6 +3,18 @@
 # Read target directories from the config file
 target_dirs=($(cat target_dirs.conf))
 
+# Function to read the action.yml or action.yaml file
+read_action_file() {
+    local action_dir=$1
+    if [[ -f "${action_dir}/action.yml" ]]; then
+        echo "${action_dir}/action.yml"
+    elif [[ -f "${action_dir}/action.yaml" ]]; then
+        echo "${action_dir}/action.yaml"
+    else
+        echo ""
+    fi
+}
+
 # Function to create or update import-config.yml for each action
 create_or_update_import_config() {
     local group_dir=$1
@@ -12,8 +24,15 @@ create_or_update_import_config() {
     group=$(basename "$group_dir")
     name=$(basename "$action_dir")
 
-    # Read first level keys of inputs, outputs, and runs from action.yml
-    action_file="${group_dir}/${action_dir}/action.yml"
+    # Determine the action file (either action.yml or action.yaml)
+    action_file=$(read_action_file "${group_dir}/${action_dir}")
+
+    if [[ -z "$action_file" ]]; then
+        echo "No action.yml or action.yaml found in ${group_dir}/${action_dir}. Skipping..."
+        return
+    fi
+
+    # Read first level keys of inputs, outputs, and runs from the action file
     inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     runs_using=$(yq e '.runs.using' "$action_file")
@@ -26,7 +45,7 @@ create_or_update_import_config() {
         echo "Updating ${import_config_file}..."
 
         # Read existing import-config.yml
-        import_config=$(yq eval '.' $import_config_file)
+        import_config=$(yq eval '.' "$import_config_file")
 
         # Update inputs and outputs fields
         import_config=$(echo "$import_config" | yq eval ".specs.inputs = [$inputs]" -)
