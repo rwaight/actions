@@ -1,0 +1,22 @@
+name: render-template
+description: placeholder
+group: utilities
+imported: true
+local:
+  modifications: false
+source:
+  action_name: render-template
+  author: chuhlomin
+  repo_name: render-template
+  repo_url: https://github.com/chuhlomin/render-template
+  current_version: v1.8
+  latest_version: v1.10
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [template, vars, vars_path, result_path, timezone]
+  outputs: [result]
+  runs:
+    using: docker
+tests:
+  _comment: reserved for future use

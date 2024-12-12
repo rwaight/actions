@@ -1,0 +1,23 @@
+name: paths-filter
+description: placeholder
+group: utilities
+imported: true
+local:
+  modifications: false
+source:
+  action_name: paths-filter
+  author: dorny
+  repo_name: paths-filter
+  repo_url: https://github.com/dorny/paths-filter
+  current_version: v3.0.2
+  latest_version: v3.0.2
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [token, working-directory, ref, base, filters, list-files, initial-fetch-depth]
+  outputs: [changes]
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

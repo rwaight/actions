@@ -1,0 +1,23 @@
+name: public-ip
+description: placeholder
+group: utilities
+imported: true
+local:
+  modifications: true
+source:
+  action_name: public-ip
+  author: haythem
+  repo_name: public-ip
+  repo_url: https://github.com/haythem/public-ip
+  current_version: v1.3
+  latest_version: v1.3
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [maxRetries]
+  outputs: []
+  runs:
+    using: node16
+    main: dist/index.js
+tests:
+  _comment: reserved for future use
