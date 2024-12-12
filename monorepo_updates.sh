@@ -20,6 +20,8 @@ check_for_updates() {
     imported=$(yq e '.imported' "$config_file")
 
     if [[ "$imported" == "true" ]]; then
+        source_repo_name=$(yq e '.source.repo_name' "$config_file")
+        source_repo_author=$(yq e '.source.author' "$config_file")
         source_repo_url=$(yq e '.source.repo_url' "$config_file")
         current_version=$(yq e '.source.current_version' "$config_file")
         latest_version=$(yq e '.source.latest_version' "$config_file")
@@ -29,6 +31,10 @@ check_for_updates() {
 
         if [[ "$update_available" == "true" ]]; then
             echo "Update available for $config_file"
+            repo_latest_tag=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/releases/latest" | jq -r '.tag_name')
+            repo_latest_tag_data=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${repo_latest_tag}" | jq -r '.object.type,.object.sha')
+            repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
+            repo_latest_sha=${repo_latest_tag_data##*$'\n'}
             echo "Downloading updated source files for version $latest_version..."
 
             # Create a temporary directory for downloading the updated source files
@@ -75,6 +81,7 @@ check_for_updates() {
                 # Step 6: Move all processed files from temp directory to local action directory
                 local_action_dir=$(dirname "$config_file")
                 cp -r "$temp_dir"/* "$local_action_dir"
+                #cp -r "$temp_dir"/* ~/path/to/monorepo/$local_action_dir
 
                 # Step 7: Create a new README.md from the template file
                 template_file="$local_action_dir/assets/imported_readme_template.md"
@@ -83,8 +90,13 @@ check_for_updates() {
                     cp "$template_file" "$new_readme"
 
                     # Place for find/replace commands
-                    sed -i "s/{{GROUP}}/$group/g" "$new_readme"
-                    sed -i "s/{{NAME}}/$name/g" "$new_readme"
+                    sed -i "s/SED_GROUP/$group/g" "$new_readme"
+                    sed -i "s/SED_NAME/$name/g" "$new_readme"
+                    sed -i "s/SED_REPONAME/$source_repo_name/g" "$new_readme"
+                    sed -i "s/SED_REPOAUTH/$source_repo_author/g" "$new_readme"
+                    sed -i "s/SED_REPOURL/$source_repo_url/g" "$new_readme"
+                    sed -i "s/SED_NEWVERSION/$latest_version/g" "$new_readme"
+                    sed -i "s/SED_NEWCOMMITSHA/$repo_latest_sha/g" "$new_readme"
                     # Add additional find/replace commands as needed
                 fi
 
