@@ -105,13 +105,15 @@ check_for_updates() {
 
                 # Add changes to git and commit
                 git add "$local_action_dir"
-                read -p "Now you need to manually add the commit before continuing. " nothing0
-                read -p "  Recommended message:    chore($group): update $name to version $latest_version " nothing1
-                read -p "Press enter to continue. " nothing2
+                echo "  Skipping running the 'git commit' command for now"
+                echo ""
+                echo "  Now you need to manually add the commit before continuing. "
+                echo "  Recommended message:    chore($group): update $name to version $latest_version "
                 #git commit -m "chore($group): update $name to version $latest_version"
 
                 # Push the new branch to the remote repository
-                echo "  skipping running the 'git push origin \"$branch_name\"' command for now"
+                echo ""
+                echo "  Skipping running the 'git push origin \"$branch_name\"' command for now"
                 #git push origin "$branch_name"
                 echo "  you will need to push to origin later... "
 
