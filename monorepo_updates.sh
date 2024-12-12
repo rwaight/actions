@@ -38,44 +38,47 @@ check_for_updates() {
             echo "Downloading updated source files for version $latest_version..."
 
             # Create a temporary directory for downloading the updated source files
+            local_repo_dir=$(pwd)
             temp_dir=$(mktemp -d)
+            cd "$temp_dir" || exit
 
             # Clone the specific version of the repository
-            git clone --branch "$latest_version" --depth 1 "$source_repo_url" "$temp_dir"
+            git clone --branch "$latest_version" --depth 1 "$source_repo_url" .
 
             if [[ $? -eq 0 ]]; then
                 echo "Downloaded updated source files to $temp_dir"
 
                 # Step 1: Rename the .github directory to __dot_github
-                if [[ -d "$temp_dir/.github" ]]; then
-                    mv "$temp_dir/.github" "$temp_dir/__dot_github"
+                if [[ -d ".github" ]]; then
+                    mv .github __dot_github
                 fi
 
                 # Step 2: Rename .yml files in __dot_github to have .disabled
-                for f in "$temp_dir/__dot_github"/*.yml; do
+                for f in __dot_github/*.yml; do
                     [ -e "$f" ] && mv "$f" "${f}.disabled"
                 done
 
                 # Step 3: Rename .yml files in __dot_github/workflows to have .disabled
-                for f in "$temp_dir/__dot_github/workflows"/*.yml; do
+                for f in __dot_github/workflows/*.yml; do
                     [ -e "$f" ] && mv "$f" "${f}.disabled"
                 done
 
                 # Step 4: Prepend repo_name to markdown files in top-level source directory
-                for f in "$temp_dir"/*.md; do
-                    [ -e "$f" ] && mv "$f" "$temp_dir/${source_repo_name}__$f"
+                for f in *.md; do
+                    [ -e "$f" ] && mv "$f" "${source_repo_name}__$f"
                 done
 
                 # Step 5: Copy .yml files in top-level source directory with prepended repo_name
-                for f in "$temp_dir"/*.yml; do
-                    [ -e "$f" ] && cp "$f" "$temp_dir/${source_repo_name}__$f"
+                for f in *.yml; do
+                    [ -e "$f" ] && cp "$f" "${source_repo_name}__$f"
                 done
 
                 # Set the local action directory variable
                 local_action_dir=$(dirname "$config_file")
 
                 # Checkout main branch and create a new branch for the update
-                cd "$local_action_dir" || exit
+                #cd "$local_action_dir" || exit
+                cd "$local_repo_dir" || exit
                 git checkout main
                 branch_name="updates/${group}_${name}_$(date +%Y%m)"
                 git checkout -b "$branch_name"
@@ -102,10 +105,15 @@ check_for_updates() {
 
                 # Add changes to git and commit
                 git add "$local_action_dir"
-                git commit -m "Update action $group/$name to version $latest_version"
+                read -p "Now you need to manually add the commit before continuing. " nothing0
+                read -p "  Recommended message:    chore($group): update $name to version $latest_version " nothing1
+                read -p "Press enter to continue. " nothing2
+                #git commit -m "chore($group): update $name to version $latest_version"
 
                 # Push the new branch to the remote repository
-                git push origin "$branch_name"
+                echo "  skipping running the 'git push origin \"$branch_name\"' command for now"
+                #git push origin "$branch_name"
+                echo "  you will need to push to origin later... "
 
                 # Clean up the temporary directory
                 read -p "Do you want to clean up the temporary directory $temp_dir? (y/n): " cleanup
