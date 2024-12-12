@@ -1,0 +1,23 @@
+name: changed-files
+description: placeholder
+group: git
+imported: true
+local:
+  modifications: false
+source:
+  action_name: changed-files
+  author: tj-actions
+  repo_name: changed-files
+  repo_url: https://github.com/tj-actions/changed-files
+  current_version: v45.0.3
+  latest_version: v45.0.5
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [separator, include_all_old_new_renamed_files, old_new_separator, old_new_files_separator, files_from_source_file, files_from_source_file_separator, files, files_separator, files_yaml, files_yaml_from_source_file, files_yaml_from_source_file_separator, files_ignore_yaml, files_ignore_yaml_from_source_file, files_ignore_yaml_from_source_file_separator, files_ignore, files_ignore_separator, files_ignore_from_source_file, files_ignore_from_source_file_separator, sha, base_sha, since, until, path, quotepath, diff_relative, dir_names, dir_names_max_depth, dir_names_exclude_current_dir, dir_names_include_files, dir_names_include_files_separator, dir_names_deleted_files_include_only_deleted_dirs, json, escape_json, safe_output, fetch_depth, skip_initial_fetch, fetch_additional_submodule_history, since_last_remote_commit, write_output_files, output_dir, output_renamed_files_as_deleted_and_added, recover_deleted_files, recover_deleted_files_to_destination, recover_files, recover_files_separator, recover_files_ignore, recover_files_ignore_separator, token, api_url, use_rest_api, fail_on_initial_diff_error, fail_on_submodule_diff_error, negation_patterns_first, matrix, exclude_submodules, fetch_missing_history_max_retries, use_posix_path_separator, tags_pattern, tags_ignore_pattern]
+  outputs: [added_files, added_files_count, copied_files, copied_files_count, deleted_files, deleted_files_count, modified_files, modified_files_count, renamed_files, renamed_files_count, all_old_new_renamed_files, all_old_new_renamed_files_count, type_changed_files, type_changed_files_count, unmerged_files, unmerged_files_count, unknown_files, unknown_files_count, all_changed_and_modified_files, all_changed_and_modified_files_count, all_changed_files, all_changed_files_count, any_changed, only_changed, other_changed_files, other_changed_files_count, all_modified_files, all_modified_files_count, any_modified, only_modified, other_modified_files, other_modified_files_count, any_deleted, only_deleted, other_deleted_files, other_deleted_files_count, modified_keys, changed_keys]
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

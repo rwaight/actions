@@ -1,0 +1,23 @@
+name: keep-a-changelog-action
+description: placeholder
+group: git
+imported: true
+local:
+  modifications: false
+source:
+  action_name: keep-a-changelog-action
+  author: release-flow
+  repo_name: keep-a-changelog-action
+  repo_url: https://github.com/release-flow/keep-a-changelog-action
+  current_version: v3.0.0
+  latest_version: v3.0.0
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [command, changelog, version, preid, release-date, tag-prefix, output-file, keep-unreleased-section, fail-on-empty-release-notes]
+  outputs: [version, release-notes, release-date, release-suffix]
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

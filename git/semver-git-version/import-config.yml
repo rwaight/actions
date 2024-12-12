@@ -1,0 +1,23 @@
+name: semver-git-version
+description: placeholder
+group: git
+imported: true
+local:
+  modifications: false
+source:
+  action_name: semver-git-version
+  author: codedesignplus
+  repo_name: semver-git-version
+  repo_url: https://github.com/codedesignplus/semver-git-version
+  current_version: v0.1.4
+  latest_version: v0.1.10
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [version, folder, release-branch, release-candidate-branch, beta-branch, major-identifier, minor-identifier, prefix, dir-affected, previous-version, new-version]
+  outputs: [new-version, new-version-prefix, previous-tag, previous-version, previous-version-prefix]
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use
