@@ -49,8 +49,10 @@ create_or_update_import_config() {
 
         # Update inputs and outputs fields
         yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
+        yq -i '.specs.inputs style="flow"' "$import_config_file"
         #import_config=$(echo "$import_config" | yq eval ".specs.inputs = [$inputs]" -)
         yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
+        yq -i '.specs.outputs style="flow"' "$import_config_file"
         #import_config=$(echo "$import_config" | yq eval ".specs.outputs = [$outputs]" -)
 
         # Update runs field if using and main are present
@@ -138,7 +140,9 @@ create_or_update_import_config() {
 
         # Add specs block, including inputs, outputs, and runs fields
         yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
+        yq -i '.specs.inputs style="flow"' "$import_config_file"
         yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
+        yq -i '.specs.outputs style="flow"' "$import_config_file"
         if [[ -n $runs_using ]]; then
             yq e -i ".specs.runs.using = \"$runs_using\"" "$import_config_file"
             if [[ -n $runs_main ]]; then
