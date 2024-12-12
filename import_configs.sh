@@ -72,7 +72,8 @@ create_or_update_import_config() {
                 update_available=true
             fi
         else
-            read -p "Has there been any modifications? (true/false): " modifications
+            #read -p "Has there been any modifications? (true/false): " modifications
+            modifications=true
         fi
 
         # Create import-config.yml content
@@ -105,6 +106,7 @@ EOF
         else
             import_config+=$(
 cat <<EOF
+
 local:
   author: $local_author
   modifications: $modifications
