@@ -1,0 +1,23 @@
+name: semantic-pull-request
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: semantic-pull-request
+  author: amannn
+  repo_name: action-semantic-pull-request
+  repo_url: https://github.com/amannn/action-semantic-pull-request
+  current_version: v5.4.0
+  latest_version: v5.5.3
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [types, scopes, requireScope, disallowScopes, subjectPattern, subjectPatternError, validateSingleCommit, validateSingleCommitMatchesPrTitle, githubBaseUrl, ignoreLabels, headerPattern, headerPatternCorrespondence, wip]
+  outputs: []
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

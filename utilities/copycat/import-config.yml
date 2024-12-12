@@ -1,0 +1,22 @@
+name: copycat
+description: placeholder
+group: utilities
+imported: true
+local:
+  modifications: false
+source:
+  action_name: copycat
+  author: andstor
+  repo_name: copycat-action
+  repo_url: https://github.com/andstor/copycat-action
+  current_version: v3.2.4
+  latest_version: v3.2.4
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [personal_token, src_path, dst_path, dst_owner, dst_repo_name, src_branch, dst_branch, clean, file_filter, filter, exclude, src_wiki, dst_wiki, commit_message, username, email]
+  outputs: []
+  runs:
+    using: docker
+tests:
+  _comment: reserved for future use

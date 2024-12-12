@@ -1,0 +1,23 @@
+name: repository-dispatch
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: repository-dispatch
+  author: peter-evans
+  repo_name: repository-dispatch
+  repo_url: https://github.com/peter-evans/repository-dispatch
+  current_version: v3.0.0
+  latest_version: v3.0.0
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [token, repository, event-type, client-payload]
+  outputs: []
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

@@ -1,0 +1,23 @@
+name: add-and-commit
+description: placeholder
+group: git
+imported: true
+local:
+  modifications: false
+source:
+  action_name: add-and-commit
+  author: EndBug
+  repo_name: add-and-commit
+  repo_url: https://github.com/EndBug/add-and-commit
+  current_version: v9.1.4
+  latest_version: v9.1.4
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: null
+  outputs: [committed, commit_long_sha, commit_sha, pushed, tagged, tag_pushed]
+  runs:
+    using: node20
+    main: lib/index.js
+tests:
+  _comment: reserved for future use

@@ -1,0 +1,23 @@
+name: create-pull-request
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: create-pull-request
+  author: peter-evans
+  repo_name: create-pull-request
+  repo_url: https://github.com/peter-evans/create-pull-request
+  current_version: v6.0.2
+  latest_version: v7.0.5
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [token, git-token, path, add-paths, commit-message, committer, author, signoff, branch, delete-branch, branch-suffix, base, push-to-fork, title, body, body-path, labels, assignees, reviewers, team-reviewers, milestone, draft]
+  outputs: [pull-request-number, pull-request-url, pull-request-operation, pull-request-head-sha]
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

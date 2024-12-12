@@ -1,0 +1,22 @@
+name: label-checker
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: label-checker
+  author: agilepathway
+  repo_name: label-checker
+  repo_url: https://github.com/agilepathway/label-checker
+  current_version: v1.6.25
+  latest_version: v1.6.60
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [one_of, none_of, all_of, any_of, repo_token, github_enterprise_graphql_url, allow_failure, prefix_mode]
+  outputs: []
+  runs:
+    using: docker
+tests:
+  _comment: reserved for future use

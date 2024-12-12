@@ -1,0 +1,22 @@
+name: git-describe-semver
+description: placeholder
+group: git
+imported: true
+local:
+  modifications: true
+source:
+  action_name: git-describe-semver
+  author: choffmeister
+  repo_name: git-describe-semver
+  repo_url: https://github.com/choffmeister/git-describe-semver
+  current_version: v0.3.11
+  latest_version: v0.4.0
+  update_available: true
+specs:
+  action_file: action.yaml
+  inputs: [version, dir, fallback, drop-prefix, prerelease-prefix, prerelease-suffix, prerelease-timestamped, gh-token, gh-debug]
+  outputs: [version, version-original]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use

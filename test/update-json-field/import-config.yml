@@ -1,0 +1,15 @@
+name: update-json-field
+description: placeholder
+group: test
+imported: false
+local:
+  author: rwaight
+  modifications: true
+specs:
+  action_file: action.yml
+  inputs: null
+  outputs: [previous-value, new-value]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use

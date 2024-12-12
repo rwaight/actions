@@ -1,0 +1,15 @@
+name: repo-version-info
+description: placeholder
+group: git
+imported: false
+local:
+  author: rwaight
+  modifications: true
+specs:
+  action_file: action.yml
+  inputs: [gh-token, include-drafts, include-pre-releases, my_workflow_debug, pre-release-id, strategy]
+  outputs: [latest-release, latest-tag, version]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use

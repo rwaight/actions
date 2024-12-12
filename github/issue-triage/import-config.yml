@@ -1,0 +1,23 @@
+name: issue-triage
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: issue-triage
+  author: krizzu
+  repo_name: issue-triage-action
+  repo_url: https://github.com/krizzu/issue-triage-action
+  current_version: v1.0.0
+  latest_version: v1.0.0
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [ghToken, staleAfter, closeAfter, staleLabel, staleComment, closeComment, showLogs]
+  outputs: []
+  runs:
+    using: node16
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

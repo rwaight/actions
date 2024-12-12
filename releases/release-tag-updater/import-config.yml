@@ -1,0 +1,23 @@
+name: release-tag-updater
+description: placeholder
+group: releases
+imported: true
+local:
+  modifications: false
+source:
+  action_name: release-tag-updater
+  author: sersoft-gmbh
+  repo_name: running-release-tags-action
+  repo_url: https://github.com/sersoft-gmbh/running-release-tags-action
+  current_version: v3.0.0
+  latest_version: v3.0.0
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [tag, prefix-regex, suffix-regex, fail-on-non-semver-tag, skip-repo-setup, update-major, update-minor, create-release, create-release-as-draft, major-release-title, major-release-body, minor-release-title, minor-release-body, update-full-release, github-token, dry-run]
+  outputs: []
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

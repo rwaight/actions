@@ -1,0 +1,23 @@
+name: find-comment
+description: placeholder
+group: chatops
+imported: true
+local:
+  modifications: false
+source:
+  action_name: find-comment
+  author: peter-evans
+  repo_name: find-comment
+  repo_url: https://github.com/peter-evans/find-comment
+  current_version: v3.1.0
+  latest_version: v3.1.0
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [token, repository, issue-number, comment-author, body-includes, body-regex, direction, nth]
+  outputs: [comment-id, comment-node-id, comment-body, comment-author]
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

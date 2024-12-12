@@ -1,0 +1,23 @@
+name: create-or-update-comment
+description: placeholder
+group: chatops
+imported: true
+local:
+  modifications: false
+source:
+  action_name: create-or-update-comment
+  author: peter-evans
+  repo_name: create-or-update-comment
+  repo_url: https://github.com/peter-evans/create-or-update-comment
+  current_version: v4.0.0
+  latest_version: v4.0.0
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [token, repository, issue-number, comment-id, body, body-path, body-file, edit-mode, append-separator, reactions, reactions-edit-mode]
+  outputs: [comment-id]
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

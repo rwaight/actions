@@ -1,0 +1,15 @@
+name: get-next-semver
+description: placeholder
+group: test
+imported: false
+local:
+  author: rwaight
+  modifications: true
+specs:
+  action_file: action.yml
+  inputs: [gh-token, include-drafts, include-pre-releases, pre-release-id, release-type, strategy, verbose]
+  outputs: [current-tag, current-version, next-tag, next-version, is-next-prerelease]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use

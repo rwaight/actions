@@ -1,0 +1,23 @@
+name: semantic-release
+description: placeholder
+group: releases
+imported: true
+local:
+  modifications: false
+source:
+  action_name: semantic-release
+  author: cycjimmy
+  repo_name: semantic-release-action
+  repo_url: https://github.com/cycjimmy/semantic-release-action
+  current_version: v4.1.0
+  latest_version: v4.1.1
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [semantic_version, branches, branch, extra_plugins, dry_run, ci, extends, working_directory, tag_format, repository_url]
+  outputs: [new_release_published, new_release_version, new_release_major_version, new_release_minor_version, new_release_patch_version, new_release_channel, new_release_notes, new_release_git_head, new_release_git_tag, last_release_version, last_release_git_head, last_release_git_tag]
+  runs:
+    using: node20
+    main: index.js
+tests:
+  _comment: reserved for future use
