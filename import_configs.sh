@@ -49,24 +49,32 @@ create_or_update_import_config() {
 
         # Update inputs and outputs fields
         yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
+        #import_config=$(echo "$import_config" | yq eval ".specs.inputs = [$inputs]" -)
         yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
+        #import_config=$(echo "$import_config" | yq eval ".specs.outputs = [$outputs]" -)
 
         # Update runs field if using and main are present
         if [[ -n $runs_using ]]; then
             yq e -i ".specs.runs.using = \"$runs_using\"" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".specs.runs.using = \"$runs_using\"" -)
             if [[ -n $runs_main ]]; then
                 yq e -i ".specs.runs.main = \"$runs_main\"" "$import_config_file"
+                #import_config=$(echo "$import_config" | yq eval ".specs.runs.main = \"$runs_main\"" -)
             else
                 yq e -i "del(.specs.runs.main)" "$import_config_file"
+                #import_config=$(echo "$import_config" | yq eval "del(.specs.runs.main)" -)
             fi
         fi
 
         # Check for updates if imported
         if [[ $(yq e '.imported' "$import_config_file") == "true" ]]; then
             source_action_author=$(yq e '.source.author' "$import_config_file")
+            #source_action_author=$(echo "$import_config" | yq eval '.source.author' -)
             source_repo_name=$(yq e '.source.repo_name' "$import_config_file")
+            #source_repo_name=$(echo "$import_config" | yq eval '.source.repo_name' -)
             source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
             current_version=$(yq e '.source.current_version' "$import_config_file")
+            #current_version=$(echo "$import_config" | yq eval '.source.current_version' -)
             latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
             update_available=false
             if [[ $current_version != $latest_version ]]; then
@@ -74,7 +82,9 @@ create_or_update_import_config() {
             fi
             # Update source fields
             yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".source.latest_version = \"$latest_version\"" -)
             yq e -i ".source.update_available = $update_available" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".source.update_available = $update_available" -)
         fi
 
     else
