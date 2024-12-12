@@ -67,6 +67,11 @@ check_for_updates() {
                     [ -e "$f" ] && cp "$f" "${source_repo_name}__$f"
                 done
 
+                # Checkout main branch and create a new branch for the update
+                git checkout main
+                branch_name="updates/${group}_${name}_$(date +%Y%m)"
+                git checkout -b "$branch_name"
+
                 # Step 6: Move all processed files from temp directory to local action directory
                 local_action_dir=$(dirname "$config_file")
                 cp -r "$temp_dir"/* "$local_action_dir"
@@ -83,6 +88,13 @@ check_for_updates() {
                     # Add additional find/replace commands as needed
                 fi
 
+                # Add changes to git and commit
+                git add "$local_action_dir"
+                git commit -m "Update action $group/$name to version $latest_version"
+
+                # Push the new branch to the remote repository
+                git push origin "$branch_name"
+
                 # Clean up the temporary directory
                 rm -rf "$temp_dir"
 
@@ -91,6 +103,7 @@ check_for_updates() {
                 yq e -i ".source.update_available = false" "$config_file"
 
                 echo "Updated local version of the action in $local_action_dir"
+                echo "Created a new branch $branch_name for the update"
             else
                 echo "Failed to download the updated source files for $config_file"
             fi
