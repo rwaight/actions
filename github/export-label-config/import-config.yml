@@ -1,0 +1,23 @@
+name: export-label-config
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: export-label-config
+  author: EndBug
+  repo_name: export-label-config
+  repo_url: https://github.com/EndBug/export-label-config
+  current_version: v1.0.1
+  latest_version: v1.0.1
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [token, raw-result, add-aliases]
+  outputs: []
+  runs:
+    using: node16
+    main: lib/index.js
+tests:
+  _comment: reserved for future use

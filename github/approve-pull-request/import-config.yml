@@ -1,0 +1,23 @@
+name: approve-pull-request
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: approve-pull-request-action
+  author: juliangruber
+  repo_name: approve-pull-request-action
+  repo_url: https://github.com/juliangruber/approve-pull-request-action
+  current_version: v2.0.6
+  latest_version: v2.0.6
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [github-token, number, repo]
+  outputs: []
+  runs:
+    using: node20
+    main: dist/index.js
+tests:
+  _comment: reserved for future use

@@ -1,0 +1,23 @@
+name: label-manager
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: label-manager
+  author: lannonbr
+  repo_name: issue-label-manager-action
+  repo_url: https://github.com/lannonbr/issue-label-manager-action
+  current_version: v4.0.0
+  latest_version: 4.0.0
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [delete]
+  outputs: []
+  runs:
+    using: node16
+    main: lib/index.js
+tests:
+  _comment: reserved for future use

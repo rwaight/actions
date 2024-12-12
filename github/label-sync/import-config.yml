@@ -1,0 +1,23 @@
+name: label-sync
+description: placeholder
+group: github
+imported: true
+local:
+  modifications: false
+source:
+  action_name: label-sync
+  author: EndBug
+  repo_name: label-sync
+  repo_url: https://github.com/EndBug/label-sync
+  current_version: v2.3.2
+  latest_version: v2.3.3
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [token, config-file, source-repo, request-token, delete-other-labels, dry-run]
+  outputs: []
+  runs:
+    using: node16
+    main: lib/index.js
+tests:
+  _comment: reserved for future use
