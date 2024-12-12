@@ -39,10 +39,8 @@ check_for_updates() {
 
             # Create a temporary directory for downloading the updated source files
             temp_dir=$(mktemp -d)
-            #cd "$temp_dir" || exit
 
             # Clone the specific version of the repository
-            #git clone --branch "$latest_version" --depth 1 "$source_repo_url" .
             git clone --branch "$latest_version" --depth 1 "$source_repo_url" "$temp_dir"
 
             if [[ $? -eq 0 ]]; then
@@ -65,13 +63,16 @@ check_for_updates() {
 
                 # Step 4: Prepend repo_name to markdown files in top-level source directory
                 for f in "$temp_dir"/*.md; do
-                    [ -e "$f" ] && mv "$f" "${temp_dir}/${source_repo_name}__$f"
+                    [ -e "$f" ] && mv "$f" "${source_repo_name}__$f"
                 done
 
                 # Step 5: Copy .yml files in top-level source directory with prepended repo_name
                 for f in "$temp_dir"/*.yml; do
-                    [ -e "$f" ] && cp "$f" "${temp_dir}/${source_repo_name}__$f"
+                    [ -e "$f" ] && cp "$f" "${source_repo_name}__$f"
                 done
+
+                # Set the local action directory variable
+                local_action_dir=$(dirname "$config_file")
 
                 # Checkout main branch and create a new branch for the update
                 cd "$local_action_dir" || exit
@@ -80,9 +81,7 @@ check_for_updates() {
                 git checkout -b "$branch_name"
 
                 # Step 6: Move all processed files from temp directory to local action directory
-                #local_action_dir=$(dirname "$config_file")
                 cp -r "$temp_dir"/* "$local_action_dir"
-                #cp -r "$temp_dir"/* ~/path/to/monorepo/$local_action_dir
 
                 # Step 7: Create a new README.md from the template file
                 template_file="$local_action_dir/assets/imported_readme_template.md"
@@ -109,7 +108,6 @@ check_for_updates() {
                 git push origin "$branch_name"
 
                 # Clean up the temporary directory
-                #rm -rf "$temp_dir"
                 read -p "Do you want to clean up the temporary directory $temp_dir? (y/n): " cleanup
                 if [[ $cleanup == "y" ]]; then
                     rm -rf "$temp_dir"
