@@ -37,6 +37,7 @@ create_or_update_import_config() {
     outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     runs_using=$(yq e '.runs.using' "$action_file")
     runs_main=$(yq e '.runs.main' "$action_file")
+    if [[ "$runs_main" == "null" ]]; then unset runs_main; fi
 
     import_config_file="${group_dir}/${action_dir}/import-config.yml"
 
