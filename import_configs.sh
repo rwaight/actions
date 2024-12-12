@@ -33,7 +33,20 @@ create_or_update_import_config() {
 
         # Update runs field if using and main are present
         if [[ -n $runs_using && -n $runs_main ]]; then
-            import_config=$(echo "$import_config" | yq eval ".runs = {using: \"$runs_using\", main: \"$runs_main\"}" -)
+            runs_block=$(cat <<EOF
+runs:
+  using: "$runs_using"
+  main: "$runs_main"
+EOF
+            )
+            import_config=$(echo "$import_config" | yq eval - <(echo "$runs_block"))
+        elif [[ -n $runs_using ]]; then
+            runs_block=$(cat <<EOF
+runs:
+  using: "$runs_using"
+EOF
+            )
+            import_config=$(echo "$import_config" | yq eval - <(echo "$runs_block"))
         fi
 
         # Check for updates if imported
@@ -89,13 +102,28 @@ description: ""
 group: $group
 inputs: [$inputs]
 outputs: [$outputs]
-runs:
-  using: $runs_using
-  main: $runs_main
 tests:
   _comment: "reserved for future use"
 EOF
         )
+
+        # Add runs block if using and main are present
+        if [[ -n $runs_using && -n $runs_main ]]; then
+            import_config+=$(
+cat <<EOF
+runs:
+  using: "$runs_using"
+  main: "$runs_main"
+EOF
+            )
+        elif [[ -n $runs_using ]]; then
+            import_config+=$(
+cat <<EOF
+runs:
+  using: "$runs_using"
+EOF
+            )
+        fi
 
         if [[ $imported == "true" ]]; then
             import_config+=$(
