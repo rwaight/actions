@@ -7,9 +7,14 @@ target_dirs=($(cat target_dirs.conf))
 create_import_config() {
     local group_dir=$1
     local action_dir=$2
+    #echo "Processing ${group_dir}/${action_dir}"
+    #echo "  group_dir is ${group_dir}"
+    #echo "  action_dir is ${action_dir}"
 
     # Prompt the user to find out if the action is imported or locally-created
-    read -p "Is the action in ${group_dir}/${action_dir} imported or locally-created (imported/local)?" action_type
+    #read -p "Is the action in ${group_dir}/${action_dir} imported or locally-created (imported/local)?" action_type
+    #read -p "Is the action in ${action_dir} imported or locally-created (imported/local)?  " action_type
+    read -p "Is ${action_dir} imported or locally-created (imported/local)?  " action_type
 
     # Set initial values for import-config.yml
     group=$(basename "$group_dir")
@@ -37,7 +42,8 @@ create_import_config() {
     fi
 
     # Read inputs, outputs, and runs from action.yml
-    action_file="${group_dir}/${action_dir}/action.yml"
+    #action_file="${group_dir}/${action_dir}/action.yml"
+    action_file="${action_dir}/action.yml"
     inputs=$(yq .inputs $action_file)
     outputs=$(yq .outputs $action_file)
     runs=$(yq .runs $action_file | jq '{using, main}')
