@@ -16,7 +16,8 @@ create_or_update_import_config() {
     action_file="${group_dir}/${action_dir}/action.yml"
     inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
-    runs=$(yq e '.runs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
+    runs_using=$(yq e '.runs.using' "$action_file")
+    runs_main=$(yq e '.runs.main' "$action_file")
 
     import_config_file="${group_dir}/${action_dir}/import-config.yml"
 
@@ -26,10 +27,14 @@ create_or_update_import_config() {
         # Read existing import-config.yml
         import_config=$(yq eval '.' $import_config_file)
 
-        # Update inputs, outputs, and runs fields
+        # Update inputs and outputs fields
         import_config=$(echo "$import_config" | yq eval ".inputs = [$inputs]" -)
         import_config=$(echo "$import_config" | yq eval ".outputs = [$outputs]" -)
-        import_config=$(echo "$import_config" | yq eval ".runs = [$runs]" -)
+
+        # Update runs field if using and main are present
+        if [[ -n $runs_using && -n $runs_main ]]; then
+            import_config=$(echo "$import_config" | yq eval ".runs = {using: \"$runs_using\", main: \"$runs_main\"}" -)
+        fi
 
         # Check for updates if imported
         if [[ $(echo "$import_config" | yq eval '.imported' -) == "true" ]]; then
@@ -84,7 +89,9 @@ description: ""
 group: $group
 inputs: [$inputs]
 outputs: [$outputs]
-runs: [$runs]
+runs:
+  using: $runs_using
+  main: $runs_main
 tests:
   _comment: "reserved for future use"
 EOF
