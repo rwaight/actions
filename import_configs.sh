@@ -32,6 +32,9 @@ create_or_update_import_config() {
         return
     fi
 
+    # Extract the action file extension
+    action_file_extension=$(basename "$action_file")
+
     # Read first level keys of inputs, outputs, and runs from the action file
     inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
@@ -48,7 +51,8 @@ create_or_update_import_config() {
         # Read existing import-config.yml
         import_config=$(yq eval '.' "$import_config_file")
 
-        # Update inputs and outputs fields
+        # Update action_file, inputs, and outputs fields
+        yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
         yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
         yq -i '.specs.inputs style="flow"' "$import_config_file"
         #import_config=$(echo "$import_config" | yq eval ".specs.inputs = [$inputs]" -)
@@ -139,7 +143,8 @@ create_or_update_import_config() {
             yq e -i ".local.modifications = true" "$import_config_file"
         fi
 
-        # Add specs block, including inputs, outputs, and runs fields
+        # Add specs block, including action_file, inputs, outputs, and runs fields
+        yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
         yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
         yq -i '.specs.inputs style="flow"' "$import_config_file"
         yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
