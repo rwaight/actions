@@ -92,7 +92,7 @@ check_for_updates() {
                 cp -r "$temp_dir"/* "$local_action_dir"
 
                 # Step 7: Create a new README.md from the template file
-                template_file="$local_action_dir/assets/imported_readme_template.md"
+                template_file="$local_repo_dir/assets/imported_readme_template.md"
                 new_readme="$local_action_dir/README.md"
                 if [[ -f "$template_file" ]]; then
                     cp "$template_file" "$new_readme"
