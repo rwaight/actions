@@ -1,5 +1,5 @@
 name: 'Set build version'
-description: 'Determine a "build version" using "git describe".'
+description: 'Determine a build version using git describe.'
 # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
 author: 'rwaight'
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
