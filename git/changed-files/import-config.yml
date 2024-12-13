@@ -1,5 +1,6 @@
 name: changed-files
-description: placeholder
+author: tj-actions
+description: Get all Added, Copied, Modified, Deleted, Renamed, Type changed, Unmerged, and Unknown files.
 group: git
 imported: true
 local:

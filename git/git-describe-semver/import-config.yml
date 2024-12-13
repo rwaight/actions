@@ -1,5 +1,6 @@
 name: git-describe-semver
-description: placeholder
+author: choffmeister
+description: A command similar to 'git describe --tags' that produces semver compatible versions that follow to semver sorting rules.
 group: git
 imported: true
 local:

@@ -1,5 +1,6 @@
 name: repo-version-info
-description: placeholder
+author: rwaight
+description: Provide version information from a git repo
 group: git
 imported: false
 local:

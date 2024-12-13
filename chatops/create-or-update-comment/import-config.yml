@@ -1,5 +1,6 @@
 name: create-or-update-comment
-description: placeholder
+author: peter-evans
+description: Create or update an issue or pull request comment
 group: chatops
 imported: true
 local:

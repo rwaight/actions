@@ -1,5 +1,6 @@
 name: find-comment
-description: placeholder
+author: peter-evans
+description: Find an issue or pull request comment
 group: chatops
 imported: true
 local:

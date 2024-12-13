@@ -1,5 +1,6 @@
 name: set-version
-description: placeholder
+author: rwaight
+description: 'Determine a build version using git describe.'
 group: builders
 imported: false
 local:

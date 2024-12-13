@@ -1,5 +1,6 @@
 name: keep-a-changelog-action
-description: placeholder
+author: Release Flow
+description: 'Performs operations on changelogs that are in Keep-a-Changelog format: bump the version, query release info.'
 group: git
 imported: true
 local:
