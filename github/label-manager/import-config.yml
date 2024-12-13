@@ -1,5 +1,6 @@
 name: label-manager
-description: placeholder
+author: Benjamin Lannon <benjamin@lannonbr.com>
+description: Will update repo's labels based on data in JSON file located at $REPO/.github/labels.json
 group: github
 imported: true
 local:
@@ -9,9 +10,9 @@ source:
   author: lannonbr
   repo_name: issue-label-manager-action
   repo_url: https://github.com/lannonbr/issue-label-manager-action
-  current_version: v4.0.0
+  current_version: 4.0.0
   latest_version: 4.0.0
-  update_available: true
+  update_available: false
 specs:
   action_file: action.yml
   inputs: [delete]

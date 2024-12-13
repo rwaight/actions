@@ -1,5 +1,6 @@
 name: public-ip
-description: placeholder
+author: haythem
+description: Queries the runner's public IP address
 group: utilities
 imported: true
 local:

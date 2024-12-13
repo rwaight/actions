@@ -1,5 +1,6 @@
 name: repository-dispatch
-description: placeholder
+author: peter-evans
+description: Create a repository dispatch event
 group: github
 imported: true
 local:

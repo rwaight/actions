@@ -1,5 +1,6 @@
 name: add-and-commit
-description: placeholder
+author: EndBug
+description: Automatically commit changes made in your workflow run directly to your repo
 group: git
 imported: true
 local:

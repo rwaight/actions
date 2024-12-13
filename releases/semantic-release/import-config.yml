@@ -1,5 +1,6 @@
 name: semantic-release
-description: placeholder
+author: cycjimmy
+description: GitHub Action for Semantic Release
 group: releases
 imported: true
 local:

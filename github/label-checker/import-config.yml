@@ -1,5 +1,6 @@
 name: label-checker
-description: placeholder
+author: John Boyes
+description: Checks pull requests for given labels
 group: github
 imported: true
 local:

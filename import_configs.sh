@@ -102,6 +102,10 @@ create_or_update_import_config() {
             if [[ $current_version != $latest_version ]]; then
                 update_available=true
             fi
+            #
+            if [[ $(yq e '.author' "$import_config_file") == "placeholder" ]]; then
+                yq e -i ".author = \"$source_action_author\"" "$import_config_file"
+            fi
             # Update source fields
             yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
             #import_config=$(echo "$import_config" | yq eval ".source.latest_version = \"$latest_version\"" -)
@@ -154,7 +158,10 @@ create_or_update_import_config() {
             if [[ $current_version != $latest_version ]]; then
                 update_available=true
             fi
-
+            #
+            if [[ $(yq e '.author' "$import_config_file") == "placeholder" ]]; then
+                yq e -i ".author = \"$source_action_author\"" "$import_config_file"
+            fi
             yq e -i ".local.modifications = $modifications" "$import_config_file"
             yq e -i ".source.action_name = \"$source_action_name\"" "$import_config_file"
             yq e -i ".source.author = \"$source_action_author\"" "$import_config_file"

@@ -1,5 +1,6 @@
 name: find-pull-request
-description: placeholder
+author: juliangruber
+description: A GitHub Action for finding pull requests
 group: github
 imported: true
 local:

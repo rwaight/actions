@@ -1,5 +1,6 @@
 name: paths-filter
-description: placeholder
+author: Michal Dorner <dorner.michal@gmail.com>
+description: Execute your workflow steps only if relevant files are modified.
 group: utilities
 imported: true
 local:

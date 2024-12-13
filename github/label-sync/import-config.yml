@@ -1,5 +1,6 @@
 name: label-sync
-description: placeholder
+author: Federico Grandi <federicograndi@duck.com>
+description: An action that allows you to sync labels from a repository or a config file
 group: github
 imported: true
 local:

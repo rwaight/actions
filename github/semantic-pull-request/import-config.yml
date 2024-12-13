@@ -1,5 +1,6 @@
 name: semantic-pull-request
-description: placeholder
+author: Jan Amann <jan@amann.work>
+description: Ensure your PR title matches the Conventional Commits spec (https://www.conventionalcommits.org/).
 group: github
 imported: true
 local:

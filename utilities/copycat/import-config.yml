@@ -1,5 +1,6 @@
 name: copycat
-description: placeholder
+author: André Storhaug
+description: GitHub Action for copying files to other repositories
 group: utilities
 imported: true
 local:
