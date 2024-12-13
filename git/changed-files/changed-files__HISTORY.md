@@ -1,5 +1,103 @@
 # Changelog
 
+# [45.0.4](https://github.com/tj-actions/changed-files/compare/v45.0.3...v45.0.4) - (2024-11-05)
+
+## <!-- 0 -->🚀 Features
+
+- Prevent ignore files warning ([#2318](https://github.com/tj-actions/changed-files/issues/2318)) ([1f772e9](https://github.com/tj-actions/changed-files/commit/1f772e919bcbf025d221836bc4b8e3b72e2ef117))  - (Tonye Jack)
+
+## <!-- 1 -->🐛 Bug Fixes
+
+- **deps:** Update dependency @actions/core to v1.11.1 ([4d0aab9](https://github.com/tj-actions/changed-files/commit/4d0aab94b6284beb85e6cc3dd23ec0ee523dcca6))  - (renovate[bot])
+
+## <!-- 16 -->➕ Add
+
+- Added missing changes and modified dist assets.
+ ([9d7201d](https://github.com/tj-actions/changed-files/commit/9d7201ded6d75401ce2b888a4f643a921bfb8604))  - (GitHub Action)
+- Added missing changes and modified dist assets.
+ ([0104c75](https://github.com/tj-actions/changed-files/commit/0104c75ccc49741ff97b817da4cd36887e0c13cd))  - (GitHub Action)
+
+## <!-- 30 -->📝 Other
+
+- Step for dependabot PRs ([#2317](https://github.com/tj-actions/changed-files/issues/2317)) ([684c5e6](https://github.com/tj-actions/changed-files/commit/684c5e6d941e3591a9de8182da044dd242dc17c9))  - (Tonye Jack)
+
+## <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- **deps:** Update dependency eslint-plugin-jest to v28.9.0 ([4edd678](https://github.com/tj-actions/changed-files/commit/4edd678ac3f81e2dc578756871e4d00c19191daf))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.9.0 ([f082558](https://github.com/tj-actions/changed-files/commit/f08255874b882608b0d7f6dde476c5756dbfc08c))  - (renovate[bot])
+- **deps:** Lock file maintenance ([92c02a0](https://github.com/tj-actions/changed-files/commit/92c02a00a1b05d13ef79d053e8e8e4aafc1431cd))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.8.7 ([b702211](https://github.com/tj-actions/changed-files/commit/b70221184d8c03f985dc253d1a84169c4b530010))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.8.6 ([435fd74](https://github.com/tj-actions/changed-files/commit/435fd74b2ec5d115590c1a20ba1101bf9a291563))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.8.5 ([0626fa3](https://github.com/tj-actions/changed-files/commit/0626fa3ff3e2030febaa380334fab666814bd24f))  - (renovate[bot])
+- **deps:** Update dependency @types/lodash to v4.17.13 ([8817a79](https://github.com/tj-actions/changed-files/commit/8817a797cbad83643006b4fafc757bb72a50bd51))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.8.4 ([5417491](https://github.com/tj-actions/changed-files/commit/54174910beb91e8c0eb59a8449720659f72bf24b))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.8.2 ([84ef162](https://github.com/tj-actions/changed-files/commit/84ef16253002b9f411c38d53e45521709f43247e))  - (renovate[bot])
+- **deps:** Lock file maintenance ([b672a51](https://github.com/tj-actions/changed-files/commit/b672a5115a5ab8c2b27838329a827d3ffda1202c))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.8.1 ([678cdc2](https://github.com/tj-actions/changed-files/commit/678cdc28086f7f6f8762a1934db3e94e7c0cadb4))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.8.0 ([27b7bbb](https://github.com/tj-actions/changed-files/commit/27b7bbb0aeabaa9258fe4bfd52318bbbb9bdbc9c))  - (renovate[bot])
+- **deps:** Update actions/setup-node action to v4.1.0 ([8361072](https://github.com/tj-actions/changed-files/commit/83610723bb32196f24d5880eca9cd59951b17c69))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.9 ([21acf46](https://github.com/tj-actions/changed-files/commit/21acf46f4af54c16f04ec314f1929b73692c4441))  - (renovate[bot])
+- **deps:** Update dependency @types/jest to v29.5.14 ([f356b3c](https://github.com/tj-actions/changed-files/commit/f356b3c86b5e3dbe272d6579b57cb7344f3e8ea3))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.8 ([66275de](https://github.com/tj-actions/changed-files/commit/66275de0606e56bdce755a9408b1cef1aac91580))  - (renovate[bot])
+- **deps:** Lock file maintenance ([a16702b](https://github.com/tj-actions/changed-files/commit/a16702bf7a036756d8ef85e34bf2e6cbcd474726))  - (renovate[bot])
+- **deps:** Update dependency @types/lodash to v4.17.12 ([aa11897](https://github.com/tj-actions/changed-files/commit/aa11897ec4afaea2c563502c017812d493d21a90))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.7 ([6513fe1](https://github.com/tj-actions/changed-files/commit/6513fe1691ddc9793b54c3b337d6946cd331ab26))  - (renovate[bot])
+- **deps:** Update dependency @types/lodash to v4.17.11 ([45e0c78](https://github.com/tj-actions/changed-files/commit/45e0c78ac7fad3fc00ec4a92c7d93a3f4489a906))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.6 ([a949a83](https://github.com/tj-actions/changed-files/commit/a949a8338c60e9581f87873ab195f1a23066a4fc))  - (renovate[bot])
+- **deps:** Lock file maintenance ([f93ff33](https://github.com/tj-actions/changed-files/commit/f93ff336292f0bcab245d8fc70fe7f1a6446464b))  - (renovate[bot])
+- **deps:** Update dependency typescript to v5.6.3 ([729c704](https://github.com/tj-actions/changed-files/commit/729c70475c2976c3d4ca8897d34d9df975a4d05c))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.5 ([2009d44](https://github.com/tj-actions/changed-files/commit/2009d446ac92d696d7df2230847a71ba91db7d4a))  - (renovate[bot])
+- **deps:** Lock file maintenance ([b693fc2](https://github.com/tj-actions/changed-files/commit/b693fc207f2cd18198a39916698cec17bc8e8d42))  - (renovate[bot])
+
+## <!-- 9 -->⬆️ Upgrades
+
+- Upgraded to v45.0.3 ([#2308](https://github.com/tj-actions/changed-files/issues/2308))
+
+Co-authored-by: jackton1 <17484350+jackton1@users.noreply.github.com> ([df3e993](https://github.com/tj-actions/changed-files/commit/df3e9932c48cda43e6e09567f3a1ce1b38ca76e9))  - (tj-actions[bot])
+
+# [45.0.3](https://github.com/tj-actions/changed-files/compare/v45.0.2...v45.0.3) - (2024-10-03)
+
+## <!-- 1 -->🐛 Bug Fixes
+
+- Overwriting yaml filter patterns ([#2307](https://github.com/tj-actions/changed-files/issues/2307)) ([c3a1bb2](https://github.com/tj-actions/changed-files/commit/c3a1bb2c992d77180ae65be6ae6c166cf40f857c))  - (Tonye Jack)
+- **deps:** Update dependency @actions/core to v1.11.0 ([9d4f8fe](https://github.com/tj-actions/changed-files/commit/9d4f8fea5842800088922c102ca4538178833673))  - (renovate[bot])
+- Bug with files ignore yaml patterns not filtering the list of files ([#2304](https://github.com/tj-actions/changed-files/issues/2304)) ([d0cf164](https://github.com/tj-actions/changed-files/commit/d0cf1645b795cec63a72fbe846e317bf9178b010))  - (Tonye Jack)
+- Test for since last remote commit check on pull_request closed ([#2295](https://github.com/tj-actions/changed-files/issues/2295)) ([e753fb0](https://github.com/tj-actions/changed-files/commit/e753fb0a6337371498559e2a3aba56403f65b949))  - (Tonye Jack)
+
+## <!-- 16 -->➕ Add
+
+- Added missing changes and modified dist assets.
+ ([36d5b9d](https://github.com/tj-actions/changed-files/commit/36d5b9dda5f13e931f09f5033a176efb2f03e605))  - (GitHub Action)
+- Added missing changes and modified dist assets.
+ ([4dbe54f](https://github.com/tj-actions/changed-files/commit/4dbe54f96e17faab8feb2c0c323ff84faa4512d2))  - (GitHub Action)
+
+## <!-- 3 -->📚 Documentation
+
+- Update README.md ([#2300](https://github.com/tj-actions/changed-files/issues/2300)) ([641e22a](https://github.com/tj-actions/changed-files/commit/641e22af4a94c93fb947ec20045f1ea036579b71))  - (Tonye Jack)
+- Update README.md ([#2296](https://github.com/tj-actions/changed-files/issues/2296)) ([1a71128](https://github.com/tj-actions/changed-files/commit/1a71128b6a67056616a4284adea37ae02b564f16))  - (Tonye Jack)
+
+## <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- **deps:** Update dependency @types/lodash to v4.17.10 ([27843f1](https://github.com/tj-actions/changed-files/commit/27843f166754bb92655dfb6102aaa76ee2faf762))  - (renovate[bot])
+- **deps:** Lock file maintenance ([8a4a975](https://github.com/tj-actions/changed-files/commit/8a4a9757b70fd0abbb3230709dd2efe832689c93))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.4 ([6bfa9e7](https://github.com/tj-actions/changed-files/commit/6bfa9e7a9a0cf32f41834ac67d934c8930978a10))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.3 ([625dbd6](https://github.com/tj-actions/changed-files/commit/625dbd682e29fb911c89c6a72b0e723206519c2c))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.2 ([c29c1d3](https://github.com/tj-actions/changed-files/commit/c29c1d3dd08b5aa5936b4f5eb5916104e8eb028b))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.7.0 ([e21f1a3](https://github.com/tj-actions/changed-files/commit/e21f1a3077058afe256713170452e771df5b8693))  - (renovate[bot])
+- **deps:** Update dependency @types/node to v22.6.1 ([792230f](https://github.com/tj-actions/changed-files/commit/792230fcedfb6be06f8b82405336b8c64d072307))  - (renovate[bot])
+- **deps:** Update dependency @vercel/ncc to v0.38.2 ([537f1c6](https://github.com/tj-actions/changed-files/commit/537f1c63183dc57ec71788609090fd4eb34d0645))  - (renovate[bot])
+- **deps:** Update dependency @types/lodash to v4.17.9 ([82587d8](https://github.com/tj-actions/changed-files/commit/82587d885833b45b38f65922b2bab11734b2e666))  - (renovate[bot])
+- **deps:** Lock file maintenance ([eda64a6](https://github.com/tj-actions/changed-files/commit/eda64a62bda002f91918e506fa907562d648e723))  - (renovate[bot])
+- **deps:** Update actions/setup-node action to v4.0.4 ([4d5444c](https://github.com/tj-actions/changed-files/commit/4d5444c2c31b579919a04a4452abc5d87e4646ad))  - (renovate[bot])
+- **deps:** Update peter-evans/create-pull-request action to v7.0.5 ([c2e104b](https://github.com/tj-actions/changed-files/commit/c2e104be2f2a434709460be32ce45f24994f8bd4))  - (renovate[bot])
+- **deps:** Update dependency eslint to v8.57.1 ([eed685a](https://github.com/tj-actions/changed-files/commit/eed685a419db057cbbbc6590e9ecec893f8e5c27))  - (renovate[bot])
+
+## <!-- 9 -->⬆️ Upgrades
+
+- Upgraded to v45.0.2 ([#2282](https://github.com/tj-actions/changed-files/issues/2282))
+
+Co-authored-by: jackton1 <17484350+jackton1@users.noreply.github.com> ([6f538bb](https://github.com/tj-actions/changed-files/commit/6f538bb83f28b3289d5cd90d638bbdca3e478ebe))  - (tj-actions[bot])
+
 # [45.0.2](https://github.com/tj-actions/changed-files/compare/v45.0.1...v45.0.2) - (2024-09-16)
 
 ## <!-- 1 -->🐛 Bug Fixes
