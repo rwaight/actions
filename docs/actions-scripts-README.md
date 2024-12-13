@@ -6,6 +6,11 @@ There are currently two scripts for the actions monorepo:
 
 The scripts update (and use) a `import-config.yml` file, which is stored for each individual action.
 
+**Table of Contents**
+- [Import Config File Specifications](#import-config-file-specifications)
+- [Import Configs Script](#import-configs-script)
+- [Monorepo Updates Script](#monorepo-updates-script)
+
 ## Import Config File Specifications
 
 The `import-config.yml` file is a structured YAML configuration file generated or updated by the `import_configs.sh` script; the file is also updated by the `monorepo_updates.sh` script. The `import-config.yml` file provides metadata and specifications for GitHub Actions, whether they are locally created or imported from external sources. Below is a breakdown of its structure and an example/template:
