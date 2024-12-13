@@ -1,5 +1,6 @@
 name: packer
-description: placeholder
+author: Robert Anderson <riznob@gmail.com>
+description: Run packer build on a template file
 group: utilities
 imported: true
 local:

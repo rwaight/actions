@@ -1,5 +1,6 @@
 name: render-template
-description: placeholder
+author: Konstantin Chukhlomin <mail@chuhlomin.com>
+description: Renders file based on template and passed variables
 group: utilities
 imported: true
 local:

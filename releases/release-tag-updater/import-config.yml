@@ -1,4 +1,5 @@
 name: release-tag-updater
+author: ser.soft GmbH
 description: placeholder
 group: releases
 imported: true
