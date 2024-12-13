@@ -87,3 +87,50 @@ tests:
 - **Dynamic Updates**: For imported actions, fields such as `source.latest_version` and `source.update_available` are dynamically updated based on the GitHub API.
 - **Flexibility**: The file structure accommodates both locally created and imported actions, ensuring versatility in various workflows.
 
+---
+
+## Import Configs Script
+
+The `import_configs.sh` script automates the creation and maintenance of `import-config.yml` files for actions found in specified directories. It achieves the following:
+
+1. **Read Configuration**:
+   - Reads target directories from a configuration file `target_dirs.conf`.
+
+2. **Identify Action Files**:
+   - Checks each subdirectory for the presence of an `action.yml` or `action.yaml` file.
+
+3. **Process `import-config.yml`**:
+   - For each subdirectory:
+     - If `import-config.yml` exists:
+       - Updates fields like `author`, `description`, `specs` (including `inputs`, `outputs`, `runs`), and `source` (if applicable).
+       - Checks for updates if the action is marked as "imported" by querying the GitHub API for the latest release.
+     - If `import-config.yml` does not exist:
+       - Prompts the user to specify if the action is "imported" or "local."
+       - Generates an initial `import-config.yml` with fields such as `author`, `group`, `imported`, `specs`, and optionally, `source` details for imported actions.
+
+4. **Extract and Format Data**:
+   - Uses the `yq` tool to parse and extract data from YAML files and to update/create YAML fields.
+   - Extracts keys (e.g., `inputs`, `outputs`) and converts them into a suitable format for YAML.
+
+5. **GitHub Integration**:
+   - For imported actions, fetches the latest version information from GitHub API to determine if an update is available.
+
+6. **Handle User Input**:
+   - Prompts the user to input metadata when creating `import-config.yml` for new actions, especially for imported actions.
+
+7. **Iterate Over All Actions**:
+   - Processes every subdirectory in the target directories, ensuring that all actions are updated or have an `import-config.yml` generated.
+
+8. **Placeholder Values**:
+   - Inserts placeholders for fields like `author` or `description` if they are missing in the action file.
+
+9. **Reserved Tests Section**:
+   - Adds a `tests` block in the `import-config.yml` file for future use.
+
+10. **Output**:
+    - Displays progress and completion messages for each action processed.
+
+### Notes
+
+This script is designed to be extensible and works efficiently for managing configurations of multiple GitHub Actions. It uses `yq` for YAML manipulation, `jq` for JSON parsing, and assumes user access to GitHub API for imported action metadata.
+
