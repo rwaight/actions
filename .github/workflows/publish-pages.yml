@@ -1,0 +1,101 @@
+# from https://squidfunk.github.io/mkdocs-material/publishing-your-site/#with-github-actions
+name: Publish site
+run-name: Deploy MkDocs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/publish-pages.yml'
+
+permissions:
+  contents: write
+  id-token: write
+  pages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
+          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
+          sparse-checkout: |
+            docs
+            includes
+
+      - name: Configure Git Credentials for github-actions bot
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Set up Python
+        # Verified creator: https://github.com/marketplace/actions/setup-python
+        # Set up your GitHub Actions workflow with a specific version of Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: 3.x
+
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
+
+      - name: Cache dependencies and build outputs
+        # Verified creator: https://github.com/marketplace/actions/cache
+        # Cache dependencies and build outputs in GitHub Actions
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+
+      - name: Install mkdocs-material
+        run: pip install mkdocs-material
+
+      - name: Install mkdocs-awesome-pages-plugin
+        # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+        run: pip install mkdocs-awesome-pages-plugin
+
+      - name: Run mkdocs gh-deploy
+        run: mkdocs gh-deploy --force
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: gh-pages
+
+      - name: Setup Pages
+        # Verified creator: https://github.com/marketplace/actions/configure-github-pages
+        # A GitHub Action to enable Pages and extract various metadata about a site.
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+
+      - name: Upload artifact
+        # Verified creator: https://github.com/marketplace/actions/upload-github-pages-artifact
+        # A composite action for packaging and uploading an artifact that can be deployed to GitHub Pages.
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        # Verified creator: https://github.com/marketplace/actions/deploy-github-pages-site
+        # GitHub Action to publish artifacts to GitHub Pages for deployments
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

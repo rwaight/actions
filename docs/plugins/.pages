@@ -1,0 +1,6 @@
+## use https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin for navigation
+## https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin?tab=readme-ov-file#customize-navigation
+#    https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin?tab=readme-ov-file#hide-directory
+hide: true
+# https://squidfunk.github.io/mkdocs-material/plugins/tags/#config.tags_file
+# https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin/issues/102
