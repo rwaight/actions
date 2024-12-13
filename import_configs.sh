@@ -35,7 +35,11 @@ create_or_update_import_config() {
     # Extract the action file extension
     action_file_extension=$(basename "$action_file")
 
-    # Read first level keys of inputs, outputs, and runs from the action file
+    # Read first level keys of author, description, inputs, outputs, and runs from the action file
+    author=$(yq e '.author' "$action_file")
+    if [[ "$author" == "null" ]]; then unset author; fi
+    description=$(yq e '.description' "$action_file")
+    if [[ "$description" == "null" ]]; then unset description; fi
     inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
     runs_using=$(yq e '.runs.using' "$action_file")
@@ -51,7 +55,18 @@ create_or_update_import_config() {
         # Read existing import-config.yml
         import_config=$(yq eval '.' "$import_config_file")
 
-        # Update action_file, inputs, and outputs fields
+        # Update author, description, specs.action_file, specs.inputs, and specs.outputs fields
+        if [[ -n $author ]]; then
+            yq e -i ".author = \"$author\"" "$import_config_file"
+        else
+            yq e -i ".author = \"placeholder\"" "$import_config_file"
+        fi
+        #
+        if [[ -n $description ]]; then
+            yq e -i ".description = \"$description\"" "$import_config_file"
+        else
+            yq e -i ".description = \"placeholder\"" "$import_config_file"
+        fi
         yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
         yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
         yq -i '.specs.inputs style="flow"' "$import_config_file"
@@ -108,7 +123,17 @@ create_or_update_import_config() {
 
         # Set initial fields
         yq e -i ".name = \"$name\"" "$import_config_file"
-        yq e -i ".description = \"placeholder\"" "$import_config_file"
+        if [[ -n $author ]]; then
+            yq e -i ".author = \"$author\"" "$import_config_file"
+        else
+            yq e -i ".author = \"placeholder\"" "$import_config_file"
+        fi
+        #
+        if [[ -n $description ]]; then
+            yq e -i ".description = \"$description\"" "$import_config_file"
+        else
+            yq e -i ".description = \"placeholder\"" "$import_config_file"
+        fi
         yq e -i ".group = \"$group\"" "$import_config_file"
         yq e -i ".imported = false" "$import_config_file"
 
