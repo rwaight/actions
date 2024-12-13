@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -153,15 +152,22 @@ func TestRenderTemplate(t *testing.T) {
 				"time": time.Date(2023, time.August, 6, 15, 8, 28, 0, time.UTC),
 			},
 			nil,
-			"06 Aug 2023 11:08:28\n06 Aug 2023 11:08:28\n[download](https://github.com)\n1,000\nQUJD\n",
+			`06 Aug 2023 11:08:28
+06 Aug 2023 11:08:28
+[download](https://github.com)
+1,000
+QUJD
+["1","2","3"]
+`,
 		},
 	}
 
-	os.Setenv("INPUT_TIMEZONE", "America/New_York")
+	t.Setenv("INPUT_TIMEZONE", "America/New_York")
 
 	for _, tt := range tests {
 		output, err := renderTemplate(tt.templateFilePath, tt.vars)
-		if err != nil {
+		switch {
+		case err != nil:
 			if tt.expectedError == nil {
 				t.Errorf("renderTemplate(%q, %v) returned an error, but was expected to succeed: %v", tt.templateFilePath, tt.vars, err)
 			} else if err.Error() != tt.expectedError.Error() {
@@ -173,9 +179,9 @@ func TestRenderTemplate(t *testing.T) {
 					err,
 				)
 			}
-		} else if tt.expectedError != nil {
+		case tt.expectedError != nil:
 			t.Errorf("renderTemplate(%q, %v) succeeded, but was expected to fail: %v", tt.templateFilePath, tt.vars, err)
-		} else if output != tt.expectedOutput {
+		case output != tt.expectedOutput:
 			t.Errorf(
 				"render(%q, %v) expected output: %q, got: %q",
 				tt.templateFilePath,

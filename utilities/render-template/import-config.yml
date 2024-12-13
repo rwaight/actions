@@ -10,9 +10,9 @@ source:
   author: chuhlomin
   repo_name: render-template
   repo_url: https://github.com/chuhlomin/render-template
-  current_version: v1.8
+  current_version: v1.10
   latest_version: v1.10
-  update_available: true
+  update_available: false
 specs:
   action_file: action.yml
   inputs: [template, vars, vars_path, result_path, timezone]

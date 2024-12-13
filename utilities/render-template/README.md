@@ -1,119 +1,28 @@
-# GitHub Render Template Action
+# GitHub render-template action
 
-The current version in this repo was based off of [**render-template** commit `0ca0022`](https://github.com/chuhlomin/render-template/commit/0ca00227d0eff8f1e5bfcf3632f61bfd5f9bb5b1) (newer than [version 1.8](https://github.com/chuhlomin/render-template/releases/tag/v1.8))
-- This action is from https://github.com/chuhlomin/render-template.
+The current version in this repo was based off of [**render-template** v1.10](https://github.com/chuhlomin/render-template/releases/tag/v1.10)
+- Specifically [this commit](https://github.com/chuhlomin/render-template/commit/807354a04d9300c9c2ac177c0aa41556c92b3f75)
+- This action is from https://github.com/chuhlomin/render-template
 
 The [`chuhlomin/render-template`](https://github.com/chuhlomin/render-template) code is licensed under the Apache License 2.0:
 > A permissive license whose main conditions require preservation of copyright and license notices. Contributors provide an express grant of patent rights. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
 
-## Render Template
+## Updates to the action
 
-<details><summary> repo badges are here </summary>
-[`!`[main]`(https://github.com/rwaight/actions/actions/workflows/main.yml/badge.svg)](https://github.com/rwaight/actions/actions/workflows/main.yml)`
-[`!`[release]`(https://github.com/rwaight/actions/actions/workflows/release.yml/badge.svg)](https://github.com/rwaight/actions/actions/workflows/release.yml)`
-[`!`[DockerHub]`(https://img.shields.io/badge/docker-hub-4988CC)](https://hub.docker.com/repository/docker/chuhlomin/render-template)`
-
-</details>
-
-GitHub Action to render file based on template and passed variables.
-
-## Inputs
-
-| Name        | Description                                   | Required |
-|-------------|-----------------------------------------------|----------|
-| template    | Path to template                              | true     |
-| vars        | Variables to use in template (in YAML format) | false    |
-| vars_path   | Path to YAML file with variables              | false    |
-| result_path | Desired path to result file                   | false    |
-| timezone    | Timezone to use in `date` template function   | false    |
-
-You must set at least `vars` or `vars_path`.  
-You may set both of them (`vars` values will precede over `vars_path`).
-
-Variables names must be alphanumeric strings (must not contain any hyphens).
-
-There are few template functions available:
-
-- `date` – formats timestamp using Go's [time layout](https://golang.org/pkg/time/#pkg-constants).  
-  Example: `{{ "2023-05-11T01:42:04Z" | date "2006-01-02" }}` will be rendered as `2023-05-11`.  
-  You may use `timezone` input to set timezone for `date` function (e.g. `timezone: "America/New_York"`).
-
-- `mdlink` – creates markdown link.  
-  Example: `{{ "https://github.com" | mdlink "GitHub" }}` will be rendered as `[GitHub](https://github.com)`.
-
-- `number` – formats number in English locale.  
-  Example: `{{ 1234567890 | number }}` will be rendered as `1,234,567,890`.
-
-- `base64` – encodes string to base64.  
-  Example: `{{ "hello" | base64 }}` will be rendered as `aGVsbG8=`.
-
-## Outputs
-
-| Name   | Description           |
-|--------|-----------------------|
-| result | Rendered file content |
-
-## Example
-
-`kube.template.yml`
-
+Yes, the `runs.using` has been changed to:
 ```yml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .deployment }}
-  labels:
-    app: {{ .app }}
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: {{ .app }}
-  template:
-    metadata:
-      labels:
-        app: {{ .app }}
-    spec:
-      containers:
-      - name: {{ .app }}
-        image: {{ .image }}
-        ports:
-        - containerPort: 80
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
 ```
 
-`.github/workflows/main.yml`
-
+It previously was:
 ```yml
-name: main
-on:
-  push:
-    branches:
-      - main
-env:
-  DOCKER_IMAGE: username/image
-  DEPLOYMENT_NAME: nginx-deployment
-jobs:
-  main:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      <...>
-
-      - name: Render template
-        id: render_template
-        uses: rwaight/actions/utilities/render-template@v1
-        with:
-          template: kube.template.yml
-          vars: |
-            image: ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-            deployment: ${{ env.DEPLOYMENT_NAME }}
-            app: nginx
-
-      - name: Deploy
-        timeout-minutes: 4
-        run: |-
-          echo '${{ steps.render_template.outputs.result }}' | kubectl apply -f -
-          kubectl rollout status deployment/$DEPLOYMENT_NAME
+runs:
+  using: docker
+  image: "docker://chuhlomin/render-template:v1.10"
 ```
+
+# render-template
+
+See the [imported actions README file](render-template__README.md) for specific information.
