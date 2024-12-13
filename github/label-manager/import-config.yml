@@ -1,5 +1,6 @@
 name: label-manager
-description: placeholder
+author: Benjamin Lannon <benjamin@lannonbr.com>
+description: Will update repo's labels based on data in JSON file located at $REPO/.github/labels.json
 group: github
 imported: true
 local:

@@ -1,5 +1,6 @@
 name: export-label-config
-description: placeholder
+author: Federico Grandi <fgrandi30@gmail.com>
+description: An action that lets you generate a file containing your label settings for the current repo
 group: github
 imported: true
 local:

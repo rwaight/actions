@@ -1,5 +1,6 @@
 name: approve-pull-request
-description: placeholder
+author: juliangruber
+description: A GitHub Action for approving pull requests
 group: github
 imported: true
 local:

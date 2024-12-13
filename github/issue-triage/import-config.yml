@@ -1,5 +1,6 @@
 name: issue-triage
-description: placeholder
+author: krizzu
+description: Deals with stale issues in your project.
 group: github
 imported: true
 local:

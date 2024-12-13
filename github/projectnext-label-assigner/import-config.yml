@@ -1,5 +1,6 @@
 name: projectnext-label-assigner
-description: placeholder
+author: richkuz
+description: Updates GitHub project tables based on issues
 group: github
 imported: true
 local:
