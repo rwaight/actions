@@ -134,3 +134,45 @@ The `import_configs.sh` script automates the creation and maintenance of `import
 
 This script is designed to be extensible and works efficiently for managing configurations of multiple GitHub Actions. It uses `yq` for YAML manipulation, `jq` for JSON parsing, and assumes user access to GitHub API for imported action metadata.
 
+---
+
+## Monorepo Updates Script
+
+This script automates the process of checking for updates in repositories and applying those updates to the actions monorepo based on configurations specified in `import-config.yml` files within target directories. It achieves the following:
+
+1. **Configuration Loading**:
+   - Reads target directories from `target_dirs.conf`.
+   - Optionally allows specifying a specific group and action to process instead of using all target directories.
+
+2. **Update Check Logic**:
+   - For each `import-config.yml` file found in the target directories:
+       - Checks if the action is "imported."
+       - Verifies if an update is available by comparing the current version with the latest version.
+       - Fetches the latest version information from the repository using GitHub APIs (via `curl` and `jq`).
+
+3. **Repository Update Process**:
+   - Clones the repository at the specified latest version.
+   - Processes the repository:
+       - Renames `.github/` directory to `__dot_github/` and disables `.yml` files within.
+       - Adds a repository name prefix to `.md` and `.yml` files.
+   - Creates a new branch in the actions monorepo for the update.
+   - Generates a new `README.md` based on a template (`imported_readme_template.md`), using `sed` to populate placeholders with details (e.g., group name, action name, new version).
+       - Eventually this will be managed by a workflow within the actions repo.
+
+4. **Git Workflow**:
+   - Prepares changes for a commit (does not auto-commit or push).
+   - Provides instructions for the user to commit and push changes manually.
+
+5. **Temporary Directory Management**:
+   - Uses a temporary directory for processing repository updates.
+   - Prompts the user for cleanup after processing.
+
+6. **Configuration File Update**:
+   - Updates the `current_version` and `update_available` fields in `import-config.yml` after successful processing.
+
+### Notes
+
+The script also has some _interactive features_:
+- Prompts the user for specifying specific actions to update.
+- Offers manual intervention for committing, pushing changes, and cleaning up temporary directories.
+
