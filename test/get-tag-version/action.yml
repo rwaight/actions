@@ -1,5 +1,5 @@
 name: 'Get Tag Version'
-description: 'A GitHub action that provides the tag version from a `push` event, specifically when a tag is created.'
+description: 'A GitHub action that provides the tag version from a push event, specifically when a tag is created.'
 # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
 author: 'rwaight'
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
