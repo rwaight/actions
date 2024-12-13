@@ -1,0 +1,132 @@
+# https://www.mkdocs.org/user-guide/configuration/
+site_name: Actions monorepo
+site_url: https://rwaight.github.io/actions
+site_author: rwaight
+repo_url: https://github.com/rwaight/actions
+repo_name: rwaight/actions
+edit_uri: blob/main/docs/
+
+## use https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin for navigation
+## the plugin won't do anything if `mkdocs.yml` defines a `nav` or `pages` entry
+## https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin?tab=readme-ov-file#customize-navigation
+## use https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin for navigation
+# # https://www.mkdocs.org/user-guide/configuration/#nav
+# # https://www.mkdocs.org/user-guide/writing-your-docs/#configure-pages-and-navigation
+# nav:
+#   - Home: 'index.md'
+#   - Blog:
+#     - blog/index.md
+#     # If you do have a navigation defined then you need to add the blog index page only to it.
+#     # You need not and should not add the individual blog posts.
+#     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-a-blog/#built-in-blog-plugin
+#   - Guides:
+#     - guides/
+#   - Random:
+#     - random/
+## use https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin for navigation
+## https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin?tab=readme-ov-file#customize-navigation
+
+# https://www.mkdocs.org/user-guide/configuration/#theme
+theme:
+  name: material
+  #locale: en
+  features:
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-header/#automatic-hiding
+    - header.autohide
+    # https://squidfunk.github.io/mkdocs-material/plugins/blog/#navigation
+    - navigation.indexes
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#setting-up-navigation
+    - navigation.instant
+    - navigation.sections
+    - navigation.tracking
+    - navigation.tabs
+  icon:
+    # # https://squidfunk.github.io/mkdocs-material/setup/changing-the-logo-and-icons/?h=icon#favicon
+    # favicon: 
+    # https://squidfunk.github.io/mkdocs-material/setup/changing-the-logo-and-icons/?h=icon#logo
+    logo: simple/github
+    # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#repository-icon
+    repo: fontawesome/brands/git-alt
+    #repo: octicons/mark-github-24
+  language: en    # https://squidfunk.github.io/mkdocs-material/setup/changing-the-language/#site-language
+  palette:
+    # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#color-palette
+    scheme: slate
+
+# https://www.mkdocs.org/user-guide/configuration/#docs_dir
+docs_dir: 'docs'
+
+# # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
+# using 'blob/main/docs/' above, instead of 'edit/main/docs/' here
+# edit_uri: edit/main/docs/
+
+markdown_extensions:
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#betterem
+  # https://facelessuser.github.io/pymdown-extensions/extensions/betterem/
+  - pymdownx.betterem
+  # # https://oprypin.github.io/markdown-callouts/index.html#markdown-callouts
+  # # will need to install with 'pip install markdown-callouts' in 'publish.yml'
+  # - callouts
+  ###
+  # not sure if 'pymdownx.github' works
+  #- pymdownx.github
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/#definition-lists
+  #- def_list
+  # https://squidfunk.github.io/mkdocs-material/reference/diagrams/#configuration
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  # https://squidfunk.github.io/mkdocs-material/reference/lists/#using-task-lists
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#tasklist
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      title: On this page
+      permalink: true
+  # https://squidfunk.github.io/mkdocs-material/reference/formatting/#configuration
+  # support for sub and superscripts
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+
+
+# https://www.mkdocs.org/user-guide/configuration/#plugins
+plugins:
+  # https://squidfunk.github.io/mkdocs-material/setup/ensuring-data-privacy/#built-in-privacy-plugin
+  - privacy
+  # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin
+  - awesome-pages
+  - search
+  # the blog plugin is NOT enabled for the 'actions' repo
+  # # https://squidfunk.github.io/mkdocs-material/plugins/blog/
+  # - blog:
+  #     # https://squidfunk.github.io/mkdocs-material/plugins/blog/#general
+  #     enabled: true
+  #     blog_dir: blog
+  #     blog_toc: true
+  #     # https://squidfunk.github.io/mkdocs-material/plugins/blog/#posts
+  # https://squidfunk.github.io/mkdocs-material/plugins/tags/
+  - tags:
+      enabled: true
+      # https://squidfunk.github.io/mkdocs-material/plugins/tags/#config.tags_file
+      # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin/issues/102
+      tags_file: plugins/tags.md
+      # # https://squidfunk.github.io/mkdocs-material/plugins/tags/?h=tags+allowed#config.tags_allowed
+      # # 'tags_allowed' is for sponsors only
+      # tags_allowed:
+      #   - GitHub
+      #   - Jekyll
+      #   - Linux
+      #   - MacOS
+      #   - MkDocs
+      #   - Virtualization
+      # # https://squidfunk.github.io/mkdocs-material/plugins/tags/?h=tags+allowed#config.tags_hierarchy
+      # # 'tags_hierarchy' is for sponsors only
+      # tags_hierarchy: true
+      # By default, tags are separated by a forward slash `/`, but you can change this to any string, e.g., `.`
+      # https://squidfunk.github.io/mkdocs-material/plugins/tags/#config.tags_hierarchy_separator
+
