@@ -42,9 +42,18 @@ check_for_updates() {
             repo_latest_sha=${repo_latest_tag_data##*$'\n'}
             echo "Downloading updated source files for version $latest_version..."
 
-            # Create a temporary directory for downloading the updated source files
+            # Prep the local template files
             local_repo_dir=$(pwd)
+            template_file="$local_repo_dir/assets/imported_readme_template.md"
+
+            # Create a temporary directory for downloading the updated source files
             temp_dir=$(mktemp -d)
+
+            # Copy the template file to the temp directory
+            template_in_temp="$temp_dir/imported_readme_template.md"
+            cp "$template_file" "$template_in_temp"
+
+            # Navigate to the temporary directory
             cd "$temp_dir" || exit
 
             # Clone the specific version of the repository
@@ -92,10 +101,12 @@ check_for_updates() {
                 cp -r "$temp_dir"/* "$local_action_dir"
 
                 # Step 7: Create a new README.md from the template file
-                template_file="$local_repo_dir/assets/imported_readme_template.md"
+                #template_file="$local_repo_dir/assets/imported_readme_template.md"
+                template_copied="$local_action_dir/imported_readme_template.tempmd"
                 new_readme="$local_action_dir/README.md"
-                if [[ -f "$template_file" ]]; then
-                    cp "$template_file" "$new_readme"
+                if [[ -f "$template_copied" ]]; then
+                    #cp "$template_file" "$new_readme"
+                    mv "$template_copied" "$new_readme"
 
                     # Place for find/replace commands
                     sed -i "s/SED_GROUP/${group}/g" "$new_readme"
