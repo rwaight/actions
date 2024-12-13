@@ -1,0 +1,1140 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="rwaight">
+      
+      
+        <link rel="canonical" href="https://rwaight.github.io/actions/sign-automatic-commits-in-github-actions/">
+      
+      
+        <link rel="prev" href="../bots-in-github-actions/">
+      
+      
+        <link rel="next" href="../git-revert-examples/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.48">
+    
+    
+      
+        <title>Sign automatic commits in github actions - Actions monorepo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        
+        <link rel="stylesheet" href="../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sign-automatic-commits-in-github-actions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Actions monorepo" class="md-header__button md-logo" aria-label="Actions monorepo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Actions monorepo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sign automatic commits in github actions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/rwaight/actions" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rwaight/actions
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../actions-release-notes/" class="md-tabs__link">
+          
+  
+    
+  
+  Monorepo
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../git-revert-examples/" class="md-tabs__link">
+          
+  
+    
+  
+  Git
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../adding-commitlint/" class="md-tabs__link">
+          
+  
+    
+  
+  Random
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../autorelease-process-notes/" class="md-tabs__link">
+          
+  
+    
+  
+  Other
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Actions monorepo" class="md-nav__button md-logo" aria-label="Actions monorepo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+
+    </a>
+    Actions monorepo
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/rwaight/actions" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rwaight/actions
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Monorepo
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Monorepo
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-release-notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions release notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-repo-update-readme/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions repo update readme
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-scripts-README/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scripts for the actions monorepo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-to-import/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions to import
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../importing-actions-manual/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Importing actions manual
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bots-in-github-actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using bots and apps in GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Sign automatic commits in github actions
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Sign automatic commits in github actions
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#solution-01-using-the-temporary-github_token-generated-for-each-workflow-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      Solution 01: using the temporary GITHUB_TOKEN generated for each workflow job
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solution-02-using-your-own-pgp-key-as-a-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      Solution 02: using your own PGP Key as a secret
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Links
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Git
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Git
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../git-revert-examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git revert examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../git-tags-examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git tag examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Random
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Random
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-commitlint/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Adding commitlint to this repo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../automating-pull-requests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automating Pull Requests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Other
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Other
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../autorelease-process-notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Autorelease Process
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#solution-01-using-the-temporary-github_token-generated-for-each-workflow-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      Solution 01: using the temporary GITHUB_TOKEN generated for each workflow job
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solution-02-using-your-own-pgp-key-as-a-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      Solution 02: using your own PGP Key as a secret
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Links
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<p>From https://github.com/Nautilus-Cyberneering/pygithub/blob/main/docs/how_to_sign_automatic_commits_in_github_actions.md</p>
+<h1 id="sign-automatic-commits-in-github-actions">Sign automatic commits in GitHub Actions<a class="headerlink" href="#sign-automatic-commits-in-github-actions" title="Permanent link">&para;</a></h1>
+<p>I'm working on a project where we use GitHub Actions intensively. One of the challenges we are facing is how we can sign commits when commits are created automatically from a GitHub Action. There is a lot of information about signing commits manually when the developer is creating the commit:</p>
+<p><a href="https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits">https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits</a></p>
+<p>but I have not found enough information about signing commits from bots and GitHub Actions. I have only found a couple of official pages from GitHub explaining how the commit signature works when using bots.</p>
+<p>On the 15th of August 2019, GitHub published this very short article: <a href="https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/">Commit signing support for bots and other GitHub Apps</a></p>
+<p>The article points to the official documentation about <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#signature-verification-for-bots">signature verification for bots</a> where you can read:</p>
+<blockquote>
+<p>Signature verification for bots</p>
+<p>Organizations and GitHub Apps that require commit signing can use bots to sign commits. If a commit or tag has a bot signature that is cryptographically verifiable, GitHub marks the commit or tag as verified.</p>
+<p>Signature verification for bots will only work if the request is verified and authenticated as the GitHub App or bot and contains no custom author information, custom committer information, and no custom signature information, such as Commits API.</p>
+</blockquote>
+<p>You can also find a link to the explanation about <a href="https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-an-installation&quot;">"Authenticating as an installation"</a>. The whole documents refers to tokens that you can create for GitHub Apps. You can use those tokens in your GitHub Apps (bots) to access the GitHub API.</p>
+<p>One of the things you can do with the API is to create a commit. So what they say is if you use a token generated for a bot (GitHub App) and you make a request to the API using that token (without custom author information), the GitHub API will recognize the bot token and will show the commit as verified.</p>
+<p>So we can try to implement a solution using a token generated for a GitHub App.</p>
+<ul>
+<li><a href="#sign-automatic-commits-in-github-actions">Sign automatic commits in GitHub Actions</a></li>
+<li><a href="#solution-01-using-the-temporary-github_token-generated-for-each-workflow-job">Solution 01: using the temporary GITHUB_TOKEN generated for each workflow job</a></li>
+<li><a href="#solution-02-using-your-own-pgp-key-as-a-secret">Solution 02: using your own PGP Key as a secret</a></li>
+<li><a href="#notes">Notes</a></li>
+<li><a href="#links">Links</a></li>
+</ul>
+<h2 id="solution-01-using-the-temporary-github_token-generated-for-each-workflow-job">Solution 01: using the temporary GITHUB_TOKEN generated for each workflow job<a class="headerlink" href="#solution-01-using-the-temporary-github_token-generated-for-each-workflow-job" title="Permanent link">&para;</a></h2>
+<p>What GitHub Apps authorization has to do with GitHub actions in a workflow?</p>
+<p>As you can read on <a href="https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret">GitHub docs</a> "at the start of each workflow run, GitHub automatically creates a unique GITHUB_TOKEN secret to use in your workflow. You can use the GITHUB_TOKEN to authenticate in a workflow run.". You can use that token to execute git commands and access the GitHub API too.</p>
+<p>In fact, the token is generated for every job: "before each job begins, GitHub fetches an installation access token for the job. The token expires when the job is finished."</p>
+<p>The <a href="https://github.com/marketplace/actions/checkout">Checkout V2 GitHub Action</a> uses the token and persists it in the local git config. "This enables your scripts to run authenticated git commands. The token is removed during post-job cleanup".</p>
+<p>So basically, you are provided with a kind of GitHub App token that you can use during the workflow execution.</p>
+<p>You can use that token directly like this:</p>
+<p><a href="https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token">https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token</a></p>
+<div class="highlight"><pre><span></span><code>on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          date &gt; generated.txt
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m &quot;generated&quot;
+          git push
+</code></pre></div>
+<p>But the problem with that solution is the commit is not going to be signed. The other option is to use the token to make a request to the GitHub API to create the commit. There is an example in this repo using a GitHub API Python wrapper:</p>
+<p><a href="./../src/01_sign_commit_using_github_api.py">01_sign_commit_using_github_api.py</a></p>
+<blockquote>
+<p>WARNING: if you run the example locally using your own token the commit is not going to be signed. It only works when you use an app token. You can check the <a href="./../.github/workflows/example-01.yml">workflow using this example</a>.</p>
+</blockquote>
+<p>Drawbacks for this solution:</p>
+<ul>
+<li>I have had problems with a 70MB file. The size limit for files in GitHub (without using LFS is 100MB).</li>
+<li>I have also had some timeouts.</li>
+<li>You have to deal with network latency, connection errors, etcetera in your workflow.</li>
+<li>If you make other git changes in your runner you end up changing the branch locally (runner) and remotely (API), and that could lead to a lot of merge conflicts.</li>
+</ul>
+<p>The alternative solution could be to use your own PGP Key.</p>
+<h2 id="solution-02-using-your-own-pgp-key-as-a-secret">Solution 02: using your own PGP Key as a secret<a class="headerlink" href="#solution-02-using-your-own-pgp-key-as-a-secret" title="Permanent link">&para;</a></h2>
+<p>If you do not want to use the <code>GITHUB_TOKEN</code>, you can use your own GPG key. For this example, I'm not using the <code>GiPython</code> package because it seems it does not support commit signing directly. I use a GitHub Action that imports and sets up a GPG key in your workflow git configuration.</p>
+<p><a href="./../.github/workflows/example-02.yml">example-02.yml</a></p>
+<p>First at all, you need a PGP key. I did not want to use my personal PGP key because it's going to be exposed as a repo secret. That means every maintainer (who has access to the workflow) could sign a commit using my PGP Key. I have created a new GitHub account for this example (<a href="https://github.com/josecelano-bot">https://github.com/josecelano-bot</a>), and I gave access to the bot to this repo.</p>
+<p>Then, you only need to follow the steps on the <a href="https://github.com/marketplace/actions/import-gpg">action documentation</a>:</p>
+<ol>
+<li>Export the Bot's PGP secret key:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--armor<span class="w"> </span>--export-secret-key<span class="w"> </span>bot@josecelano.com<span class="w"> </span>-w0
+</code></pre></div>
+<ol>
+<li>Add the secrets to your repo: PGP secret key and passphrase</li>
+</ol>
+<p>If you follow the process, your commits will be signed like this:</p>
+<p><img alt="Signed commit with custom PGP key" src="images/commit-signed-with-custom-pgp-key.png" /></p>
+<p>The funniest thing about this solution is that you can easily check your bot's activity:</p>
+<p><img alt="Jose Celano's bot" src="images/josecelanos-bot.png" /></p>
+<p>Does it make sense to use a shared PGP key? All maintainers will have access to the key.</p>
+<p>There is a different proposal in a GitHub runner issue: <a href="https://github.com/actions/runner/issues/667#issuecomment-940441757">https://github.com/actions/runner/issues/667#issuecomment-940441757</a></p>
+<blockquote>
+<p>The actual feature we should propose is to recognize myname+actions@github.com as a non-human account associated with me, and can be verified by my GPG keys. All I need is to store a private key as actions secret and use it for signing the commits.</p>
+</blockquote>
+<p>If I understand the proposal, that means all automatic commits will be signed with the PGP key of the developer who triggered the workflow, just telling GitHub your PGP secret key and using a specific email for the commit author <code>josecelano+actions@github.com</code>. In the end, it's almost the same as creating your own bot account, but with two more advantages:</p>
+<ul>
+<li>You do not have to pay for an extra seat (depending on the GitHub license you are using).</li>
+<li>You do not have to share that key with other maintainers.</li>
+</ul>
+<p>If you want to use your own bot approach you could create a bot for every repo, and change the PGP key every time a maintainer is removed from the project.</p>
+<h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<p><a href="https://github.com/gitpython-developers/GitPython">GiPython</a> does not support commit signing directly:</p>
+<ul>
+<li><a href="https://github.com/gitpython-developers/GitPython/issues/580">https://github.com/gitpython-developers/GitPython/issues/580</a></li>
+<li><a href="https://github.com/gitpython-developers/GitPython/issues/579">https://github.com/gitpython-developers/GitPython/issues/579</a></li>
+</ul>
+<h2 id="links">Links<a class="headerlink" href="#links" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/actions/runner/issues/667">GitHub runner issue demanding signed commits for GitHub actions</a></li>
+<li><a href="https://github.community/t/sign-bot-commit-in-actions/17896">Sign bot commit in actions, GitHub Community/</a></li>
+<li><a href="https://github.community/t/how-to-properly-gpg-sign-github-app-bot-created-commits/131364">How to properly GPG-sign GitHub App (bot) created commits</a></li>
+<li><a href="https://gist.github.com/swinton/03e84635b45c78353b1f71e41007fc7c">Verified commits made easy with GitHub Actions</a></li>
+<li><a href="https://github.com/marketplace/actions/import-gpg">GitHub Action to easily import a GPG key</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "navigation.tabs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>

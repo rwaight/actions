@@ -1,0 +1,1634 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="rwaight">
+      
+      
+        <link rel="canonical" href="https://rwaight.github.io/actions/autorelease-process-notes/">
+      
+      
+        <link rel="prev" href="../automating-pull-requests/">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.48">
+    
+    
+      
+        <title>Autorelease Process - Actions monorepo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        
+        <link rel="stylesheet" href="../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#autorelease-process" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Actions monorepo" class="md-header__button md-logo" aria-label="Actions monorepo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Actions monorepo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Autorelease Process
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/rwaight/actions" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rwaight/actions
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../actions-release-notes/" class="md-tabs__link">
+          
+  
+    
+  
+  Monorepo
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../git-revert-examples/" class="md-tabs__link">
+          
+  
+    
+  
+  Git
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../adding-commitlint/" class="md-tabs__link">
+          
+  
+    
+  
+  Random
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+    
+  
+  Other
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Actions monorepo" class="md-nav__button md-logo" aria-label="Actions monorepo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+
+    </a>
+    Actions monorepo
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/rwaight/actions" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rwaight/actions
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Monorepo
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Monorepo
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-release-notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions release notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-repo-update-readme/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions repo update readme
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-scripts-README/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scripts for the actions monorepo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-to-import/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions to import
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../importing-actions-manual/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Importing actions manual
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bots-in-github-actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using bots and apps in GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sign-automatic-commits-in-github-actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sign automatic commits in github actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Git
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Git
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../git-revert-examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git revert examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../git-tags-examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git tag examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Random
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Random
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-commitlint/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Adding commitlint to this repo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../automating-pull-requests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automating Pull Requests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Other
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Other
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Autorelease Process
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Autorelease Process
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#about-the-autorelease-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      About the autorelease process
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#process-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Process Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inputs-and-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inputs and outputs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#autorelease-reusable-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Autorelease Reusable Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Autorelease Reusable Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Credentials
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Permissions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-numbering-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Numbering Order
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#01-prepare-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      01. prepare-release
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#02-prep-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      02. prep-build
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#03-prepare-pr" class="md-nav__link">
+    <span class="md-ellipsis">
+      03. prepare-pr
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#04-pr-merged" class="md-nav__link">
+    <span class="md-ellipsis">
+      04. pr-merged
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#05-validate-tag-was-autorelease-03-validate-from-created-tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      05. validate-tag (was autorelease 03 - validate from created tag)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#06-build-prod-was-autorelease-03-build-prod" class="md-nav__link">
+    <span class="md-ellipsis">
+      06. build-prod (was autorelease 03 - build-prod)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#07-prepare-final-draft-was-autorelease-04-update-final-draft-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      07. prepare-final-draft (was autorelease 04 - update FINAL draft release)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#08-update-tags-maybe-rename-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      08. update-tags (maybe rename this??)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#details-about-specific-jobs-and-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Details about specific jobs and actions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Details about specific jobs and actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calculating-the-next-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculating the next version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calculating-the-build-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculating the build version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-for-the-full-version-tag-in-an-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering for the full version tag in an action
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#about-the-autorelease-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      About the autorelease process
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#process-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Process Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inputs-and-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inputs and outputs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#autorelease-reusable-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Autorelease Reusable Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Autorelease Reusable Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Credentials
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Permissions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-numbering-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Numbering Order
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#01-prepare-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      01. prepare-release
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#02-prep-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      02. prep-build
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#03-prepare-pr" class="md-nav__link">
+    <span class="md-ellipsis">
+      03. prepare-pr
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#04-pr-merged" class="md-nav__link">
+    <span class="md-ellipsis">
+      04. pr-merged
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#05-validate-tag-was-autorelease-03-validate-from-created-tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      05. validate-tag (was autorelease 03 - validate from created tag)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#06-build-prod-was-autorelease-03-build-prod" class="md-nav__link">
+    <span class="md-ellipsis">
+      06. build-prod (was autorelease 03 - build-prod)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#07-prepare-final-draft-was-autorelease-04-update-final-draft-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      07. prepare-final-draft (was autorelease 04 - update FINAL draft release)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#08-update-tags-maybe-rename-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      08. update-tags (maybe rename this??)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#details-about-specific-jobs-and-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Details about specific jobs and actions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Details about specific jobs and actions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calculating-the-next-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculating the next version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calculating-the-build-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculating the build version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtering-for-the-full-version-tag-in-an-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering for the full version tag in an action
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="autorelease-process">Autorelease Process<a class="headerlink" href="#autorelease-process" title="Permanent link">&para;</a></h1>
+<h3 id="about-the-autorelease-process">About the autorelease process<a class="headerlink" href="#about-the-autorelease-process" title="Permanent link">&para;</a></h3>
+<p>The goal of autorelease process is to reduce time spent on the overall "release" process.  This includes, but is not limited to: code changes; software updates; deploying new containers or images; deploying updated templates and files; reviewing and verifying built applications, artifacts, images, tools, etc.</p>
+<h3 id="process-overview">Process Overview<a class="headerlink" href="#process-overview" title="Permanent link">&para;</a></h3>
+<p>The "autorelease process" currently exists as 5 steps, with <em>hopefully minimal</em> time spent on the actual "release".</p>
+<h3 id="inputs-and-outputs">Inputs and outputs<a class="headerlink" href="#inputs-and-outputs" title="Permanent link">&para;</a></h3>
+<p>this section is incomplete</p>
+<h2 id="autorelease-reusable-workflows">Autorelease Reusable Workflows<a class="headerlink" href="#autorelease-reusable-workflows" title="Permanent link">&para;</a></h2>
+<p>The autorelease process currently leverages <a href="https://docs.github.com/en/actions/using-workflows/reusing-workflows">GitHub's reusable workflows</a>.
+- Future state is that <strong>most</strong> of the actual jobs below would become <em>composite GitHub Actions</em> that are called by the reusable workflows.
+- There is a <a href="https://docs.github.com/en/actions/using-workflows/reusing-workflows#creating-a-reusable-workflow">limitation that subdirectories are not supported for reusable workflows</a>
+    - See https://github.com/orgs/community/discussions/15935
+    &gt; Reusable workflows are YAML-formatted files, very similar to any other workflow file. As with other workflow files, you locate reusable workflows in the <code>.github/workflows</code> directory of a repository. Subdirectories of the <code>workflows</code> directory are not supported.</p>
+<h4 id="github-credentials">GitHub Credentials<a class="headerlink" href="#github-credentials" title="Permanent link">&para;</a></h4>
+<p>Using <strong>autorelease</strong> requires a GitHub token to access the GitHub API. You configure this token via the <code>ACTIONS_TOKEN</code> secret <strong>and</strong> the <code>GH_APP_ID</code> and <code>GH_APP_KEY</code> secrets.</p>
+<p>In the future, you <em>might</em> have the option to specify if you want to use a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">Personal Access Token</a> or authenticate with a GitHub app (bot).</p>
+<blockquote>
+<p>[!WARNING]<br />
+You will need to specify the both <strong>token secrets</strong> for your workflows to run the <strong>autorelease</strong> workflows.</p>
+</blockquote>
+<p>All resources created by the <strong>autorelease</strong> workflows will not trigger future GitHub actions workflows, 
+and workflows normally triggered by the applicable "autorelease" events will also not run.  From GitHub's 
+<a href="https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow">triggering a workflow docs</a>:</p>
+<blockquote>
+<p>When you use the repository's <code>GITHUB_TOKEN</code> to perform tasks, events triggered by the <code>GITHUB_TOKEN</code>
+will not create a new workflow run. This prevents you from accidentally creating recursive workflow runs.</p>
+</blockquote>
+<p>You will want to need a GitHub Actions secret with a <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">Personal Access Token</a>
+if you want GitHub Actions run on the applicable "autorelease" events.</p>
+<h4 id="workflow-permissions">Workflow Permissions<a class="headerlink" href="#workflow-permissions" title="Permanent link">&para;</a></h4>
+<p>The <strong>autorelease</strong> workflows <em>should specify the permissions needed</em>; however, if they do not then they will need the following permissions:</p>
+<div class="highlight"><pre><span></span><code>permissions:
+  contents: write
+  pull-requests: write
+</code></pre></div>
+<h4 id="workflow-numbering-order">Workflow Numbering Order<a class="headerlink" href="#workflow-numbering-order" title="Permanent link">&para;</a></h4>
+<p>The numbering for autorelease workflows should be as follows</p>
+<h3 id="step-1">Step 1<a class="headerlink" href="#step-1" title="Permanent link">&para;</a></h3>
+<p>The process starts when the user runs the <strong>Autorelease - prepare release PR</strong> workflow
+- For repos without builds, this should be the <code>autorelease-01-prep-pr</code> workflow file
+- For repos <strong>with</strong> builds, this should be the <code>autorelease-01-prep-build</code> workflow file</p>
+<h4 id="01-prepare-release">01. prepare-release<a class="headerlink" href="#01-prepare-release" title="Permanent link">&para;</a></h4>
+<p>Check inputs, get next version, determine next steps
+- for repos with packer, this is called from 'prep-build'?</p>
+<ol>
+<li>check the user inputs             (tbd???)</li>
+<li>get the next version              (reuse-next-version)</li>
+<li>determine the next step for inputs and outputs... (tbd???)</li>
+</ol>
+<h4 id="02-prep-build">02. prep-build<a class="headerlink" href="#02-prep-build" title="Permanent link">&para;</a></h4>
+<p><strong>if applicable</strong></p>
+<ol>
+<li>validate the reviewed image ID    (reuse-verify-reviewed-image)</li>
+<li>call 'test-build'</li>
+<li>gather build results</li>
+<li>send results to 'prepare-pr'</li>
+</ol>
+<h4 id="03-prepare-pr">03. prepare-pr<a class="headerlink" href="#03-prepare-pr" title="Permanent link">&para;</a></h4>
+<p>this job is the last part of the "first step" for the <strong>autorelease process</strong></p>
+<ol>
+<li>prepare the release items    (prepare-pr)<ul>
+<li>prepare and create the initial release draft</li>
+<li>prepare and create the release pull request</li>
+</ul>
+</li>
+<li>print the prepare-release outputs</li>
+<li>(wish-list item) update the repo changelog<ul>
+<li>for repos with builds, this would also update the "build log"</li>
+</ul>
+</li>
+<li>(wish-list item) check to make sure no other PRs are opened (or pushes to the default branch)<ul>
+<li>it would probably be part of this job... and would <strong>auto-close the release pull request</strong>, since a change was made??</li>
+</ul>
+</li>
+</ol>
+<h3 id="step-2">Step 2<a class="headerlink" href="#step-2" title="Permanent link">&para;</a></h3>
+<p>The process starts when the <strong>release pull request is merged into the default branch</strong>
+- For all repos, this should be the <code>autorelease-02-pr-merged</code> workflow file</p>
+<h4 id="04-pr-merged">04. pr-merged<a class="headerlink" href="#04-pr-merged" title="Permanent link">&para;</a></h4>
+<ol>
+<li>get the version from the autorelease branch;                             (check-autorelease-branch)    ## done</li>
+<li>get the version, type, and reviewed image id from the JSON_VARS_FILE;    (check-json-file)             ## done</li>
+<li>get the commit SHA's from the merged pull request;                       (check-commit-sha)            ## done</li>
+<li>validate the versions match (between autorelease and the file);          (validate-version)            ## done</li>
+<li><strong>create the full-version tag</strong> with the new version;                    (create-tag)                  ## broken</li>
+</ol>
+<h3 id="step-3">Step 3<a class="headerlink" href="#step-3" title="Permanent link">&para;</a></h3>
+<p>The process starts when the <strong>full version tag is created</strong> (by the <strong>pr-merged</strong> job)
+- For repos without builds, this should be the <code>autorelease-03-prep-release</code> workflow file
+- For repos <strong>with</strong> builds, this should be the <code>autorelease-03-build-prod</code> workflow file</p>
+<h4 id="05-validate-tag-was-autorelease-03-validate-from-created-tag">05. validate-tag   (was autorelease 03 - validate from created tag)<a class="headerlink" href="#05-validate-tag-was-autorelease-03-validate-from-created-tag" title="Permanent link">&para;</a></h4>
+<ol>
+<li>get the version from the tag;                                            (check-tag)             ## done</li>
+<li>get the version, type, and reviewed image id from the JSON_VARS_FILE;    (check-json-file)       ## done  (update to call the new reusable workflow..)</li>
+<li>(wish-list item) update a separate "release log"<ul>
+<li>for repos with builds, this would also update the "build log"</li>
+</ul>
+</li>
+<li>check for any non-build outputs that might need to go to the 'prepare-final-draft' job </li>
+</ol>
+<h4 id="06-build-prod-was-autorelease-03-build-prod">06. build-prod     (was autorelease 03 - build-prod)<a class="headerlink" href="#06-build-prod-was-autorelease-03-build-prod" title="Permanent link">&para;</a></h4>
+<p><strong>if applicable</strong> this job should be called by the 'validate-tag' job in the remote repo</p>
+<ol>
+<li>validate the reviewed image ID from the JSON_VARS_FILE;             (check-image-id)          (validate-image-id)       (update to call the new reusable workflow..)</li>
+<li>validate the versions match (between autorelease and the file);     (validate-version)        (use the same job from the '02 pr-merged' workflow)</li>
+<li>call the builder using the 'convert-to-prod' build method;               (call-build-prod)</li>
+<li>print the build results</li>
+<li>gather the AMI info and upload the artifact somewhere??<ul>
+<li>upload the AMI artifact file to the draft release</li>
+</ul>
+</li>
+<li>update the release template file (or send the proper outputs to the 'prepare-final-draft' job)<ul>
+<li>probably use <code>sed</code> or something to find/replace the new AMI ID into the file</li>
+</ul>
+</li>
+<li>print output that the new image has been built and to check the status of the 'prepare-final-draft' job</li>
+</ol>
+<h4 id="07-prepare-final-draft-was-autorelease-04-update-final-draft-release">07. prepare-final-draft     (was autorelease 04 - update FINAL draft release)<a class="headerlink" href="#07-prepare-final-draft-was-autorelease-04-update-final-draft-release" title="Permanent link">&para;</a></h4>
+<ol>
+<li>verify the draft release has the proper updates (either from <strong>validate-tag</strong> or <strong>build-prod</strong>)<ul>
+<li>for <strong>build-prod</strong>, verify the new AMI ID.  If an update needs to be made, use <code>sed</code> or something</li>
+<li>for <strong>validate-tag</strong>, need to verify the applicable outputs or updates.  If an update needs to be made, use <code>sed</code> or something</li>
+</ul>
+</li>
+<li>verify the applicable artifacts are added to the draft release<ul>
+<li>for <strong>build-prod</strong>, verify the AMI artifact file is uploaded</li>
+</ul>
+</li>
+<li>update the release draft</li>
+<li>maybe a check to ensure the draft release is valid?</li>
+<li>print output that the release draft is ready for review</li>
+<li>the next step is manual, requiring someone to review the release draft</li>
+</ol>
+<h3 id="step-4">Step 4<a class="headerlink" href="#step-4" title="Permanent link">&para;</a></h3>
+<p>This step starts with a manual review of the release draft.</p>
+<p>Once the release draft has been reviewed and verified, click <strong>Publish release</strong></p>
+<h3 id="step-5">Step 5<a class="headerlink" href="#step-5" title="Permanent link">&para;</a></h3>
+<p>The process starts when the <strong>release is published manually by the person reviewing the release draft</strong>
+- For all repos, this should be the <code>autorelease-04-update-tags</code> workflow file</p>
+<h4 id="08-update-tags-maybe-rename-this">08. update-tags    (maybe rename this??)<a class="headerlink" href="#08-update-tags-maybe-rename-this" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Update major and minor tags on release (update-tags-on-release)   <strong>this might be the last step</strong></li>
+<li>(wish-list item) send a notification (maybe on Slack, Discord, etc)</li>
+<li>(wish-list item) <strong>if applicable</strong> make updates with any needed IDs or artifacts from the release, then open a PR with post-release notes??</li>
+<li>celebrate!</li>
+</ol>
+<h2 id="details-about-specific-jobs-and-actions">Details about specific jobs and actions<a class="headerlink" href="#details-about-specific-jobs-and-actions" title="Permanent link">&para;</a></h2>
+<h3 id="calculating-the-next-version">Calculating the next version<a class="headerlink" href="#calculating-the-next-version" title="Permanent link">&para;</a></h3>
+<p>Autorelease currently uses the <code>test/get-next-semver</code> action to determine the next version.
+- Details about how the <strong>next version</strong> is calculated can be found in the <a href="../test/get-next-semver/README.md#next-tag"><strong>next-tag</strong> section of the <code>get-next-semver</code> README</a>
+- The only time the "next version" will match the "build version" is when a full version tag is created.</p>
+<h3 id="calculating-the-build-version">Calculating the build version<a class="headerlink" href="#calculating-the-build-version" title="Permanent link">&para;</a></h3>
+<p>Autorelease <em>will use</em> the <code>builders/set-version</code> action to determine the build version.
+- The default <strong>build version</strong> is calculated based on the output from running the command <code>git describe --tags --match "v[0-9].[0-9].[0-9]*"</code>
+- The only time the "next version" will match the "build version" is when a full version tag is created.</p>
+<h3 id="filtering-for-the-full-version-tag-in-an-action">Filtering for the full version tag in an action<a class="headerlink" href="#filtering-for-the-full-version-tag-in-an-action" title="Permanent link">&para;</a></h3>
+<p><strong>Note</strong> the filter pattern will need to be updated to allow double digits, either:
+- specify 2 digits with a second range followed by <code>?</code>: 
+    - using: <code>'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'</code>
+- or keep the single digit, but match one or more with <code>+</code>:
+    - using: <code>'v[0-9]+.[0-9]+.[0-9]+'</code></p>
+<p>See <a href="https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet">GitHub's filter pattern cheat sheet</a> for more info.</p>
+<p><strong>important</strong>: using <code>'v*.*.*'</code> does not work.  For example, using <code>if: contains('refs/tags/v*.*.*', github.ref) &amp;&amp; github.ref_type == 'tag'</code> will not ever be true since <code>'v*.*.*'</code> is not the proper syntax.  You must use <code>v[0-9].[0-9].[0-9]</code> (or one of the options above) instead.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "navigation.tabs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>

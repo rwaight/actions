@@ -1,0 +1,1380 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="rwaight">
+      
+      
+        <link rel="canonical" href="https://rwaight.github.io/actions/actions-scripts-README/">
+      
+      
+        <link rel="prev" href="../actions-repo-update-readme/">
+      
+      
+        <link rel="next" href="../actions-to-import/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.48">
+    
+    
+      
+        <title>Scripts for the actions monorepo - Actions monorepo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        
+        <link rel="stylesheet" href="../assets/external/fonts.googleapis.com/css.49ea35f2.css">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#scripts-for-the-actions-monorepo" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Actions monorepo" class="md-header__button md-logo" aria-label="Actions monorepo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Actions monorepo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Scripts for the actions monorepo
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/rwaight/actions" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rwaight/actions
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../actions-release-notes/" class="md-tabs__link">
+          
+  
+    
+  
+  Monorepo
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../git-revert-examples/" class="md-tabs__link">
+          
+  
+    
+  
+  Git
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../adding-commitlint/" class="md-tabs__link">
+          
+  
+    
+  
+  Random
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../autorelease-process-notes/" class="md-tabs__link">
+          
+  
+    
+  
+  Other
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Actions monorepo" class="md-nav__button md-logo" aria-label="Actions monorepo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+
+    </a>
+    Actions monorepo
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/rwaight/actions" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    rwaight/actions
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Monorepo
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Monorepo
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-release-notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions release notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-repo-update-readme/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions repo update readme
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Scripts for the actions monorepo
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Scripts for the actions monorepo
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#import-config-file-specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import Config File Specifications
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Import Config File Specifications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-import-configyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example import-config.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#import-configs-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import Configs Script
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Import Configs Script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monorepo-updates-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monorepo Updates Script
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monorepo Updates Script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-to-import/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Actions to import
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../importing-actions-manual/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Importing actions manual
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bots-in-github-actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using bots and apps in GitHub Actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sign-automatic-commits-in-github-actions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Sign automatic commits in github actions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Git
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Git
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../git-revert-examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git revert examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../git-tags-examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Git tag examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Random
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Random
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-commitlint/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Adding commitlint to this repo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../automating-pull-requests/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automating Pull Requests
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Other
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Other
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../autorelease-process-notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Autorelease Process
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#import-config-file-specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import Config File Specifications
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Import Config File Specifications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-import-configyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example import-config.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#import-configs-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import Configs Script
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Import Configs Script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monorepo-updates-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monorepo Updates Script
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monorepo Updates Script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="scripts-for-the-actions-monorepo">Scripts for the actions monorepo<a class="headerlink" href="#scripts-for-the-actions-monorepo" title="Permanent link">&para;</a></h1>
+<p>There are currently two scripts for the actions monorepo:
+- <code>import_configs.sh</code>
+- <code>monorepo_updates.sh</code></p>
+<p>The scripts update (and use) a <code>import-config.yml</code> file, which is stored for each individual action.</p>
+<p><strong>Table of Contents</strong>
+- <a href="#import-config-file-specifications">Import Config File Specifications</a>
+- <a href="#import-configs-script">Import Configs Script</a>
+- <a href="#monorepo-updates-script">Monorepo Updates Script</a></p>
+<h2 id="import-config-file-specifications">Import Config File Specifications<a class="headerlink" href="#import-config-file-specifications" title="Permanent link">&para;</a></h2>
+<p>The <code>import-config.yml</code> file is a structured YAML configuration file generated or updated by the <code>import_configs.sh</code> script; the file is also updated by the <code>monorepo_updates.sh</code> script. The <code>import-config.yml</code> file provides metadata and specifications for GitHub Actions, whether they are locally created or imported from external sources. Below is a breakdown of its structure and an example/template:</p>
+<h3 id="file-structure">File Structure<a class="headerlink" href="#file-structure" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Metadata Fields</strong>:</li>
+<li><strong><code>name</code></strong>: The name of the action (derived from the directory name).</li>
+<li><strong><code>author</code></strong>: The author of the action. If not specified, a placeholder is used.</li>
+<li><strong><code>description</code></strong>: A brief description of the action. Defaults to "placeholder" if not provided.</li>
+<li>
+<p><strong><code>group</code></strong>: The name of the parent directory group.</p>
+</li>
+<li>
+<p><strong>Import Status</strong>:</p>
+</li>
+<li>
+<p><strong><code>imported</code></strong>: A boolean indicating if the action is imported (<code>true</code>) or locally created (<code>false</code>).</p>
+</li>
+<li>
+<p><strong>Source Information</strong> (if <code>imported</code> is <code>true</code>):</p>
+</li>
+<li><strong><code>source.action_name</code></strong>: The name of the imported action.</li>
+<li><strong><code>source.author</code></strong>: The author of the source action.</li>
+<li><strong><code>source.repo_name</code></strong>: The name of the GitHub repository containing the action.</li>
+<li><strong><code>source.repo_url</code></strong>: The URL of the source repository.</li>
+<li><strong><code>source.current_version</code></strong>: The version currently in use.</li>
+<li><strong><code>source.latest_version</code></strong>: The latest available version of the action.</li>
+<li>
+<p><strong><code>source.update_available</code></strong>: Boolean indicating if an update is available.</p>
+</li>
+<li>
+<p><strong>Local Modifications</strong>:</p>
+</li>
+<li><strong><code>local.author</code></strong>: The author of the local action (if not imported).</li>
+<li>
+<p><strong><code>local.modifications</code></strong>: Boolean indicating if modifications have been made.</p>
+</li>
+<li>
+<p><strong>Specifications</strong>:</p>
+</li>
+<li><strong><code>specs.action_file</code></strong>: The name of the action file (<code>action.yml</code> or <code>action.yaml</code>).</li>
+<li><strong><code>specs.inputs</code></strong>: A list of input keys defined in the action.</li>
+<li><strong><code>specs.outputs</code></strong>: A list of output keys defined in the action.</li>
+<li><strong><code>specs.runs.using</code></strong>: The execution environment (e.g., <code>node12</code>, <code>docker</code>).</li>
+<li>
+<p><strong><code>specs.runs.main</code></strong>: The entry point file for the action (if applicable).</p>
+</li>
+<li>
+<p><strong>Tests</strong>:</p>
+</li>
+<li><strong><code>tests._comment</code></strong>: A reserved section for future test-related fields.</li>
+</ol>
+<hr />
+<h3 id="example-import-configyml">Example <code>import-config.yml</code><a class="headerlink" href="#example-import-configyml" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example-action</span>
+<span class="nt">author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john-doe&quot;</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;An</span><span class="nv"> </span><span class="s">example</span><span class="nv"> </span><span class="s">GitHub</span><span class="nv"> </span><span class="s">Action</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">demonstration</span><span class="nv"> </span><span class="s">purposes.&quot;</span>
+<span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example-group&quot;</span>
+<span class="nt">imported</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">source</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">action_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example-action&quot;</span>
+<span class="w">  </span><span class="nt">author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-author&quot;</span>
+<span class="w">  </span><span class="nt">repo_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;example-repo&quot;</span>
+<span class="w">  </span><span class="nt">repo_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://github.com/external-author/example-repo&quot;</span>
+<span class="w">  </span><span class="nt">current_version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;v1.0.0&quot;</span>
+<span class="w">  </span><span class="nt">latest_version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;v1.1.0&quot;</span>
+<span class="w">  </span><span class="nt">update_available</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">local</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">author</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;john-doe&quot;</span>
+<span class="w">  </span><span class="nt">modifications</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">specs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">action_file</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;action.yml&quot;</span>
+<span class="w">  </span><span class="nt">inputs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;input1&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;input2&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">outputs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;output1&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">runs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">using</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;node16&quot;</span>
+<span class="w">    </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dist/index.js&quot;</span>
+
+<span class="nt">tests</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">_comment</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;reserved</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">future</span><span class="nv"> </span><span class="s">use&quot;</span>
+</code></pre></div>
+<h3 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Placeholders</strong>: If the script cannot determine certain values, placeholders (<code>"placeholder"</code>) are inserted to prompt the user for manual updates.</li>
+<li><strong>Dynamic Updates</strong>: For imported actions, fields such as <code>source.latest_version</code> and <code>source.update_available</code> are dynamically updated based on the GitHub API.</li>
+<li><strong>Flexibility</strong>: The file structure accommodates both locally created and imported actions, ensuring versatility in various workflows.</li>
+</ul>
+<hr />
+<h2 id="import-configs-script">Import Configs Script<a class="headerlink" href="#import-configs-script" title="Permanent link">&para;</a></h2>
+<p>The <code>import_configs.sh</code> script automates the creation and maintenance of <code>import-config.yml</code> files for actions found in specified directories. It achieves the following:</p>
+<ol>
+<li><strong>Read Configuration</strong>:</li>
+<li>
+<p>Reads target directories from a configuration file <code>target_dirs.conf</code>.</p>
+</li>
+<li>
+<p><strong>Identify Action Files</strong>:</p>
+</li>
+<li>
+<p>Checks each subdirectory for the presence of an <code>action.yml</code> or <code>action.yaml</code> file.</p>
+</li>
+<li>
+<p><strong>Process <code>import-config.yml</code></strong>:</p>
+</li>
+<li>
+<p>For each subdirectory:</p>
+<ul>
+<li>If <code>import-config.yml</code> exists:</li>
+<li>Updates fields like <code>author</code>, <code>description</code>, <code>specs</code> (including <code>inputs</code>, <code>outputs</code>, <code>runs</code>), and <code>source</code> (if applicable).</li>
+<li>Checks for updates if the action is marked as "imported" by querying the GitHub API for the latest release.</li>
+<li>If <code>import-config.yml</code> does not exist:</li>
+<li>Prompts the user to specify if the action is "imported" or "local."</li>
+<li>Generates an initial <code>import-config.yml</code> with fields such as <code>author</code>, <code>group</code>, <code>imported</code>, <code>specs</code>, and optionally, <code>source</code> details for imported actions.</li>
+</ul>
+</li>
+<li>
+<p><strong>Extract and Format Data</strong>:</p>
+</li>
+<li>Uses the <code>yq</code> tool to parse and extract data from YAML files and to update/create YAML fields.</li>
+<li>
+<p>Extracts keys (e.g., <code>inputs</code>, <code>outputs</code>) and converts them into a suitable format for YAML.</p>
+</li>
+<li>
+<p><strong>GitHub Integration</strong>:</p>
+</li>
+<li>
+<p>For imported actions, fetches the latest version information from GitHub API to determine if an update is available.</p>
+</li>
+<li>
+<p><strong>Handle User Input</strong>:</p>
+</li>
+<li>
+<p>Prompts the user to input metadata when creating <code>import-config.yml</code> for new actions, especially for imported actions.</p>
+</li>
+<li>
+<p><strong>Iterate Over All Actions</strong>:</p>
+</li>
+<li>
+<p>Processes every subdirectory in the target directories, ensuring that all actions are updated or have an <code>import-config.yml</code> generated.</p>
+</li>
+<li>
+<p><strong>Placeholder Values</strong>:</p>
+</li>
+<li>
+<p>Inserts placeholders for fields like <code>author</code> or <code>description</code> if they are missing in the action file.</p>
+</li>
+<li>
+<p><strong>Reserved Tests Section</strong>:</p>
+</li>
+<li>
+<p>Adds a <code>tests</code> block in the <code>import-config.yml</code> file for future use.</p>
+</li>
+<li>
+<p><strong>Output</strong>:</p>
+<ul>
+<li>Displays progress and completion messages for each action processed.</li>
+</ul>
+</li>
+</ol>
+<h3 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h3>
+<p>This script is designed to be extensible and works efficiently for managing configurations of multiple GitHub Actions. It uses <code>yq</code> for YAML manipulation, <code>jq</code> for JSON parsing, and assumes user access to GitHub API for imported action metadata.</p>
+<hr />
+<h2 id="monorepo-updates-script">Monorepo Updates Script<a class="headerlink" href="#monorepo-updates-script" title="Permanent link">&para;</a></h2>
+<p>This script automates the process of checking for updates in repositories and applying those updates to the actions monorepo based on configurations specified in <code>import-config.yml</code> files within target directories. It achieves the following:</p>
+<ol>
+<li><strong>Configuration Loading</strong>:</li>
+<li>Reads target directories from <code>target_dirs.conf</code>.</li>
+<li>
+<p>Optionally allows specifying a specific group and action to process instead of using all target directories.</p>
+</li>
+<li>
+<p><strong>Update Check Logic</strong>:</p>
+</li>
+<li>
+<p>For each <code>import-config.yml</code> file found in the target directories:</p>
+<ul>
+<li>Checks if the action is "imported."</li>
+<li>Verifies if an update is available by comparing the current version with the latest version.</li>
+<li>Fetches the latest version information from the repository using GitHub APIs (via <code>curl</code> and <code>jq</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Repository Update Process</strong>:</p>
+</li>
+<li>Clones the repository at the specified latest version.</li>
+<li>Processes the repository:<ul>
+<li>Renames <code>.github/</code> directory to <code>__dot_github/</code> and disables <code>.yml</code> files within.</li>
+<li>Adds a repository name prefix to <code>.md</code> and <code>.yml</code> files.</li>
+</ul>
+</li>
+<li>Creates a new branch in the actions monorepo for the update.</li>
+<li>
+<p>Generates a new <code>README.md</code> based on a template (<code>imported_readme_template.md</code>), using <code>sed</code> to populate placeholders with details (e.g., group name, action name, new version).</p>
+<ul>
+<li>Eventually this will be managed by a workflow within the actions repo.</li>
+</ul>
+</li>
+<li>
+<p><strong>Git Workflow</strong>:</p>
+</li>
+<li>Prepares changes for a commit (does not auto-commit or push).</li>
+<li>
+<p>Provides instructions for the user to commit and push changes manually.</p>
+</li>
+<li>
+<p><strong>Temporary Directory Management</strong>:</p>
+</li>
+<li>Uses a temporary directory for processing repository updates.</li>
+<li>
+<p>Prompts the user for cleanup after processing.</p>
+</li>
+<li>
+<p><strong>Configuration File Update</strong>:</p>
+</li>
+<li>Updates the <code>current_version</code> and <code>update_available</code> fields in <code>import-config.yml</code> after successful processing.</li>
+</ol>
+<h3 id="notes_2">Notes<a class="headerlink" href="#notes_2" title="Permanent link">&para;</a></h3>
+<p>The script also has some <em>interactive features</em>:
+- Prompts the user for specifying specific actions to update.
+- Offers manual intervention for committing, pushing changes, and cleaning up temporary directories.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "navigation.tabs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>
