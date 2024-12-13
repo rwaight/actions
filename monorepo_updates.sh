@@ -15,6 +15,11 @@ check_for_updates() {
     group=$(yq e '.group' "$config_file")
     name=$(yq e '.name' "$config_file")
 
+    if [[ "$specify_action" == "yes" && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
+        echo "Skipping $group/$name..."
+        return
+    fi
+
     echo "Processing $group/$name..."
 
     imported=$(yq e '.imported' "$config_file")
@@ -139,6 +144,14 @@ check_for_updates() {
         echo "Action in $config_file is not imported. Skipping..."
     fi
 }
+
+# Prompt to specify whether to specify an action or use the target_dirs config file
+read -p "Do you want to specify a group and action? (yes/no): " specify_action
+
+if [[ "$specify_action" == "yes" ]]; then
+    read -p "Enter the group name: " specified_group
+    read -p "Enter the action name: " specified_action
+fi
 
 # Iterate through each target directory and check for updates
 for target_dir in "${target_dirs[@]}"; do
