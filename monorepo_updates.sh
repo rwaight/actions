@@ -49,10 +49,6 @@ check_for_updates() {
             # Create a temporary directory for downloading the updated source files
             temp_dir=$(mktemp -d)
 
-            # Copy the template file to the temp directory
-            template_in_temp="$temp_dir/imported_readme_template.md"
-            cp "$template_file" "$template_in_temp"
-
             # Navigate to the temporary directory
             cd "$temp_dir" || exit
 
@@ -61,6 +57,10 @@ check_for_updates() {
 
             if [[ $? -eq 0 ]]; then
                 echo "Downloaded updated source files to $temp_dir"
+
+                # Copy the template file to the temp directory
+                template_in_temp="$temp_dir/imported_readme_template.tempmd"
+                cp "$template_file" "$template_in_temp"
 
                 # Step 1: Rename the .github directory to __dot_github
                 if [[ -d ".github" ]]; then
