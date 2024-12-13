@@ -10,9 +10,9 @@ source:
   author: peter-evans
   repo_name: create-pull-request
   repo_url: https://github.com/peter-evans/create-pull-request
-  current_version: v6.0.2
+  current_version: v7.0.5
   latest_version: v7.0.5
-  update_available: true
+  update_available: false
 specs:
   action_file: action.yml
   inputs: [token, git-token, path, add-paths, commit-message, committer, author, signoff, branch, delete-branch, branch-suffix, base, push-to-fork, title, body, body-path, labels, assignees, reviewers, team-reviewers, milestone, draft]
