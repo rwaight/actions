@@ -15,6 +15,11 @@ check_for_updates() {
     group=$(yq e '.group' "$config_file")
     name=$(yq e '.name' "$config_file")
 
+    if [[ "$specify_action" == "yes" && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
+        echo "Skipping $group/$name..."
+        return
+    fi
+
     echo "Processing $group/$name..."
 
     imported=$(yq e '.imported' "$config_file")
@@ -87,19 +92,19 @@ check_for_updates() {
                 cp -r "$temp_dir"/* "$local_action_dir"
 
                 # Step 7: Create a new README.md from the template file
-                template_file="$local_action_dir/assets/imported_readme_template.md"
+                template_file="$local_repo_dir/assets/imported_readme_template.md"
                 new_readme="$local_action_dir/README.md"
                 if [[ -f "$template_file" ]]; then
                     cp "$template_file" "$new_readme"
 
                     # Place for find/replace commands
-                    sed -i "s/SED_GROUP/$group/g" "$new_readme"
-                    sed -i "s/SED_NAME/$name/g" "$new_readme"
-                    sed -i "s/SED_REPONAME/$source_repo_name/g" "$new_readme"
-                    sed -i "s/SED_REPOAUTH/$source_repo_author/g" "$new_readme"
-                    sed -i "s/SED_REPOURL/$source_repo_url/g" "$new_readme"
-                    sed -i "s/SED_NEWVERSION/$latest_version/g" "$new_readme"
-                    sed -i "s/SED_NEWCOMMITSHA/$repo_latest_sha/g" "$new_readme"
+                    sed -i "s/SED_GROUP/${group}/g" "$new_readme"
+                    sed -i "s/SED_NAME/${name}/g" "$new_readme"
+                    sed -i "s/SED_REPONAME/${source_repo_name}/g" "$new_readme"
+                    sed -i "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
+                    ##not used##sed -i "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
+                    sed -i "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
+                    sed -i "s/SED_NEWCOMMITSHA/${repo_latest_sha}/g" "$new_readme"
                     # Add additional find/replace commands as needed
                 fi
 
@@ -139,6 +144,14 @@ check_for_updates() {
         echo "Action in $config_file is not imported. Skipping..."
     fi
 }
+
+# Prompt to specify whether to specify an action or use the target_dirs config file
+read -p "Do you want to specify a group and action? (yes/no): " specify_action
+
+if [[ "$specify_action" == "yes" ]]; then
+    read -p "Enter the group name: " specified_group
+    read -p "Enter the action name: " specified_action
+fi
 
 # Iterate through each target directory and check for updates
 for target_dir in "${target_dirs[@]}"; do
