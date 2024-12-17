@@ -19,13 +19,13 @@ jobs:
       pull-requests: read
     # Set job outputs to values from filter step
     outputs:
-      backend1: ${{ steps.filter.outputs.backend1 }}
-      frontend1: ${{ steps.filter.outputs.frontend1 }}
-      backend2: ${{ steps.filter.outputs.backend2 }}
-      frontend2: ${{ steps.filter.outputs.frontend2 }}
-      backend3: ${{ steps.filter.outputs.backend3 }}
-      frontend3: ${{ steps.filter.outputs.frontend3 }}
-      backend4: ${{ steps.filter.outputs.backend4 }}
+      builders: ${{ steps.filter.outputs.builders }}
+      chatops: ${{ steps.filter.outputs.chatops }}
+      git: ${{ steps.filter.outputs.git }}
+      github: ${{ steps.filter.outputs.github }}
+      releases: ${{ steps.filter.outputs.releases }}
+      test: ${{ steps.filter.outputs.test }}
+      utilities: ${{ steps.filter.outputs.utilities }}
       frontend4: ${{ steps.filter.outputs.frontend4 }}
       backend5: ${{ steps.filter.outputs.backend5 }}
       frontend5: ${{ steps.filter.outputs.frontend5 }}
@@ -39,20 +39,20 @@ jobs:
       id: filter
       with:
         filters: |
-          backend1:
-            - 'backend1/**'
-          frontend1:
-            - 'frontend1/**'
-          backend2:
-            - 'backend2/**'
-          frontend2:
-            - 'frontend2/**'
-          backend3:
-            - 'backend3/**'
-          frontend3:
-            - 'frontend3/**'
-          backend4:
-            - 'backend4/**'
+          builders:
+            - 'builders/**'
+          chatops:
+            - 'chatops/**'
+          git:
+            - 'git/**'
+          github:
+            - 'github/**'
+          releases:
+            - 'releases/**'
+          test:
+            - 'test/**'
+          utilities:
+            - 'utilities/**'
           frontend4:
             - 'frontend4/**'
           backend5:
@@ -64,10 +64,10 @@ jobs:
         #   frontend0:
         #     - 'frontend0/**'
 
-  # JOB to build and test backend1 code
-  backend1:
+  # JOB to build and test builders code
+  builders:
     needs: changes
-    if: ${{ needs.changes.outputs.backend1 == 'true' }}
+    if: ${{ needs.changes.outputs.builders == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -85,24 +85,24 @@ jobs:
           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
-            backend1
+            builders
 
       - name: run the actions in this group
-        uses: ./backend1
+        uses: ./builders
 
       - name: run the actions in this group
-        uses: ./backend1
+        uses: ./builders
 
       - name: run the actions in this group
-        uses: ./backend1
+        uses: ./builders
 
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test frontend1 code
-  frontend1:
+  # JOB to build and test chatops code
+  chatops:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend1 == 'true' }}
+    if: ${{ needs.changes.outputs.chatops == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -120,24 +120,24 @@ jobs:
           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
-            frontend1
+            chatops
 
       - name: run the actions in this group
-        uses: ./frontend1
+        uses: ./chatops
 
       - name: run the actions in this group
-        uses: ./frontend1
+        uses: ./chatops
 
       - name: run the actions in this group
-        uses: ./frontend1
+        uses: ./chatops
 
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test backend2 code
-  backend2:
+  # JOB to build and test git code
+  git:
     needs: changes
-    if: ${{ needs.changes.outputs.backend2 == 'true' }}
+    if: ${{ needs.changes.outputs.git == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -155,24 +155,24 @@ jobs:
           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
-            backend2
+            git
 
       - name: run the actions in this group
-        uses: ./backend2
+        uses: ./git
 
       - name: run the actions in this group
-        uses: ./backend2
+        uses: ./git
 
       - name: run the actions in this group
-        uses: ./backend2
+        uses: ./git
 
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test frontend2 code
-  frontend2:
+  # JOB to build and test github code
+  github:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend2 == 'true' }}
+    if: ${{ needs.changes.outputs.github == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -190,24 +190,24 @@ jobs:
           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
-            frontend2
+            github
 
       - name: run the actions in this group
-        uses: ./frontend2
+        uses: ./github
 
       - name: run the actions in this group
-        uses: ./frontend2
+        uses: ./github
 
       - name: run the actions in this group
-        uses: ./frontend2
+        uses: ./github
 
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test backend3 code
-  backend3:
+  # JOB to build and test releases code
+  releases:
     needs: changes
-    if: ${{ needs.changes.outputs.backend3 == 'true' }}
+    if: ${{ needs.changes.outputs.releases == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -225,24 +225,24 @@ jobs:
           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
-            backend3
+            releases
 
       - name: run the actions in this group
-        uses: ./backend3
+        uses: ./releases
 
       - name: run the actions in this group
-        uses: ./backend3
+        uses: ./releases
 
       - name: run the actions in this group
-        uses: ./backend3
+        uses: ./releases
 
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test frontend3 code
-  frontend3:
+  # JOB to build and test test code
+  test:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend3 == 'true' }}
+    if: ${{ needs.changes.outputs.test == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -260,24 +260,24 @@ jobs:
           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
-            frontend3
+            test
 
       - name: run the actions in this group
-        uses: ./frontend3
+        uses: ./test
 
       - name: run the actions in this group
-        uses: ./frontend3
+        uses: ./test
 
       - name: run the actions in this group
-        uses: ./frontend3
+        uses: ./test
 
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test backend4 code
-  backend4:
+  # JOB to build and test utilities code
+  utilities:
     needs: changes
-    if: ${{ needs.changes.outputs.backend4 == 'true' }}
+    if: ${{ needs.changes.outputs.utilities == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -295,16 +295,16 @@ jobs:
           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
-            backend4
+            utilities
 
       - name: run the actions in this group
-        uses: ./backend4
+        uses: ./utilities
 
       - name: run the actions in this group
-        uses: ./backend4
+        uses: ./utilities
 
       - name: run the actions in this group
-        uses: ./backend4
+        uses: ./utilities
 
       - name: echo asdf
         run: echo "asdf ..."
@@ -344,7 +344,7 @@ jobs:
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test backend1 code
+  # JOB to build and test builders code
   backend5:
     needs: changes
     if: ${{ needs.changes.outputs.backend5 == 'true' }}
@@ -379,10 +379,10 @@ jobs:
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test frontend1 code
+  # JOB to build and test chatops code
   frontend5:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend1 == 'true' }}
+    if: ${{ needs.changes.outputs.chatops == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -414,7 +414,7 @@ jobs:
       - name: echo asdf
         run: echo "asdf ..."
 
-#   # JOB to build and test backend1 code
+#   # JOB to build and test builders code
 #   backend0:
 #     needs: changes
 #     if: ${{ needs.changes.outputs.backend0 == 'true' }}
@@ -449,10 +449,10 @@ jobs:
 #       - name: echo asdf
 #         run: echo "asdf ..."
 
-#   # JOB to build and test frontend1 code
+#   # JOB to build and test chatops code
 #   frontend0:
 #     needs: changes
-#     if: ${{ needs.changes.outputs.frontend1 == 'true' }}
+#     if: ${{ needs.changes.outputs.chatops == 'true' }}
 #     runs-on: ubuntu-latest
 #     permissions:
 #       actions: read
@@ -485,7 +485,7 @@ jobs:
 #         run: echo "asdf ..."
 
 
-  chatops:
+  chatops00:
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -503,5 +503,5 @@ jobs:
           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
-            chatops
+            chatops00
 
