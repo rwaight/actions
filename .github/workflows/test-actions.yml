@@ -185,17 +185,59 @@ jobs:
           sparse-checkout: |
             git
 
-      - name: run the actions in this group
-        uses: ./git
+      - name: git/changed-files | Get the changed files
+        id: changed-files
+        uses: ./git/changed-files
+        # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
+        # with:
+        #   since_last_remote_commit: true 
 
-      - name: run the actions in this group
-        uses: ./git
+      - name: git/changed-files | List all changed files
+        if: ${{ steps.changed-files.outputs.all_changed_files }}
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
-      - name: run the actions in this group
-        uses: ./git
+      - name: git/add-and-commit | create a txt file
+        run: echo "123" > ./git/testfile.txt
 
-      - name: echo asdf
-        run: echo "asdf ..."
+      - name: git/add-and-commit | commit the txt file
+        uses: ./git/add-and-commit
+        with:
+          message: 'test: add the very useful text file'
+          add: '*.txt --force'
+          cwd: './git/'
+
+    #   - name: run the actions in this group
+    #     uses: ./git
+
+      - name: git/git-describe-semver | Get the semver version
+        id: git-describe-semver
+        uses: ./git/git-describe-semver
+        with:
+            version: latest
+            # set 'dir' to 'git-describe-semver' due to the action being in a subdirectory
+            dir: git-describe-semver
+            fallback: v0.0.0
+            drop-prefix: true
+            #prerelease-prefix: dev
+            #prerelease-suffix: SNAPSHOT
+            #prerelease-timestamped: true
+            #gh-token: ${{ secrets.GITHUB_TOKEN }}
+            gh-debug: true
+
+      - name: git/git-describe-semver | Output the semver version
+        if: ${{ steps.git-describe-semver.outputs.version }}
+        run: echo "The version is ${{ steps.git-describe-semver.outputs.version }}"
+
+    #   - name: run the actions in this group
+    #     uses: ./git
+
+      - name: last step in the git group
+        run: echo "last step in the git group ..."
 
   # JOB to build and test github code
   github:
