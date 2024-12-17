@@ -69,6 +69,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.backend1 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -99,6 +104,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.frontend1 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -129,6 +139,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.backend2 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -159,6 +174,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.frontend2 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -189,6 +209,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.backend3 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -219,6 +244,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.frontend3 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -249,6 +279,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.backend4 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -279,6 +314,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.frontend4 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -309,6 +349,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.backend5 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -339,6 +384,11 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.frontend1 == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
 
       - name: Checkout files from commit tree
@@ -369,6 +419,11 @@ jobs:
 #     needs: changes
 #     if: ${{ needs.changes.outputs.backend0 == 'true' }}
 #     runs-on: ubuntu-latest
+#     permissions:
+#       actions: read
+#       contents: read
+#       issues: write
+#       pull-requests: write
 #     steps:
 
 #       - name: Checkout files from commit tree
@@ -399,6 +454,11 @@ jobs:
 #     needs: changes
 #     if: ${{ needs.changes.outputs.frontend1 == 'true' }}
 #     runs-on: ubuntu-latest
+#     permissions:
+#       actions: read
+#       contents: read
+#       issues: write
+#       pull-requests: write
 #     steps:
 
 #       - name: Checkout files from commit tree
