@@ -88,13 +88,10 @@ jobs:
             builders
 
       - name: run the actions in this group
-        uses: ./builders
-
-      - name: run the actions in this group
-        uses: ./builders
-
-      - name: run the actions in this group
-        uses: ./builders
+        uses: ./builders/set-version
+        with:
+          strategy: simple
+          verbose: true
 
       - name: echo asdf
         run: echo "asdf ..."
