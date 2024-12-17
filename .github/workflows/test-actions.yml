@@ -132,6 +132,7 @@ jobs:
       - name: Create comment
         if: steps.existing-comment.outputs.comment-id == ''
         uses: ./chatops/create-or-update-comment
+        id: new-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
@@ -139,7 +140,7 @@ jobs:
             reactions: rocket
 
       - name: Find the newly created comment
-        if: steps.existing-comment.outputs.comment-id == ''
+        if: steps.existing-comment.outputs.comment-id != ''
         uses: ./chatops/find-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
