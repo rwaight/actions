@@ -550,3 +550,30 @@ jobs:
 #       - name: echo asdf
 #         run: echo "asdf ..."
 
+  tests-complete:
+    needs: [changes,builders,chatops,git,github,releases,test,utilities]
+    # this needs to run if NONE of the previous jobs failed; if ALL of the previous jobs were successful
+    #if: ${{ needs.changes.outputs.chatops == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            chatops
+            github
+
+      - name: run the github/approve-pull-request action
+        uses: ./github/approve-pull-request
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
