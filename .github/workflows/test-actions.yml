@@ -270,6 +270,92 @@ jobs:
           sparse-checkout: |
             github
 
+      - name: Run export label config action
+        uses: ./github/export-label-config
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          raw-result: false
+          add-aliases: true
+
+      - name: Run label sync
+        uses: ./github/label-sync
+        with:
+          config-file: |
+            assets/labels/my-labels-core.yml
+            assets/labels/my-labels-actions.yml
+            assets/labels/my-labels-versioning.yml
+          request-token: ${{ secrets.GITHUB_TOKEN }}
+          delete-other-labels: false
+          dry-run: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for versioning labels
+        uses: ./github/label-checker
+        with:
+          one_of: "type:"
+          prefix_mode: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Maybe archive github/label-manager | Run the label-manager action
+        uses: ./github/label-manager
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          delete: false # will delete any labels that aren't in the .github/labels.json (this is set to false by default)
+
+      - name: Maybe archive github/issue-triage | Find old issues and mark them stale
+        uses: ./github/issue-triage
+        with:
+          ghToken: ${{ secrets.GITHUB_TOKEN }}
+          staleAfter: 60
+          # do not set 'staleAfter' to anything less than 30 in production
+          closeAfter: 360
+          staleLabel: "triage:stale"
+          staleComment: "This issue is %DAYS_OLD% days old, marking as stale! cc: @%AUTHOR%"
+          # you can remove or comment out 'staleComment' to use the default 'staleComment'
+          closeComment: "Issue last updated %DAYS_OLD% days ago! Closing down!"
+          # you can remove or comment out 'closeComment' to use the default 'closeComment'
+          showLogs: true
+
+      - name: Create Pull Request
+        uses: ./github/create-pull-request
+        id: create-pull-request
+
+      - name: Approve Pull Request
+        uses: ./github/approve-pull-request
+        id: approve-pull-request
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+          #repo: rwaight/test-actions # optional
+
+      - name: Ensures PR titles match the conventional commits spec
+        uses: ./github/semantic-pull-request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          wip: true
+          types: |
+            fix
+            feat
+            test
+            chore
+            refactor
+          # Configure which scopes are allowed (newline-delimited).
+          # These are regex patterns auto-wrapped in `^ $`.
+          scopes: |
+            actions
+            github
+            test-\d+
+          requireScope: false
+
+      - name: Repository Dispatch
+        uses: ./github/repository-dispatch
+        with:
+          #token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          #repository: rwaight/actions
+          event-type: test-event
+
       - name: run the actions in this group
         uses: ./github
 
