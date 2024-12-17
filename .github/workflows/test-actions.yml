@@ -195,18 +195,8 @@ jobs:
             echo "$file was changed"
           done
 
-      - name: git/add-and-commit | create a txt file
-        run: echo "123" > ./git/testfile.txt
-
-      - name: git/add-and-commit | commit the txt file
-        uses: ./git/add-and-commit
-        with:
-          message: 'test: add the very useful text file'
-          add: '*.txt --force'
-          cwd: './git/'
-
-    #   - name: run the actions in this group
-    #     uses: ./git
+      - name: git/repo-version-info | run the git/repo-version-info action
+        uses: ./git/repo-version-info
 
       - name: git/git-describe-semver | Get the semver version
         id: git-describe-semver
@@ -227,8 +217,33 @@ jobs:
         if: ${{ steps.git-describe-semver.outputs.version }}
         run: echo "The version is ${{ steps.git-describe-semver.outputs.version }}"
 
-    #   - name: run the actions in this group
-    #     uses: ./git
+      - name: git/keep-a-changelog-action | run the git/keep-a-changelog-action action
+        uses: ./git/keep-a-changelog-action
+
+      - name: git/semver-git-version | Calculate Version
+        id: version
+        uses: ./git/semver-git-version
+        with:
+            folder: ${{github.workspace}}
+            release-branch: 'main'
+            release-candidate-branch: 'rc'
+            beta-branch: 'dev'
+            major-identifier: 'breaking'
+            minor-identifier: 'feat'
+            prefix: 'v'
+            dir-affected: ./git
+            previous-version: true
+            new-version: true
+
+      - name: git/add-and-commit | create a txt file
+        run: echo "123" > ./git/testfile.txt
+
+      - name: git/add-and-commit | commit the txt file
+        uses: ./git/add-and-commit
+        with:
+          message: 'test: add the very useful text file'
+          add: '*.txt --force'
+          cwd: './git/'
 
       - name: last step in the git group
         run: echo "last step in the git group ..."
