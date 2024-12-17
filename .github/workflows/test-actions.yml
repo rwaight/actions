@@ -82,8 +82,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             builders
 
@@ -120,8 +118,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             chatops
 
@@ -180,8 +176,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             git
 
@@ -257,8 +251,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             github
 
@@ -292,8 +284,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             releases
 
@@ -327,8 +317,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             test
 
@@ -362,8 +350,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             utilities
 
@@ -397,8 +383,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             frontend4
 
@@ -432,8 +416,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             backend5
 
@@ -467,8 +449,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
           sparse-checkout: |
             frontend5
 
