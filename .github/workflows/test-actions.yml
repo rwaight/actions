@@ -87,14 +87,20 @@ jobs:
           sparse-checkout: |
             builders
 
-      - name: run the actions in this group
+      - name: run builders/set-version using the 'simple' strategy
         uses: ./builders/set-version
         with:
           strategy: simple
           verbose: true
 
-      - name: echo asdf
-        run: echo "asdf ..."
+      - name: run builders/set-version using the 'wildcard' strategy
+        uses: ./builders/set-version
+        with:
+          strategy: wildcard
+          verbose: true
+
+      - name: last step in the builders group
+        run: echo "last step in the builders group ..."
 
   # JOB to build and test chatops code
   chatops:
