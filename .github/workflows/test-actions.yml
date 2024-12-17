@@ -51,6 +51,14 @@ jobs:
             - 'backend4/**'
           frontend4:
             - 'frontend4/**'
+          backend5:
+            - 'backend5/**'
+          frontend5:
+            - 'frontend5/**'
+        #   backend0:
+        #     - 'backend0/**'
+        #   frontend0:
+        #     - 'frontend0/**'
 
   # JOB to build and test backend1 code
   backend1:
@@ -172,7 +180,6 @@ jobs:
       - name: echo asdf
         run: echo "asdf ..."
 
-
   # JOB to build and test backend3 code
   backend3:
     needs: changes
@@ -233,7 +240,6 @@ jobs:
       - name: echo asdf
         run: echo "asdf ..."
 
-
   # JOB to build and test backend4 code
   backend4:
     needs: changes
@@ -293,6 +299,127 @@ jobs:
 
       - name: echo asdf
         run: echo "asdf ..."
+
+  # JOB to build and test backend1 code
+  backend5:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend5 == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
+          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
+          sparse-checkout: |
+            backend5
+
+      - name: run the actions in this group
+        uses: ./backend5
+
+      - name: run the actions in this group
+        uses: ./backend5
+
+      - name: run the actions in this group
+        uses: ./backend5
+
+      - name: echo asdf
+        run: echo "asdf ..."
+
+  # JOB to build and test frontend1 code
+  frontend5:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend1 == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
+          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
+          sparse-checkout: |
+            frontend5
+
+      - name: run the actions in this group
+        uses: ./frontend5
+
+      - name: run the actions in this group
+        uses: ./frontend5
+
+      - name: run the actions in this group
+        uses: ./frontend5
+
+      - name: echo asdf
+        run: echo "asdf ..."
+
+#   # JOB to build and test backend1 code
+#   backend0:
+#     needs: changes
+#     if: ${{ needs.changes.outputs.backend0 == 'true' }}
+#     runs-on: ubuntu-latest
+#     steps:
+
+#       - name: Checkout files from commit tree
+#         # Verified creator: https://github.com/marketplace/actions/checkout
+#         # GitHub Action for checking out a repo
+#         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+#         with:
+#           fetch-depth: 0
+#           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
+#           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
+#           sparse-checkout: |
+#             backend0
+
+#       - name: run the actions in this group
+#         uses: ./backend0
+
+#       - name: run the actions in this group
+#         uses: ./backend0
+
+#       - name: run the actions in this group
+#         uses: ./backend0
+
+#       - name: echo asdf
+#         run: echo "asdf ..."
+
+#   # JOB to build and test frontend1 code
+#   frontend0:
+#     needs: changes
+#     if: ${{ needs.changes.outputs.frontend1 == 'true' }}
+#     runs-on: ubuntu-latest
+#     steps:
+
+#       - name: Checkout files from commit tree
+#         # Verified creator: https://github.com/marketplace/actions/checkout
+#         # GitHub Action for checking out a repo
+#         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+#         with:
+#           fetch-depth: 0
+#           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
+#           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
+#           sparse-checkout: |
+#             frontend0
+
+#       - name: run the actions in this group
+#         uses: ./frontend0
+
+#       - name: run the actions in this group
+#         uses: ./frontend0
+
+#       - name: run the actions in this group
+#         uses: ./frontend0
+
+#       - name: echo asdf
+#         run: echo "asdf ..."
+
 
   chatops:
     runs-on: ubuntu-latest
