@@ -506,24 +506,3 @@ jobs:
 #       - name: echo asdf
 #         run: echo "asdf ..."
 
-
-  chatops00:
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      issues: write
-      pull-requests: write
-    steps:
-
-      - name: Checkout files from commit tree
-        # Verified creator: https://github.com/marketplace/actions/checkout
-        # GitHub Action for checking out a repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
-          # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
-          # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
-          sparse-checkout: |
-            chatops00
-
