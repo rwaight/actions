@@ -18,7 +18,7 @@
   name: 'skip-changelog'
   color: '415259'
   description: 'Skip adding to release-drafter'
-  aliases: []
+  aliases: ['changelog:skip']
 -
   name: 'version:major'
   color: 'BFD4F2'
