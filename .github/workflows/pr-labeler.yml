@@ -305,7 +305,7 @@ jobs:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/test/check-semver-labels@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/test/check-semver-labels@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         id: check-version-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
@@ -318,7 +318,7 @@ jobs:
           my_action_debug: true
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/github/label-checker@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         id: check-type-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
@@ -392,7 +392,7 @@ jobs:
           echo "The 'write-results' step has finished. "
 
       - name: Look for a comment
-        uses: rwaight/actions/chatops/find-comment@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/chatops/find-comment@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
@@ -409,7 +409,7 @@ jobs:
 
       - name: Generate comment template
         id: comment-template
-        uses: rwaight/actions/utilities/render-template@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/utilities/render-template@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
@@ -435,7 +435,7 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/chatops/create-or-update-comment@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/chatops/create-or-update-comment@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
