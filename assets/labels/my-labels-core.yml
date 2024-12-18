@@ -87,6 +87,93 @@
   description: 'Action changes or updates made by dependabot'
   aliases: []
 #
+##### area: labels
+# The area: labels have not been formally defined
+-
+  name: 'area:infrastructure'
+  color: 'B1BFAE'
+  description: 'Used for infrastructure issues, like continuous integration bot changes.'
+  aliases: []
+-
+  name: 'area:meta'
+  color: 'B1BFAE'
+  description: 'Cross-cutting, high-level issues (for tracking many other implementation issues, etc).'
+  aliases: []
+-
+  name: 'area:test'
+  color: 'B1BFAE'
+  description: 'Cross-cutting test issues (use area: labels for specific failures; not used for package:test).'
+  aliases: []
+#
+##### changelog: labels
+# The changelog: labels have not been formally defined
+# examples from https://github.com/elastic/oblt-actions/labels?q=changelog%3A
+-
+  name: 'changelog:breaking'
+  color: 'BAA938'   # red
+  description: 'When a breaking change is introduced'
+  aliases: []
+-
+  name: 'changelog:chore'
+  color: '6BA2F2'   # blue
+  description: 'When you add a change that is not user-facing'
+  aliases: []
+-
+  name: 'changelog:ci'
+  color: 'AFCC2E'   # yellow/green
+  description: 'When you add a change that is related to CI'
+  aliases: []
+-
+  name: 'changelog:dependencies'
+  color: 'A0C621'   # yellow
+  description: 'When you add or update a dependency'
+  aliases: []
+-
+  name: 'changelog:docs'
+  color: '0052CC'   # blueish
+  description: 'When you add or update documentation'
+  aliases: []
+-
+  name: 'changelog:enhancement'
+  color: 'FB7784'   # pink/red
+  description: 'When you enhance an existing feature'
+  aliases: []
+-
+  name: 'changelog:feature'
+  color: '7C22E7'   # purple
+  description: 'When you add a new feature'
+  aliases: []
+-
+  name: 'changelog:fix'
+  color: '51FC96'   # green
+  description: 'When you fix a bug or issue'
+  aliases: []
+-
+  name: 'changelog:skip'
+  color: '415259'   # grey
+  description: 'When you do not want to include a change in the changelog'
+  aliases: []
+-
+  name: 'changelog:content'
+  color: '2A9708'   # green
+  description: 'When you add or update content'
+  aliases: []
+-
+  name: 'changelog:deprecate'
+  color: '565D16'
+  description: 'When you make a change to deprecate, archive, or remove something'
+  aliases: []
+# -
+#   name: 'changelog:'
+#   color: '50790C'
+#   description: 'description needed here'
+#   aliases: []
+-
+  name: 'changelog:missing'
+  color: '50790C'
+  description: 'Placeholder label for missing changelog entries'
+  aliases: []
+#
 ##### impacts: labels
 # The impacts: labels have not been formally defined
 -
