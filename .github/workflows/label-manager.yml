@@ -107,7 +107,7 @@ jobs:
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
           (github.event_name=='push' && github.ref_name=='main') 
-        uses: rwaight/actions/github/export-label-config@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/github/export-label-config@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         #uses: rwaight/actions/github/export-label-config@v0.1.26
         #uses: rwaight/actions/github/export-label-config@main
         with:
@@ -127,7 +127,7 @@ jobs:
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
           (github.event_name=='push' && github.ref_name=='main') 
           )
-        uses: rwaight/actions/github/label-sync@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/github/label-sync@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         #uses: rwaight/actions/github/label-sync@v0.1.26
         #uses: rwaight/actions/github/label-sync@main
         with:
