@@ -108,7 +108,7 @@ jobs:
           (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
           (github.event_name=='workflow_call' && inputs.sync_labels==false) || 
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==false)
-        uses: rwaight/actions/github/repository-dispatch@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/github/repository-dispatch@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         #uses: rwaight/actions/github/repository-dispatch@v0.1.26
         #uses: rwaight/actions/github/repository-dispatch@main
         with:
@@ -122,7 +122,7 @@ jobs:
           (github.event_name=='workflow_call' && inputs.sync_labels==true) ||
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
         id: call-sync-labels
-        uses: rwaight/actions/github/repository-dispatch@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/github/repository-dispatch@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         #uses: rwaight/actions/github/repository-dispatch@v0.1.26
         #uses: rwaight/actions/github/repository-dispatch@main
         with:
@@ -222,8 +222,8 @@ jobs:
   #     - name: Send '${{ env.EVENT }}' dispatch to ${{ matrix.repo }}
   #       #if: (github.event_name=='workflow_dispatch' && inputs.sync_labels==true)
   #       id: call-sync-labels
-  #       #uses: rwaight/actions/github/repository-dispatch@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a
-  #       #uses: rwaight/actions/github/repository-dispatch@v0.1.41
+  #       #uses: rwaight/actions/github/repository-dispatch@db6d0174bcb446e1844c6be80f83d8d1025ed6db
+  #       #uses: rwaight/actions/github/repository-dispatch@v0.1.42
   #       uses: rwaight/actions/github/repository-dispatch@main
   #       with:
   #         token: ${{ steps.app-token.outputs.token }}
