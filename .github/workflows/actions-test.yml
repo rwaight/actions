@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Evaluate changes to actions using utilities/paths-filter
-        uses: rwaight/actions/utilities/paths-filter@b7d72b3dabc4bbcbc82070c52cec93a4657e3d8a # v0.1.41
+        uses: rwaight/actions/utilities/paths-filter@db6d0174bcb446e1844c6be80f83d8d1025ed6db # v0.1.42
         id: paths-filter
         with:
           ref: 'main'
