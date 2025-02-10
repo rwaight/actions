@@ -91,6 +91,7 @@ runs:
       id: verbose-print-inputs
       shell: bash
       run: | 
+        echo "::group::starting the 'verbose-print-inputs' step... "
         ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
@@ -105,6 +106,7 @@ runs:
         echo "workflow is        :  ${{ inputs.workflow }} "
         echo "verbose is set to  :  ${{ inputs.verbose }} "
         ##
+        echo "::endgroup::"
 
     - name: Checkout files from commit tree
       # Verified creator: https://github.com/marketplace/actions/checkout
@@ -130,11 +132,15 @@ runs:
       if: github.ref_type == 'tag'
       shell: bash
       run: |
+        echo "::group::The ref_type is 'tag' "
+        ##echo ""
         echo "The ref_type is: ${{ github.ref_type }}"
         echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
         echo "GitHub ref: ${{ github.ref }}"
         echo "GitHub ref_name: ${{ github.ref_name }}"
         echo "GitHub ref_type: ${{ github.ref_type }}"
+        ##echo ""
+        echo "::endgroup::"
 
     - name: Extra | This should run when the ref_type is 'tag' and the tag starts with the proper numbering syntax
       if: github.ref_type == 'tag' && startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref)
@@ -146,11 +152,15 @@ runs:
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
       shell: bash
       run: |
+        echo "::group::The ref_type is 'tag' and the tag starts with the proper numbering syntax "
+        ##echo ""
         echo "The ref_type is: ${{ github.ref_type }}"
         echo "The release.tag_name value is ${{ github.event.release.tag_name }}"
         echo "GitHub ref: ${{ github.ref }}"
         echo "GitHub ref_name: ${{ github.ref_name }}"
         echo "GitHub ref_type: ${{ github.ref_type }}"
+        ##echo ""
+        echo "::endgroup::"
 
     - name: Fetch the tags from the repo
       id: git-fetch
@@ -159,9 +169,10 @@ runs:
       # end error for the command above
       shell: bash
       run: |
-        echo "starting the 'git-fetch' step... "
+        echo "::group::starting the 'git-fetch' step... "
         git fetch --force --prune --tags
         echo "finishing the 'git-fetch' step... "
+        echo "::endgroup::"
 
     - name: Set environmental variables used to evaluate the build version
       id: set-eval-version-env-vars
@@ -171,18 +182,20 @@ runs:
       if: ${{ always() }}
       shell: bash
       run: |
-        echo "Setting EVAL_BUILD_VERSION to false..."
+        echo "::group::Setting EVAL_BUILD_VERSION to false..."
         echo "EVAL_BUILD_VERSION=false" >> $GITHUB_ENV
         echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
         echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
         echo ""
+        echo "finishing the 'set-eval-version-env-vars' step... "
+        echo "::endgroup::"
 
     - name: get-tag-version
       id: get-tag-version
       if: (github.ref_type == 'tag')
       shell: bash
       run: |
-        echo "starting step 'get-tag-version' "
+        echo "::group::starting step 'get-tag-version' "
         VERSION="${{ github.event.release.tag_name || github.ref_name }}"
         ##
         RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
@@ -214,6 +227,7 @@ runs:
         echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
         echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
         echo "completing the 'get-tag-version' step. "
+        echo "::endgroup::"
 
     - name: get-tag-version | Print outputs
       id: check-get-tag-version
@@ -221,7 +235,7 @@ runs:
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
       shell: bash
       run: |
-        echo "starting step 'check-get-tag-version' "
+        echo "::group::starting step 'check-get-tag-version' "
         echo "## get-tag-version outputs"
         echo "Full version: ${{ env.FULL_VERSION_REF }} "
         echo "Major ref   : ${{ env.MAJOR_REF }} "
@@ -230,6 +244,7 @@ runs:
         echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
         echo ""
         echo "completing the 'check-get-tag-version' step. "
+        echo "::endgroup::"
       env:
         #FULL_VERSION_TAG: ${{ steps.get-tag-version.outputs.full-version-tag }}
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
@@ -252,7 +267,7 @@ runs:
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
       shell: bash
       run: |
-        echo "starting step 'set-build-version-full-version-tag' "
+        echo "::group::starting step 'set-build-version-full-version-tag' "
         echo ""
         echo "event name:  ${{ github.event_name }} "
         echo "ref       :  ${{ github.ref }}"
@@ -269,6 +284,7 @@ runs:
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
         echo "completing the 'set-build-version-full-version-tag' step. "
+        echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
@@ -286,7 +302,7 @@ runs:
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
       shell: bash
       run: |
-        echo "starting step 'set-build-version-duplicate-check' "
+        echo "::group::starting step 'set-build-version-duplicate-check' "
         echo ""
         echo "event name:  ${{ github.event_name }} "
         echo "ref       :  ${{ github.ref }}"
@@ -318,6 +334,7 @@ runs:
             echo "something strange is happening, not changing anything... "
         fi
         echo "completing the 'set-build-version-duplicate-check' step. "
+        echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
@@ -332,13 +349,14 @@ runs:
       #if: {{ github.ref == 'ref/head/v*' }}
       shell: bash
       run: |
-        echo "starting step 'set-build-version-fallback-semver-compliant-tag' "
+        echo "::group::starting step 'set-build-version-fallback-semver-compliant-tag' "
         echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}' ..."
         echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
         echo ""
         echo "completing the 'set-build-version-fallback-semver-compliant-tag' step. "
+        echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
@@ -355,13 +373,14 @@ runs:
       if: ${{ always() }}
       shell: bash
       run: |
-        echo "starting the 'simple-semver' step ... "
+        echo "::group::starting the 'simple-semver' step ... "
         git describe --tags --match "v[0-9].[0-9].[0-9]*"
         semver_simple=$(git describe --tags --match "v[0-9].[0-9].[0-9]*")
         echo "setting the value of 'simple-semver' to '${semver_simple}' and sending it to GitHub output"
         echo "simple-semver=${semver_simple}" >> $GITHUB_ENV
         echo "simple-semver=${semver_simple}" >> $GITHUB_OUTPUT
         echo "finishing the 'simple-semver' step ... "
+        echo "::endgroup::"
 
     - name: simple-semver | Print output
       id: check-simple-semver
@@ -379,11 +398,12 @@ runs:
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='simple' && ${{ steps.simple-semver.outputs.simple-semver }})
       shell: bash
       run: |
-        echo "Setting BUILD_VERSION to '${{ env.SEMVER_SIMPLE }}'..."
+        echo "::group::Setting BUILD_VERSION to '${{ env.SEMVER_SIMPLE }}'..."
         echo "BUILD_VERSION=${{ env.SEMVER_SIMPLE }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
         echo ""
+        echo "::endgroup::"
       env:
         SEMVER_SIMPLE: ${{ steps.simple-semver.outputs.simple-semver }}
 
@@ -398,13 +418,14 @@ runs:
       if: (env.EVAL_BUILD_VERSION=='false' || inputs.strategy=='wildcard')
       shell: bash
       run: |
-        echo "starting the 'wildcard-semver' step... "
+        echo "::group::starting the 'wildcard-semver' step... "
         git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"
         semver_wildcard=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*")
         echo "setting the value of 'wildcard-semver' to '${semver_wildcard}' and sending it to GitHub output"
         echo "wildcard-semver=${semver_wildcard}" >> $GITHUB_ENV
         echo "wildcard-semver=${semver_wildcard}" >> $GITHUB_OUTPUT
         echo "finishing the 'wildcard-semver' step... "
+        echo "::endgroup::"
 
     - name: wildcard-semver | Print output
       id: check-wildcard-semver
@@ -422,11 +443,12 @@ runs:
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='wildcard' && ${{ steps.wildcard-semver.outputs.wildcard-semver }})
       shell: bash
       run: |
-        echo "Setting BUILD_VERSION to '${{ env.SEMVER_WILDCARD }}'..."
+        echo "::group::Setting BUILD_VERSION to '${{ env.SEMVER_WILDCARD }}'..."
         echo "BUILD_VERSION=${{ env.SEMVER_WILDCARD }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
         echo ""
+        echo "::endgroup::"
       env:
         SEMVER_WILDCARD: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
 
@@ -486,10 +508,11 @@ runs:
       id: set-version-output
       shell: bash
       run: |
-        echo "starting the 'set-version-output' step ... "
+        echo "::group::starting the 'set-version-output' step ... "
         echo "The BUILD_VERSION has been set to '${{ env.BUILD_VERSION }}' ... "
         echo "BUILD_VERSION=${{ env.BUILD_VERSION }}" >> "$GITHUB_OUTPUT"
         echo "finishing the 'set-version-output' step ... "
+        echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
         MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
