@@ -15,14 +15,38 @@ inputs:
     description: 'If the action should checkout the repo using `actions/checkout`, defaults to false. '
     required: false
     default: 'false'
+  event-name:
+    description: 'This should be the github.event_name variable. '
+    default: ${{ github.event_name }}
+    required: false
   gh-token:
     description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
     required: false
     default: ${{ github.token }}
+  ref:
+    description: 'This should be the github.ref variable. '
+    default: ${{ github.ref }}
+    required: false
+  ref-name:
+    description: 'This should be the github.ref_type variable. '
+    default: ${{ github.ref_name }}
+    required: false
+  ref-type:
+    description: 'This should be the github.ref_type variable. '
+    default: ${{ github.ref_type }}
+    required: false
+  release-tag-name:
+    description: 'This should be the github.ref_type variable. '
+    default: ${{ github.event.release.tag_name }}
+    required: false
   strategy:
     description: 'The strategy to use when calculating the version, either: `simple` or `wildcard`. '
     required: false
     default: 'simple'
+  workflow:
+    description: 'This should be the github.workflow variable. '
+    default: ${{ github.workflow }}
+    required: false
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
