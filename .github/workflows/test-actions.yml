@@ -26,12 +26,13 @@ jobs:
       releases: ${{ steps.filter.outputs.releases }}
       test: ${{ steps.filter.outputs.test }}
       utilities: ${{ steps.filter.outputs.utilities }}
-      frontend4: ${{ steps.filter.outputs.frontend4 }}
+      newgroup0: ${{ steps.filter.outputs.newgroup0 }}
       backend5: ${{ steps.filter.outputs.backend5 }}
       frontend5: ${{ steps.filter.outputs.frontend5 }}
     #   backend0: ${{ steps.filter.outputs.backend0 }}
     #   frontend0: ${{ steps.filter.outputs.frontend0 }}
     steps:
+
     # For pull requests it's not necessary to checkout the code
     - name: paths-filter example
       #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
@@ -53,8 +54,8 @@ jobs:
             - 'test/**'
           utilities:
             - 'utilities/**'
-          frontend4:
-            - 'frontend4/**'
+          newgroup0:
+            - 'newgroup0/**'
           backend5:
             - 'backend5/**'
           frontend5:
@@ -467,10 +468,10 @@ jobs:
       - name: echo asdf
         run: echo "asdf ..."
 
-  # JOB to build and test frontend4 code
-  frontend4:
+  # JOB to build and test newgroup0 code
+  newgroup0:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend4 == 'true' }}
+    if: ${{ needs.changes.outputs.newgroup0 == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -486,16 +487,16 @@ jobs:
         with:
           fetch-depth: 0
           sparse-checkout: |
-            frontend4
+            newgroup0
 
       - name: run the actions in this group
-        uses: ./frontend4
+        uses: ./newgroup0
 
       - name: run the actions in this group
-        uses: ./frontend4
+        uses: ./newgroup0
 
       - name: run the actions in this group
-        uses: ./frontend4
+        uses: ./newgroup0
 
       - name: echo asdf
         run: echo "asdf ..."
