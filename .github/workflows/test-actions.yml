@@ -56,10 +56,6 @@ jobs:
             - 'utilities/**'
           newgroup0:
             - 'newgroup0/**'
-          backend5:
-            - 'backend5/**'
-          frontend5:
-            - 'frontend5/**'
         #   backend0:
         #     - 'backend0/**'
         #   frontend0:
@@ -497,72 +493,6 @@ jobs:
 
       - name: run the actions in this group
         uses: ./newgroup0
-
-      - name: echo asdf
-        run: echo "asdf ..."
-
-  # JOB to build and test builders code
-  backend5:
-    needs: changes
-    if: ${{ needs.changes.outputs.backend5 == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      issues: write
-      pull-requests: write
-    steps:
-
-      - name: Checkout files from commit tree
-        # Verified creator: https://github.com/marketplace/actions/checkout
-        # GitHub Action for checking out a repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
-          sparse-checkout: |
-            backend5
-
-      - name: run the actions in this group
-        uses: ./backend5
-
-      - name: run the actions in this group
-        uses: ./backend5
-
-      - name: run the actions in this group
-        uses: ./backend5
-
-      - name: echo asdf
-        run: echo "asdf ..."
-
-  # JOB to build and test chatops code
-  frontend5:
-    needs: changes
-    if: ${{ needs.changes.outputs.chatops == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      issues: write
-      pull-requests: write
-    steps:
-
-      - name: Checkout files from commit tree
-        # Verified creator: https://github.com/marketplace/actions/checkout
-        # GitHub Action for checking out a repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
-          sparse-checkout: |
-            frontend5
-
-      - name: run the actions in this group
-        uses: ./frontend5
-
-      - name: run the actions in this group
-        uses: ./frontend5
-
-      - name: run the actions in this group
-        uses: ./frontend5
 
       - name: echo asdf
         run: echo "asdf ..."
