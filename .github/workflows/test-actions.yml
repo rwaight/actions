@@ -1,0 +1,594 @@
+name: Test Actions
+run-name: Run actions test on ${{ github.event_name }}
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [review_requested]
+
+permissions:
+  contents: write
+
+jobs:
+
+  changes:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    # Set job outputs to values from filter step
+    outputs:
+      builders: ${{ steps.filter.outputs.builders }}
+      chatops: ${{ steps.filter.outputs.chatops }}
+      git: ${{ steps.filter.outputs.git }}
+      github: ${{ steps.filter.outputs.github }}
+      releases: ${{ steps.filter.outputs.releases }}
+      test: ${{ steps.filter.outputs.test }}
+      utilities: ${{ steps.filter.outputs.utilities }}
+    #   newgroup0: ${{ steps.filter.outputs.newgroup0 }}
+    #   backend0: ${{ steps.filter.outputs.backend0 }}
+    #   frontend0: ${{ steps.filter.outputs.frontend0 }}
+    steps:
+
+    # For pull requests it's not necessary to checkout the code
+    - name: paths-filter for actions in the repo
+      #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
+      uses: rwaight/actions/utilities/paths-filter@v0
+      id: filter
+      with:
+        filters: |
+          builders:
+            - 'builders/**'
+          chatops:
+            - 'chatops/**'
+          git:
+            - 'git/**'
+          github:
+            - 'github/**'
+          releases:
+            - 'releases/**'
+          test:
+            - 'test/**'
+          utilities:
+            - 'utilities/**'
+        #   newgroup0:
+        #     - 'newgroup0/**'
+        #   backend0:
+        #     - 'backend0/**'
+        #   frontend0:
+        #     - 'frontend0/**'
+
+  # JOB to build and test builders code
+  builders:
+    needs: changes
+    if: ${{ needs.changes.outputs.builders == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            builders
+
+      - name: run builders/set-version using the 'simple' strategy
+        uses: ./builders/set-version
+        with:
+          strategy: simple
+          verbose: true
+
+      - name: run builders/set-version using the 'wildcard' strategy
+        uses: ./builders/set-version
+        with:
+          strategy: wildcard
+          verbose: true
+
+      - name: last step in the builders group
+        run: echo "last step in the builders group ..."
+
+  # JOB to build and test chatops code
+  chatops:
+    needs: changes
+    if: ${{ needs.changes.outputs.chatops == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            chatops
+
+      - name: Look for an existing comment
+        uses: ./chatops/find-comment
+        id: existing-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: This comment was written and updated by a bot!
+
+      - name: Create comment
+        if: steps.existing-comment.outputs.comment-id == ''
+        uses: ./chatops/create-or-update-comment
+        id: new-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            This comment was written by a bot!
+            reactions: rocket
+
+      - name: Find the newly created comment
+        if: steps.existing-comment.outputs.comment-id != ''
+        uses: ./chatops/find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: This comment was written by a bot!
+
+      - name: Update comment
+        if: steps.existing-comment.outputs.comment-id != ''
+        uses: ./chatops/create-or-update-comment
+        with:
+          comment-id: ${{ steps.existing-comment.outputs.comment-id }}
+          body: |
+            This comment was written and updated by a bot!
+            reactions: hooray
+
+      - name: last step in the chatops group
+        run: echo "last step in the chatops group ..."
+
+  # JOB to build and test git code
+  git:
+    needs: changes
+    if: ${{ needs.changes.outputs.git == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            git
+
+      - name: git/changed-files | Get the changed files
+        id: changed-files
+        uses: ./git/changed-files
+        # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
+        # with:
+        #   since_last_remote_commit: true 
+
+      - name: git/changed-files | List all changed files
+        if: ${{ steps.changed-files.outputs.all_changed_files }}
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
+      - name: git/repo-version-info | run the git/repo-version-info action
+        uses: ./git/repo-version-info
+
+      - name: git/git-describe-semver | Get the semver version
+        id: git-describe-semver
+        uses: ./git/git-describe-semver
+        with:
+            version: latest
+            # set 'dir' to 'git-describe-semver' due to the action being in a subdirectory
+            dir: git-describe-semver
+            fallback: v0.0.0
+            drop-prefix: true
+            #prerelease-prefix: dev
+            #prerelease-suffix: SNAPSHOT
+            #prerelease-timestamped: true
+            #gh-token: ${{ secrets.GITHUB_TOKEN }}
+            gh-debug: true
+
+      - name: git/git-describe-semver | Output the semver version
+        if: ${{ steps.git-describe-semver.outputs.version }}
+        run: echo "The version is ${{ steps.git-describe-semver.outputs.version }}"
+
+      - name: git/keep-a-changelog-action | run the git/keep-a-changelog-action action
+        uses: ./git/keep-a-changelog-action
+
+      - name: git/semver-git-version | Calculate Version
+        id: version
+        uses: ./git/semver-git-version
+        with:
+            folder: ${{github.workspace}}
+            release-branch: 'main'
+            release-candidate-branch: 'rc'
+            beta-branch: 'dev'
+            major-identifier: 'breaking'
+            minor-identifier: 'feat'
+            prefix: 'v'
+            dir-affected: ./git
+            previous-version: true
+            new-version: true
+
+      - name: git/add-and-commit | create a txt file
+        run: echo "123" > ./git/testfile.txt
+
+      - name: git/add-and-commit | commit the txt file
+        uses: ./git/add-and-commit
+        with:
+          message: 'test: add the very useful text file'
+          add: '*.txt --force'
+          cwd: './git/'
+
+      - name: last step in the git group
+        run: echo "last step in the git group ..."
+
+  # JOB to build and test github code
+  github:
+    needs: changes
+    if: ${{ needs.changes.outputs.github == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            github
+
+      - name: Run export label config action
+        uses: ./github/export-label-config
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          raw-result: false
+          add-aliases: true
+
+      - name: Run label sync
+        uses: ./github/label-sync
+        with:
+          config-file: |
+            assets/labels/my-labels-core.yml
+            assets/labels/my-labels-actions.yml
+            assets/labels/my-labels-versioning.yml
+          request-token: ${{ secrets.GITHUB_TOKEN }}
+          delete-other-labels: false
+          dry-run: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for versioning labels
+        uses: ./github/label-checker
+        with:
+          one_of: "type:"
+          prefix_mode: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Maybe archive github/label-manager | Run the label-manager action
+        uses: ./github/label-manager
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          delete: false # will delete any labels that aren't in the .github/labels.json (this is set to false by default)
+
+      - name: Maybe archive github/issue-triage | Find old issues and mark them stale
+        uses: ./github/issue-triage
+        with:
+          ghToken: ${{ secrets.GITHUB_TOKEN }}
+          staleAfter: 60
+          # do not set 'staleAfter' to anything less than 30 in production
+          closeAfter: 360
+          staleLabel: "triage:stale"
+          staleComment: "This issue is %DAYS_OLD% days old, marking as stale! cc: @%AUTHOR%"
+          # you can remove or comment out 'staleComment' to use the default 'staleComment'
+          closeComment: "Issue last updated %DAYS_OLD% days ago! Closing down!"
+          # you can remove or comment out 'closeComment' to use the default 'closeComment'
+          showLogs: true
+
+      # - name: Create Pull Request
+      #   uses: ./github/create-pull-request
+      #   id: create-pull-request
+
+      # - name: Approve Pull Request
+      #   uses: ./github/approve-pull-request
+      #   id: approve-pull-request
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     number: ${{ github.event.pull_request.number }}
+      #     #repo: rwaight/test-actions # optional
+
+      - name: Ensures PR titles match the conventional commits spec
+        uses: ./github/semantic-pull-request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          wip: true
+          types: |
+            fix
+            feat
+            test
+            chore
+            refactor
+          # Configure which scopes are allowed (newline-delimited).
+          # These are regex patterns auto-wrapped in `^ $`.
+          scopes: |
+            actions
+            github
+            test-\d+
+          requireScope: false
+
+      - name: Repository Dispatch
+        uses: ./github/repository-dispatch
+        with:
+          #token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          #repository: rwaight/actions
+          event-type: test-event
+
+      - name: run the actions in this group
+        uses: ./github
+
+      - name: run the actions in this group
+        uses: ./github
+
+      - name: run the actions in this group
+        uses: ./github
+
+      - name: echo asdf
+        run: echo "asdf ..."
+
+  # JOB to build and test releases code
+  releases:
+    needs: changes
+    if: ${{ needs.changes.outputs.releases == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            releases
+
+      - name: run the actions in this group
+        uses: ./releases
+
+      - name: run the actions in this group
+        uses: ./releases
+
+      - name: run the actions in this group
+        uses: ./releases
+
+      - name: echo asdf
+        run: echo "asdf ..."
+
+  # JOB to build and test test code
+  test:
+    needs: changes
+    if: ${{ needs.changes.outputs.test == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            test
+
+      - name: run the actions in this group
+        uses: ./test
+
+      - name: run the actions in this group
+        uses: ./test
+
+      - name: run the actions in this group
+        uses: ./test
+
+      - name: echo asdf
+        run: echo "asdf ..."
+
+  # JOB to build and test utilities code
+  utilities:
+    needs: changes
+    if: ${{ needs.changes.outputs.utilities == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            utilities
+
+      - name: run the actions in this group
+        uses: ./utilities
+
+      - name: run the actions in this group
+        uses: ./utilities
+
+      - name: run the actions in this group
+        uses: ./utilities
+
+      - name: echo asdf
+        run: echo "asdf ..."
+
+  # # JOB to build and test newgroup0 code
+  # newgroup0:
+  #   needs: changes
+  #   if: ${{ needs.changes.outputs.newgroup0 == 'true' }}
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     actions: read
+  #     contents: read
+  #     issues: write
+  #     pull-requests: write
+  #   steps:
+
+  #     - name: Checkout files from commit tree
+  #       # Verified creator: https://github.com/marketplace/actions/checkout
+  #       # GitHub Action for checking out a repo
+  #       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #       with:
+  #         fetch-depth: 0
+  #         sparse-checkout: |
+  #           newgroup0
+
+  #     - name: run the actions in this group
+  #       uses: ./newgroup0
+
+  #     - name: run the actions in this group
+  #       uses: ./newgroup0
+
+  #     - name: run the actions in this group
+  #       uses: ./newgroup0
+
+  #     - name: echo asdf
+  #       run: echo "asdf ..."
+
+#   # JOB to build and test backend0 code
+#   backend0:
+#     needs: changes
+#     if: ${{ needs.changes.outputs.backend0 == 'true' }}
+#     runs-on: ubuntu-latest
+#     permissions:
+#       actions: read
+#       contents: read
+#       issues: write
+#       pull-requests: write
+#     steps:
+
+#       - name: Checkout files from commit tree
+#         # Verified creator: https://github.com/marketplace/actions/checkout
+#         # GitHub Action for checking out a repo
+#         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+#         with:
+#           fetch-depth: 0
+#           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
+#           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
+#           sparse-checkout: |
+#             backend0
+
+#       - name: run the actions in this group
+#         uses: ./backend0
+
+#       - name: run the actions in this group
+#         uses: ./backend0
+
+#       - name: run the actions in this group
+#         uses: ./backend0
+
+#       - name: echo asdf
+#         run: echo "asdf ..."
+
+#   # JOB to build and test frontend0 code
+#   frontend0:
+#     needs: changes
+#     if: ${{ needs.changes.outputs.frontend0 == 'true' }}
+#     runs-on: ubuntu-latest
+#     permissions:
+#       actions: read
+#       contents: read
+#       issues: write
+#       pull-requests: write
+#     steps:
+
+#       - name: Checkout files from commit tree
+#         # Verified creator: https://github.com/marketplace/actions/checkout
+#         # GitHub Action for checking out a repo
+#         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+#         with:
+#           fetch-depth: 0
+#           # 'sparse-checkout' includes all files in the root directory, so we do not need to specify 'mkdocs.yml'
+#           # https://squidfunk.github.io/mkdocs-material/blog/2023/09/22/using-git-sparse-checkout-for-faster-documentation-builds/#github-actions
+#           sparse-checkout: |
+#             frontend0
+
+#       - name: run the actions in this group
+#         uses: ./frontend0
+
+#       - name: run the actions in this group
+#         uses: ./frontend0
+
+#       - name: run the actions in this group
+#         uses: ./frontend0
+
+#       - name: echo asdf
+#         run: echo "asdf ..."
+
+  tests-complete:
+    needs: [changes,builders,chatops,git,github,releases,test,utilities]
+    # this needs to run if NONE of the previous jobs failed; if ALL of the previous jobs were successful
+    #if: ${{ needs.changes.outputs.chatops == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            chatops
+            github
+
+      - name: run the github/approve-pull-request action
+        uses: ./github/approve-pull-request
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
