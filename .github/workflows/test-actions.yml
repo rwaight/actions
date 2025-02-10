@@ -34,7 +34,7 @@ jobs:
     steps:
 
     # For pull requests it's not necessary to checkout the code
-    - name: paths-filter example
+    - name: paths-filter for actions in the repo
       #uses: rwaight/actions/utilities/paths-filter@main  # can use version specific or main
       uses: rwaight/actions/utilities/paths-filter@v0
       id: filter
