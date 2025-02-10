@@ -194,7 +194,7 @@ runs:
                 echo "PRERELEASE: $PRERELEASE "
             fi
         else
-            echo "::error file=set-version-action.yml,title=⛔ set-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
+            echo "::error file=builders/set-version/action.yml,title=⛔ set-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
             exit 1
         fi
         ##
