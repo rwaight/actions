@@ -1,12 +1,12 @@
 # Actions used for builds
 
-This directory contains actions that are used for building packages, images, etc.  Composite actions created for building should be stored here.
+This directory contains actions that are used for building packages, images, etc.
+
+###
 
 ### Using KVM (Nested virtualization) in GitHub Actions
 
-If we need to leverage nested virtualization, we may need to use KVM, in order to build specific images using GitHub Actions.
-
-Review the following:
+If you need to leverage nested virtualization (for example: [KVM](https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine)) in order to build images using GitHub Actions, then review the following:
 - https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/, **and**
 - https://github.com/actions/runner-images/issues/183#issuecomment-1442154492
     - Migrated to https://github.com/actions/runner-images/discussions/7191
