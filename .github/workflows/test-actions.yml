@@ -318,17 +318,17 @@ jobs:
           # you can remove or comment out 'closeComment' to use the default 'closeComment'
           showLogs: true
 
-      - name: Create Pull Request
-        uses: ./github/create-pull-request
-        id: create-pull-request
+      # - name: Create Pull Request
+      #   uses: ./github/create-pull-request
+      #   id: create-pull-request
 
-      - name: Approve Pull Request
-        uses: ./github/approve-pull-request
-        id: approve-pull-request
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ github.event.pull_request.number }}
-          #repo: rwaight/test-actions # optional
+      # - name: Approve Pull Request
+      #   uses: ./github/approve-pull-request
+      #   id: approve-pull-request
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     number: ${{ github.event.pull_request.number }}
+      #     #repo: rwaight/test-actions # optional
 
       - name: Ensures PR titles match the conventional commits spec
         uses: ./github/semantic-pull-request
