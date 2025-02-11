@@ -395,16 +395,16 @@ runs:
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
       shell: bash
       run: |
-        echo "step id: 'set-build-method-full-version-tag' "
+        echo "::group::starting step 'set-build-version-full-version-tag' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build method (input)    : ${{ inputs.BUILD_METHOD }} "
+        echo "Build strategy (input)    : ${{ inputs.strategy }} "
         echo "The GitHub event_name is: ${{ github.event_name }}"
         echo "The GitHub ref is       : ${{ github.ref }}"
         echo "The GitHub ref_name is  : ${{ github.ref_name }}"
         echo "The GitHub ref_type is  : ${{ github.ref_type }}"
         echo ""
-        echo "release tag_name: ${{ github.event.release.tag_name }}"
+        echo "release tag_name: ${{ github.event.release.tag_name }} "
         echo ""
         echo "## get-tag-version outputs"
         echo "Full version: ${{ env.FULL_VERSION_REF }} "
@@ -429,6 +429,8 @@ runs:
             echo "something strange is happening, not changing anything... "
         fi
         echo ""
+        echo "completing the 'set-build-method-full-version-tag' step. "
+        echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
