@@ -317,6 +317,69 @@ runs:
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
 
+    - name: get-tag-version
+      id: get-tag-version
+      if: (github.ref_type == 'tag')
+      shell: bash
+      run: |
+        echo "::group::starting step 'get-tag-version' "
+        VERSION="${{ github.event.release.tag_name || github.ref_name }}"
+        ##
+        RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        if [[ $VERSION =~ $RE ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                echo "VERSION is: $VERSION "
+                echo "RE is     : $RE "
+                echo "MAJOR is  : $MAJOR "
+                echo "MINOR is  : $MINOR "
+                echo "PATCH is  : $PATCH "
+                echo "PRERELEASE: $PRERELEASE "
+            fi
+        else
+            echo "::error file=builders/set-version/action.yml,title=⛔ set-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
+            exit 1
+        fi
+        ##
+        if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+        ##
+        ##echo "full-version-tag=$VERSION" >> $GITHUB_OUTPUT
+        ##echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+        echo "full-version-ref=$VERSION" >> $GITHUB_OUTPUT
+        echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+        echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+        echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+        echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+        echo "completing the 'get-tag-version' step. "
+        echo "::endgroup::"
+
+    - name: get-tag-version | Print outputs
+      id: check-get-tag-version
+      #if: (github.ref_type == 'tag')
+      if: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
+      run: |
+        echo "::group::starting step 'check-get-tag-version' "
+        echo "## get-tag-version outputs"
+        echo "Full version: ${{ env.FULL_VERSION_REF }} "
+        echo "Major ref   : ${{ env.MAJOR_REF }} "
+        echo "Minor ref   : ${{ env.MINOR_REF }} "
+        echo "Patch ref   : ${{ env.PATCH_REF }} "
+        echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
+        echo ""
+        echo "completing the 'check-get-tag-version' step. "
+        echo "::endgroup::"
+      env:
+        #FULL_VERSION_TAG: ${{ steps.get-tag-version.outputs.full-version-tag }}
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
+        MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
+        PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
+        IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+
     - name: BUILD_METHOD | The build method is 'to-prod' for tags
       # This step is run when the branch is a 'v*.*.*' tag
       id: set-build-method-full-version-tag
