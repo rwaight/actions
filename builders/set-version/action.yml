@@ -468,8 +468,9 @@ runs:
       shell: bash
       run: |
         echo "::group::starting the 'wildcard-semver' step... "
-        git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"
-        semver_wildcard=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*")
+        ## old wildcard-semver match ##git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"
+        git describe --tags --match "v[0-9*].[0-9*].[0-9*]"
+        semver_wildcard=$(git describe --tags --match "v[0-9*].[0-9*].[0-9*]")
         echo "setting the value of 'wildcard-semver' to '${semver_wildcard}' and sending it to GitHub output"
         echo "wildcard-semver=${semver_wildcard}" >> $GITHUB_ENV
         echo "wildcard-semver=${semver_wildcard}" >> $GITHUB_OUTPUT
