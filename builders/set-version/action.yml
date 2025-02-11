@@ -423,8 +423,33 @@ runs:
       shell: bash
       run: |
         echo "::group::starting the 'simple-semver' step ... "
+        if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - issuing 'set +e' to ignore errors... "; fi
+        set +e
+        echo "  attempt 1 of 2 to set 'semver_simple' ... "
         git describe --tags --match "v[0-9].[0-9].[0-9]*"
-        semver_simple=$(git describe --tags --match "v[0-9].[0-9].[0-9]*")
+        exitcode="$?"
+        ##semver_simple=$(git describe --tags --match "v[0-9].[0-9].[0-9]*")
+        ##if [[ $? -eq 0 ]]; then
+        if [[ $exitcode -eq 0 ]]; then
+            semver_simple=$(git describe --tags --match "v[0-9].[0-9].[0-9]*")
+            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - attempt 1 of 2, 'semver_simple' is set to '$semver_simple' "; fi
+            echo "    attempt 1 of 2, 'semver_simple' is set to '$semver_simple' "
+        else
+            echo ""
+            echo "  attempt 2 of 2 to set 'semver_simple', allowing multiple digit version numbers ... "
+            semver_simple=$(git describe --tags --match "v[0-9*].[0-9*].[0-9*]*")
+            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - attempt 2 of 3, 'semver_simple' is set to '$semver_simple' "; fi
+            echo "    attempt 2 of 2, 'semver_simple' is set to '$semver_simple' "
+        fi
+        ##
+        if [[ -n "$semver_simple" ]]; then
+            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - the variable 'semver_simple' is set to '$semver_simple' "; fi
+            echo "the variable 'semver_simple' is set to '$semver_simple' "
+        else
+            echo "the variable 'semver_simple' is empty, it is currently set to '$semver_simple' "
+            echo ""
+        fi
+        ##
         echo "setting the value of 'simple-semver' to '${semver_simple}' and sending it to GitHub output"
         echo "simple-semver=${semver_simple}" >> $GITHUB_ENV
         echo "simple-semver=${semver_simple}" >> $GITHUB_OUTPUT
