@@ -40,9 +40,9 @@ inputs:
     default: ${{ github.event.release.tag_name }}
     required: false
   strategy:
-    description: 'The strategy to use when calculating the method, either: `simple` or `wildcard`. '
+    description: 'The strategy to use when calculating the method, either: `github-event`, `convert`, `convert-test`, or `convert-to-prod`. '
     required: false
-    default: 'simple'
+    default: 'github-event'
   workflow:
     description: 'This should be the github.workflow variable. '
     default: ${{ github.workflow }}
