@@ -444,7 +444,8 @@ runs:
       #    or keep the single digit, but match one or more with `+`:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      if: (startsWith(github.ref_name, 'v[0-9].[0-9].[0-9]') && github.ref_type == 'tag' && github.event_name=='push' && env.EVAL_BUILD_METHOD=='false')
+      if: (startsWith(github.ref_name, 'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?') && github.ref_type == 'tag' && github.event_name=='push' && env.EVAL_BUILD_METHOD=='false')
+      #if: (startsWith(github.ref_name, 'v[0-9].[0-9].[0-9]') && github.ref_type == 'tag' && github.event_name=='push' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
         echo "step id: 'set-build-method-prod-startswith' "
