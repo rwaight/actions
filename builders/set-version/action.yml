@@ -408,6 +408,33 @@ runs:
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
+    - name: tag-version | Fallback 2 check for a semver compliant tag to set the build version
+      # This step is run when the branch is a 'v*.*.*' tag
+      id: set-build-version-fallback-2-semver-compliant-tag
+      #if: |
+      #  ${{ steps.get-tag-version.outputs.full-version-ref }} && ${{ env.EVAL_BUILD_VERSION=='false' }}
+      #  ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') }}
+      #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (env.EVAL_BUILD_VERSION=='false') }}
+      if: (contains('refs/tags/v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?', github.ref) && github.ref_type == 'tag' && env.EVAL_BUILD_VERSION=='false')
+      # the filter pattern will need to be updated to allow double digits, using either: 
+      #    specify 2 digits with a second range followed by `?`:
+      #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
+      #    or keep the single digit, but match one or more with `+`:
+      #        'v[0-9]+.[0-9]+.[0-9]+'
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-build-version-fallback-2-semver-compliant-tag' "
+        echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}' ..."
+        echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
+        echo "Setting EVAL_BUILD_VERSION to true..."
+        echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
+        echo ""
+        echo "completing the 'set-build-version-fallback-2-semver-compliant-tag' step. "
+        echo "::endgroup::"
+      env:
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+
     - name: simple-semver | Look for simple semver with git describe
       #name: simple-semver | Look for simple semver with git describe
       # name: 02b | Run 'git describe --tags --match "v[0-9].[0-9].[0-9]*"'
