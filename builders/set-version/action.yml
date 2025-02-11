@@ -546,8 +546,8 @@ runs:
       shell: bash
       run: |
         echo "The build version was not set correctly. "
-        echo "This workflow will now fail and exit. "
-        echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::Build version not set correctly "
+        echo "This '${{ github.action }}' action at path '${{ github.action_path }}' will now fail and exit. "
+        echo "::error file=${{ github.action_path }},title=⛔ '${{ github.action }}' error in the '${{ github.workflow }}' workflow hint::Build version not set correctly "
         exit 1
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
 
