@@ -284,36 +284,16 @@ runs:
       if: ${{ always() }}
       shell: bash
       run: |
-        echo "::group::Setting EVAL_BUILD_METHOD to false..."
+        echo "::group::starting the 'set-eval-method-env-vars' step... "
+        echo ""
+        echo "Setting EVAL_BUILD_METHOD to false..."
         echo "EVAL_BUILD_METHOD=false" >> $GITHUB_ENV
+        ##
         echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
         echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
         echo ""
         echo "finishing the 'set-eval-method-env-vars' step... "
         echo "::endgroup::"
-
-    - name: Set environmental variables used to evaluate the build method
-      id: set-eval-method-env-vars
-      # Ensure that the needed environmental variables are set
-      #   - 'EVAL_BUILD_METHOD' is set to 'false'
-      #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
-      if: ${{ always() }}
-      shell: bash
-      run: |
-        echo "step id: 'set-eval-method-env-vars' "
-        echo ""
-        echo "Setting EVAL_BUILD_METHOD to false..."
-        echo "EVAL_BUILD_METHOD=false" >> $GITHUB_ENV
-        echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
-        echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
-        echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build method (input)    : ${{ inputs.BUILD_METHOD }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
-        echo ""
 
     - name: BUILD_METHOD | The build method is 'convert-to-main' from input
       # This step is run when the branch is a 'v*.*.*' tag
