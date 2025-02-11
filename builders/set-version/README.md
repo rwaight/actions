@@ -1,4 +1,4 @@
-# GitHub Composite Action - Set build version
+# GitHub Composite Action - Builders: Set version
 
 This action was created in https://github.com/rwaight/actions.
 
@@ -37,7 +37,7 @@ jobs:
       - name: Run the checkout action
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Run the set-version action
         id: run-set-version
