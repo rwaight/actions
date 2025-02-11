@@ -388,6 +388,7 @@ runs:
 
     - name: tag-version | Fallback 1 check for a semver compliant tag to set the build version
       # This step is run when the branch is a 'v*.*.*' tag
+      # non-prerelease 'git describe' command ## git describe --tags --match "v[0-9*].[0-9*].[0-9*]" "$(git tag | grep -E '^v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}$' | sort -V | tail -n1)"
       id: set-build-version-fallback-1-semver-compliant-tag
       #if: |
       #  ${{ steps.get-tag-version.outputs.full-version-ref }} && ${{ env.EVAL_BUILD_VERSION=='false' }}
@@ -410,6 +411,7 @@ runs:
 
     - name: tag-version | Fallback 2 check for a semver compliant tag to set the build version
       # This step is run when the branch is a 'v*.*.*' tag
+      # non-prerelease 'git describe' command ## git describe --tags --match "v[0-9*].[0-9*].[0-9*]" "$(git tag | grep -E '^v[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}$' | sort -V | tail -n1)"
       id: set-build-version-fallback-2-semver-compliant-tag
       #if: |
       #  ${{ steps.get-tag-version.outputs.full-version-ref }} && ${{ env.EVAL_BUILD_VERSION=='false' }}
