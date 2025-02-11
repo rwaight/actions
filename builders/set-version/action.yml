@@ -659,17 +659,18 @@ runs:
             PATCH="${BASH_REMATCH[3]}"
             INCRE="${BASH_REMATCH[4]}"
             SHORT="${BASH_REMATCH[5]}"
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
-                echo "  Verbose - output from non-tag regex match: "
-                echo "      VERSION is  : $VERSION "
-                echo "      RE_NO_TAG is: $RE_NO_TAG "
-                echo "      MAJOR is    : $MAJOR "
-                echo "      MINOR is    : $MINOR "
-                echo "      PATCH is    : $PATCH "
-                echo "      INCRE is    : $INCRE "
-                echo "      SHORT is    : $SHORT "
-                echo ""
-            fi
+            ## placeholder start for old verbose block here
+            echo ""
+            echo "  Output from non-tag regex match: "
+            echo "      VERSION  : $VERSION "
+            echo "      RE_NO_TAG: $RE_NO_TAG "
+            echo "      MAJOR    : $MAJOR "
+            echo "      MINOR    : $MINOR "
+            echo "      PATCH    : $PATCH "
+            echo "      INCRE    : $INCRE "
+            echo "      SHORT    : $SHORT "
+            echo ""
+            ## placeholder end for old verbose block here
             ##
         elif [[ $VERSION =~ $RE_TAG ]]; then
             MAJOR="${BASH_REMATCH[1]}"
@@ -696,6 +697,19 @@ runs:
         echo ""
         echo "finishing the 'parse-build-version-info' step ... "
         echo "::endgroup::"
+      # ## old verbose block from 'run' block above
+      #       if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+      #           echo "  Verbose - output from non-tag regex match: "
+      #           echo "      VERSION is  : $VERSION "
+      #           echo "      RE_NO_TAG is: $RE_NO_TAG "
+      #           echo "      MAJOR is    : $MAJOR "
+      #           echo "      MINOR is    : $MINOR "
+      #           echo "      PATCH is    : $PATCH "
+      #           echo "      INCRE is    : $INCRE "
+      #           echo "      SHORT is    : $SHORT "
+      #           echo ""
+      #       fi
+      #       ##
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
