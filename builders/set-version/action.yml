@@ -86,6 +86,57 @@ runs:
         echo "  action status:  ${{ github.action_status }} "
         echo ""
 
+    - name: Show GitHub runner context
+      #if: inputs.verbose=='true'
+      # to do:  run this if either the verbose input is true or the runner.debug is true
+      id: show-runner-context
+      ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+      shell: bash
+      env:
+        EVAL_GH_VAR_RUNNER_DEBUG_EQ0: ${{ runner.debug == '0' }}
+        EVAL_GH_VAR_RUNNER_DEBUG_EQ1: ${{ runner.debug == '1' }}
+        FOOBAR: ${{ runner.debug == '1' && 'foo' || 'bar' }}
+        # https://github.com/actions/runner/issues/2204#issuecomment-1287947031
+        # https://github.com/orgs/community/discussions/27627#discussioncomment-3302259
+        GH_RUNNER_LOG: "${{ runner.debug == '1' && 'INFO' || 'ERROR' }}"
+        GH_VAR_RUNNER_DEBUG1: ${{ runner.debug }}
+        GH_VAR_RUNNER_DEBUG2: ${{ env.RUNNER_DEBUG }}
+        GH_VAR_RUNNER_OS1: ${{ runner.os }}
+        GH_VAR_RUNNER_OS2: ${{ env.RUNNER_OS }}
+        GH_VAR_RUNNER_ARCH1: ${{ runner.arch }}
+        GH_VAR_RUNNER_ARCH2: ${{ env.RUNNER_ARCH }}
+      run: |
+        echo "::group::starting the 'show-runner-context' step... "
+        echo ""
+        echo "NOTE: The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context "
+        echo ""
+        echo "eval if the 'runner.debug' is set to either '0' or '1' "
+        echo "     runner.debug equal 0:  ${EVAL_GH_VAR_RUNNER_DEBUG_EQ0} "
+        echo "     runner.debug equal 1:  ${EVAL_GH_VAR_RUNNER_DEBUG_EQ1} "
+        echo ""
+        echo "set FOOBAR to 'foo' if 'runner.debug' is '1'; otherwise set FOOBAR to 'bar' "
+        echo "    FOOBAR:  ${FOOBAR} "
+        echo ""
+        echo "set GH_RUNNER_LOG to 'INFO' if 'runner.debug' is '1'; otherwise set GH_RUNNER_LOG to 'ERROR' "
+        echo "    GH_RUNNER_LOG:  ${GH_RUNNER_LOG} "
+        echo ""
+        echo "the values of 'runner.debug' and 'env.RUNNER_DEBUG': "
+        echo "    GH_VAR_RUNNER_DEBUG1:  ${GH_VAR_RUNNER_DEBUG1} "
+        echo "    GH_VAR_RUNNER_DEBUG2:  ${GH_VAR_RUNNER_DEBUG2} "
+        echo ""
+        echo "the values of 'runner.os' and 'env.RUNNER_OS': "
+        echo "    GH_VAR_RUNNER_OS1:  ${GH_VAR_RUNNER_OS1} "
+        echo "    GH_VAR_RUNNER_OS2:  ${GH_VAR_RUNNER_OS2} "
+        echo ""
+        echo "the values of 'runner.arch' and 'env.RUNNER_ARCH': "
+        echo "    GH_VAR_RUNNER_ARCH1:  ${GH_VAR_RUNNER_ARCH1} "
+        echo "    GH_VAR_RUNNER_ARCH2:  ${GH_VAR_RUNNER_ARCH2} "
+        echo ""
+        echo "finishing the 'show-runner-context' step... "
+        ##
+        echo "::endgroup::"
+      ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true'
       id: verbose-print-inputs
