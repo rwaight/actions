@@ -625,6 +625,81 @@ runs:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
 
+    - name: TEST | Parse the build version information
+      # Parse the build version information when the build is not a 'tag' and the build version is set
+      #if: env.EVAL_BUILD_VERSION=='true' && ${{ env.BUILD_VERSION }} && github.ref_type != 'tag'
+      if: ${{ env.BUILD_VERSION }} && github.ref_type != 'tag'
+      id: parse-build-version-info
+      # to do: output the parsed build version information:  major, minor, patch, incre, short
+      shell: bash
+      continue-on-error: true
+      run: |
+        echo "::group::starting the 'parse-build-version-info' step ... "
+        ## Parse the build version information when the build is not a 'tag' and the build version is set
+        ## the double number signs below are for line spacing and readability only
+        ##
+        VERSION="${{ env.BUILD_VERSION }}"
+        if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+            echo "  Verbose - variable used in this step: "
+            echo "      VERSION  :  ${{ env.VERSION }} "
+            echo ""
+            echo "  Verbose - variables included but not currently used: "
+            echo "      BUILD_VERSION  :  ${{ env.BUILD_VERSION }} "
+            echo "      semver_simple  :  ${{ env.semver_simple }} "
+            echo "      semver_wildcard:  ${{ env.semver_wildcard }} "
+            echo ""
+        fi
+        ##
+        RE_NO_TAG='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)[-]([0-9]+)[-][g]([0-9A-Za-z.+-]*)?'
+        RE_TAG='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        ##
+        if [[ $VERSION =~ $RE_NO_TAG ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            INCRE="${BASH_REMATCH[4]}"
+            SHORT="${BASH_REMATCH[5]}"
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                echo "  Verbose - output from non-tag regex match: "
+                echo "      VERSION is  : $VERSION "
+                echo "      RE_NO_TAG is: $RE_NO_TAG "
+                echo "      MAJOR is    : $MAJOR "
+                echo "      MINOR is    : $MINOR "
+                echo "      PATCH is    : $PATCH "
+                echo "      INCRE is    : $INCRE "
+                echo "      SHORT is    : $SHORT "
+                echo ""
+            fi
+            ##
+        elif [[ $VERSION =~ $RE_TAG ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                echo "  Verbose - output from tag regex match: "
+                echo "      VERSION is: $VERSION "
+                echo "      RE_TAG is : $RE_TAG "
+                echo "      MAJOR is  : $MAJOR "
+                echo "      MINOR is  : $MINOR "
+                echo "      PATCH is  : $PATCH "
+                echo "      PRERELEASE: $PRERELEASE "
+                echo ""
+            fi
+            ##
+        else
+            echo "NOTICE: Unable to parse the non-tag build version information ... "
+            echo "  The VERSION variable was set to '${{ env.VERSION }}' "
+            echo ""
+        fi
+        ##
+        echo ""
+        echo "finishing the 'parse-build-version-info' step ... "
+        echo "::endgroup::"
+      env:
+        semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
+        semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+
     - name: Error if the build version was not set
       if: ${{ env.BUILD_VERSION == '' }}
       shell: bash
