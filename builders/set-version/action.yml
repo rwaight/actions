@@ -544,9 +544,11 @@ runs:
       if: ${{ steps.simple-semver.outputs.simple-semver }}
       shell: bash
       run: |
+        echo "::group::starting the 'check-simple-semver' step ... "
         echo "## simple-semver outputs"
         echo "simple-semver: ${{ env.semver_simple }} "
         echo ""
+        echo "::endgroup::"
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
 
@@ -555,7 +557,9 @@ runs:
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='simple' && ${{ steps.simple-semver.outputs.simple-semver }})
       shell: bash
       run: |
-        echo "::group::Setting BUILD_VERSION to '${{ env.SEMVER_SIMPLE }}'..."
+        echo "::group::starting the 'set-build-version-using-simple-semver' step ... "
+        echo ""
+        echo "Setting BUILD_VERSION to '${{ env.SEMVER_SIMPLE }}'..."
         echo "BUILD_VERSION=${{ env.SEMVER_SIMPLE }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
@@ -618,9 +622,11 @@ runs:
       if: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
       shell: bash
       run: |
+        echo "::group::starting the 'check-wildcard-semver' step ... "
         echo "## wildcard-semver outputs"
         echo "wildcard-semver: ${{ env.semver_wildcard }} "
         echo ""
+        echo "::endgroup::"
       env:
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
 
@@ -629,7 +635,9 @@ runs:
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='wildcard' && ${{ steps.wildcard-semver.outputs.wildcard-semver }})
       shell: bash
       run: |
-        echo "::group::Setting BUILD_VERSION to '${{ env.SEMVER_WILDCARD }}'..."
+        echo "::group::starting the 'set-build-version-using-wildcard-semver' step ... "
+        echo ""
+        echo "Setting BUILD_VERSION to '${{ env.SEMVER_WILDCARD }}'..."
         echo "BUILD_VERSION=${{ env.SEMVER_WILDCARD }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
