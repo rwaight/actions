@@ -9,6 +9,9 @@ This action was created in https://github.com/rwaight/actions.
 
 See the `inputs` configured in the [action.yml](action.yml) file.
 
+**Note**: If checkout is being performed before the action is called, you must include either `fetch-depth: 0` or `fetch-tags: true`
+- This is needed until [actions/checkout#1467](https://github.com/actions/checkout/issues/1467) is resolved
+
 ### Outputs
 
 See the `inputs` configured in the [action.yml](action.yml) file.
@@ -38,15 +41,17 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
 
       - name: Run the set-version action
         id: run-set-version
         uses: rwaight/actions/builders/set-version@main
         with:
-          checkout: 'false'
+          checkout: false
           gh-token: ${{ secrets.GITHUB_TOKEN }}
           strategy: 'simple'
-          verbose: 'true'
+          verbose: true
 
       - name: Report the output from the run-set-version step
         if: ${{ steps.run-set-version.outputs.build-version }}
