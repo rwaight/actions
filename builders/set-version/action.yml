@@ -641,13 +641,14 @@ runs:
       id: set-fallback-version
       shell: bash
       run: |
+        echo "::group::starting the 'set-fallback-version' step ... "
         ## Compare the simple and wildcard semver versions
         ## the double number signs below are for line spacing and readability only
         ##
         if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
-            echo "starting the 'set-fallback-version' step. "
-            echo "semver_simple is  :  ${{ env.semver_simple }} "
-            echo "semver_wildcard is:  ${{ env.semver_wildcard }} "
+            echo "  verbose - starting the 'set-fallback-version' step. "
+            echo "      semver_simple is  :  ${{ env.semver_simple }} "
+            echo "      semver_wildcard is:  ${{ env.semver_wildcard }} "
         fi
         ##
         if [ '${{ env.semver_simple }}' == '${{ env.semver_wildcard }}' ]; then
@@ -672,6 +673,8 @@ runs:
         echo ""
         echo "**NOTE**: BUILD_VERSION was set to the fallback value." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        echo ""
+        echo "::endgroup::"
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
