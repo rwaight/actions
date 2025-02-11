@@ -386,9 +386,9 @@ runs:
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
-    - name: tag-version | Check for a semver compliant tag to set the build version
+    - name: tag-version | Fallback 1 check for a semver compliant tag to set the build version
       # This step is run when the branch is a 'v*.*.*' tag
-      id: set-build-version-fallback-semver-compliant-tag
+      id: set-build-version-fallback-1-semver-compliant-tag
       #if: |
       #  ${{ steps.get-tag-version.outputs.full-version-ref }} && ${{ env.EVAL_BUILD_VERSION=='false' }}
       #  ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') }}
@@ -397,13 +397,13 @@ runs:
       #if: {{ github.ref == 'ref/head/v*' }}
       shell: bash
       run: |
-        echo "::group::starting step 'set-build-version-fallback-semver-compliant-tag' "
+        echo "::group::starting step 'set-build-version-fallback-1-semver-compliant-tag' "
         echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}' ..."
         echo "BUILD_VERSION=${{ env.FULL_VERSION_REF }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
         echo ""
-        echo "completing the 'set-build-version-fallback-semver-compliant-tag' step. "
+        echo "completing the 'set-build-version-fallback-1-semver-compliant-tag' step. "
         echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
