@@ -276,17 +276,22 @@ runs:
       if: ${{ always() }}
       shell: bash
       run: |
+        echo "::group::starting the 'set-eval-type-env-vars' step... "
+        echo ""
         echo "Setting EVAL_BUILD_TYPE to false..."
         echo "EVAL_BUILD_TYPE=false" >> $GITHUB_ENV
         echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
         echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
         echo ""
+        echo "finishing the 'set-eval-type-env-vars' step... "
+        echo "::endgroup::"
 
     - name: get-tag-version
       id: get-tag-version
       if: (github.ref_type == 'tag')
       shell: bash
       run: |
+        echo "::group::starting step 'get-tag-version' "
         VERSION="${{ github.event.release.tag_name || github.ref_name }}"
         ##
         RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
@@ -317,7 +322,9 @@ runs:
         echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
         echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
         echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
-        echo "completing the 'get-tag-version' step "
+        echo ""
+        echo "completing the 'get-tag-version' step. "
+        echo "::endgroup::"
 
     - name: get-tag-version | Print outputs
       id: check-get-tag-version
@@ -325,6 +332,7 @@ runs:
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
       shell: bash
       run: |
+        echo "::group::starting step 'check-get-tag-version' "
         echo "## get-tag-version outputs"
         echo "Full version: ${{ env.FULL_VERSION_REF }} "
         echo "Major ref   : ${{ env.MAJOR_REF }} "
@@ -332,6 +340,8 @@ runs:
         echo "Patch ref   : ${{ env.PATCH_REF }} "
         echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
         echo ""
+        echo "completing the 'check-get-tag-version' step. "
+        echo "::endgroup::"
       env:
         #FULL_VERSION_TAG: ${{ steps.get-tag-version.outputs.full-version-tag }}
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
@@ -594,5 +604,9 @@ runs:
       id: set-type-output
       shell: bash
       run: |
+        echo "::group::starting the 'set-type-output' step ... "
         echo "The BUILD_TYPE has been set to '${{ env.BUILD_TYPE }}' ... "
         echo "BUILD_TYPE=${{ env.BUILD_TYPE }}" >> "$GITHUB_OUTPUT"
+        echo ""
+        echo "finishing the 'set-type-output' step ... "
+        echo "::endgroup::"
