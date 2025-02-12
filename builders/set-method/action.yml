@@ -40,7 +40,7 @@ inputs:
     default: ${{ github.event.release.tag_name }}
     required: false
   strategy:
-    description: 'The strategy to use when calculating the method, either: `github-event`, `convert`, `convert-test`, or `convert-to-prod`. '
+    description: 'The strategy to use when calculating the method, either: `github-event`, `convert`, `convert-test`, `convert-to-main`, `convert-to-prod`, `from-source`, or `from-base`. '
     required: false
     default: 'github-event'
   workflow:
@@ -297,27 +297,58 @@ runs:
         echo "finishing the 'set-eval-method-env-vars' step... "
         echo "::endgroup::"
 
-    - name: NO NO NO NO NO NO | BUILD_METHOD | The build method is 'convert-to-main' from input
-      # This step is run when the branch is a 'v*.*.*' tag
-      id: set-build-method-input-convert-to-main
+    - name: BUILD_METHOD | Strategy input is not 'github-event'
+      #name: Strategy Input | Build method is 'convert-to-main' from input
+      id: set-method-from-input-strategy
       #if: (inputs.strategy=='convert-to-main')
-      if: (github.ref_type == 'tag')
+      if: (inputs.strategy!='github-event')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-input-convert-to-main' "
+        echo "::group::starting the 'set-method-from-input-strategy' step... "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "Variables used to evaluate the build method: "
+        echo "    EVAL_BUILD_METHOD  : ${{ env.EVAL_BUILD_METHOD }} "
+        echo "    Strategy (input)   : ${{ inputs.strategy }} "
         echo ""
-        echo "Setting BUILD_METHOD to 'convert-to-main' ..."
-        echo "BUILD_METHOD=convert-to-main" >> $GITHUB_ENV
+        if [[ '${{ inputs.strategy }}' == 'convert-to-prod' ]]; then
+            build_method='convert-to-prod'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'convert-to-main' ]]; then
+            build_method='convert-to-main'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'convert' ]]; then
+            build_method='convert'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'convert-test' ]]; then
+            build_method='convert-test'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'from-source' ]]; then
+            build_method='from-source'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'from-base' ]]; then
+            build_method='from-base'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        else
+            echo "this is the ELSE statement, setting the build method to 'convert' "
+            build_method='convert'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        fi
+        echo ""
+        echo "Based on the provided input, the 'BUILD_METHOD' will be set to '${build_method}' ..."
+        echo "BUILD_METHOD=${build_method}" >> $GITHUB_ENV
+        echo ""
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "finishing the 'set-method-from-input-strategy' step... "
+        echo "::endgroup::"
 
     - name: get-tag-version
       id: get-tag-version
