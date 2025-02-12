@@ -305,11 +305,11 @@ runs:
         echo "    Strategy (input)   : ${{ inputs.strategy }} "
         echo ""
         if [[ '${{ inputs.strategy }}' == 'convert-to-prod' ]]; then
-            build_method='convert-to-prod'
+            build_method='to-prod'
             if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         elif [[ '${{ inputs.strategy }}' == 'convert-to-main' ]]; then
-            build_method='convert-to-main'
+            build_method='to-main'
             if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         elif [[ '${{ inputs.strategy }}' == 'convert' ]]; then
