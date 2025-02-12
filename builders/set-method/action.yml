@@ -424,6 +424,7 @@ runs:
 
     - name: BUILD_METHOD | The build method is 'to-prod' for tags
       # This step is run when the branch is a 'v*.*.*' tag
+      #   If a tag is being created, then we assume the build method is 'to-prod'
       id: set-build-method-full-version-tag
       #using 'v*.*.*' does not work# #was#if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
       #using 'v*.*.*' does not work# #if: (contains('refs/tags/v*.*.*', github.ref) && github.ref_type == 'tag' && github.event_name=='push')
@@ -439,37 +440,51 @@ runs:
       run: |
         echo "::group::starting step 'set-build-version-full-version-tag' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "Variables used to evaluate the build method: "
+        echo "    EVAL_BUILD_METHOD  : ${{ env.EVAL_BUILD_METHOD }} "
+        echo "    Strategy (input)   : ${{ inputs.strategy }} "
         echo ""
-        echo "release tag_name: ${{ github.event.release.tag_name }} "
+        echo "  get-tag-version outputs: "
+        echo "    FULL_VERSION_REF   : ${{ env.FULL_VERSION_REF }} "
         echo ""
-        echo "## get-tag-version outputs"
-        echo "Full version: ${{ env.FULL_VERSION_REF }} "
+        echo "  GitHub context values: "
+        echo "    event_name:  ${{ github.event_name }} "
+        echo "    ref       :  ${{ github.ref }} "
+        echo "    ref_name  :  ${{ github.ref_name }} "
+        echo "    ref_type  :  ${{ github.ref_type }} "
+        echo "    workflow  :  ${{ github.workflow }} "
+        echo ""
+        echo "  GitHub event context values: "
+        echo "    event.release.tag_name         :  ${{ github.event.release.tag_name }} "
+        echo "    event.repository.default_branch:  ${{ github.event.repository.default_branch }} "
+        echo ""
         echo ""
         if [[ '${{ github.event_name }}' == 'push' ]]; then
             echo "the 'github.event_name' is 'push', going to set the method to 'to-prod' "
+            build_method='to-prod'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             ##
-            echo "Setting BUILD_METHOD to 'to-prod' ..."
-            echo "BUILD_METHOD=to-prod" >> $GITHUB_ENV
-            ##
-            echo "Setting EVAL_BUILD_METHOD to true..."
-            echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         elif [[ '${{ github.event_name }}' != 'push' ]]; then
             echo "the 'github.event_name' is NOT 'push', going to set the method to 'to-prod' "
+            build_method='to-prod'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             ##
-            echo "Setting BUILD_METHOD to 'to-prod' ..."
-            echo "BUILD_METHOD=to-prod" >> $GITHUB_ENV
-            ##
-            echo "Setting EVAL_BUILD_METHOD to true..."
-            echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         else
-            echo "something strange is happening, not changing anything... "
+            echo "this is the ELSE statement, something strange is happening... maybe do not do this, but going to set the method to 'to-prod' "
+            build_method='to-prod'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            ##
         fi
+        echo ""
+        echo "Based on the full version tag, the 'BUILD_METHOD' will be set to '${build_method}' ..."
+        echo "BUILD_METHOD=${build_method}" >> $GITHUB_ENV
+        echo ""
+        echo "Setting EVAL_BUILD_METHOD to true..."
+        echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
+        echo ""
+        eval_reason='full_version_tag'
+        echo "Setting EVAL_REASON to '${eval_reason}' ..."
+        echo "EVAL_REASON=${eval_reason}" >> $GITHUB_ENV
         echo ""
         echo "completing the 'set-build-method-full-version-tag' step. "
         echo "::endgroup::"
