@@ -61,7 +61,7 @@ inputs:
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
 outputs:
   build-type:
-    description: "The determined build type. "
+    description: "The determined build type, either: `dev`, `test`, `main`, or `prod`. "
     value: ${{ steps.set-type-output.outputs.BUILD_TYPE }}
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
