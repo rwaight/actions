@@ -286,11 +286,13 @@ runs:
       run: |
         echo "::group::starting the 'set-eval-method-env-vars' step... "
         echo ""
-        echo "Setting EVAL_BUILD_METHOD to false..."
-        echo "EVAL_BUILD_METHOD=false" >> $GITHUB_ENV
-        ##
-        echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
-        echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
+        EVAL_BUILD_METHOD=false
+        echo "Setting EVAL_BUILD_METHOD to '${EVAL_BUILD_METHOD}' ..."
+        echo "EVAL_BUILD_METHOD=${EVAL_BUILD_METHOD}" >> $GITHUB_ENV
+        echo ""
+        GH_DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+        echo "Setting GH_DEFAULT_BRANCH to '${GH_DEFAULT_BRANCH}'..."
+        echo "GH_DEFAULT_BRANCH=${GH_DEFAULT_BRANCH}" >> $GITHUB_ENV
         echo ""
         echo "finishing the 'set-eval-method-env-vars' step... "
         echo "::endgroup::"
