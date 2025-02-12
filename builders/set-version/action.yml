@@ -47,6 +47,10 @@ inputs:
     description: 'This should be the github.workflow variable. '
     default: ${{ github.workflow }}
     required: false
+  workflow-summary:
+    description: 'Determine if the action should output to the GitHub summary (`$GITHUB_STEP_SUMMARY`), defaults to false. '
+    required: false
+    default: 'false'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
@@ -85,6 +89,57 @@ runs:
         echo "  action repo  :  ${{ github.action_repository }} "
         echo "  action status:  ${{ github.action_status }} "
         echo ""
+
+    - name: Show GitHub runner context
+      #if: inputs.verbose=='true'
+      # to do:  run this if either the verbose input is true or the runner.debug is true
+      id: show-runner-context
+      ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+      shell: bash
+      env:
+        EVAL_GH_VAR_RUNNER_DEBUG_EQ0: ${{ runner.debug == '0' }}
+        EVAL_GH_VAR_RUNNER_DEBUG_EQ1: ${{ runner.debug == '1' }}
+        FOOBAR: ${{ runner.debug == '1' && 'foo' || 'bar' }}
+        # https://github.com/actions/runner/issues/2204#issuecomment-1287947031
+        # https://github.com/orgs/community/discussions/27627#discussioncomment-3302259
+        GH_RUNNER_LOG: "${{ runner.debug == '1' && 'INFO' || 'ERROR' }}"
+        GH_VAR_RUNNER_DEBUG1: ${{ runner.debug }}
+        GH_VAR_RUNNER_DEBUG2: ${{ env.RUNNER_DEBUG }}
+        GH_VAR_RUNNER_OS1: ${{ runner.os }}
+        GH_VAR_RUNNER_OS2: ${{ env.RUNNER_OS }}
+        GH_VAR_RUNNER_ARCH1: ${{ runner.arch }}
+        GH_VAR_RUNNER_ARCH2: ${{ env.RUNNER_ARCH }}
+      run: |
+        echo "::group::starting the 'show-runner-context' step... "
+        echo ""
+        echo "NOTE: The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context "
+        echo ""
+        echo "eval if the 'runner.debug' is set to either '0' or '1' "
+        echo "     runner.debug equal 0:  ${EVAL_GH_VAR_RUNNER_DEBUG_EQ0} "
+        echo "     runner.debug equal 1:  ${EVAL_GH_VAR_RUNNER_DEBUG_EQ1} "
+        echo ""
+        echo "set FOOBAR to 'foo' if 'runner.debug' is '1'; otherwise set FOOBAR to 'bar' "
+        echo "    FOOBAR:  ${FOOBAR} "
+        echo ""
+        echo "set GH_RUNNER_LOG to 'INFO' if 'runner.debug' is '1'; otherwise set GH_RUNNER_LOG to 'ERROR' "
+        echo "    GH_RUNNER_LOG:  ${GH_RUNNER_LOG} "
+        echo ""
+        echo "the values of 'runner.debug' and 'env.RUNNER_DEBUG': "
+        echo "    GH_VAR_RUNNER_DEBUG1:  ${GH_VAR_RUNNER_DEBUG1} "
+        echo "    GH_VAR_RUNNER_DEBUG2:  ${GH_VAR_RUNNER_DEBUG2} "
+        echo ""
+        echo "the values of 'runner.os' and 'env.RUNNER_OS': "
+        echo "    GH_VAR_RUNNER_OS1:  ${GH_VAR_RUNNER_OS1} "
+        echo "    GH_VAR_RUNNER_OS2:  ${GH_VAR_RUNNER_OS2} "
+        echo ""
+        echo "the values of 'runner.arch' and 'env.RUNNER_ARCH': "
+        echo "    GH_VAR_RUNNER_ARCH1:  ${GH_VAR_RUNNER_ARCH1} "
+        echo "    GH_VAR_RUNNER_ARCH2:  ${GH_VAR_RUNNER_ARCH2} "
+        echo ""
+        echo "finishing the 'show-runner-context' step... "
+        ##
+        echo "::endgroup::"
+      ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
 
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true'
@@ -211,15 +266,18 @@ runs:
         echo "::endgroup::"
 
     - name: Fetch the tags from the repo
-      id: git-fetch
+      id: git-fetch-first
       # error: 'fatal: --unshallow on a complete repository does not make sense'
       #run: "git fetch --force --prune --unshallow --tags"
       # end error for the command above
       shell: bash
       run: |
-        echo "::group::starting the 'git-fetch' step... "
+        echo "::group::starting the 'git-fetch-first' step... "
+        echo ""
+        echo "This is needed because of https://github.com/actions/checkout/issues/1467 "
+        echo ""
         git fetch --force --prune --tags
-        echo "finishing the 'git-fetch' step... "
+        echo "finishing the 'git-fetch-first' step... "
         echo "::endgroup::"
 
     - name: Set environmental variables used to evaluate the build version
@@ -490,9 +548,11 @@ runs:
       if: ${{ steps.simple-semver.outputs.simple-semver }}
       shell: bash
       run: |
+        echo "::group::starting the 'check-simple-semver' step ... "
         echo "## simple-semver outputs"
         echo "simple-semver: ${{ env.semver_simple }} "
         echo ""
+        echo "::endgroup::"
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
 
@@ -501,7 +561,9 @@ runs:
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='simple' && ${{ steps.simple-semver.outputs.simple-semver }})
       shell: bash
       run: |
-        echo "::group::Setting BUILD_VERSION to '${{ env.SEMVER_SIMPLE }}'..."
+        echo "::group::starting the 'set-build-version-using-simple-semver' step ... "
+        echo ""
+        echo "Setting BUILD_VERSION to '${{ env.SEMVER_SIMPLE }}'..."
         echo "BUILD_VERSION=${{ env.SEMVER_SIMPLE }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
@@ -564,9 +626,11 @@ runs:
       if: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
       shell: bash
       run: |
+        echo "::group::starting the 'check-wildcard-semver' step ... "
         echo "## wildcard-semver outputs"
         echo "wildcard-semver: ${{ env.semver_wildcard }} "
         echo ""
+        echo "::endgroup::"
       env:
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
 
@@ -575,7 +639,9 @@ runs:
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='wildcard' && ${{ steps.wildcard-semver.outputs.wildcard-semver }})
       shell: bash
       run: |
-        echo "::group::Setting BUILD_VERSION to '${{ env.SEMVER_WILDCARD }}'..."
+        echo "::group::starting the 'set-build-version-using-wildcard-semver' step ... "
+        echo ""
+        echo "Setting BUILD_VERSION to '${{ env.SEMVER_WILDCARD }}'..."
         echo "BUILD_VERSION=${{ env.SEMVER_WILDCARD }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
@@ -584,19 +650,36 @@ runs:
       env:
         SEMVER_WILDCARD: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
 
+    - name: Fetch the tags from the repo
+      id: git-fetch-second
+      if: (env.EVAL_BUILD_VERSION=='false' || env.BUILD_VERSION == '')
+      # error: 'fatal: --unshallow on a complete repository does not make sense'
+      #run: "git fetch --force --prune --unshallow --tags"
+      # end error for the command above
+      shell: bash
+      run: |
+        echo "::group::starting the 'git-fetch-second' step... "
+        echo ""
+        echo "This is needed because of https://github.com/actions/checkout/issues/1467 "
+        echo ""
+        git fetch --prune --prune-tags --force --depth=1
+        echo "finishing the 'git-fetch-second' step... "
+        echo "::endgroup::"
+
     - name: BUILD_VERSION | Fallback value using simple-semver output
       # This step is run when the build is not production
       if: (env.EVAL_BUILD_VERSION=='false' || env.BUILD_VERSION == '')
       id: set-fallback-version
       shell: bash
       run: |
+        echo "::group::starting the 'set-fallback-version' step ... "
         ## Compare the simple and wildcard semver versions
         ## the double number signs below are for line spacing and readability only
         ##
         if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
-            echo "starting the 'set-fallback-version' step. "
-            echo "semver_simple is  :  ${{ env.semver_simple }} "
-            echo "semver_wildcard is:  ${{ env.semver_wildcard }} "
+            echo "  verbose - starting the 'set-fallback-version' step. "
+            echo "      semver_simple is  :  ${{ env.semver_simple }} "
+            echo "      semver_wildcard is:  ${{ env.semver_wildcard }} "
         fi
         ##
         if [ '${{ env.semver_simple }}' == '${{ env.semver_wildcard }}' ]; then
@@ -619,8 +702,16 @@ runs:
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
         echo ""
-        echo "**NOTE**: BUILD_VERSION was set to the fallback value." >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        if [[ "${{ inputs.workflow-summary }}" == "true" ]]; then
+            echo "**NOTE**: BUILD_VERSION was set to the fallback value." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        else
+            echo "**NOTE**: BUILD_VERSION was set to the fallback value."
+            echo ""
+            echo "  this is not being sent to the workflow summary, since 'inputs.workflow-summary' is not set to 'true'."
+        fi
+        echo ""
+        echo "::endgroup::"
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
