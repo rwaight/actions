@@ -280,6 +280,7 @@ runs:
       id: set-eval-method-env-vars
       # Ensure that the needed environmental variables are set
       #   - 'EVAL_BUILD_METHOD' is set to 'false'
+      #   - 'EVAL_REASON' is set to 'tbd'
       #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
       if: ${{ always() }}
       shell: bash
@@ -289,6 +290,10 @@ runs:
         EVAL_BUILD_METHOD=false
         echo "Setting EVAL_BUILD_METHOD to '${EVAL_BUILD_METHOD}' ..."
         echo "EVAL_BUILD_METHOD=${EVAL_BUILD_METHOD}" >> $GITHUB_ENV
+        echo ""
+        EVAL_REASON=tbd
+        echo "Setting EVAL_REASON to '${EVAL_REASON}' ..."
+        echo "EVAL_REASON=${EVAL_REASON}" >> $GITHUB_ENV
         echo ""
         GH_DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
         echo "Setting GH_DEFAULT_BRANCH to '${GH_DEFAULT_BRANCH}'..."
@@ -346,6 +351,10 @@ runs:
         echo ""
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
+        echo ""
+        eval_reason='strategy_input'
+        echo "Setting EVAL_REASON to '${eval_reason}' ..."
+        echo "EVAL_REASON=${eval_reason}" >> $GITHUB_ENV
         echo ""
         echo "finishing the 'set-method-from-input-strategy' step... "
         echo "::endgroup::"
