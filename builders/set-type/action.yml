@@ -292,6 +292,7 @@ runs:
       shell: bash
       run: |
         echo "::group::starting step 'get-tag-version' "
+        echo ""
         VERSION="${{ github.event.release.tag_name || github.ref_name }}"
         ##
         RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
@@ -333,6 +334,7 @@ runs:
       shell: bash
       run: |
         echo "::group::starting step 'check-get-tag-version' "
+        echo ""
         echo "## get-tag-version outputs"
         echo "Full version: ${{ env.FULL_VERSION_REF }} "
         echo "Major ref   : ${{ env.MAJOR_REF }} "
@@ -363,7 +365,8 @@ runs:
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
       shell: bash
       run: |
-        echo "step id: 'set-build-type-prod-full-version-tag' "
+        echo "::group::starting step 'set-build-type-prod-full-version-tag' "
+        echo ""
         echo "result of new conditional:  ${{ steps.get-tag-version.outputs.full-version-ref }} "
         echo "result of old conditional:  ${{ contains('refs/tags/v[0-9].[0-9].[0-9]', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }} "
         echo ""
@@ -395,6 +398,8 @@ runs:
             echo "something strange is happening, not changing anything... "
         fi
         echo ""
+        echo "completing the 'set-build-type-prod-full-version-tag' step. "
+        echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
 
@@ -411,7 +416,8 @@ runs:
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
       shell: bash
       run: |
-        echo "step id: 'set-build-type-prod-fallback' "
+        echo "::group::starting step 'set-build-type-prod-fallback' "
+        echo ""
         echo "results of old conditional:  ${{ contains('refs/tags/v[0-9].[0-9].[0-9]', github.ref) && (github.ref_type == 'tag') && (env.EVAL_BUILD_TYPE=='false') }} "
         echo "results of new conditional:  ${{ (github.ref_type == 'tag' && env.EVAL_BUILD_TYPE=='false') }}"
         echo ""
@@ -424,6 +430,8 @@ runs:
         echo "Setting EVAL_BUILD_TYPE to true..."
         echo "EVAL_BUILD_TYPE=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-type-prod-fallback' step. "
+        echo "::endgroup::"
 
     - name: BUILD_TYPE | Check for main branch (contains), set the build type to main
       id: set-eval-type-main-contains
