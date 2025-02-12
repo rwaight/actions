@@ -40,13 +40,17 @@ inputs:
     default: ${{ github.event.release.tag_name }}
     required: false
   strategy:
-    description: 'The strategy to use when calculating the method, either: `github-event`, `convert`, `convert-test`, or `convert-to-prod`. '
+    description: 'The strategy to use when calculating the method, either: `github-event`, `convert`, `convert-test`, `convert-to-main`, `convert-to-prod`, `from-source`, or `from-base`. '
     required: false
     default: 'github-event'
   workflow:
     description: 'This should be the github.workflow variable. '
     default: ${{ github.workflow }}
     required: false
+  workflow-summary:
+    description: 'Determine if the action should output to the GitHub summary (`$GITHUB_STEP_SUMMARY`), defaults to false. '
+    required: false
+    default: 'false'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
@@ -261,61 +265,88 @@ runs:
         ##
         echo "::endgroup::"
 
-    - name: Fetch the tags from the repo
-      id: git-fetch-first
-      # error: 'fatal: --unshallow on a complete repository does not make sense'
-      #run: "git fetch --force --prune --unshallow --tags"
-      # end error for the command above
-      shell: bash
-      run: |
-        echo "::group::starting the 'git-fetch-first' step... "
-        echo ""
-        echo "This is needed because of https://github.com/actions/checkout/issues/1467 "
-        echo ""
-        git fetch --force --prune --tags
-        echo "finishing the 'git-fetch-first' step... "
-        echo "::endgroup::"
-
     - name: Set environmental variables used to evaluate the build method
       id: set-eval-method-env-vars
       # Ensure that the needed environmental variables are set
       #   - 'EVAL_BUILD_METHOD' is set to 'false'
+      #   - 'EVAL_REASON' is set to 'tbd'
       #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
       if: ${{ always() }}
       shell: bash
       run: |
         echo "::group::starting the 'set-eval-method-env-vars' step... "
         echo ""
-        echo "Setting EVAL_BUILD_METHOD to false..."
-        echo "EVAL_BUILD_METHOD=false" >> $GITHUB_ENV
-        ##
-        echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
-        echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
+        EVAL_BUILD_METHOD=false
+        echo "Setting EVAL_BUILD_METHOD to '${EVAL_BUILD_METHOD}' ..."
+        echo "EVAL_BUILD_METHOD=${EVAL_BUILD_METHOD}" >> $GITHUB_ENV
+        echo ""
+        EVAL_REASON=tbd
+        echo "Setting EVAL_REASON to '${EVAL_REASON}' ..."
+        echo "EVAL_REASON=${EVAL_REASON}" >> $GITHUB_ENV
+        echo ""
+        GH_DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+        echo "Setting GH_DEFAULT_BRANCH to '${GH_DEFAULT_BRANCH}'..."
+        echo "GH_DEFAULT_BRANCH=${GH_DEFAULT_BRANCH}" >> $GITHUB_ENV
         echo ""
         echo "finishing the 'set-eval-method-env-vars' step... "
         echo "::endgroup::"
 
-    - name: NO NO NO NO NO NO | BUILD_METHOD | The build method is 'convert-to-main' from input
-      # This step is run when the branch is a 'v*.*.*' tag
-      id: set-build-method-input-convert-to-main
+    - name: BUILD_METHOD | Strategy input is not 'github-event'
+      #name: Strategy Input | Build method is 'convert-to-main' from input
+      id: set-method-from-input-strategy
       #if: (inputs.strategy=='convert-to-main')
-      if: (github.ref_type == 'tag')
+      if: (inputs.strategy!='github-event')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-input-convert-to-main' "
+        echo "::group::starting the 'set-method-from-input-strategy' step... "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "Variables used to evaluate the build method: "
+        echo "    EVAL_BUILD_METHOD  : ${{ env.EVAL_BUILD_METHOD }} "
+        echo "    Strategy (input)   : ${{ inputs.strategy }} "
         echo ""
-        echo "Setting BUILD_METHOD to 'convert-to-main' ..."
-        echo "BUILD_METHOD=convert-to-main" >> $GITHUB_ENV
+        if [[ '${{ inputs.strategy }}' == 'convert-to-prod' ]]; then
+            build_method='to-prod'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'convert-to-main' ]]; then
+            build_method='to-main'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'convert' ]]; then
+            build_method='convert'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'convert-test' ]]; then
+            build_method='convert-test'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'from-source' ]]; then
+            build_method='from-source'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        elif [[ '${{ inputs.strategy }}' == 'from-base' ]]; then
+            build_method='from-base'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        else
+            echo "this is the ELSE statement, setting the build method to 'convert' "
+            build_method='convert'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            #
+        fi
+        echo ""
+        echo "Based on the provided input, the 'BUILD_METHOD' will be set to '${build_method}' ..."
+        echo "BUILD_METHOD=${build_method}" >> $GITHUB_ENV
+        echo ""
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        eval_reason='strategy_input'
+        echo "Setting EVAL_REASON to '${eval_reason}' ..."
+        echo "EVAL_REASON=${eval_reason}" >> $GITHUB_ENV
+        echo ""
+        echo "finishing the 'set-method-from-input-strategy' step... "
+        echo "::endgroup::"
 
     - name: get-tag-version
       id: get-tag-version
@@ -382,6 +413,7 @@ runs:
 
     - name: BUILD_METHOD | The build method is 'to-prod' for tags
       # This step is run when the branch is a 'v*.*.*' tag
+      #   If a tag is being created, then we assume the build method is 'to-prod'
       id: set-build-method-full-version-tag
       #using 'v*.*.*' does not work# #was#if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
       #using 'v*.*.*' does not work# #if: (contains('refs/tags/v*.*.*', github.ref) && github.ref_type == 'tag' && github.event_name=='push')
@@ -397,37 +429,51 @@ runs:
       run: |
         echo "::group::starting step 'set-build-version-full-version-tag' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "Variables used to evaluate the build method: "
+        echo "    EVAL_BUILD_METHOD  : ${{ env.EVAL_BUILD_METHOD }} "
+        echo "    Strategy (input)   : ${{ inputs.strategy }} "
         echo ""
-        echo "release tag_name: ${{ github.event.release.tag_name }} "
+        echo "  get-tag-version outputs: "
+        echo "    FULL_VERSION_REF   : ${{ env.FULL_VERSION_REF }} "
         echo ""
-        echo "## get-tag-version outputs"
-        echo "Full version: ${{ env.FULL_VERSION_REF }} "
+        echo "  GitHub context values: "
+        echo "    event_name:  ${{ github.event_name }} "
+        echo "    ref       :  ${{ github.ref }} "
+        echo "    ref_name  :  ${{ github.ref_name }} "
+        echo "    ref_type  :  ${{ github.ref_type }} "
+        echo "    workflow  :  ${{ github.workflow }} "
+        echo ""
+        echo "  GitHub event context values: "
+        echo "    event.release.tag_name         :  ${{ github.event.release.tag_name }} "
+        echo "    event.repository.default_branch:  ${{ github.event.repository.default_branch }} "
+        echo ""
         echo ""
         if [[ '${{ github.event_name }}' == 'push' ]]; then
             echo "the 'github.event_name' is 'push', going to set the method to 'to-prod' "
+            build_method='to-prod'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             ##
-            echo "Setting BUILD_METHOD to 'to-prod' ..."
-            echo "BUILD_METHOD=to-prod" >> $GITHUB_ENV
-            ##
-            echo "Setting EVAL_BUILD_METHOD to true..."
-            echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         elif [[ '${{ github.event_name }}' != 'push' ]]; then
             echo "the 'github.event_name' is NOT 'push', going to set the method to 'to-prod' "
+            build_method='to-prod'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             ##
-            echo "Setting BUILD_METHOD to 'to-prod' ..."
-            echo "BUILD_METHOD=to-prod" >> $GITHUB_ENV
-            ##
-            echo "Setting EVAL_BUILD_METHOD to true..."
-            echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         else
-            echo "something strange is happening, not changing anything... "
+            echo "this is the ELSE statement, something strange is happening... maybe do not do this, but going to set the method to 'to-prod' "
+            build_method='to-prod'
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            ##
         fi
+        echo ""
+        echo "Based on the full version tag, the 'BUILD_METHOD' will be set to '${build_method}' ..."
+        echo "BUILD_METHOD=${build_method}" >> $GITHUB_ENV
+        echo ""
+        echo "Setting EVAL_BUILD_METHOD to true..."
+        echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
+        echo ""
+        eval_reason='full_version_tag'
+        echo "Setting EVAL_REASON to '${eval_reason}' ..."
+        echo "EVAL_REASON=${eval_reason}" >> $GITHUB_ENV
         echo ""
         echo "completing the 'set-build-method-full-version-tag' step. "
         echo "::endgroup::"
@@ -448,20 +494,17 @@ runs:
       #if: (startsWith(github.ref_name, 'v[0-9].[0-9].[0-9]') && github.ref_type == 'tag' && github.event_name=='push' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-prod-startswith' "
+        echo "::group::starting step 'set-build-method-prod-startswith' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "  THIS STEP IS PROBABLY NOT NEEDED, THIS SHOULD BE REVIEWED AT A LATER DATE. "
         echo ""
         echo "Setting BUILD_METHOD to 'to-prod' ..."
         echo "BUILD_METHOD=to-prod" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-prod-startswith' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-prod' for tags (fallback)
       # This step is run when the branch is a 'v*.*.*' tag
@@ -471,20 +514,17 @@ runs:
       if: (github.ref_type == 'tag' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-prod-fallback' "
+        echo "::group::starting step 'set-build-method-prod-fallback' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "  THIS STEP IS PROBABLY NOT NEEDED, THIS SHOULD BE REVIEWED AT A LATER DATE. "
         echo ""
         echo "Setting BUILD_METHOD to 'to-prod' ..."
         echo "BUILD_METHOD=to-prod" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-prod-fallback' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-main' (startsWith)
       # This step is run when the branch starts with 'main'
@@ -492,20 +532,15 @@ runs:
       if: (startsWith(github.ref_name, 'main') && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-main-startswith' "
-        echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "::group::starting step 'set-build-method-main-startswith' "
         echo ""
         echo "Setting BUILD_METHOD to 'to-main' ..."
         echo "BUILD_METHOD=to-main" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-main-startswith' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-main' (contains)
       # This step is run when the branch contains 'main'
@@ -518,20 +553,17 @@ runs:
       # try this next#if: ${{ contains(github.ref_name, 'main*') && (env.EVAL_BUILD_METHOD=='false') }}
       shell: bash
       run: |
-        echo "step id: 'set-build-method-main-contains' "
+        echo "::group::starting step 'set-build-method-main-contains' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "  THIS STEP IS PROBABLY NOT NEEDED, THIS SHOULD BE REVIEWED AT A LATER DATE. "
         echo ""
         echo "Setting BUILD_METHOD to 'to-main' ..."
         echo "BUILD_METHOD=to-main" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-main-contains' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for pull requests
       id: set-build-method-pull-request
@@ -541,43 +573,33 @@ runs:
       # example to delete # if: (github.event_name=='pull_request' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-pull-request' "
-        echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "::group::starting step 'set-build-method-pull-request' "
         echo ""
         echo "Setting BUILD_METHOD to 'to-dev' ..."
         echo "BUILD_METHOD=to-dev" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-pull-request' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for pull requests (endsWith)
-      id: set-build-method-pull-request-endswith
+      id: set-build-method-pr-endswith
       # This step is run for pull requests
       if: (env.EVAL_BUILD_METHOD=='false' && endsWith(github.ref_name, 'merge'))
       # example to delete # startsWith(github.event.pull_request.head.ref, 'dev')
       # example to delete # if: (github.event_name=='pull_request' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-pull-request-endswith' "
-        echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "::group::starting step 'set-build-method-pr-endswith' "
         echo ""
         echo "Setting BUILD_METHOD to 'to-dev' ..."
         echo "BUILD_METHOD=to-dev" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-pr-endswith' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for dev branches (startsWith)
       # This step is run when the branch starts with dev
@@ -587,20 +609,17 @@ runs:
       if: (env.EVAL_BUILD_METHOD=='false' && startsWith(github.ref_name, 'dev'))
       shell: bash
       run: |
-        echo "step id: 'set-build-method-startswith-dev' "
+        echo "::group::starting step 'set-build-method-startswith-dev' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "  THIS STEP SHOULD BE CONSOLIDATED WITH THE OTHER DEV BRANCHES CHECKS INTO A SINGLE STEP. "
         echo ""
         echo "Setting BUILD_METHOD to 'to-dev' ..."
         echo "BUILD_METHOD=to-dev" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-startswith-dev' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for dev branches (contains)
       # This step is run when the branch is dev
@@ -609,20 +628,17 @@ runs:
       if: (env.EVAL_BUILD_METHOD=='false' && contains(github.ref_name, 'dev'))
       shell: bash
       run: |
-        echo "step id: 'set-build-method-contains-dev' "
+        echo "::group::starting step 'set-build-method-contains-dev' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "  THIS STEP SHOULD BE CONSOLIDATED WITH THE OTHER DEV BRANCHES CHECKS INTO A SINGLE STEP. "
         echo ""
         echo "Setting BUILD_METHOD to 'to-dev' ..."
         echo "BUILD_METHOD=to-dev" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-contains-dev' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for test branches (contains)
       # This step is run when the branch is test
@@ -631,20 +647,17 @@ runs:
       if: (contains(github.ref_name, 'test') && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-contains-test' "
+        echo "::group::starting step 'set-build-method-contains-test' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "  THIS STEP SHOULD BE CONSOLIDATED WITH THE OTHER DEV BRANCHES CHECKS INTO A SINGLE STEP. "
         echo ""
         echo "Setting BUILD_METHOD to 'to-dev' ..."
         echo "BUILD_METHOD=to-dev" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-contains-test' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | Fallback value - User input or 'to-dev'
       id: set-build-method-fallback
@@ -652,22 +665,42 @@ runs:
       if: env.EVAL_BUILD_METHOD=='false'
       shell: bash
       run: |
-        echo "step id: 'set-build-method-fallback' "
+        echo "::group::starting step 'set-build-method-fallback' "
         echo ""
-        echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
-        echo "Build strategy (input)    : ${{ inputs.strategy }} "
-        echo "Build strategy (input with fallback value): "
-        echo "                        : ${{ inputs.strategy || 'to-dev' }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "Variables used to evaluate the build method: "
+        echo "    EVAL_BUILD_METHOD  : ${{ env.EVAL_BUILD_METHOD }} "
+        echo "    Strategy (input)   : ${{ inputs.strategy }} "
+        echo ""
+        echo "  get-tag-version outputs: "
+        echo "    FULL_VERSION_REF   : ${{ env.FULL_VERSION_REF }} "
+        echo ""
+        echo "  GitHub context values: "
+        echo "    event_name:  ${{ github.event_name }} "
+        echo "    ref       :  ${{ github.ref }} "
+        echo "    ref_name  :  ${{ github.ref_name }} "
+        echo "    ref_type  :  ${{ github.ref_type }} "
+        echo "    workflow  :  ${{ github.workflow }} "
+        echo ""
+        echo "  GitHub event context values: "
+        echo "    event.release.tag_name         :  ${{ github.event.release.tag_name }} "
+        echo "    event.repository.default_branch:  ${{ github.event.repository.default_branch }} "
         echo ""
         echo "Setting BUILD_METHOD to '${{ env.BUILD_METHOD || 'to-dev' }}' ..."
         echo "BUILD_METHOD=${{ env.BUILD_METHOD || 'to-dev' }}" >> $GITHUB_ENV
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        if [[ "${{ inputs.workflow-summary }}" == "true" ]]; then
+            echo "**NOTE**: BUILD_METHOD was set to the fallback value." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        else
+            echo "**NOTE**: BUILD_METHOD was set to the fallback value."
+            echo ""
+            echo "  this is not being sent to the workflow summary, since 'inputs.workflow-summary' is not set to 'true'."
+        fi
+        echo ""
+        echo "completing the 'set-build-method-fallback' step. "
+        echo "::endgroup::"
 
     - name: Error if the build method was not set
       id: set-eval-method-error
@@ -685,5 +718,31 @@ runs:
       id: set-method-output
       shell: bash
       run: |
+        echo "::group::starting the 'set-method-output' step ... "
         echo "The BUILD_METHOD has been set to '${{ env.BUILD_METHOD }}' ... "
         echo "BUILD_METHOD=${{ env.BUILD_METHOD }}" >> "$GITHUB_OUTPUT"
+        echo ""
+        echo ""
+        echo "The remaining information is probably extra and can probably be removed in the future. "
+        echo ""
+        echo "Variables used to evaluate the build method: "
+        echo "    EVAL_BUILD_METHOD  : ${{ env.EVAL_BUILD_METHOD }} "
+        echo "    Strategy (input)   : ${{ inputs.strategy }} "
+        echo ""
+        echo "  get-tag-version outputs: "
+        echo "    FULL_VERSION_REF   : ${{ env.FULL_VERSION_REF }} "
+        echo ""
+        echo "  GitHub context values: "
+        echo "    event_name:  ${{ github.event_name }} "
+        echo "    ref       :  ${{ github.ref }} "
+        echo "    ref_name  :  ${{ github.ref_name }} "
+        echo "    ref_type  :  ${{ github.ref_type }} "
+        echo "    workflow  :  ${{ github.workflow }} "
+        echo ""
+        echo "  GitHub event context values: "
+        echo "    event.release.tag_name         :  ${{ github.event.release.tag_name }} "
+        echo "    event.repository.default_branch:  ${{ github.event.repository.default_branch }} "
+        echo ""
+        echo ""
+        echo "finishing the 'set-method-output' step ... "
+        echo "::endgroup::"
