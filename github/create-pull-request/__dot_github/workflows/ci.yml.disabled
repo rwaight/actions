@@ -109,6 +109,9 @@ jobs:
             ```
             /test repository=${{ github.event.pull_request.head.repo.full_name }} ref=${{ github.event.pull_request.head.ref }} build=true
             ```
+            ```
+            /test repository=${{ github.event.pull_request.head.repo.full_name }} ref=${{ github.event.pull_request.head.ref }} build=true sign-commits=true
+            ```
 
   package:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -121,7 +124,7 @@ jobs:
           name: dist
           path: dist
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.ACTIONS_BOT_TOKEN }}
           commit-message: 'build: update distribution'
