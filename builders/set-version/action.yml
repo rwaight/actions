@@ -47,6 +47,10 @@ inputs:
     description: 'This should be the github.workflow variable. '
     default: ${{ github.workflow }}
     required: false
+  workflow-summary:
+    description: 'Determine if the action should output to the GitHub summary (`$GITHUB_STEP_SUMMARY`), defaults to false. '
+    required: false
+    default: 'false'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
@@ -698,8 +702,14 @@ runs:
         echo "Setting EVAL_BUILD_VERSION to true..."
         echo "EVAL_BUILD_VERSION=true" >> $GITHUB_ENV
         echo ""
-        echo "**NOTE**: BUILD_VERSION was set to the fallback value." >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        if [[ "${{ inputs.workflow-summary }}" == "true" ]]; then
+            echo "**NOTE**: BUILD_VERSION was set to the fallback value." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        else
+            echo "**NOTE**: BUILD_VERSION was set to the fallback value."
+            echo ""
+            echo "  this is not being sent to the workflow summary, since 'inputs.workflow-summary' is not set to 'true'."
+        fi
         echo ""
         echo "::endgroup::"
       env:
