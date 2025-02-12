@@ -25,7 +25,7 @@ See the `inputs` configured in the [action.yml](action.yml) file.
 ## Example Usage
 
 Create a file named `.github/workflows/my-skip-create-workflow.yml` with the following:
-```
+```yml
 name: Run a GitHub workflow to set the build skip-create variable
 
 on:
@@ -54,7 +54,7 @@ jobs:
           checkout: false
           gh-token: ${{ secrets.GITHUB_TOKEN }}
           strategy: 'simple'
-          verbose: true
+          verbose: ${{ runner.debug == '1' }}
 
       - name: Report the output from the run-set-skip-create step
         if: ${{ steps.run-set-skip-create.outputs.build-skip-create }}

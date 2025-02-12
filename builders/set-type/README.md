@@ -18,7 +18,7 @@ See the `inputs` configured in the [action.yml](action.yml) file.
 ## Example Usage
 
 Create a file named `.github/workflows/my-type-workflow.yml` with the following:
-```
+```yml
 name: Run a GitHub workflow to set the build type
 
 on:
@@ -49,7 +49,7 @@ jobs:
           checkout: false
           gh-token: ${{ secrets.GITHUB_TOKEN }}
           strategy: 'simple'
-          verbose: true
+          verbose: ${{ runner.debug == '1' }}
 
       - name: Report the output from the run-set-type step
         if: ${{ steps.run-set-type.outputs.build-type }}
