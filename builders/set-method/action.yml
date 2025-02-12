@@ -161,6 +161,7 @@ runs:
         echo "    release-tag-name:  ${{ inputs.release-tag-name }} "
         echo "    strategy        :  ${{ inputs.strategy }} "
         echo "    workflow        :  ${{ inputs.workflow }} "
+        echo "    workflow-summary:  ${{ inputs.workflow-summary }} "
         echo "    verbose         :  ${{ inputs.verbose }} "
         echo ""
         echo "finishing the 'verbose-print-inputs' step... "
@@ -371,7 +372,7 @@ runs:
                 echo "PRERELEASE: $PRERELEASE "
             fi
         else
-            echo "::error file=builders/set-version/action.yml,title=⛔ set-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
+            echo "::error file=builders/set-method/action.yml,title=⛔ set-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
             exit 1
         fi
         ##
@@ -384,6 +385,7 @@ runs:
         echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
         echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
         echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
+        echo ""
         echo "completing the 'get-tag-version' step. "
         echo "::endgroup::"
 
