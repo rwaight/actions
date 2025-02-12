@@ -494,7 +494,7 @@ runs:
       #if: (startsWith(github.ref_name, 'v[0-9].[0-9].[0-9]') && github.ref_type == 'tag' && github.event_name=='push' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-prod-startswith' "
+        echo "::group::starting step 'set-build-method-prod-startswith' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -508,6 +508,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-prod-startswith' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-prod' for tags (fallback)
       # This step is run when the branch is a 'v*.*.*' tag
@@ -517,7 +519,7 @@ runs:
       if: (github.ref_type == 'tag' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-prod-fallback' "
+        echo "::group::starting step 'set-build-method-prod-fallback' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -531,6 +533,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-prod-fallback' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-main' (startsWith)
       # This step is run when the branch starts with 'main'
@@ -538,7 +542,7 @@ runs:
       if: (startsWith(github.ref_name, 'main') && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-main-startswith' "
+        echo "::group::starting step 'set-build-method-main-startswith' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -552,6 +556,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-main-startswith' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-main' (contains)
       # This step is run when the branch contains 'main'
@@ -564,7 +570,7 @@ runs:
       # try this next#if: ${{ contains(github.ref_name, 'main*') && (env.EVAL_BUILD_METHOD=='false') }}
       shell: bash
       run: |
-        echo "step id: 'set-build-method-main-contains' "
+        echo "::group::starting step 'set-build-method-main-contains' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -578,6 +584,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-main-contains' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for pull requests
       id: set-build-method-pull-request
@@ -587,7 +595,7 @@ runs:
       # example to delete # if: (github.event_name=='pull_request' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-pull-request' "
+        echo "::group::starting step 'set-build-method-pull-request' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -601,16 +609,18 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-pull-request' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for pull requests (endsWith)
-      id: set-build-method-pull-request-endswith
+      id: set-build-method-pr-endswith
       # This step is run for pull requests
       if: (env.EVAL_BUILD_METHOD=='false' && endsWith(github.ref_name, 'merge'))
       # example to delete # startsWith(github.event.pull_request.head.ref, 'dev')
       # example to delete # if: (github.event_name=='pull_request' && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-pull-request-endswith' "
+        echo "::group::starting step 'set-build-method-pr-endswith' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -624,6 +634,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-pr-endswith' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for dev branches (startsWith)
       # This step is run when the branch starts with dev
@@ -633,7 +645,7 @@ runs:
       if: (env.EVAL_BUILD_METHOD=='false' && startsWith(github.ref_name, 'dev'))
       shell: bash
       run: |
-        echo "step id: 'set-build-method-startswith-dev' "
+        echo "::group::starting step 'set-build-method-startswith-dev' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -647,6 +659,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-startswith-dev' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for dev branches (contains)
       # This step is run when the branch is dev
@@ -655,7 +669,7 @@ runs:
       if: (env.EVAL_BUILD_METHOD=='false' && contains(github.ref_name, 'dev'))
       shell: bash
       run: |
-        echo "step id: 'set-build-method-contains-dev' "
+        echo "::group::starting step 'set-build-method-contains-dev' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -669,6 +683,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-contains-dev' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | The build method is 'to-dev' for test branches (contains)
       # This step is run when the branch is test
@@ -677,7 +693,7 @@ runs:
       if: (contains(github.ref_name, 'test') && env.EVAL_BUILD_METHOD=='false')
       shell: bash
       run: |
-        echo "step id: 'set-build-method-contains-test' "
+        echo "::group::starting step 'set-build-method-contains-test' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -691,6 +707,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-contains-test' step. "
+        echo "::endgroup::"
 
     - name: BUILD_METHOD | Fallback value - User input or 'to-dev'
       id: set-build-method-fallback
@@ -698,7 +716,7 @@ runs:
       if: env.EVAL_BUILD_METHOD=='false'
       shell: bash
       run: |
-        echo "step id: 'set-build-method-fallback' "
+        echo "::group::starting step 'set-build-method-fallback' "
         echo ""
         echo "EVAL_BUILD_METHOD is    : ${{ env.EVAL_BUILD_METHOD }} "
         echo "Build strategy (input)    : ${{ inputs.strategy }} "
@@ -714,6 +732,8 @@ runs:
         echo "Setting EVAL_BUILD_METHOD to true..."
         echo "EVAL_BUILD_METHOD=true" >> $GITHUB_ENV
         echo ""
+        echo "completing the 'set-build-method-fallback' step. "
+        echo "::endgroup::"
 
     - name: Error if the build method was not set
       id: set-eval-method-error
@@ -731,5 +751,8 @@ runs:
       id: set-method-output
       shell: bash
       run: |
+        echo "::group::starting the 'set-method-output' step ... "
         echo "The BUILD_METHOD has been set to '${{ env.BUILD_METHOD }}' ... "
         echo "BUILD_METHOD=${{ env.BUILD_METHOD }}" >> "$GITHUB_OUTPUT"
+        echo "finishing the 'set-method-output' step ... "
+        echo "::endgroup::"
