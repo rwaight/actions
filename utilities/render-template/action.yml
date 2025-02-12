@@ -5,7 +5,7 @@ author: Konstantin Chukhlomin <mail@chuhlomin.com>
 
 branding:
   icon: file-text
-  color: 'blue'
+  color: blue
   # Ref: https://haya14busa.github.io/github-action-brandings/
   # fork: https://github.com/rwaight/github-action-brandings
 
@@ -40,4 +40,4 @@ runs:
 
 # runs:
 #   using: docker
-#   image: 'docker://chuhlomin/render-template:v1.8'
+#   image: "docker://chuhlomin/render-template:v1.10"
