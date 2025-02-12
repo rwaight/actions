@@ -49,6 +49,10 @@ inputs:
     description: 'This should be the github.workflow variable. '
     default: ${{ github.workflow }}
     required: false
+  workflow-summary:
+    description: 'Determine if the action should output to the GitHub summary (`$GITHUB_STEP_SUMMARY`), defaults to false. '
+    required: false
+    default: 'false'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
