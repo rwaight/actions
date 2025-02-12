@@ -163,6 +163,7 @@ runs:
         echo "    release-tag-name:  ${{ inputs.release-tag-name }} "
         echo "    strategy        :  ${{ inputs.strategy }} "
         echo "    workflow        :  ${{ inputs.workflow }} "
+        echo "    workflow-summary:  ${{ inputs.workflow-summary }} "
         echo "    verbose         :  ${{ inputs.verbose }} "
         echo ""
         echo "finishing the 'verbose-print-inputs' step... "
