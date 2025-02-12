@@ -306,10 +306,10 @@ runs:
                 echo "MAJOR is  : $MAJOR "
                 echo "MINOR is  : $MINOR "
                 echo "PATCH is  : $PATCH "
-                echo "PRERELEASE: $PRERELEASE"
+                echo "PRERELEASE: $PRERELEASE "
             fi
         else
-            echo "::error file=reuse-build.yml,title=⛔ set-build-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
+            echo "::error file=builders/set-type/action.yml,title=⛔ set-type error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
             exit 1
         fi
         ##
