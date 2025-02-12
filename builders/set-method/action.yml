@@ -91,7 +91,7 @@ runs:
         echo ""
 
     - name: Show GitHub runner context
-      #if: inputs.verbose=='true'
+      if: inputs.verbose=='true'
       # to do:  run this if either the verbose input is true or the runner.debug is true
       id: show-runner-context
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
