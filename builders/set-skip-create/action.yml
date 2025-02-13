@@ -71,7 +71,7 @@ runs:
       shell: bash
       run: |
         echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
-        echo "::error file=builders/set-skip-create/action.yml,title=⛔ build-skip-create error hint::This action supports Linux only"
+        echo "::error file=builders/set-skip-create/action.yml,title=⛔ set-skip-create error hint::This action supports Linux only"
         exit 1
 
     - name: Greet the triggering_actor
