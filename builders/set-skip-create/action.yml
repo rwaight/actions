@@ -295,8 +295,9 @@ runs:
       run: |
         echo "::group::starting the 'set-eval-skip-create-env-vars' step... "
         echo ""
-        echo "Setting EVAL_SKIP_CREATE to false..."
-        echo "EVAL_SKIP_CREATE=false" >> $GITHUB_ENV
+        EVAL_SKIP_CREATE=false
+        echo "Setting EVAL_SKIP_CREATE to '${EVAL_SKIP_CREATE}' ..."
+        echo "EVAL_SKIP_CREATE=${EVAL_SKIP_CREATE}" >> $GITHUB_ENV
         echo ""
         IMAGE_SKIP_NOTE=tbd
         echo "Setting IMAGE_SKIP_NOTE to '${IMAGE_SKIP_NOTE}' ..."
