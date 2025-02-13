@@ -368,3 +368,319 @@ runs:
         MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
         PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
         IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+
+    - name: IMAGE_SKIP_CREATE | Enable AMI creation for a full version tag
+      #name: IMAGE_SKIP_CREATE | Enable AMI creation for creating (push) a 'v*.*.*' tag
+      id: set-eval-skip-create-full-version-tag
+      # Create an AMI when we create (push) a 'v*.*.*' tag and the github.ref_type is 'tag'
+      # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+      #using 'v*.*.*' does not work#was#if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
+      #using 'v*.*.*' does not work#if: (contains('refs/tags/v*.*.*', github.ref) && github.ref_type == 'tag' && github.event_name=='push')
+      if: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-eval-skip-create-full-version-tag' "
+        echo ""
+        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo ""
+        echo "Event name:  ${{ github.event_name }} "
+        echo "Ref       :  ${{ github.ref }}"
+        echo "Ref name  :  ${{ github.ref_name }} "
+        echo "Ref type  :  ${{ github.ref_type }} "
+        echo ""
+        echo "release tag_name: ${{ github.event.release.tag_name }}"
+        echo ""
+        echo "## get-tag-version outputs"
+        echo "Full version: ${{ env.FULL_VERSION_REF }} "
+        echo ""
+        if [[ '${{ github.event_name }}' == 'push' ]]; then
+            echo "the 'github.event_name' is 'push' ... "
+            ##
+            echo "Enabling AMI creation based on the above conditions being met."
+            echo "Setting IMAGE_SKIP_CREATE to false..."
+            echo "IMAGE_SKIP_CREATE=false" >> $GITHUB_ENV
+            echo "IMAGE_SKIP_NOTE=Build AMI" >> $GITHUB_ENV
+            ##
+            echo "Setting EVAL_CREATE_IMAGE to true..."
+            EVAL_CREATE_IMAGE=true
+            echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+            ##
+            echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+            echo "IMAGE_SKIP_REASON=Build image: ${{ github.event_name }} with ref: ${{ github.ref }}, ref_type: ${{ github.ref_type }}" >> $GITHUB_ENV
+        elif [[ '${{ github.event_name }}' != 'push' ]]; then
+            echo "the 'github.event_name' is NOT 'push' ... "
+            ##
+            echo "Enabling AMI creation based on the above conditions being met."
+            echo "Setting IMAGE_SKIP_CREATE to false..."
+            echo "IMAGE_SKIP_CREATE=false" >> $GITHUB_ENV
+            echo "IMAGE_SKIP_NOTE=Build AMI" >> $GITHUB_ENV
+            ##
+            echo "Setting EVAL_CREATE_IMAGE to true..."
+            EVAL_CREATE_IMAGE=true
+            echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+            ##
+            echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+            echo "IMAGE_SKIP_REASON=Build image: ${{ github.event_name }} with ref: ${{ github.ref }}, ref_type: ${{ github.ref_type }}" >> $GITHUB_ENV
+        else
+            echo "something strange is happening, not changing anything... "
+        fi
+        echo ""
+        echo "completing the 'set-eval-skip-create-full-version-tag' step. "
+        echo "::endgroup::"
+      env:
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+
+    - name: IMAGE_SKIP_CREATE | Skip AMI creation for manual workflow runs
+      id: set-eval-skip-create-manual-skip
+      # Manual builds where the 'Create an AMI from build' option is NOT checked
+      if: (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='false' && env.EVAL_CREATE_IMAGE=='false')
+      #try-next#if: env.EVAL_CREATE_IMAGE=='false' && (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='false')
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-eval-skip-create-manual-skip' "
+        echo ""
+        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "The GitHub event_name is: ${{ github.event_name }}"
+        echo "The GitHub ref is       : ${{ github.ref }}"
+        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
+        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo ""
+        echo "Skipping AMI creation based on the above conditions being met."
+        echo "Setting IMAGE_SKIP_CREATE to true..."
+        echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "IMAGE_SKIP_NOTE=Skip AMI" >> $GITHUB_ENV
+        echo "Setting EVAL_CREATE_IMAGE to true..."
+        EVAL_CREATE_IMAGE=true
+        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}, image_create input: ${{ inputs.IMAGE_CREATE }}" >> $GITHUB_ENV
+        echo ""
+        echo "completing the 'set-eval-skip-create-manual-skip' step. "
+        echo "::endgroup::"
+
+    - name: IMAGE_SKIP_CREATE | Enable AMI creation for manual workflow runs
+      id: set-eval-skip-create-manual-create
+      # Manual builds where the 'Create an AMI from build' option is checked
+      if: (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='true' && env.EVAL_CREATE_IMAGE=='false')
+      #try-next#if: env.EVAL_CREATE_IMAGE=='false' && (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='true')
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-eval-skip-create-manual-create' "
+        echo ""
+        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "The GitHub event_name is: ${{ github.event_name }}"
+        echo "The GitHub ref is       : ${{ github.ref }}"
+        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
+        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo ""
+        echo "Enabling AMI creation based on the above conditions being met."
+        echo "Setting IMAGE_SKIP_CREATE to false..."
+        echo "IMAGE_SKIP_CREATE=false" >> $GITHUB_ENV
+        echo "IMAGE_SKIP_NOTE=Build AMI" >> $GITHUB_ENV
+        echo "Setting EVAL_CREATE_IMAGE to true..."
+        EVAL_CREATE_IMAGE=true
+        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "IMAGE_SKIP_REASON=Build image: ${{ github.event_name }}, image_create input: ${{ inputs.IMAGE_CREATE }}" >> $GITHUB_ENV
+        echo ""
+        echo "completing the 'set-eval-skip-create-manual-create' step. "
+        echo "::endgroup::"
+
+    - name: IMAGE_SKIP_CREATE | Skip image creation for scheduled workflow run at ${{ github.event.schedule }}
+      id: set-eval-skip-create-scheduled
+      # Do not build an AMI when the workflow runs on the schedule declared above
+      if: (github.event_name=='schedule' && github.event.schedule==env.BUILD_SCHEDULE && env.EVAL_CREATE_IMAGE=='false')
+      #try-next#if: env.EVAL_CREATE_IMAGE=='false' && (github.event_name=='schedule' && github.event.schedule==env.BUILD_SCHEDULE)
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-eval-skip-create-scheduled' "
+        echo ""
+        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "The GitHub event_name is: ${{ github.event_name }}"
+        echo "The GitHub ref is       : ${{ github.ref }}"
+        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
+        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo ""
+        echo "Skipping AMI creation based on the above conditions being met."
+        echo "Setting IMAGE_SKIP_CREATE to true..."
+        echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "IMAGE_SKIP_NOTE=Skip AMI" >> $GITHUB_ENV
+        echo "Setting EVAL_CREATE_IMAGE to true..."
+        EVAL_CREATE_IMAGE=true
+        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }} at ${{ github.event.schedule }}" >> $GITHUB_ENV
+        echo ""
+        echo "completing the 'set-eval-skip-create-scheduled' step. "
+        echo "::endgroup::"
+
+    - name: IMAGE_SKIP_CREATE | Skip AMI creation for pull requests
+      id: set-eval-skip-create-pull-request
+      # Do not create an AMI when a pull request has been opened
+      if: (github.event_name=='pull_request' && env.EVAL_CREATE_IMAGE=='false')
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-eval-skip-create-pull-request' "
+        echo ""
+        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "The GitHub event_name is: ${{ github.event_name }}"
+        echo "The GitHub ref is       : ${{ github.ref }}"
+        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
+        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo ""
+        echo "Skipping AMI creation based on the above conditions being met."
+        echo "Setting IMAGE_SKIP_CREATE to true..."
+        echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "IMAGE_SKIP_NOTE=Skip AMI" >> $GITHUB_ENV
+        echo "Setting EVAL_CREATE_IMAGE to true..."
+        EVAL_CREATE_IMAGE=true
+        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}" >> $GITHUB_ENV
+        echo "" # this is a blank line
+        echo "**NOTE**: You must manually run the build to create an AMI for a pull request." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        echo ""
+        echo "completing the 'set-eval-skip-create-pull-request' step. "
+        echo "::endgroup::"
+
+    - name: IMAGE_SKIP_CREATE | Skip image creation for push (commit) to main
+      id: set-eval-skip-create-push-to-main
+      # Do not create an AMI when we push (commit) to main (from a pull request) and the github.ref is 'refs/heads/main'
+      # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+      shell: bash
+      if: |
+        (github.event_name=='push' && github.ref == 'refs/heads/main' && env.EVAL_CREATE_IMAGE=='false') || 
+        (github.event_name=='push' && startsWith(github.ref_name, 'main') && env.EVAL_CREATE_IMAGE=='false')
+      # need to use the below conditional for branches with multiple major versions
+      #if: (github.event_name=='push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-2.x'))
+      run: |
+        echo "::group::starting step 'set-eval-skip-create-push-to-main' "
+        echo ""
+        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "The GitHub event_name is: ${{ github.event_name }}"
+        echo "The GitHub ref is       : ${{ github.ref }}"
+        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
+        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo ""
+        echo "Skipping AMI creation based on the above conditions being met."
+        echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "IMAGE_SKIP_NOTE=Skip AMI" >> $GITHUB_ENV
+        echo "Setting EVAL_CREATE_IMAGE to true..."
+        EVAL_CREATE_IMAGE=true
+        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }} with ref: ${{ github.ref }}" >> $GITHUB_ENV
+        echo ""
+        echo "completing the 'set-eval-skip-create-push-to-main' step. "
+        echo "::endgroup::"
+
+    - name: IMAGE_SKIP_CREATE | Skip image creation for push (commit) to default
+      id: set-eval-skip-create-push-to-default
+      # Do not create an AMI when we push (commit) to main (from a pull request) and the github.ref is 'refs/heads/main'
+      # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+      #was#if: |
+      #was#  (github.event_name=='push' && github.ref == 'refs/heads/${{ env.GH_DEFAULT_BRANCH }}' && env.EVAL_CREATE_IMAGE=='false') ||
+      #was#  (github.event_name=='push' && github.ref_name == '${{ env.GH_DEFAULT_BRANCH }}' && env.EVAL_CREATE_IMAGE=='false')
+      if: | 
+        ${{ env.EVAL_CREATE_IMAGE=='false' }} &&
+        ${{ (github.event_name=='push' && github.ref_name=='${{ github.event.repository.default_branch }}') }}
+      # need to use the below conditional for branches with multiple major versions
+      #if: (github.event_name=='push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-2.x'))
+      ## https://stackoverflow.com/questions/68928595/strange-boolean-evaluation-in-github-actions
+      ## https://github.com/actions/runner/issues/1173
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-eval-skip-create-push-to-default' "
+        echo ""
+        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "The GitHub event_name is: ${{ github.event_name }}"
+        echo "The GitHub ref is       : ${{ github.ref }}"
+        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
+        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo ""
+        if [[ "${{ env.EVAL_CREATE_IMAGE }}" == "true" ]]; then
+            echo "nested conditional, EVAL_CREATE_IMAGE must be true ... "
+            echo "the true is in double quotes... "
+            echo "nothing to do, need to find out why this step ran   ... "
+        elif [[ '${{ env.EVAL_CREATE_IMAGE }}' == 'true' ]]; then
+            echo "nested conditional, EVAL_CREATE_IMAGE must be true ... "
+            echo "the true is in single quotes... "
+            echo "nothing to do, need to find out why this step ran   ... "
+        else
+            echo "nested conditional, else statement"
+            echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+            echo ""
+            echo "Skipping AMI creation based on the above conditions being met."
+            echo "Setting IMAGE_SKIP_CREATE to true..."
+            echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
+            echo "IMAGE_SKIP_NOTE=Skip AMI" >> $GITHUB_ENV
+            echo "Setting EVAL_CREATE_IMAGE to true..."
+            EVAL_CREATE_IMAGE=true
+            echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+            echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+            echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }} with ref: ${{ github.ref }}" >> $GITHUB_ENV
+            echo ""
+        fi
+        ##
+        echo ""
+        echo "completing the 'set-eval-skip-create-push-to-default' step. "
+        echo "::endgroup::"
+
+    - name: IMAGE_SKIP_CREATE | Fallback value - Skip image creation for other events
+      id: set-eval-skip-create-fallback
+      # If this runs, then that means the previous steps were skipped
+      if: env.EVAL_CREATE_IMAGE=='false'
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-eval-skip-create-fallback' "
+        echo ""
+        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "The GitHub event_name is: ${{ github.event_name }}"
+        echo "The GitHub ref is       : ${{ github.ref }}"
+        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
+        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo ""
+        echo "Skipping AMI creation as the previous conditions were not met."
+        echo "Setting IMAGE_SKIP_CREATE to true..."
+        echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "IMAGE_SKIP_NOTE=Skip AMI" >> $GITHUB_ENV
+        echo "Setting EVAL_CREATE_IMAGE to true..."
+        EVAL_CREATE_IMAGE=true
+        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}, fallback value" >> $GITHUB_ENV
+        echo ""
+        echo "**NOTE**: IMAGE_SKIP_CREATE was set to the fallback value." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        echo ""
+        echo "completing the 'set-eval-skip-create-fallback' step. "
+        echo "::endgroup::"
+
+    - name: Error if the image skip create variable was not set
+      id: set-eval-skip-create-error
+      if: ${{ env.IMAGE_SKIP_CREATE == '' }}
+      shell: bash
+      run: |
+        echo "The image skip create variable was not set. "
+        echo "This workflow will now fail and exit. "
+        echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::Image skip create variable not set correctly "
+        exit 1
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+
+    - name: Output the image skip create results
+      # Output the image skip create results
+      id: set-skip-create-output
+      shell: bash
+      run: |
+        echo "::group::starting step 'set-skip-create-output' "
+        echo ""
+        echo "IMAGE_SKIP_CREATE has been set to '${{ env.IMAGE_SKIP_CREATE }}' ... "
+        echo "IMAGE_SKIP_CREATE=${{ env.IMAGE_SKIP_CREATE }}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_SKIP_NOTE has been set to '${{ env.IMAGE_SKIP_NOTE }}' ... "
+        echo "IMAGE_SKIP_NOTE=${{ env.IMAGE_SKIP_NOTE }}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_SKIP_REASON has been set to '${{ env.IMAGE_SKIP_REASON }}' ... "
+        echo "IMAGE_SKIP_REASON=${{ env.IMAGE_SKIP_REASON }}" >> "$GITHUB_OUTPUT"
+        echo ""
+        echo "completing the 'set-skip-create-output' step. "
+        echo "::endgroup::"
