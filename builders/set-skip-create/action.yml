@@ -268,21 +268,6 @@ runs:
         ##
         echo "::endgroup::"
 
-    - name: Fetch the tags from the repo
-      id: git-fetch-first
-      # error: 'fatal: --unshallow on a complete repository does not make sense'
-      #run: "git fetch --force --prune --unshallow --tags"
-      # end error for the command above
-      shell: bash
-      run: |
-        echo "::group::starting the 'git-fetch-first' step... "
-        echo ""
-        echo "This is needed because of https://github.com/actions/checkout/issues/1467 "
-        echo ""
-        git fetch --force --prune --tags
-        echo "finishing the 'git-fetch-first' step... "
-        echo "::endgroup::"
-
     - name: Set environmental variables used to evaluate the build skip-create
       id: set-eval-skip-create-env-vars
       # Ensure that the needed environmental variables are set
