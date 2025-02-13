@@ -1,5 +1,7 @@
 name: 'Set build skip-create'
-description: 'Determine a build skip-create based on predetermined conditions.'
+description: >-
+  Determine a build skip-create based on predetermined conditions.
+  This action is used with Packer to determine the `skip_create*` variable for either Amazon EBS (`skip_create_ami`) or Google Cloud Platform (`skip_create_image`).
 # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
 author: 'rwaight'
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
