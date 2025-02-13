@@ -72,8 +72,8 @@ inputs:
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
 outputs:
-  build-skip-create:
-    description: "The determined build skip-create. "
+  image-skip-create:
+    description: "The determine variable to be provided as the Packer `skip_create*` variable. "
     value: ${{ steps.set-skip-create-output.outputs.BUILD_SKIP_CREATE }}
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
@@ -285,7 +285,7 @@ runs:
     - name: Set environmental variables used to evaluate the build skip-create
       id: set-eval-skip-create-env-vars
       # Ensure that the needed environmental variables are set
-      #   - 'EVAL_BUILD_SKIP_CREATE' is set to 'false'
+      #   - 'EVAL_SKIP_CREATE' is set to 'false'
       #   - 'EVAL_REASON' is set to 'tbd'
       #   - 'IMAGE_SKIP_NOTE' is set to 'tbd'
       #   - 'IMAGE_SKIP_REASON' is set to 'tbd'
@@ -295,8 +295,8 @@ runs:
       run: |
         echo "::group::starting the 'set-eval-skip-create-env-vars' step... "
         echo ""
-        echo "Setting EVAL_BUILD_SKIP_CREATE to false..."
-        echo "EVAL_BUILD_SKIP_CREATE=false" >> $GITHUB_ENV
+        echo "Setting EVAL_SKIP_CREATE to false..."
+        echo "EVAL_SKIP_CREATE=false" >> $GITHUB_ENV
         echo ""
         EVAL_REASON=tbd
         echo "Setting EVAL_REASON to '${EVAL_REASON}' ..."
@@ -394,7 +394,7 @@ runs:
       run: |
         echo "::group::starting step 'set-eval-skip-create-full-version-tag' "
         echo ""
-        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
         echo ""
         echo "Event name:  ${{ github.event_name }} "
         echo "Ref       :  ${{ github.ref }}"
@@ -414,11 +414,11 @@ runs:
             echo "IMAGE_SKIP_CREATE=false" >> $GITHUB_ENV
             echo "IMAGE_SKIP_NOTE=Build image" >> $GITHUB_ENV
             ##
-            echo "Setting EVAL_CREATE_IMAGE to true..."
-            EVAL_CREATE_IMAGE=true
-            echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+            echo "Setting EVAL_SKIP_CREATE to true..."
+            EVAL_SKIP_CREATE=true
+            echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
             ##
-            echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+            echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
             echo "IMAGE_SKIP_REASON=Build image: ${{ github.event_name }} with ref: ${{ github.ref }}, ref_type: ${{ github.ref_type }}" >> $GITHUB_ENV
         elif [[ '${{ github.event_name }}' != 'push' ]]; then
             echo "the 'github.event_name' is NOT 'push' ... "
@@ -428,11 +428,11 @@ runs:
             echo "IMAGE_SKIP_CREATE=false" >> $GITHUB_ENV
             echo "IMAGE_SKIP_NOTE=Build image" >> $GITHUB_ENV
             ##
-            echo "Setting EVAL_CREATE_IMAGE to true..."
-            EVAL_CREATE_IMAGE=true
-            echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
+            echo "Setting EVAL_SKIP_CREATE to true..."
+            EVAL_SKIP_CREATE=true
+            echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
             ##
-            echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+            echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
             echo "IMAGE_SKIP_REASON=Build image: ${{ github.event_name }} with ref: ${{ github.ref }}, ref_type: ${{ github.ref_type }}" >> $GITHUB_ENV
         else
             echo "something strange is happening, not changing anything... "
@@ -446,13 +446,13 @@ runs:
     - name: IMAGE_SKIP_CREATE | Skip image creation for manual workflow runs
       id: set-eval-skip-create-manual-skip
       # Manual builds where the 'Create an image from build' option is NOT checked
-      if: (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='false' && env.EVAL_CREATE_IMAGE=='false')
-      #try-next#if: env.EVAL_CREATE_IMAGE=='false' && (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='false')
+      if: (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='false' && env.EVAL_SKIP_CREATE=='false')
+      #try-next#if: env.EVAL_SKIP_CREATE=='false' && (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='false')
       shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-manual-skip' "
         echo ""
-        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
         echo "The GitHub event_name is: ${{ github.event_name }}"
         echo "The GitHub ref is       : ${{ github.ref }}"
         echo "The GitHub ref_name is  : ${{ github.ref_name }}"
@@ -462,10 +462,10 @@ runs:
         echo "Setting IMAGE_SKIP_CREATE to true..."
         echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
         echo "IMAGE_SKIP_NOTE=Skip image" >> $GITHUB_ENV
-        echo "Setting EVAL_CREATE_IMAGE to true..."
-        EVAL_CREATE_IMAGE=true
-        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
-        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "Setting EVAL_SKIP_CREATE to true..."
+        EVAL_SKIP_CREATE=true
+        echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
         echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}, image_create input: ${{ inputs.IMAGE_CREATE }}" >> $GITHUB_ENV
         echo ""
         echo "completing the 'set-eval-skip-create-manual-skip' step. "
@@ -474,13 +474,13 @@ runs:
     - name: IMAGE_SKIP_CREATE | Enable image creation for manual workflow runs
       id: set-eval-skip-create-manual-create
       # Manual builds where the 'Create an image from build' option is checked
-      if: (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='true' && env.EVAL_CREATE_IMAGE=='false')
-      #try-next#if: env.EVAL_CREATE_IMAGE=='false' && (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='true')
+      if: (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='true' && env.EVAL_SKIP_CREATE=='false')
+      #try-next#if: env.EVAL_SKIP_CREATE=='false' && (github.event_name=='workflow_dispatch' && inputs.IMAGE_CREATE=='true')
       shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-manual-create' "
         echo ""
-        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
         echo "The GitHub event_name is: ${{ github.event_name }}"
         echo "The GitHub ref is       : ${{ github.ref }}"
         echo "The GitHub ref_name is  : ${{ github.ref_name }}"
@@ -490,10 +490,10 @@ runs:
         echo "Setting IMAGE_SKIP_CREATE to false..."
         echo "IMAGE_SKIP_CREATE=false" >> $GITHUB_ENV
         echo "IMAGE_SKIP_NOTE=Build image" >> $GITHUB_ENV
-        echo "Setting EVAL_CREATE_IMAGE to true..."
-        EVAL_CREATE_IMAGE=true
-        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
-        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "Setting EVAL_SKIP_CREATE to true..."
+        EVAL_SKIP_CREATE=true
+        echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
         echo "IMAGE_SKIP_REASON=Build image: ${{ github.event_name }}, image_create input: ${{ inputs.IMAGE_CREATE }}" >> $GITHUB_ENV
         echo ""
         echo "completing the 'set-eval-skip-create-manual-create' step. "
@@ -502,13 +502,13 @@ runs:
     - name: IMAGE_SKIP_CREATE | Skip image creation for scheduled workflow run at ${{ github.event.schedule }}
       id: set-eval-skip-create-scheduled
       # Do not build an image when the workflow runs on the schedule declared above
-      if: (github.event_name=='schedule' && github.event.schedule==env.BUILD_SCHEDULE && env.EVAL_CREATE_IMAGE=='false')
-      #try-next#if: env.EVAL_CREATE_IMAGE=='false' && (github.event_name=='schedule' && github.event.schedule==env.BUILD_SCHEDULE)
+      if: (github.event_name=='schedule' && github.event.schedule==env.BUILD_SCHEDULE && env.EVAL_SKIP_CREATE=='false')
+      #try-next#if: env.EVAL_SKIP_CREATE=='false' && (github.event_name=='schedule' && github.event.schedule==env.BUILD_SCHEDULE)
       shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-scheduled' "
         echo ""
-        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
         echo "The GitHub event_name is: ${{ github.event_name }}"
         echo "The GitHub ref is       : ${{ github.ref }}"
         echo "The GitHub ref_name is  : ${{ github.ref_name }}"
@@ -518,10 +518,10 @@ runs:
         echo "Setting IMAGE_SKIP_CREATE to true..."
         echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
         echo "IMAGE_SKIP_NOTE=Skip image" >> $GITHUB_ENV
-        echo "Setting EVAL_CREATE_IMAGE to true..."
-        EVAL_CREATE_IMAGE=true
-        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
-        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "Setting EVAL_SKIP_CREATE to true..."
+        EVAL_SKIP_CREATE=true
+        echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
         echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }} at ${{ github.event.schedule }}" >> $GITHUB_ENV
         echo ""
         echo "completing the 'set-eval-skip-create-scheduled' step. "
@@ -530,12 +530,12 @@ runs:
     - name: IMAGE_SKIP_CREATE | Skip image creation for pull requests
       id: set-eval-skip-create-pull-request
       # Do not create an image when a pull request has been opened
-      if: (github.event_name=='pull_request' && env.EVAL_CREATE_IMAGE=='false')
+      if: (github.event_name=='pull_request' && env.EVAL_SKIP_CREATE=='false')
       shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-pull-request' "
         echo ""
-        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
         echo "The GitHub event_name is: ${{ github.event_name }}"
         echo "The GitHub ref is       : ${{ github.ref }}"
         echo "The GitHub ref_name is  : ${{ github.ref_name }}"
@@ -545,10 +545,10 @@ runs:
         echo "Setting IMAGE_SKIP_CREATE to true..."
         echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
         echo "IMAGE_SKIP_NOTE=Skip image" >> $GITHUB_ENV
-        echo "Setting EVAL_CREATE_IMAGE to true..."
-        EVAL_CREATE_IMAGE=true
-        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
-        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "Setting EVAL_SKIP_CREATE to true..."
+        EVAL_SKIP_CREATE=true
+        echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
         echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}" >> $GITHUB_ENV
         echo "" # this is a blank line
         echo "**NOTE**: You must manually run the build to create an image for a pull request." >> $GITHUB_STEP_SUMMARY
@@ -563,14 +563,14 @@ runs:
       # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
       shell: bash
       if: |
-        (github.event_name=='push' && github.ref == 'refs/heads/main' && env.EVAL_CREATE_IMAGE=='false') || 
-        (github.event_name=='push' && startsWith(github.ref_name, 'main') && env.EVAL_CREATE_IMAGE=='false')
+        (github.event_name=='push' && github.ref == 'refs/heads/main' && env.EVAL_SKIP_CREATE=='false') || 
+        (github.event_name=='push' && startsWith(github.ref_name, 'main') && env.EVAL_SKIP_CREATE=='false')
       # need to use the below conditional for branches with multiple major versions
       #if: (github.event_name=='push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-2.x'))
       run: |
         echo "::group::starting step 'set-eval-skip-create-push-to-main' "
         echo ""
-        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
         echo "The GitHub event_name is: ${{ github.event_name }}"
         echo "The GitHub ref is       : ${{ github.ref }}"
         echo "The GitHub ref_name is  : ${{ github.ref_name }}"
@@ -579,10 +579,10 @@ runs:
         echo "Skipping image creation based on the above conditions being met."
         echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
         echo "IMAGE_SKIP_NOTE=Skip image" >> $GITHUB_ENV
-        echo "Setting EVAL_CREATE_IMAGE to true..."
-        EVAL_CREATE_IMAGE=true
-        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
-        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "Setting EVAL_SKIP_CREATE to true..."
+        EVAL_SKIP_CREATE=true
+        echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
         echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }} with ref: ${{ github.ref }}" >> $GITHUB_ENV
         echo ""
         echo "completing the 'set-eval-skip-create-push-to-main' step. "
@@ -593,10 +593,10 @@ runs:
       # Do not create an image when we push (commit) to main (from a pull request) and the github.ref is 'refs/heads/main'
       # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
       #was#if: |
-      #was#  (github.event_name=='push' && github.ref == 'refs/heads/${{ env.GH_DEFAULT_BRANCH }}' && env.EVAL_CREATE_IMAGE=='false') ||
-      #was#  (github.event_name=='push' && github.ref_name == '${{ env.GH_DEFAULT_BRANCH }}' && env.EVAL_CREATE_IMAGE=='false')
+      #was#  (github.event_name=='push' && github.ref == 'refs/heads/${{ env.GH_DEFAULT_BRANCH }}' && env.EVAL_SKIP_CREATE=='false') ||
+      #was#  (github.event_name=='push' && github.ref_name == '${{ env.GH_DEFAULT_BRANCH }}' && env.EVAL_SKIP_CREATE=='false')
       if: | 
-        ${{ env.EVAL_CREATE_IMAGE=='false' }} &&
+        ${{ env.EVAL_SKIP_CREATE=='false' }} &&
         ${{ (github.event_name=='push' && github.ref_name=='${{ github.event.repository.default_branch }}') }}
       # need to use the below conditional for branches with multiple major versions
       #if: (github.event_name=='push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-2.x'))
@@ -606,32 +606,32 @@ runs:
       run: |
         echo "::group::starting step 'set-eval-skip-create-push-to-default' "
         echo ""
-        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
         echo "The GitHub event_name is: ${{ github.event_name }}"
         echo "The GitHub ref is       : ${{ github.ref }}"
         echo "The GitHub ref_name is  : ${{ github.ref_name }}"
         echo "The GitHub ref_type is  : ${{ github.ref_type }}"
         echo ""
-        if [[ "${{ env.EVAL_CREATE_IMAGE }}" == "true" ]]; then
-            echo "nested conditional, EVAL_CREATE_IMAGE must be true ... "
+        if [[ "${{ env.EVAL_SKIP_CREATE }}" == "true" ]]; then
+            echo "nested conditional, EVAL_SKIP_CREATE must be true ... "
             echo "the true is in double quotes... "
             echo "nothing to do, need to find out why this step ran   ... "
-        elif [[ '${{ env.EVAL_CREATE_IMAGE }}' == 'true' ]]; then
-            echo "nested conditional, EVAL_CREATE_IMAGE must be true ... "
+        elif [[ '${{ env.EVAL_SKIP_CREATE }}' == 'true' ]]; then
+            echo "nested conditional, EVAL_SKIP_CREATE must be true ... "
             echo "the true is in single quotes... "
             echo "nothing to do, need to find out why this step ran   ... "
         else
             echo "nested conditional, else statement"
-            echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+            echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
             echo ""
             echo "Skipping image creation based on the above conditions being met."
             echo "Setting IMAGE_SKIP_CREATE to true..."
             echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
             echo "IMAGE_SKIP_NOTE=Skip image" >> $GITHUB_ENV
-            echo "Setting EVAL_CREATE_IMAGE to true..."
-            EVAL_CREATE_IMAGE=true
-            echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
-            echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+            echo "Setting EVAL_SKIP_CREATE to true..."
+            EVAL_SKIP_CREATE=true
+            echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
+            echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
             echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }} with ref: ${{ github.ref }}" >> $GITHUB_ENV
             echo ""
         fi
@@ -643,12 +643,12 @@ runs:
     - name: IMAGE_SKIP_CREATE | Fallback value - Skip image creation for other events
       id: set-eval-skip-create-fallback
       # If this runs, then that means the previous steps were skipped
-      if: env.EVAL_CREATE_IMAGE=='false'
+      if: env.EVAL_SKIP_CREATE=='false'
       shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-fallback' "
         echo ""
-        echo "EVAL_CREATE_IMAGE is    : ${{ env.EVAL_CREATE_IMAGE }} "
+        echo "EVAL_SKIP_CREATE is    : ${{ env.EVAL_SKIP_CREATE }} "
         echo "The GitHub event_name is: ${{ github.event_name }}"
         echo "The GitHub ref is       : ${{ github.ref }}"
         echo "The GitHub ref_name is  : ${{ github.ref_name }}"
@@ -658,10 +658,10 @@ runs:
         echo "Setting IMAGE_SKIP_CREATE to true..."
         echo "IMAGE_SKIP_CREATE=true" >> $GITHUB_ENV
         echo "IMAGE_SKIP_NOTE=Skip image" >> $GITHUB_ENV
-        echo "Setting EVAL_CREATE_IMAGE to true..."
-        EVAL_CREATE_IMAGE=true
-        echo "EVAL_CREATE_IMAGE=true" >> $GITHUB_ENV
-        echo "The EVAL_CREATE_IMAGE parameter has been set to ${EVAL_CREATE_IMAGE}"
+        echo "Setting EVAL_SKIP_CREATE to true..."
+        EVAL_SKIP_CREATE=true
+        echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
+        echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
         echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}, fallback value" >> $GITHUB_ENV
         echo ""
         echo "**NOTE**: IMAGE_SKIP_CREATE was set to the fallback value." >> $GITHUB_STEP_SUMMARY
