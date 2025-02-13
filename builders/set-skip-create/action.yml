@@ -284,6 +284,9 @@ runs:
       id: set-eval-skip-create-env-vars
       # Ensure that the needed environmental variables are set
       #   - 'EVAL_BUILD_SKIP_CREATE' is set to 'false'
+      #   - 'EVAL_REASON' is set to 'tbd'
+      #   - 'IMAGE_SKIP_NOTE' is set to 'tbd'
+      #   - 'IMAGE_SKIP_REASON' is set to 'tbd'
       #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
       if: ${{ always() }}
       shell: bash
@@ -296,6 +299,14 @@ runs:
         EVAL_REASON=tbd
         echo "Setting EVAL_REASON to '${EVAL_REASON}' ..."
         echo "EVAL_REASON=${EVAL_REASON}" >> $GITHUB_ENV
+        echo ""
+        IMAGE_SKIP_NOTE=tbd
+        echo "Setting IMAGE_SKIP_NOTE to '${IMAGE_SKIP_NOTE}' ..."
+        echo "IMAGE_SKIP_NOTE=${IMAGE_SKIP_NOTE}" >> $GITHUB_ENV
+        echo ""
+        IMAGE_SKIP_REASON=tbd
+        echo "Setting IMAGE_SKIP_REASON to '${IMAGE_SKIP_REASON}' ..."
+        echo "IMAGE_SKIP_REASON=${IMAGE_SKIP_REASON}" >> $GITHUB_ENV
         echo ""
         echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
         echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
