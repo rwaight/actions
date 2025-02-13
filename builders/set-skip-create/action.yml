@@ -552,9 +552,11 @@ runs:
         echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}" >> $GITHUB_ENV
         echo ""
         if [[ "${{ inputs.workflow-summary }}" == "true" ]]; then
+            echo "::notice file=builders/set-skip-create/action.yml,title=Skip Create Notice::You must manually run the build to create an image for a pull request."
             echo "**NOTE**: You must manually run the build to create an image for a pull request." >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
         else
+            echo "::notice file=builders/set-skip-create/action.yml,title=Skip Create Notice::You must manually run the build to create an image for a pull request."
             echo "**NOTE**: You must manually run the build to create an image for a pull request."
             echo ""
             echo "  this is not being sent to the workflow summary, since 'inputs.workflow-summary' is not set to 'true'."
