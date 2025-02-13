@@ -46,7 +46,7 @@ inputs:
   # strategy:
   #   description: >-
   #     This is not used to set skip-create. 
-  #     The strategy to use when calculating skip-create, either: `github-event` or `github-event`. '
+  #     The strategy to use when determining skip-create, either: `user-input` or `github-event`. '
   #   required: false
   #   default: 'github-event'
   workflow:
