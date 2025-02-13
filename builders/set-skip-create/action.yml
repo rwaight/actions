@@ -53,7 +53,7 @@ inputs:
     required: false
   # strategy:
   #   description: >-
-  #     This is not used to set skip-create. 
+  #     This is reserved for future use, but currently not used to set skip-create. 
   #     The strategy to use when determining skip-create, either: `user-input` or `github-event`. '
   #   required: false
   #   default: 'github-event'
