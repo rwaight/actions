@@ -276,33 +276,83 @@ runs:
       if: ${{ always() }}
       shell: bash
       run: |
-        echo "::group::Setting EVAL_BUILD_SKIP_CREATE to false..."
+        echo "::group::starting the 'set-eval-skip-create-env-vars' step... "
+        echo ""
+        echo "Setting EVAL_BUILD_SKIP_CREATE to false..."
         echo "EVAL_BUILD_SKIP_CREATE=false" >> $GITHUB_ENV
+        echo ""
+        EVAL_REASON=tbd
+        echo "Setting EVAL_REASON to '${EVAL_REASON}' ..."
+        echo "EVAL_REASON=${EVAL_REASON}" >> $GITHUB_ENV
+        echo ""
         echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
         echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
         echo ""
         echo "finishing the 'set-eval-skip-create-env-vars' step... "
         echo "::endgroup::"
 
-    - name: Set environmental variables used to evaluate the build skip-create
-      id: set-eval-skip-create-env-vars
-      # Ensure that the needed environmental variables are set
-      #   - 'EVAL_BUILD_SKIP_CREATE' is set to 'false'
-      #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
-      if: ${{ always() }}
+    - name: get-tag-version
+      id: get-tag-version
+      if: (github.ref_type == 'tag')
       shell: bash
       run: |
-        echo "step id: 'set-eval-skip-create-env-vars' "
+        echo "::group::starting step 'get-tag-version' "
         echo ""
-        echo "Setting EVAL_BUILD_SKIP_CREATE to false..."
-        echo "EVAL_BUILD_SKIP_CREATE=false" >> $GITHUB_ENV
-        echo "Setting GH_DEFAULT_BRANCH to '${{ github.event.repository.default_branch }}'..."
-        echo "GH_DEFAULT_BRANCH=${{ github.event.repository.default_branch }}" >> $GITHUB_ENV
+        VERSION="${{ github.event.release.tag_name || github.ref_name }}"
+        ##
+        RE='^[vV]?([0-9]+)[.]([0-9]+)[.]([0-9]+)(-[0-9A-Za-z.+-]*)?'
+        if [[ $VERSION =~ $RE ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            PRERELEASE="${BASH_REMATCH[4]}"
+            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+                echo "VERSION is: $VERSION "
+                echo "RE is     : $RE "
+                echo "MAJOR is  : $MAJOR "
+                echo "MINOR is  : $MINOR "
+                echo "PATCH is  : $PATCH "
+                echo "PRERELEASE: $PRERELEASE "
+            fi
+        else
+            echo "::error file=builders/set-skip-create/action.yml,title=⛔ set-version error hint::Version '$VERSION' is not in a valid format, see the 'get-tag-version' step output."
+            exit 1
+        fi
+        ##
+        if [[ "$PRERELEASE" ]]; then pre=true; else pre=false; fi
+        ##
+        ##echo "full-version-tag=$VERSION" >> $GITHUB_OUTPUT
+        ##echo "full-version-ref=v$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
+        echo "full-version-ref=$VERSION" >> $GITHUB_OUTPUT
+        echo "major-ref=v$MAJOR" >> $GITHUB_OUTPUT
+        echo "minor-ref=v$MINOR" >> $GITHUB_OUTPUT
+        echo "patch-ref=v$PATCH" >> $GITHUB_OUTPUT
+        echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
         echo ""
-        echo "EVAL_BUILD_SKIP_CREATE is    : ${{ env.EVAL_BUILD_SKIP_CREATE }} "
-        echo "Build skip-create (input)    : ${{ inputs.BUILD_SKIP_CREATE }} "
-        echo "The GitHub event_name is: ${{ github.event_name }}"
-        echo "The GitHub ref is       : ${{ github.ref }}"
-        echo "The GitHub ref_name is  : ${{ github.ref_name }}"
-        echo "The GitHub ref_type is  : ${{ github.ref_type }}"
+        echo "completing the 'get-tag-version' step. "
+        echo "::endgroup::"
+
+    - name: get-tag-version | Print outputs
+      id: check-get-tag-version
+      #if: (github.ref_type == 'tag')
+      if: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
+      run: |
+        echo "::group::starting step 'check-get-tag-version' "
         echo ""
+        echo "## get-tag-version outputs"
+        echo "Full version: ${{ env.FULL_VERSION_REF }} "
+        echo "Major ref   : ${{ env.MAJOR_REF }} "
+        echo "Minor ref   : ${{ env.MINOR_REF }} "
+        echo "Patch ref   : ${{ env.PATCH_REF }} "
+        echo "Prerelease  : ${{ env.IS_PRERELEASE }}"
+        echo ""
+        echo "completing the 'check-get-tag-version' step. "
+        echo "::endgroup::"
+      env:
+        #FULL_VERSION_TAG: ${{ steps.get-tag-version.outputs.full-version-tag }}
+        FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+        MAJOR_REF: ${{ steps.get-tag-version.outputs.major-ref }}
+        MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
+        PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
+        IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
