@@ -11,10 +11,12 @@ branding:
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
 inputs:
-  checkout:
-    description: 'If the action should checkout the repo using `actions/checkout`, defaults to false. '
-    required: false
-    default: 'false'
+  # checkout:
+  #   description: >-
+  #     This is not used to set skip-create. 
+  #     If the action should checkout the repo using `actions/checkout`, defaults to false.
+  #   required: false
+  #   default: 'false'
   event-name:
     description: 'This should be the github.event_name variable. '
     default: ${{ github.event_name }}
