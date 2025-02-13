@@ -10,9 +10,9 @@ source:
   author: codedesignplus
   repo_name: semver-git-version
   repo_url: https://github.com/codedesignplus/semver-git-version
-  current_version: v0.1.4
+  current_version: v0.1.10
   latest_version: v0.1.10
-  update_available: true
+  update_available: false
 specs:
   action_file: action.yml
   inputs: [version, folder, release-branch, release-candidate-branch, beta-branch, major-identifier, minor-identifier, prefix, dir-affected, previous-version, new-version]
