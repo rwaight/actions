@@ -550,9 +550,15 @@ runs:
         echo "EVAL_SKIP_CREATE=true" >> $GITHUB_ENV
         echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
         echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}" >> $GITHUB_ENV
-        echo "" # this is a blank line
-        echo "**NOTE**: You must manually run the build to create an image for a pull request." >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        echo ""
+        if [[ "${{ inputs.workflow-summary }}" == "true" ]]; then
+            echo "**NOTE**: You must manually run the build to create an image for a pull request." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        else
+            echo "**NOTE**: You must manually run the build to create an image for a pull request."
+            echo ""
+            echo "  this is not being sent to the workflow summary, since 'inputs.workflow-summary' is not set to 'true'."
+        fi
         echo ""
         echo "completing the 'set-eval-skip-create-pull-request' step. "
         echo "::endgroup::"
@@ -664,8 +670,15 @@ runs:
         echo "The EVAL_SKIP_CREATE parameter has been set to ${EVAL_SKIP_CREATE}"
         echo "IMAGE_SKIP_REASON=Skip image: ${{ github.event_name }}, fallback value" >> $GITHUB_ENV
         echo ""
-        echo "**NOTE**: IMAGE_SKIP_CREATE was set to the fallback value." >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        echo ""
+        if [[ "${{ inputs.workflow-summary }}" == "true" ]]; then
+            echo "**NOTE**: IMAGE_SKIP_CREATE was set to the fallback value." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        else
+            echo "**NOTE**: IMAGE_SKIP_CREATE was set to the fallback value."
+            echo ""
+            echo "  this is not being sent to the workflow summary, since 'inputs.workflow-summary' is not set to 'true'."
+        fi
         echo ""
         echo "completing the 'set-eval-skip-create-fallback' step. "
         echo "::endgroup::"
