@@ -39,10 +39,12 @@ inputs:
     description: 'This should be the github.ref_type variable. '
     default: ${{ github.event.release.tag_name }}
     required: false
-  strategy:
-    description: 'The strategy to use when calculating skip-create, either: `simple` or `wildcard`. '
-    required: false
-    default: 'simple'
+  # strategy:
+  #   description: >-
+  #     This is not used to set skip-create. 
+  #     The strategy to use when calculating skip-create, either: `github-event` or `github-event`. '
+  #   required: false
+  #   default: 'github-event'
   workflow:
     description: 'This should be the github.workflow variable. '
     default: ${{ github.workflow }}
