@@ -216,25 +216,27 @@ runs:
         ##
         echo "::endgroup::"
 
-    - name: Checkout files from commit tree
-      # Verified creator: https://github.com/marketplace/actions/checkout
-      # GitHub Action for checking out a repo
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      id: checkout-without-token
-      if: inputs.checkout=='true'
-      continue-on-error: true
-      with:
-        fetch-depth: 0
+    # #     This is not used to set skip-create.
+    # - name: Checkout files from commit tree
+    #   # Verified creator: https://github.com/marketplace/actions/checkout
+    #   # GitHub Action for checking out a repo
+    #   uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    #   id: checkout-without-token
+    #   if: inputs.checkout=='true'
+    #   continue-on-error: true
+    #   with:
+    #     fetch-depth: 0
 
-    - name: Checkout files from commit tree with the token
-      # Verified creator: https://github.com/marketplace/actions/checkout
-      # GitHub Action for checking out a repo
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      id: checkout-with-token
-      if: steps.checkout-without-token.outcome == 'failure'
-      with:
-        fetch-depth: 0
-        token: ${{ inputs.gh-token }}
+    # #     This is not used to set skip-create.
+    # - name: Checkout files from commit tree with the token
+    #   # Verified creator: https://github.com/marketplace/actions/checkout
+    #   # GitHub Action for checking out a repo
+    #   uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    #   id: checkout-with-token
+    #   if: steps.checkout-without-token.outcome == 'failure'
+    #   with:
+    #     fetch-depth: 0
+    #     token: ${{ inputs.gh-token }}
 
     - name: Extra | The ref_type is 'tag'
       id: extra-ref-type-tag
