@@ -49,6 +49,10 @@ inputs:
     description: 'This should be the github.workflow variable. '
     default: ${{ github.workflow }}
     required: false
+  workflow-summary:
+    description: 'Determine if the action should output to the GitHub summary (`$GITHUB_STEP_SUMMARY`), defaults to false. '
+    required: false
+    default: 'false'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false. '
     required: false
@@ -159,6 +163,7 @@ runs:
         echo "    release-tag-name:  ${{ inputs.release-tag-name }} "
         echo "    strategy        :  ${{ inputs.strategy }} "
         echo "    workflow        :  ${{ inputs.workflow }} "
+        echo "    workflow-summary:  ${{ inputs.workflow-summary }} "
         echo "    verbose         :  ${{ inputs.verbose }} "
         echo ""
         echo "finishing the 'verbose-print-inputs' step... "
