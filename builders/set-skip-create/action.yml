@@ -21,10 +21,12 @@ inputs:
     description: 'This should be the github.event_name variable. '
     default: ${{ github.event_name }}
     required: false
-  gh-token:
-    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
-    required: false
-    default: ${{ github.token }}
+  # gh-token:
+  #   description: >-
+  #     This is not used to set skip-create. 
+  #     GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI.
+  #   required: false
+  #   default: ${{ github.token }}
   ref:
     description: 'This should be the github.ref variable. '
     default: ${{ github.ref }}
