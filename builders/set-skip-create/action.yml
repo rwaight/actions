@@ -74,7 +74,7 @@ inputs:
 outputs:
   image-skip-create:
     description: "The determine variable to be provided as the Packer `skip_create*` variable. "
-    value: ${{ steps.set-skip-create-output.outputs.BUILD_SKIP_CREATE }}
+    value: ${{ steps.set-skip-create-output.outputs.IMAGE_SKIP_CREATE }}
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
 runs:
