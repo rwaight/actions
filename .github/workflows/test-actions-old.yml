@@ -1,6 +1,6 @@
 # This workflow tests the actions when there is a push to main
-name: Test actions
-run-name: Run actions test on ${{ github.event_name }}
+name: Test actions old
+run-name: Run old actions test on ${{ github.event_name }}
 on: 
   push:
     branches: [ main ]
