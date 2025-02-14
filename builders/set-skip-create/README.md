@@ -36,6 +36,16 @@ on:
     paths-ignore:
       - '**.md'
       - '.github/**'
+  workflow_dispatch:
+    inputs:
+      create_image:
+        description: 'Create an image from build'
+        required: true
+        default: false
+        # if this 'create_image' input is 'false', then it will set the `skip_create*` variable to 'true'
+        type: boolean
+  schedule:
+    - cron: '15 14 * * 2'  # once a week on Tuesday at 14:15 UTC, https://www.timeanddate.com/worldclock/timezone/utc
 
 jobs:
   set-skip-create:
@@ -51,9 +61,7 @@ jobs:
         id: run-set-skip-create
         uses: rwaight/actions/builders/set-skip-create@main
         with:
-          checkout: false
-          gh-token: ${{ secrets.GITHUB_TOKEN }}
-          strategy: 'simple'
+          create-image: ${{ inputs.create_image }}
           verbose: ${{ runner.debug == '1' }}
 
       - name: Report the output from the run-set-skip-create step
