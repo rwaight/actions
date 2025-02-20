@@ -307,32 +307,32 @@ runs:
         echo ""
         if [[ '${{ inputs.strategy }}' == 'convert-to-prod' ]]; then
             build_method='to-prod'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         elif [[ '${{ inputs.strategy }}' == 'convert-to-main' ]]; then
             build_method='to-main'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         elif [[ '${{ inputs.strategy }}' == 'convert' ]]; then
             build_method='convert'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         elif [[ '${{ inputs.strategy }}' == 'convert-test' ]]; then
             build_method='convert-test'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         elif [[ '${{ inputs.strategy }}' == 'from-source' ]]; then
             build_method='from-source'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         elif [[ '${{ inputs.strategy }}' == 'from-base' ]]; then
             build_method='from-base'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         else
             echo "this is the ELSE statement, setting the build method to 'convert' "
             build_method='convert'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             #
         fi
         echo ""
@@ -363,7 +363,7 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
                 echo "VERSION is: $VERSION "
                 echo "RE is     : $RE "
                 echo "MAJOR is  : $MAJOR "
@@ -453,17 +453,17 @@ runs:
         if [[ '${{ github.event_name }}' == 'push' ]]; then
             echo "the 'github.event_name' is 'push', going to set the method to 'to-prod' "
             build_method='to-prod'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             ##
         elif [[ '${{ github.event_name }}' != 'push' ]]; then
             echo "the 'github.event_name' is NOT 'push', going to set the method to 'to-prod' "
             build_method='to-prod'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             ##
         else
             echo "this is the ELSE statement, something strange is happening... maybe do not do this, but going to set the method to 'to-prod' "
             build_method='to-prod'
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
+            if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  Verbose - setting 'build_method' to '${build_method}' "; fi
             ##
         fi
         echo ""

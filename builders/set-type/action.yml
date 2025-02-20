@@ -301,7 +301,7 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
                 echo "VERSION is: $VERSION "
                 echo "RE is     : $RE "
                 echo "MAJOR is  : $MAJOR "

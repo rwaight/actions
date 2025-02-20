@@ -310,7 +310,7 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
                 echo "VERSION is: $VERSION "
                 echo "RE is     : $RE "
                 echo "MAJOR is  : $MAJOR "
@@ -510,7 +510,7 @@ runs:
       shell: bash
       run: |
         echo "::group::starting the 'simple-semver' step ... "
-        if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - issuing 'set +e' to ignore errors... "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - issuing 'set +e' to ignore errors... "; fi
         set +e
         echo "  attempt 1 of 2 to set 'semver_simple' ... "
         git describe --tags --match "v[0-9].[0-9].[0-9]*"
@@ -519,18 +519,18 @@ runs:
         ##if [[ $? -eq 0 ]]; then
         if [[ $exitcode -eq 0 ]]; then
             semver_simple=$(git describe --tags --match "v[0-9].[0-9].[0-9]*")
-            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - attempt 1 of 2, 'semver_simple' is set to '$semver_simple' "; fi
+            ##if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - attempt 1 of 2, 'semver_simple' is set to '$semver_simple' "; fi
             echo "    attempt 1 of 2, 'semver_simple' is set to '$semver_simple' "
         else
             echo ""
             echo "  attempt 2 of 2 to set 'semver_simple', allowing multiple digit version numbers ... "
             semver_simple=$(git describe --tags --match "v[0-9*].[0-9*].[0-9*]*")
-            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - attempt 2 of 3, 'semver_simple' is set to '$semver_simple' "; fi
+            ##if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - attempt 2 of 3, 'semver_simple' is set to '$semver_simple' "; fi
             echo "    attempt 2 of 2, 'semver_simple' is set to '$semver_simple' "
         fi
         ##
         if [[ -n "$semver_simple" ]]; then
-            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - the variable 'semver_simple' is set to '$semver_simple' "; fi
+            ##if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - the variable 'semver_simple' is set to '$semver_simple' "; fi
             echo "the variable 'semver_simple' is set to '$semver_simple' "
         else
             echo "the variable 'semver_simple' is empty, it is currently set to '$semver_simple' "
@@ -585,7 +585,7 @@ runs:
       run: |
         echo "::group::starting the 'wildcard-semver' step... "
         ## old wildcard-semver match ##git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"
-        if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - issuing 'set +e' to ignore errors... "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - issuing 'set +e' to ignore errors... "; fi
         set +e
         echo "  attempt 1 of 3 to set 'semver_wildcard' ... "
         git describe --tags --match "v[0-9*].[0-9*].[0-9*]"
@@ -593,25 +593,25 @@ runs:
         ##if [[ $? -eq 0 ]]; then
         if [[ $exitcode -eq 0 ]]; then
             semver_wildcard=$(git describe --tags --match "v[0-9*].[0-9*].[0-9*]")
-            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - attempt 1 of 3, 'semver_wildcard' is set to '$semver_wildcard' "; fi
+            ##if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - attempt 1 of 3, 'semver_wildcard' is set to '$semver_wildcard' "; fi
             echo "    attempt 1 of 3, 'semver_wildcard' is set to '$semver_wildcard' "
         else
             echo ""
             echo "  attempt 2 of 3 to set 'semver_wildcard', using the old wildcard-semver match ... "
             semver_wildcard=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*")
-            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - attempt 2 of 3, 'semver_wildcard' is set to '$semver_wildcard' "; fi
+            ##if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - attempt 2 of 3, 'semver_wildcard' is set to '$semver_wildcard' "; fi
             echo "    attempt 2 of 3, 'semver_wildcard' is set to '$semver_wildcard' "
         fi
         ##
         if [[ -n "$semver_wildcard" ]]; then
-            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - the variable 'semver_wildcard' is set to '$semver_wildcard' "; fi
+            ##if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - the variable 'semver_wildcard' is set to '$semver_wildcard' "; fi
             echo "the variable 'semver_wildcard' is set to '$semver_wildcard' "
         else
             echo "the variable 'semver_wildcard' is empty, it is currently set to '$semver_wildcard' "
             echo ""
             echo "  attempt 3 of 3 to set 'semver_wildcard', going to add a prefix wildcard ... "
             semver_wildcard=$(git describe --tags --match "*v[0-9*].[0-9*].[0-9*]")
-            ##if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - attempt 3 of 3, 'semver_wildcard' is set to '$semver_wildcard' "; fi
+            ##if [ '${{ inputs.verbose }}' == 'true' ]; then echo "  verbose - attempt 3 of 3, 'semver_wildcard' is set to '$semver_wildcard' "; fi
             echo "    attempt 3 of 3, 'semver_wildcard' is set to '$semver_wildcard' "
         fi
         ##
@@ -676,7 +676,7 @@ runs:
         ## Compare the simple and wildcard semver versions
         ## the double number signs below are for line spacing and readability only
         ##
-        if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "  verbose - starting the 'set-fallback-version' step. "
             echo "      semver_simple is  :  ${{ env.semver_simple }} "
             echo "      semver_wildcard is:  ${{ env.semver_wildcard }} "
@@ -693,7 +693,7 @@ runs:
         fi
         echo "do_the_semver_values_match=${simple_and_wildcard_match}" >> "$GITHUB_OUTPUT"
         echo "do_the_semver_values_match=${simple_and_wildcard_match}" >> $GITHUB_ENV
-        if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "The do_the_semver_values_match variable has been set to \`$simple_and_wildcard_match\`"
         fi
         echo "going to set the build version to the value of 'semver_simple' ... "
@@ -730,7 +730,7 @@ runs:
         ## the double number signs below are for line spacing and readability only
         ##
         VERSION="${{ env.BUILD_VERSION }}"
-        if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "  Verbose - variable used in this step: "
             echo "      VERSION  :  ${{ env.VERSION }} "
             echo ""
@@ -768,7 +768,7 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
                 echo "  Verbose - output from tag regex match: "
                 echo "      VERSION is: $VERSION "
                 echo "      RE_TAG is : $RE_TAG "
@@ -789,7 +789,7 @@ runs:
         echo "finishing the 'parse-build-version-info' step ... "
         echo "::endgroup::"
       # ## old verbose block from 'run' block above
-      #       if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+      #       if [ '${{ inputs.verbose }}' == 'true' ]; then
       #           echo "  Verbose - output from non-tag regex match: "
       #           echo "      VERSION is  : $VERSION "
       #           echo "      RE_NO_TAG is: $RE_NO_TAG "
