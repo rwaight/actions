@@ -15,9 +15,9 @@ source:
   author: EndBug
   repo_name: label-sync
   repo_url: https://github.com/EndBug/label-sync
-  current_version: v2.3.2
+  current_version: v2.3.3
   latest_version: v2.3.3
-  update_available: true
+  update_available: false
 specs:
   action_file: action.yml
   inputs: [token, config-file, source-repo, request-token, delete-other-labels, dry-run]

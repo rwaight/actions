@@ -1,0 +1,116 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "EndBug",
+      "name": "Federico Grandi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26386270?v=4",
+      "profile": "https://github.com/EndBug",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "h1dden-da3m0n",
+      "name": "K3rnelPan1c",
+      "avatar_url": "https://avatars.githubusercontent.com/u/33120068?v=4",
+      "profile": "https://github.com/h1dden-da3m0n",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "danielwerg",
+      "name": "danielwerg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35052399?v=4",
+      "profile": "https://github.com/danielwerg",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "kenodegard",
+      "name": "Ken Odegard",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4546435?v=4",
+      "profile": "https://github.com/kenodegard",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "armsnyder",
+      "name": "Adam Snyder",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9969202?v=4",
+      "profile": "https://github.com/armsnyder",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "srealmoreno",
+      "name": "Salvador real",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50985135?v=4",
+      "profile": "http://srealmoreno.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "simbo",
+      "name": "Simon Lepel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/647390?v=4",
+      "profile": "http://simbo.de/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "carrodher",
+      "name": "Carlos Rodríguez Hernández",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13216600?v=4",
+      "profile": "https://www.linkedin.com/in/carlosrodriguezhernandez/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "MaddoScientisto",
+      "name": "Marco",
+      "avatar_url": "https://avatars.githubusercontent.com/u/816014?v=4",
+      "profile": "https://github.com/MaddoScientisto",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "andrewvaughan",
+      "name": "Andrew Vaughan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1119590?v=4",
+      "profile": "https://github.com/andrewvaughan",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "reece",
+      "name": "Reece Hart",
+      "avatar_url": "https://avatars.githubusercontent.com/u/109453?v=4",
+      "profile": "https://linkedin.com/in/reece",
+      "contributions": [
+        "maintenance"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "label-sync",
+  "projectOwner": "EndBug",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true,
+  "commitConvention": "angular",
+  "commitType": "docs"
+}
