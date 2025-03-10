@@ -120,7 +120,10 @@ check_for_updates() {
                 printf "%s\n" "${exclusion_list[@]}"
                 
                 # Step 6: Move all processed files from temp directory to local action directory
+                # Ensure dotfiles are included when copying from $temp_dir to $local_action_dir
+                shopt -s dotglob  # Enable globbing for dotfiles
                 cp -r "$temp_dir"/* "$local_action_dir"
+                shopt -u dotglob  # Disable dotglob after use
 
                 # Step 7: Create a new README.md from the template file
                 #template_file="$local_repo_dir/assets/imported_readme_template.md"
