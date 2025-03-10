@@ -9,14 +9,16 @@ local:
     exclusions:
       - README-examples.md
       - example-custom-notes.md
+      - README_branch-specific-configuration.md
+      - docs/
 source:
   action_name: release-drafter
   author: release-drafter
   repo_name: release-drafter
   repo_url: https://github.com/release-drafter/release-drafter
-  current_version: v5.25.0
+  current_version: v6.0.0
   latest_version: v6.0.0
-  update_available: true
+  update_available: false
 specs:
   action_file: action.yml
   inputs: [config-name, name, tag, version, publish, latest, prerelease, prerelease-identifier, commitish, header, footer, disable-releaser, disable-autolabeler]

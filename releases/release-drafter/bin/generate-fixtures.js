@@ -9,8 +9,7 @@ const {
 } = require('../lib/commits')
 
 const REPO_NAME = 'release-drafter-test-repo'
-const GITHUB_GRAPHQL_API_ENDPOINT = 'https://api.github.com/rwaight/actions'
-//const GITHUB_GRAPHQL_API_ENDPOINT = 'https://api.github.com/graphql'
+const GITHUB_GRAPHQL_API_ENDPOINT = 'https://api.github.com/graphql'
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 
 if (!GITHUB_TOKEN) {
@@ -69,7 +68,7 @@ const runQuery = (kind, repo, body) => {
         path.resolve(
           __dirname,
           '../test/fixtures/__generated__',
-          `rwaight/actions-${kind}-${repo.branch}.json`
+          `graphql-${kind}-${repo.branch}.json`
         ),
         string + '\n'
       )
