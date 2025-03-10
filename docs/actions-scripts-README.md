@@ -39,6 +39,7 @@ The `import-config.yml` file is a structured YAML configuration file generated o
 4. **Local Modifications**:
    - **`local.author`**: The author of the local action (if not imported).
    - **`local.modifications`**: Boolean indicating if modifications have been made.
+   - **`local.update.exclusions`**: A list of files to exclude when updating from source.
 
 5. **Specifications**:
    - **`specs.action_file`**: The name of the action file (`action.yml` or `action.yaml`).
@@ -73,13 +74,17 @@ source:
 local:
   author: "john-doe"
   modifications: false
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
 
 specs:
   action_file: "action.yml"
   inputs: ["input1", "input2"]
   outputs: ["output1"]
   runs:
-    using: "node16"
+    using: "node20"
     main: "dist/index.js"
 
 tests:
