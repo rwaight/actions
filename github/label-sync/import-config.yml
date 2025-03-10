@@ -5,6 +5,10 @@ group: github
 imported: true
 local:
   modifications: false
+  update:
+    exclusions:
+      - label-sync-2.3.2.zip
+      - README.md
 source:
   action_name: label-sync
   author: EndBug
