@@ -15,12 +15,12 @@ source:
   repo_name: create-pull-request
   repo_url: https://github.com/peter-evans/create-pull-request
   current_version: v7.0.5
-  latest_version: v7.0.5
-  update_available: false
+  latest_version: v7.0.8
+  update_available: true
 specs:
   action_file: action.yml
-  inputs: [token, git-token, path, add-paths, commit-message, committer, author, signoff, branch, delete-branch, branch-suffix, base, push-to-fork, title, body, body-path, labels, assignees, reviewers, team-reviewers, milestone, draft]
-  outputs: [pull-request-number, pull-request-url, pull-request-operation, pull-request-head-sha]
+  inputs: [token, branch-token, path, add-paths, commit-message, committer, author, signoff, branch, delete-branch, branch-suffix, base, push-to-fork, sign-commits, title, body, body-path, labels, assignees, reviewers, team-reviewers, milestone, draft, maintainer-can-modify]
+  outputs: [pull-request-number, pull-request-url, pull-request-operation, pull-request-head-sha, pull-request-branch]
   runs:
     using: node20
     main: dist/index.js
