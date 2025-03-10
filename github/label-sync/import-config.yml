@@ -23,7 +23,7 @@ specs:
   inputs: [token, config-file, source-repo, request-token, delete-other-labels, dry-run]
   outputs: []
   runs:
-    using: node16
+    using: node20
     main: lib/index.js
 tests:
   _comment: reserved for future use

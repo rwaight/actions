@@ -17,14 +17,14 @@ source:
   repo_name: release-drafter
   repo_url: https://github.com/release-drafter/release-drafter
   current_version: v6.0.0
-  latest_version: v6.0.0
-  update_available: false
+  latest_version: v6.1.0
+  update_available: true
 specs:
   action_file: action.yml
   inputs: [config-name, name, tag, version, publish, latest, prerelease, prerelease-identifier, commitish, header, footer, disable-releaser, disable-autolabeler]
   outputs: [id, name, tag_name, body, html_url, upload_url, major_version, minor_version, patch_version, resolved_version]
   runs:
-    using: node16
+    using: node20
     main: dist/index.js
 tests:
   _comment: reserved for future use

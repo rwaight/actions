@@ -15,7 +15,7 @@ source:
   repo_name: label-checker
   repo_url: https://github.com/agilepathway/label-checker
   current_version: v1.6.25
-  latest_version: v1.6.60
+  latest_version: v1.6.65
   update_available: true
 specs:
   action_file: action.yml
