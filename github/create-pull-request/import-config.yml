@@ -5,6 +5,10 @@ group: github
 imported: true
 local:
   modifications: false
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
 source:
   action_name: create-pull-request
   author: peter-evans

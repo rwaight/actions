@@ -5,6 +5,10 @@ group: releases
 imported: true
 local:
   modifications: false
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
 source:
   action_name: release-tag-updater
   author: sersoft-gmbh

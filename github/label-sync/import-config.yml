@@ -9,6 +9,7 @@ local:
     exclusions:
       - README-examples.md
       - README.md
+      - example-custom-notes.md
 source:
   action_name: label-sync
   author: EndBug
