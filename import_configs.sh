@@ -3,6 +3,9 @@
 # Read target directories from the config file
 target_dirs=($(cat target_dirs.conf))
 
+# Default exclusions array
+default_exclusions=("README-examples.md" "example-custom-notes.md")
+
 # Function to read the action.yml or action.yaml file
 read_action_file() {
     local action_dir=$1
@@ -112,7 +115,20 @@ create_or_update_import_config() {
             yq e -i ".source.update_available = $update_available" "$import_config_file"
             #import_config=$(echo "$import_config" | yq eval ".source.update_available = $update_available" -)
         fi
-
+        # Check if local.update.exclusions exists, and add it if missing
+        exclusions_exist=$(yq e '.local.update.exclusions' "$import_config_file" 2>/dev/null)
+        if [[ "$exclusions_exist" == "null" || -z "$exclusions_exist" ]]; then
+            echo "Adding default exclusions to ${import_config_file}..."
+            yq e -i '.local.update.exclusions = []' "$import_config_file"
+        fi
+        # Ensure default exclusions are present
+        for exclusion in "${default_exclusions[@]}"; do
+            exists=$(yq e ".local.update.exclusions | contains([\"$exclusion\"])" "$import_config_file")
+            if [[ "$exists" != "true" ]]; then
+                yq e -i ".local.update.exclusions += [\"$exclusion\"]" "$import_config_file"
+            fi
+        done
+        #
     else
         # Prompt the user to find out if the action is imported or locally-created
         read -p "Is the action in ${group_dir}/${action_dir} imported or locally-created (imported/local)? " action_type
@@ -187,7 +203,8 @@ create_or_update_import_config() {
                 yq e -i ".specs.runs.main = \"$runs_main\"" "$import_config_file"
             fi
         fi
-
+        # Add the exclusions field with default values
+        yq e -i ".local.update.exclusions = [\"README-examples.md\", \"example-custom-notes.md\"]" "$import_config_file"
         # Add tests block
         yq e -i ".tests._comment = \"reserved for future use\"" "$import_config_file"
     fi

@@ -5,6 +5,10 @@ group: git
 imported: true
 local:
   modifications: false
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
 source:
   action_name: semver-git-version
   author: codedesignplus

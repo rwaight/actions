@@ -5,6 +5,10 @@ group: github
 imported: true
 local:
   modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
 source:
   action_name: projectnext-label-assigner
   author: richkuz
