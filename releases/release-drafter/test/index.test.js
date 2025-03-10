@@ -12,19 +12,19 @@ const release2Payload = require('./fixtures/release-2.json')
 const release3Payload = require('./fixtures/release-3.json')
 const preReleasePayload = require('./fixtures/pre-release.json')
 const pushNonMasterPayload = require('./fixtures/push-non-master-branch.json')
-const graphqlCommitsNoPRsPayload = require('./fixtures/rwaight/actions/was/just/graphql-commits-no-prs.json')
-const graphqlCommitsMergeCommit = require('./fixtures/__generated__/rwaight/actions/was/just/graphql-commits-merge-commit.json')
-const graphqlNullIncludePathMergeCommit = require('./fixtures/__generated__/rwaight/actions/was/just/graphql-include-null-path-merge-commit.json')
-const graphqlIncludePathMergeCommit = require('./fixtures/__generated__/rwaight/actions/was/just/graphql-include-path-src-5.md-merge-commit.json')
-const graphqlCommitsEmpty = require('./fixtures/rwaight/actions/was/just/graphql-commits-empty.json')
+const graphqlCommitsNoPRsPayload = require('./fixtures/graphql-commits-no-prs.json')
+const graphqlCommitsMergeCommit = require('./fixtures/__generated__/graphql-commits-merge-commit.json')
+const graphqlNullIncludePathMergeCommit = require('./fixtures/__generated__/graphql-include-null-path-merge-commit.json')
+const graphqlIncludePathMergeCommit = require('./fixtures/__generated__/graphql-include-path-src-5.md-merge-commit.json')
+const graphqlCommitsEmpty = require('./fixtures/graphql-commits-empty.json')
 const releaseDrafterFixture = require('./fixtures/release-draft.json')
-const graphqlCommitsOverlappingLabel = require('./fixtures/__generated__/rwaight/actions/was/just/graphql-commits-overlapping-label.json')
-const graphqlCommitsRebaseMerging = require('./fixtures/__generated__/rwaight/actions/was/just/graphql-commits-rebase-merging.json')
-const graphqlCommitsSquashMerging = require('./fixtures/__generated__/rwaight/actions/was/just/graphql-commits-squash-merging.json')
+const graphqlCommitsOverlappingLabel = require('./fixtures/__generated__/graphql-commits-overlapping-label.json')
+const graphqlCommitsRebaseMerging = require('./fixtures/__generated__/graphql-commits-rebase-merging.json')
+const graphqlCommitsSquashMerging = require('./fixtures/__generated__/graphql-commits-squash-merging.json')
 const releaseSharedCommitDate = require('./fixtures/release-shared-commit-date.json')
-const graphqlCommitsForking = require('./fixtures/__generated__/rwaight/actions/was/just/graphql-commits-forking.json')
-const graphqlCommitsPaginated1 = require('./fixtures/rwaight/actions/was/just/graphql-commits-paginated-1.json')
-const graphqlCommitsPaginated2 = require('./fixtures/rwaight/actions/was/just/graphql-commits-paginated-2.json')
+const graphqlCommitsForking = require('./fixtures/__generated__/graphql-commits-forking.json')
+const graphqlCommitsPaginated1 = require('./fixtures/graphql-commits-paginated-1.json')
+const graphqlCommitsPaginated2 = require('./fixtures/graphql-commits-paginated-2.json')
 
 nock.disableNetConnect()
 
@@ -71,7 +71,7 @@ describe('release-drafter', () => {
     logger = []
 
     nock('https://api.github.com')
-      .post('//#/#/#commented out in rwaight/actions//#/app/installations/179208/access_tokens')
+      .post('/app/installations/179208/access_tokens')
       .reply(200, { token: 'test' })
 
     let mockEnvironment = {}
@@ -101,11 +101,11 @@ describe('release-drafter', () => {
       it('does nothing', async () => {
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/contents/.github%2Frelease-drafter.yml'
+            '/repos/toolmantim/release-drafter-test-project/contents/.github%2Frelease-drafter.yml'
           )
           .reply(404)
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/.github/contents/.github%2Frelease-drafter.yml'
+            '/repos/toolmantim/.github/contents/.github%2Frelease-drafter.yml'
           )
           .reply(404)
 
@@ -141,17 +141,17 @@ describe('release-drafter', () => {
           getConfigMock('config-non-master-branch.yml')
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsNoPRsPayload)
 
           nock('https://api.github.com')
-            .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+            .get('/repos/toolmantim/release-drafter-test-project/releases')
             .query(true)
             .reply(200, [releasePayload])
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -205,17 +205,17 @@ describe('release-drafter', () => {
           getConfigMock('config-tag-reference.yml')
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsMergeCommit)
 
           nock('https://api.github.com')
-            .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+            .get('/repos/toolmantim/release-drafter-test-project/releases')
             .query(true)
             .reply(200, [releasePayload])
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -253,20 +253,20 @@ describe('release-drafter', () => {
         getConfigMock('config-previous-tag.yml')
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [])
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -309,19 +309,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [release2Payload, releasePayload, release3Payload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -363,19 +363,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [release2Payload, releasePayload, release3Payload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -415,19 +415,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -459,19 +459,19 @@ describe('release-drafter', () => {
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [releasePayload])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsMergeCommit)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -508,19 +508,19 @@ describe('release-drafter', () => {
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [releasePayload])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsMergeCommit)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -557,19 +557,19 @@ describe('release-drafter', () => {
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [releasePayload])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsMergeCommit)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -606,19 +606,19 @@ describe('release-drafter', () => {
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [releasePayload])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsMergeCommit)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -649,19 +649,19 @@ describe('release-drafter', () => {
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [releasePayload])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsEmpty)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -694,19 +694,19 @@ describe('release-drafter', () => {
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [releasePayload])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsMergeCommit)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -740,12 +740,12 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [release2Payload, releasePayload, release3Payload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) => {
+          .post('/graphql', (body) => {
             expect(body.variables.since).toBe(release3Payload.created_at)
             return body.query.includes(
               'query findCommitsWithAssociatedPullRequests'
@@ -755,7 +755,7 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -789,19 +789,19 @@ describe('release-drafter', () => {
           getConfigMock('config-with-changes-templates.yml')
 
           nock('https://api.github.com')
-            .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+            .get('/repos/toolmantim/release-drafter-test-project/releases')
             .query(true)
             .reply(200, [])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsEmpty)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -834,19 +834,19 @@ describe('release-drafter', () => {
         getConfigMock()
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releaseDrafterFixture])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .patch(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases/11691725',
+            '/repos/toolmantim/release-drafter-test-project/releases/11691725',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -885,19 +885,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-compare-link.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -944,19 +944,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-categories.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -999,19 +999,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-categories-with-other-category.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1056,19 +1056,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-categories-2.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1111,19 +1111,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-categories-3.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsOverlappingLabel)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1166,19 +1166,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-categories-4.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsOverlappingLabel)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1225,19 +1225,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-categories-with-collapse-after.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1283,19 +1283,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-include-pre-releases-true.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [release2Payload, preReleasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1334,19 +1334,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-exclude-labels.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1390,19 +1390,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-include-labels.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1440,19 +1440,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-major-minor-patch-version-template.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1482,19 +1482,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-major-minor-version-template.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1524,19 +1524,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-major-version-template.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1568,19 +1568,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-header-template.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1611,19 +1611,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-footer-template.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1654,19 +1654,19 @@ describe('release-drafter', () => {
         getConfigMock('config-with-header-and-footer-template.yml')
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1700,19 +1700,19 @@ describe('release-drafter', () => {
         )
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1746,19 +1746,19 @@ describe('release-drafter', () => {
         })
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -1794,20 +1794,20 @@ describe('release-drafter', () => {
           getConfigMock()
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsMergeCommit)
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [])
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -1848,20 +1848,20 @@ describe('release-drafter', () => {
           getConfigMock()
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsRebaseMerging)
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [])
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -1902,20 +1902,20 @@ describe('release-drafter', () => {
           getConfigMock()
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsSquashMerging)
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [])
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -1955,19 +1955,19 @@ describe('release-drafter', () => {
 
           nock('https://api.github.com')
             .get(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+              '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
             )
             .reply(200, [releaseSharedCommitDate])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsSquashMerging)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -2005,19 +2005,19 @@ describe('release-drafter', () => {
           getConfigMock()
 
           nock('https://api.github.com')
-            .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+            .get('/repos/toolmantim/release-drafter-test-project/releases')
             .query(true)
             .reply(200, [releasePayload])
 
           nock('https://api.github.com')
-            .post('/rwaight/actions/was/just/graphql', (body) =>
+            .post('/graphql', (body) =>
               body.query.includes('query findCommitsWithAssociatedPullRequests')
             )
             .reply(200, graphqlCommitsForking)
 
           nock('https://api.github.com')
             .post(
-              '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+              '/repos/toolmantim/release-drafter-test-project/releases',
               (body) => {
                 expect(body).toMatchInlineSnapshot(`
                   Object {
@@ -2059,24 +2059,24 @@ describe('release-drafter', () => {
         getConfigMock('config.yml')
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsPaginated1)
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsPaginated2)
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [])
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -2128,20 +2128,20 @@ describe('release-drafter', () => {
         getConfigMock('config-with-replacers.yml')
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsMergeCommit)
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [])
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -2183,24 +2183,24 @@ describe('release-drafter', () => {
       getConfigMock('config-with-sort-by-title.yml')
 
       nock('https://api.github.com')
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithAssociatedPullRequests')
         )
         .reply(200, graphqlCommitsPaginated1)
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithAssociatedPullRequests')
         )
         .reply(200, graphqlCommitsPaginated2)
 
       nock('https://api.github.com')
         .get(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+          '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
         )
         .reply(200, [])
 
       nock('https://api.github.com')
         .post(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+          '/repos/toolmantim/release-drafter-test-project/releases',
           (body) => {
             expect(body).toMatchInlineSnapshot(`
               Object {
@@ -2252,24 +2252,24 @@ describe('release-drafter', () => {
       getConfigMock('config-with-sort-direction-ascending.yml')
 
       nock('https://api.github.com')
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithAssociatedPullRequests')
         )
         .reply(200, graphqlCommitsPaginated1)
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithAssociatedPullRequests')
         )
         .reply(200, graphqlCommitsPaginated2)
 
       nock('https://api.github.com')
         .get(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+          '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
         )
         .reply(200, [])
 
       nock('https://api.github.com')
         .post(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+          '/repos/toolmantim/release-drafter-test-project/releases',
           (body) => {
             expect(body).toMatchInlineSnapshot(`
               Object {
@@ -2321,24 +2321,24 @@ describe('release-drafter', () => {
       getConfigMock('config-with-include-paths.yml')
 
       nock('https://api.github.com')
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithAssociatedPullRequests')
         )
         .reply(200, graphqlCommitsMergeCommit)
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithPathChangesQuery')
         )
         .reply(200, graphqlNullIncludePathMergeCommit)
 
       nock('https://api.github.com')
         .get(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+          '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
         )
         .reply(200, [])
 
       nock('https://api.github.com')
         .post(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+          '/repos/toolmantim/release-drafter-test-project/releases',
           (body) => {
             expect(body).toMatchInlineSnapshot(`
               Object {
@@ -2376,24 +2376,24 @@ describe('release-drafter', () => {
       getConfigMock('config-with-include-paths.yml')
 
       nock('https://api.github.com')
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithAssociatedPullRequests')
         )
         .reply(200, graphqlCommitsMergeCommit)
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithPathChangesQuery')
         )
         .reply(200, graphqlIncludePathMergeCommit)
 
       nock('https://api.github.com')
         .get(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+          '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
         )
         .reply(200, [])
 
       nock('https://api.github.com')
         .post(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+          '/repos/toolmantim/release-drafter-test-project/releases',
           (body) => {
             expect(body).toMatchInlineSnapshot(`
               Object {
@@ -2482,17 +2482,17 @@ describe('release-drafter', () => {
       )
 
       nock('https://api.github.com')
-        .post('/rwaight/actions/was/just/graphql', (body) =>
+        .post('/graphql', (body) =>
           body.query.includes('query findCommitsWithAssociatedPullRequests')
         )
         .reply(200, graphqlCommitsNoPRsPayload)
 
       nock('https://api.github.com')
-        .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+        .get('/repos/toolmantim/release-drafter-test-project/releases')
         .query(true)
         .reply(200, [releasePayload])
         .post(
-          '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+          '/repos/toolmantim/release-drafter-test-project/releases',
           (body) => {
             // Assert that the correct body was used
             expect(body).toMatchInlineSnapshot(`
@@ -2573,19 +2573,19 @@ describe('release-drafter', () => {
     getConfigMock(config)
 
     nock('https://api.github.com')
-      .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+      .get('/repos/toolmantim/release-drafter-test-project/releases')
       .query(true)
       .reply(200, [releasePayload])
 
     nock('https://api.github.com')
-      .post('/rwaight/actions/was/just/graphql', (body) =>
+      .post('/graphql', (body) =>
         body.query.includes('query findCommitsWithAssociatedPullRequests')
       )
       .reply(200, graphqlCommitsMergeCommit)
 
     nock('https://api.github.com')
       .post(
-        '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+        '/repos/toolmantim/release-drafter-test-project/releases',
         (body) => {
           expect(body).toMatchObject(expectedBody)
           return true
@@ -2857,17 +2857,17 @@ describe('release-drafter', () => {
         getConfigMock('config-with-resolved-version-template.yml')
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsEmpty)
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [])
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -2914,17 +2914,17 @@ describe('release-drafter', () => {
         getConfigMock('config-with-resolved-version-template.yml')
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsNoPRsPayload)
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -2969,17 +2969,17 @@ describe('release-drafter', () => {
         getConfigMock('config-with-resolved-version-template.yml')
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsEmpty)
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [])
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -3022,17 +3022,17 @@ describe('release-drafter', () => {
         getConfigMock('config-with-resolved-version-template.yml')
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsNoPRsPayload)
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [releasePayload])
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -3083,17 +3083,17 @@ describe('release-drafter', () => {
         }
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsNoPRsPayload)
 
         nock('https://api.github.com')
-          .get('//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
           .query(true)
           .reply(200, [alteredReleasePayload])
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -3129,19 +3129,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsForking)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -3171,19 +3171,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsForking)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -3213,19 +3213,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsForking)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -3255,19 +3255,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsForking)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -3298,19 +3298,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsForking)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
@@ -3343,19 +3343,19 @@ describe('release-drafter', () => {
 
         nock('https://api.github.com')
           .get(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
+            '/repos/toolmantim/release-drafter-test-project/releases?per_page=100'
           )
           .reply(200, [releasePayload])
 
         nock('https://api.github.com')
-          .post('/rwaight/actions/was/just/graphql', (body) =>
+          .post('/graphql', (body) =>
             body.query.includes('query findCommitsWithAssociatedPullRequests')
           )
           .reply(200, graphqlCommitsForking)
 
         nock('https://api.github.com')
           .post(
-            '//#/#/#commented out in rwaight/actions//#/repos/toolmantim/release-drafter-test-project/releases',
+            '/repos/toolmantim/release-drafter-test-project/releases',
             (body) => {
               expect(body).toMatchInlineSnapshot(`
                 Object {
