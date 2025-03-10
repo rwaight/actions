@@ -97,6 +97,28 @@ check_for_updates() {
                 branch_name="updates/${group}_${name}_$(date +%Y%m)"
                 git checkout -b "$branch_name"
 
+                # Read exclusion list from import-config.yml
+                exclusion_list=($(yq e '.local.update.exclusions[]' "$config_file" 2>/dev/null))
+
+                # Always exclude import-config.yml
+                exclusion_list+=("import-config.yml")
+                
+                # Convert the array into a pattern for `rm` exclusion
+                exclusion_pattern=$(printf "! -name %s " "${exclusion_list[@]}")
+                
+                # print the list of files that will be excluded
+                echo "The following files SHOULD BE excluded:"
+                printf "%s\n" "${exclusion_list[@]}"
+                echo ""
+
+                # Clean up the $local_action_dir while keeping excluded files
+                echo "Cleaning up $local_action_dir while keeping excluded files..."
+                find "$local_action_dir" -mindepth 1 $exclusion_pattern -exec rm -rf {} +
+
+                # print the list of excluded files
+                echo "Cleanup completed. The following files were excluded:"
+                printf "%s\n" "${exclusion_list[@]}"
+                
                 # Step 6: Move all processed files from temp directory to local action directory
                 cp -r "$temp_dir"/* "$local_action_dir"
 
