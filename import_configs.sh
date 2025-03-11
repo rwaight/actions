@@ -120,8 +120,12 @@ function create_or_update_import_config() {
     {
         author=$(sanitize_value "$(yq e '.author // "placeholder"' "$action_file" 2>/dev/null)")
         description=$(sanitize_value "$(yq e '.description // "placeholder"' "$action_file" 2>/dev/null)")
-        inputs=$(sanitize_value "$(yq e '.inputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
-        outputs=$(sanitize_value "$(yq e '.outputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
+        #inputs=$(sanitize_value "$(yq e '.inputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
+        #nope#inputs=$(yq e '.inputs | select(. != null) | keys' "$action_file" 2>/dev/null | grep -v '^#')
+        inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
+        #outputs=$(sanitize_value "$(yq e '.outputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
+        #nope#outputs=$(yq e '.outputs | select(. != null) | keys' "$action_file" 2>/dev/null | grep -v '^#')
+        outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
         runs_using=$(sanitize_value "$(yq e '.runs.using // empty' "$action_file" 2>/dev/null)")
         runs_main=$(sanitize_value "$(yq e '.runs.main // empty' "$action_file" 2>/dev/null)")
     } || {
