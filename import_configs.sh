@@ -16,6 +16,9 @@ target_dirs=($(cat target_dirs.conf))
 # Default exclusions array
 default_exclusions=("README-examples.md" "example-custom-notes.md")
 
+# Default import config file
+default_config="import-config.yml"
+
 # Array to track errors
 error_actions=()
 
@@ -107,11 +110,13 @@ create_or_update_import_config() {
         return
     }
 
-    import_config_file="${group_dir}/${action_dir}/import-config.yml"
+    #import_config_file="${group_dir}/${action_dir}/import-config.yml"
+    import_config_file="${group_dir}/${action_dir}/${default_config}"
     # check to see if the import-config.yml file exists
     if [[ -f $import_config_file ]]; then
         echo "" # Improve CLI readability
-        echo "Updating ${import_config_file}..."
+        echo -n "Processing ${group_dir}/${action_dir} ... "
+        echo " checking ${default_config} ..."
         #
         # Read existing import-config.yml
         import_config=$(yq eval '.' "$import_config_file")
