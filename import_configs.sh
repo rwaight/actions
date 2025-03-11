@@ -58,6 +58,31 @@ sanitize_value() {
     echo "$sanitized_value"
 }
 
+sanitize_multiline() {
+    local value="$1"
+    local sanitized_value=""
+    #
+    # Iterate through each character to remove backticks, double, and single quotes
+    for ((i=0; i<${#value}; i++)); do
+        char="${value:$i:1}"
+        if [[ "$char" != "\"" && "$char" != "'" && "$char" != "\`" ]]; then
+            sanitized_value+="$char"
+        fi
+    done
+    #
+    # Replace multiple newlines with a single space to preserve readability
+    sanitized_value=$(echo "$sanitized_value" | tr '\n' ' ')
+    #
+    # Log warning if any modifications were made
+    if [[ "$sanitized_value" != "$value" ]]; then
+        #echo "[WARNING] Sanitized multiline text: $value → $sanitized_value" | tee -a "$error_log"
+        echo "[WARNING] Sanitized multiline text: $value → $sanitized_value" >> "$error_log"
+    fi
+    #
+    echo "$sanitized_value"
+}
+
+
 # Function to fetch the latest version from GitHub API
 fetch_latest_version() {
     local repo_owner="$1"
@@ -118,12 +143,39 @@ create_or_update_import_config() {
     #
     # Read required fields from action file while filtering out null values
     {
-        author=$(sanitize_value "$(yq e '.author // "placeholder"' "$action_file" 2>/dev/null)")
-        description=$(sanitize_value "$(yq e '.description // "placeholder"' "$action_file" 2>/dev/null)")
-        inputs=$(sanitize_value "$(yq e '.inputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
-        outputs=$(sanitize_value "$(yq e '.outputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
-        runs_using=$(sanitize_value "$(yq e '.runs.using // empty' "$action_file" 2>/dev/null)")
-        runs_main=$(sanitize_value "$(yq e '.runs.main // empty' "$action_file" 2>/dev/null)")
+        # the commented out code below KIND OF worked prior to adding error checks
+        # author=$(sanitize_value "$(yq e '.author // "placeholder"' "$action_file" 2>/dev/null)")
+        # description=$(sanitize_value "$(yq e '.description // "placeholder"' "$action_file" 2>/dev/null)")
+        # inputs=$(sanitize_value "$(yq e '.inputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
+        # outputs=$(sanitize_value "$(yq e '.outputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
+        # runs_using=$(sanitize_value "$(yq e '.runs.using // empty' "$action_file" 2>/dev/null)")
+        # runs_main=$(sanitize_value "$(yq e '.runs.main // empty' "$action_file" 2>/dev/null)")
+        # the commented out code above KIND OF worked prior to adding error checks
+        raw_author=$(yq e '.author // "placeholder"' "$action_file" 2>/dev/null)
+        author=$(sanitize_multiline "$raw_author")
+        #
+        raw_description=$(yq e '.description // "placeholder"' "$action_file" 2>/dev/null)
+        description=$(sanitize_multiline "$raw_description")
+        #
+        # Handle multiline descriptions explicitly
+        if [[ "$(yq e '.description style' "$action_file")" == "folded" ]]; then
+            raw_description=$(yq e '.description' "$action_file")
+            description=$(sanitize_multiline "$raw_description")
+        fi
+        #
+        # Extract inputs & outputs while skipping comments
+        raw_inputs=$(yq e '.inputs | select(. != null) | keys' "$action_file" 2>/dev/null | grep -v '^#')
+        inputs=$(sanitize_multiline "$raw_inputs")
+        #
+        raw_outputs=$(yq e '.outputs | select(. != null) | keys' "$action_file" 2>/dev/null | grep -v '^#')
+        outputs=$(sanitize_multiline "$raw_outputs")
+        #
+        raw_runs_using=$(yq e '.runs.using // empty' "$action_file" 2>/dev/null)
+        runs_using=$(sanitize_multiline "$raw_runs_using")
+        #
+        raw_runs_main=$(yq e '.runs.main // empty' "$action_file" 2>/dev/null)
+        runs_main=$(sanitize_multiline "$raw_runs_main")
+        #
     } || {
         echo "[ERROR] A general issue occurred while reading fields in $action_file" | tee -a "$error_log"
         error_actions+=("${group_dir}/${action_dir}")
