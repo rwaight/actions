@@ -125,16 +125,26 @@ function create_or_update_import_config() {
         #description=$(sanitize_value "$(yq e '.description // "placeholder"' "$action_file" 2>/dev/null)")
         description=$(yq e '.description' "$action_file")
         if [[ "$description" == "null" ]]; then unset description; fi
+        #
         #inputs=$(sanitize_value "$(yq e '.inputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
         #nope#inputs=$(yq e '.inputs | select(. != null) | keys' "$action_file" 2>/dev/null | grep -v '^#')
         #inputs=$(yq e '.inputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
         inputs=$(yq e '.inputs | select(. != null) | keys' "$action_file" | grep -v '^#' | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
+        if [[ "$inputs" == "null" ]]; then unset inputs; fi
+        #
         #outputs=$(sanitize_value "$(yq e '.outputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
         #nope#outputs=$(yq e '.outputs | select(. != null) | keys' "$action_file" 2>/dev/null | grep -v '^#')
         #outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
         outputs=$(yq e '.outputs | keys' "$action_file" | grep -v '^#' | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
-        runs_using=$(sanitize_value "$(yq e '.runs.using // empty' "$action_file" 2>/dev/null)")
-        runs_main=$(sanitize_value "$(yq e '.runs.main // empty' "$action_file" 2>/dev/null)")
+        if [[ "$outputs" == "null" ]]; then unset outputs; fi
+        #
+        #runs_using=$(sanitize_value "$(yq e '.runs.using // empty' "$action_file" 2>/dev/null)")
+        runs_using=$(yq e '.runs.using' "$action_file")
+        #
+        #runs_main=$(sanitize_value "$(yq e '.runs.main // empty' "$action_file" 2>/dev/null)")
+        runs_main=$(yq e '.runs.main' "$action_file")
+        if [[ "$runs_main" == "null" ]]; then unset runs_main; fi
+        #
     } || {
         echo "[ERROR] A general issue occurred while reading fields in $action_file" | tee -a "$error_log"
         error_actions+=("${group_dir}/${action_dir}")
