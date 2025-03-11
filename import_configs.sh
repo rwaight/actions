@@ -23,7 +23,7 @@ default_config="import-config.yml"
 error_actions=()
 
 # Function to read the action.yml or action.yaml file
-read_action_file() {
+function read_action_file() {
     local action_dir=$1
     if [[ -f "${action_dir}/action.yml" ]]; then
         echo "${action_dir}/action.yml"
@@ -35,7 +35,7 @@ read_action_file() {
 }
 
 # Function to sanitize values (removes backticks to avoid parsing issues)
-sanitize_value() {
+function sanitize_value() {
     local value="$1"
     local sanitized_value=""
     #
@@ -59,7 +59,7 @@ sanitize_value() {
 }
 
 # Function to fetch the latest version from GitHub API
-fetch_latest_version() {
+function fetch_latest_version() {
     local repo_owner="$1"
     local repo_name="$2"
     #
@@ -82,7 +82,7 @@ fetch_latest_version() {
 }
 
 # Function to create or update import-config.yml for each action
-create_or_update_import_config() {
+function create_or_update_import_config() {
     local group_dir=$1
     local action_dir=$2
     # Set initial values for import-config.yml
