@@ -136,7 +136,7 @@ function create_or_update_import_config() {
         #outputs=$(sanitize_value "$(yq e '.outputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
         #nope#outputs=$(yq e '.outputs | select(. != null) | keys' "$action_file" 2>/dev/null | grep -v '^#')
         #outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
-        outputs=$(yq e '.outputs | keys' "$action_file" | grep -v '^#' | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
+        outputs=$(yq e '.outputs | select(. != null) | keys' "$action_file" | grep -v '^#' | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
         if [[ "$outputs" == "null" ]]; then unset outputs; fi
         #
         #runs_using=$(sanitize_value "$(yq e '.runs.using // empty' "$action_file" 2>/dev/null)")
