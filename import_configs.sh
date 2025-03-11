@@ -37,25 +37,25 @@ read_action_file() {
 # Function to sanitize values (removes backticks to avoid parsing issues)
 sanitize_value() {
     local value="$1"
-    # Remove backticks
-    if [[ "$value" == *"\`"* ]]; then
-        echo "[WARNING] Backticks found in value: $value" | tee -a "$error_log"
-        value="${value//\`/}"  # Remove backticks
-    fi
-    # Replace double quotes with single quotes and escape existing single quotes
-    if [[ "$value" == *"\""* ]]; then
-        echo "[WARNING] Double quotes found in value: $value" | tee -a "$error_log"
-        # Replace double quotes with single quotes and escape existing single quotes
-        value="${value//\"/\'}"       # Replace " with '
-        value="${value//\'/\'\'}"     # Escape single quotes by doubling them
-    fi
-    # Replace double quotes with single quotes
-    if [[ "$value" == *'"'* ]]; then
-        echo "[WARNING] Double quotes found in value: $value" | tee -a "$error_log"
-        value="${value//\"/\'}"  # Replace double quotes with single quotes
+    local sanitized_value=""
+    #
+    # Iterate through each character in the string
+    for ((i=0; i<${#value}; i++)); do
+        char="${value:$i:1}"
+        #
+        # Skip backticks (`), double quotes ("), and single quotes (')
+        if [[ "$char" != "\"" && "$char" != "'" && "$char" != "\`" ]]; then
+            sanitized_value+="$char"
+        fi
+    done
+    #
+    # Log warning if any modifications were made
+    if [[ "$sanitized_value" != "$value" ]]; then
+        #echo "[WARNING] Special characters removed: $value → $sanitized_value" | tee -a "$error_log"
+        echo "[WARNING] Special characters removed: $value → $sanitized_value" >> "$error_log"
     fi
     #
-    echo "$value"
+    echo "$sanitized_value"
 }
 
 # Function to fetch the latest version from GitHub API
