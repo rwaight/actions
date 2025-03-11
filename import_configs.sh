@@ -1,10 +1,21 @@
 #!/bin/bash
 
+# Define the error log file
+error_log="import_configs_errors.log"
+> "$error_log"  # Clear the log file at the start
+
+# Print yq and jq versions for debugging
+echo "Running yq version: $(yq --version 2>&1)" | tee -a "$error_log"
+echo "Running jq version: $(jq --version 2>&1)" | tee -a "$error_log"
+
 # Read target directories from the config file
 target_dirs=($(cat target_dirs.conf))
 
 # Default exclusions array
 default_exclusions=("README-examples.md" "example-custom-notes.md")
+
+# Array to track errors
+error_actions=()
 
 # Function to read the action.yml or action.yaml file
 read_action_file() {
@@ -18,20 +29,47 @@ read_action_file() {
     fi
 }
 
+# Function to sanitize values (removes backticks to avoid parsing issues)
+sanitize_value() {
+    local value="$1"
+    if [[ "$value" == *"\`"* ]]; then
+        echo "[WARNING] Backticks found in value: $value" | tee -a "$error_log"
+        value="${value//\`/}"  # Remove backticks
+    fi
+    echo "$value"
+}
+
+# Function to fetch the latest version from GitHub API
+fetch_latest_version() {
+    local author="$1"
+    local repo="$2"
+    
+    latest_version=$(curl -s "https://api.github.com/repos/${author}/${repo}/releases/latest" | jq -r .tag_name)
+    
+    if [[ "$latest_version" == "null" || -z "$latest_version" ]]; then
+        echo "[ERROR] Unable to fetch latest version for $author/$repo" | tee -a "$error_log"
+        latest_version=""
+    fi
+    
+    echo "$latest_version"
+}
+
 # Function to create or update import-config.yml for each action
 create_or_update_import_config() {
     local group_dir=$1
     local action_dir=$2
-
     # Set initial values for import-config.yml
-    group=$(basename "$group_dir")
-    name=$(basename "$action_dir")
+    local group=$(basename "$group_dir")
+    local name=$(basename "$action_dir")
+    local import_config_file="${group_dir}/${action_dir}/import-config.yml"
+
+    echo "Processing: Group = $group_dir, Action = $action_dir"
 
     # Determine the action file (either action.yml or action.yaml)
     action_file=$(read_action_file "${group_dir}/${action_dir}")
-
     if [[ -z "$action_file" ]]; then
-        echo "No action.yml or action.yaml found in ${group_dir}/${action_dir}. Skipping..."
+        #echo "No action.yml or action.yaml found in ${group_dir}/${action_dir}. Skipping..."
+        echo "[ERROR] No action.yml or action.yaml found in ${group_dir}/${action_dir}. Skipping..." | tee -a "$error_log"
         return
     fi
 
