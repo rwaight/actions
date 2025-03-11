@@ -88,7 +88,8 @@ function create_or_update_import_config() {
     # Set initial values for import-config.yml
     local group=$(basename "$group_dir")
     local name=$(basename "$action_dir")
-    local import_config_file="${group_dir}/${action_dir}/import-config.yml"
+    #local import_config_file="${group_dir}/${action_dir}/import-config.yml"
+    local import_config_file="${group_dir}/${action_dir}/${default_config}"
 
     echo "Processing: Group = $group_dir, Action = $action_dir"
 
@@ -151,8 +152,8 @@ function create_or_update_import_config() {
         return
     }
 
-    #import_config_file="${group_dir}/${action_dir}/import-config.yml"
-    import_config_file="${group_dir}/${action_dir}/${default_config}"
+    #already declared above# ###import_config_file="${group_dir}/${action_dir}/import-config.yml"
+    #already declared above# #import_config_file="${group_dir}/${action_dir}/${default_config}"
     # check to see if the import-config.yml file exists
     if [[ -f $import_config_file ]]; then
         #echo "" # Improve CLI readability
