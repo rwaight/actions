@@ -53,8 +53,8 @@ fetch_latest_version() {
     ##latest_version=$(curl -s "https://api.github.com/repos/${repo_owner}/${repo_name}/releases/latest" | jq -r .tag_name)
     # use 'gh release' or 'gh api' to fetch the latest version
     # https://docs.github.com/rest/releases/releases#get-the-latest-release
-    latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo '${repo_owner}/${repo_name}')
-    #latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo '${repo_owner}/${repo_name}')
+    latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo "${repo_owner}/${repo_name}")
+    #latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo "${repo_owner}/${repo_name}")
     #latest_version=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/releases/latest")
     #
     if [[ "$latest_version" == "null" || -z "$latest_version" ]]; then
