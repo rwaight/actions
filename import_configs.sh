@@ -234,23 +234,40 @@ create_or_update_import_config() {
             imported=true
             yq e -i ".imported = true" "$import_config_file"
             #
-            read -p "Enter source action name [default: $name]: " source_action_name
-            source_action_name=${source_action_name:-$name}
+            # the commented out code below worked prior to adding error checks
+            # read -p "Enter source action name [default: $name]: " source_action_name
+            # source_action_name=${source_action_name:-$name}
+            # read -p "Enter source action author: " source_action_author
+            # read -p "Enter source GitHub repo name [default: $name]: " source_repo_name
+            # source_repo_name=${source_repo_name:-$name}
+            # source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
+            # read -p "Have there been any local modifications? (true/false): " modifications
+            # read -p "Enter current version used: " current_version
+            # latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
+            # did not have the 'fetch_latest_version' function before error checks
+            # the commented out code above worked prior to adding error checks
+            read -p "Enter source action name [default: $action_dir]: " source_action_name
+            source_action_name=${source_action_name:-$action_dir}
+            #
             read -p "Enter source action author: " source_action_author
-            read -p "Enter source GitHub repo name [default: $name]: " source_repo_name
-            source_repo_name=${source_repo_name:-$name}
+            read -p "Enter source GitHub repo name [default: $action_dir]: " source_repo_name
+            source_repo_name=${source_repo_name:-$action_dir}
+            #
             source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
             read -p "Have there been any local modifications? (true/false): " modifications
             read -p "Enter current version used: " current_version
-            latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
+            #
+            latest_version=$(fetch_latest_version "$source_action_author" "$source_repo_name")
             update_available=false
             if [[ $current_version != $latest_version ]]; then
                 update_available=true
             fi
             #
+            # =( # this was SKIPPED in 'import_configs_broken.sh' # =( #
             if [[ $(yq e '.author' "$import_config_file") == "placeholder" ]]; then
                 yq e -i ".author = \"$source_action_author\"" "$import_config_file"
             fi
+            #
             yq e -i ".local.modifications = $modifications" "$import_config_file"
             yq e -i ".source.action_name = \"$source_action_name\"" "$import_config_file"
             yq e -i ".source.author = \"$source_action_author\"" "$import_config_file"
@@ -259,11 +276,13 @@ create_or_update_import_config() {
             yq e -i ".source.current_version = \"$current_version\"" "$import_config_file"
             yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
             yq e -i ".source.update_available = $update_available" "$import_config_file"
+            # end of # if [[ $action_type == "imported" ]]; then # block
         else
             yq e -i ".local.author = \"$local_author\"" "$import_config_file"
             yq e -i ".local.modifications = true" "$import_config_file"
         fi
-
+        #
+        # =( # this was SKIPPED in 'import_configs_broken.sh' # =( #
         # Add specs block, including action_file, inputs, outputs, and runs fields
         yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
         yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
@@ -281,10 +300,10 @@ create_or_update_import_config() {
         # Add tests block
         yq e -i ".tests._comment = \"reserved for future use\"" "$import_config_file"
     fi
-
+    #
     # # Sort the import-config.yml file alphabetically
     # yq eval --inplace 'sort_keys(..)' "$import_config_file"
-
+    #
     echo "Processed import-config.yml for ${group_dir}/${action_dir}"
     echo ""
 }
@@ -298,3 +317,5 @@ for group_dir in "${target_dirs[@]}"; do
         fi
     done
 done
+
+echo "[INFO] Finished processing. Check $error_log for error details."
