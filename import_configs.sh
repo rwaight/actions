@@ -120,9 +120,9 @@ create_or_update_import_config() {
     import_config_file="${group_dir}/${action_dir}/${default_config}"
     # check to see if the import-config.yml file exists
     if [[ -f $import_config_file ]]; then
-        echo "" # Improve CLI readability
-        echo -n "Processing ${group_dir}/${action_dir} ... "
-        echo " checking ${default_config} ..."
+        #echo "" # Improve CLI readability
+        #echo -n "Processing ${group_dir}/${action_dir} ... "
+        echo "    Checking ${default_config} ..."
         #
         # Read existing import-config.yml
         import_config=$(yq eval '.' "$import_config_file")
@@ -185,7 +185,7 @@ create_or_update_import_config() {
                 #yq e -i ".source.update_available = true" "$import_config_file"
                 yq e -i ".source.update_available = $update_available" "$import_config_file"
                 #echo "[UPDATE] New version available for $source_repo_name: $latest_version" | tee -a "$error_log"
-                echo "[UPDATE] New version available for ${group_dir}/${action_dir}: $latest_version" | tee -a "$error_log"
+                echo "  [UPDATE] New version available for ${group_dir}/${action_dir}: $latest_version" | tee -a "$error_log"
             else
                 #yq e -i ".source.update_available = false" "$import_config_file"
                 yq e -i ".source.update_available = $update_available" "$import_config_file"
@@ -322,7 +322,7 @@ create_or_update_import_config() {
     # # Sort the import-config.yml file alphabetically
     # yq eval --inplace 'sort_keys(..)' "$import_config_file"
     #
-    echo "Processed import-config.yml for ${group_dir}/${action_dir}"
+    echo "    Processed import-config.yml for ${group_dir}/${action_dir}"
     echo ""
 }
 
