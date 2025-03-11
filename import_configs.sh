@@ -3,195 +3,225 @@
 # Read target directories from the config file
 target_dirs=($(cat target_dirs.conf))
 
-# Function to read the import-config.yml file and check for updates
-check_for_updates() {
-    local config_file=$1
+# Default exclusions array
+default_exclusions=("README-examples.md" "example-custom-notes.md")
 
-    if [[ ! -f "$config_file" ]]; then
-        echo "No import-config.yml found in $config_file. Skipping..."
-        return
-    fi
-
-    group=$(yq e '.group' "$config_file")
-    name=$(yq e '.name' "$config_file")
-
-    if [[ "$specify_action" == "yes" && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
-        echo "Skipping $group/$name..."
-        return
-    fi
-
-    echo "Processing $group/$name..."
-
-    imported=$(yq e '.imported' "$config_file")
-
-    if [[ "$imported" == "true" ]]; then
-        source_repo_url=$(yq e '.source.repo_url' "$config_file")
-        source_repo_name=$(yq e '.source.repo_name' "$config_file")
-        source_repo_author=$(yq e '.source.author' "$config_file")
-        current_version=$(yq e '.source.current_version' "$config_file")
-        latest_version=$(yq e '.source.latest_version' "$config_file")
-        update_available=$(yq e '.source.update_available' "$config_file")
-
-        echo "Checking for updates from $source_repo_url..."
-
-        if [[ "$update_available" == "true" ]]; then
-            echo "Update available for $config_file"
-            repo_latest_tag=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/releases/latest" | jq -r '.tag_name')
-            repo_latest_tag_data=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${repo_latest_tag}" | jq -r '.object.type,.object.sha')
-            repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
-            repo_latest_sha=${repo_latest_tag_data##*$'\n'}
-            echo "Downloading updated source files for version $latest_version..."
-
-            # Prep the local template files
-            local_repo_dir=$(pwd)
-            template_file="$local_repo_dir/assets/imported_readme_template.md"
-
-            # Create a temporary directory for downloading the updated source files
-            temp_dir=$(mktemp -d)
-
-            # Navigate to the temporary directory
-            cd "$temp_dir" || exit
-
-            # Clone the specific version of the repository
-            git clone --branch "$latest_version" --depth 1 "$source_repo_url" .
-
-            if [[ $? -eq 0 ]]; then
-                echo "Downloaded updated source files to $temp_dir"
-
-                # Copy the template file to the temp directory
-                template_in_temp="$temp_dir/imported_readme_template.tempmd"
-                cp "$template_file" "$template_in_temp"
-
-                # Step 1: Rename the .github directory to __dot_github
-                if [[ -d ".github" ]]; then
-                    mv .github __dot_github
-                fi
-
-                # Step 2: Rename .yml files in __dot_github to have .disabled
-                for f in __dot_github/*.yml; do
-                    [ -e "$f" ] && mv "$f" "${f}.disabled"
-                done
-
-                # Step 3: Rename .yml files in __dot_github/workflows to have .disabled
-                for f in __dot_github/workflows/*.yml; do
-                    [ -e "$f" ] && mv "$f" "${f}.disabled"
-                done
-
-                # Step 4: Prepend repo_name to markdown files in top-level source directory
-                for f in *.md; do
-                    [ -e "$f" ] && mv "$f" "${source_repo_name}__$f"
-                done
-
-                # Step 5: Copy .yml files in top-level source directory with prepended repo_name
-                for f in *.yml; do
-                    [ -e "$f" ] && cp "$f" "${source_repo_name}__$f"
-                done
-
-                # Set the local action directory variable
-                local_action_dir=$(dirname "$config_file")
-
-                # Checkout main branch and create a new branch for the update
-                #cd "$local_action_dir" || exit
-                cd "$local_repo_dir" || exit
-                git checkout main
-                branch_name="updates/${group}_${name}_$(date +%Y%m)"
-                git checkout -b "$branch_name"
-
-                # Read exclusion list from import-config.yml
-                exclusion_list=($(yq e '.local.update.exclusions[]' "$config_file" 2>/dev/null))
-
-                # Always exclude import-config.yml
-                exclusion_list+=("import-config.yml")
-                
-                # Convert the array into a pattern for `rm` exclusion
-                exclusion_pattern=$(printf "! -name %s " "${exclusion_list[@]}")
-                
-                # print the list of files that will be excluded
-                echo "The following files SHOULD BE excluded:"
-                printf "%s\n" "${exclusion_list[@]}"
-                echo ""
-
-                # Clean up the $local_action_dir while keeping excluded files
-                echo "Cleaning up $local_action_dir while keeping excluded files..."
-                find "$local_action_dir" -mindepth 1 $exclusion_pattern -exec rm -rf {} +
-
-                # print the list of excluded files
-                echo "Cleanup completed. The following files were excluded:"
-                printf "%s\n" "${exclusion_list[@]}"
-                
-                # Step 6: Move all processed files from temp directory to local action directory
-                # Ensure dotfiles are included when copying from $temp_dir to $local_action_dir
-                shopt -s dotglob  # Enable globbing for dotfiles
-                cp -r "$temp_dir"/* "$local_action_dir"
-                shopt -u dotglob  # Disable dotglob after use
-
-                # Step 7: Create a new README.md from the template file
-                #template_file="$local_repo_dir/assets/imported_readme_template.md"
-                template_copied="$local_action_dir/imported_readme_template.tempmd"
-                new_readme="$local_action_dir/README.md"
-                if [[ -f "$template_copied" ]]; then
-                    #cp "$template_file" "$new_readme"
-                    mv "$template_copied" "$new_readme"
-
-                    # Place for find/replace commands
-                    sed -i "s/SED_GROUP/${group}/g" "$new_readme"
-                    sed -i "s/SED_NAME/${name}/g" "$new_readme"
-                    sed -i "s/SED_REPONAME/${source_repo_name}/g" "$new_readme"
-                    sed -i "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
-                    ##not used##sed -i "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
-                    sed -i "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
-                    sed -i "s/SED_NEWCOMMITSHA/${repo_latest_sha}/g" "$new_readme"
-                    # Add additional find/replace commands as needed
-                fi
-
-                # Add changes to git and commit
-                git add "$local_action_dir"
-                echo "  Skipping running the 'git commit' command for now"
-                echo ""
-                echo "  Now you need to manually add the commit before continuing. "
-                echo "  Recommended message:    chore($group): update $name to version $latest_version "
-                #git commit -m "chore($group): update $name to version $latest_version"
-
-                # Push the new branch to the remote repository
-                echo ""
-                echo "  Skipping running the 'git push origin \"$branch_name\"' command for now"
-                #git push origin "$branch_name"
-                echo "  you will need to push to origin later... "
-
-                # Clean up the temporary directory
-                read -p "Do you want to clean up the temporary directory $temp_dir? (y/n): " cleanup
-                if [[ $cleanup == "y" ]]; then
-                    rm -rf "$temp_dir"
-                fi
-
-                # Update the current version in import-config.yml
-                yq e -i ".source.current_version = \"$latest_version\"" "$config_file"
-                yq e -i ".source.update_available = false" "$config_file"
-
-                echo "Updated local version of the action in $local_action_dir"
-                echo "Created a new branch $branch_name for the update"
-            else
-                echo "Failed to download the updated source files for $config_file"
-            fi
-        else
-            echo "No update available for $config_file"
-        fi
+# Function to read the action.yml or action.yaml file
+read_action_file() {
+    local action_dir=$1
+    if [[ -f "${action_dir}/action.yml" ]]; then
+        echo "${action_dir}/action.yml"
+    elif [[ -f "${action_dir}/action.yaml" ]]; then
+        echo "${action_dir}/action.yaml"
     else
-        echo "Action in $config_file is not imported. Skipping..."
+        echo ""
     fi
 }
 
-# Prompt to specify whether to specify an action or use the target_dirs config file
-read -p "Do you want to specify a group and action? (yes/no): " specify_action
+# Function to create or update import-config.yml for each action
+create_or_update_import_config() {
+    local group_dir=$1
+    local action_dir=$2
 
-if [[ "$specify_action" == "yes" ]]; then
-    read -p "Enter the group name: " specified_group
-    read -p "Enter the action name: " specified_action
-fi
+    # Set initial values for import-config.yml
+    group=$(basename "$group_dir")
+    name=$(basename "$action_dir")
 
-# Iterate through each target directory and check for updates
-for target_dir in "${target_dirs[@]}"; do
-    find "$target_dir" -name "import-config.yml" | while read -r config_file; do
-        check_for_updates "$config_file"
+    # Determine the action file (either action.yml or action.yaml)
+    action_file=$(read_action_file "${group_dir}/${action_dir}")
+
+    if [[ -z "$action_file" ]]; then
+        echo "No action.yml or action.yaml found in ${group_dir}/${action_dir}. Skipping..."
+        return
+    fi
+
+    # Extract the action file extension
+    action_file_extension=$(basename "$action_file")
+
+    # Read first level keys of author, description, inputs, outputs, and runs from the action file
+    author=$(yq e '.author' "$action_file")
+    if [[ "$author" == "null" ]]; then unset author; fi
+    description=$(yq e '.description' "$action_file")
+    if [[ "$description" == "null" ]]; then unset description; fi
+    inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
+    outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
+    runs_using=$(yq e '.runs.using' "$action_file")
+    runs_main=$(yq e '.runs.main' "$action_file")
+    if [[ "$runs_main" == "null" ]]; then unset runs_main; fi
+
+    import_config_file="${group_dir}/${action_dir}/import-config.yml"
+
+    if [[ -f $import_config_file ]]; then
+        echo ""
+        echo "Updating ${import_config_file}..."
+
+        # Read existing import-config.yml
+        import_config=$(yq eval '.' "$import_config_file")
+
+        # Update author, description, specs.action_file, specs.inputs, and specs.outputs fields
+        if [[ -n $author ]]; then
+            yq e -i ".author = \"$author\"" "$import_config_file"
+        else
+            yq e -i ".author = \"placeholder\"" "$import_config_file"
+        fi
+        #
+        if [[ -n $description ]]; then
+            yq e -i ".description = \"$description\"" "$import_config_file"
+        else
+            yq e -i ".description = \"placeholder\"" "$import_config_file"
+        fi
+        yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
+        yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
+        yq -i '.specs.inputs style="flow"' "$import_config_file"
+        #import_config=$(echo "$import_config" | yq eval ".specs.inputs = [$inputs]" -)
+        yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
+        yq -i '.specs.outputs style="flow"' "$import_config_file"
+        #import_config=$(echo "$import_config" | yq eval ".specs.outputs = [$outputs]" -)
+
+        # Update runs field if using and main are present
+        if [[ -n $runs_using ]]; then
+            yq e -i ".specs.runs.using = \"$runs_using\"" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".specs.runs.using = \"$runs_using\"" -)
+            if [[ -n $runs_main ]]; then
+                yq e -i ".specs.runs.main = \"$runs_main\"" "$import_config_file"
+                #import_config=$(echo "$import_config" | yq eval ".specs.runs.main = \"$runs_main\"" -)
+            else
+                yq e -i "del(.specs.runs.main)" "$import_config_file"
+                #import_config=$(echo "$import_config" | yq eval "del(.specs.runs.main)" -)
+            fi
+        fi
+
+        # Check for updates if imported
+        if [[ $(yq e '.imported' "$import_config_file") == "true" ]]; then
+            source_action_author=$(yq e '.source.author' "$import_config_file")
+            #source_action_author=$(echo "$import_config" | yq eval '.source.author' -)
+            source_repo_name=$(yq e '.source.repo_name' "$import_config_file")
+            #source_repo_name=$(echo "$import_config" | yq eval '.source.repo_name' -)
+            source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
+            current_version=$(yq e '.source.current_version' "$import_config_file")
+            #current_version=$(echo "$import_config" | yq eval '.source.current_version' -)
+            latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
+            update_available=false
+            if [[ $current_version != $latest_version ]]; then
+                update_available=true
+            fi
+            #
+            if [[ $(yq e '.author' "$import_config_file") == "placeholder" ]]; then
+                yq e -i ".author = \"$source_action_author\"" "$import_config_file"
+            fi
+            # Update source fields
+            yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".source.latest_version = \"$latest_version\"" -)
+            yq e -i ".source.update_available = $update_available" "$import_config_file"
+            #import_config=$(echo "$import_config" | yq eval ".source.update_available = $update_available" -)
+        fi
+        # Check if local.update.exclusions exists, and add it if missing
+        exclusions_exist=$(yq e '.local.update.exclusions' "$import_config_file" 2>/dev/null)
+        if [[ "$exclusions_exist" == "null" || -z "$exclusions_exist" ]]; then
+            echo "Adding default exclusions to ${import_config_file}..."
+            yq e -i '.local.update.exclusions = []' "$import_config_file"
+        fi
+        # Ensure default exclusions are present
+        for exclusion in "${default_exclusions[@]}"; do
+            exists=$(yq e ".local.update.exclusions | contains([\"$exclusion\"])" "$import_config_file")
+            if [[ "$exists" != "true" ]]; then
+                yq e -i ".local.update.exclusions += [\"$exclusion\"]" "$import_config_file"
+            fi
+        done
+        #
+    else
+        # Prompt the user to find out if the action is imported or locally-created
+        read -p "Is the action in ${group_dir}/${action_dir} imported or locally-created (imported/local)? " action_type
+
+        # Set initial variables
+        imported=false
+        local_author="rwaight"
+        modifications=false
+
+        # Create an empty import-config.yml file
+        touch "$import_config_file"
+
+        # Set initial fields
+        yq e -i ".name = \"$name\"" "$import_config_file"
+        if [[ -n $author ]]; then
+            yq e -i ".author = \"$author\"" "$import_config_file"
+        else
+            yq e -i ".author = \"placeholder\"" "$import_config_file"
+        fi
+        #
+        if [[ -n $description ]]; then
+            yq e -i ".description = \"$description\"" "$import_config_file"
+        else
+            yq e -i ".description = \"placeholder\"" "$import_config_file"
+        fi
+        yq e -i ".group = \"$group\"" "$import_config_file"
+        yq e -i ".imported = false" "$import_config_file"
+
+        # Add local and source blocks
+        if [[ $action_type == "imported" ]]; then
+            imported=true
+            yq e -i ".imported = true" "$import_config_file"
+            read -p "Enter source action name [default: $name]: " source_action_name
+            source_action_name=${source_action_name:-$name}
+            read -p "Enter source action author: " source_action_author
+            read -p "Enter source GitHub repo name [default: $name]: " source_repo_name
+            source_repo_name=${source_repo_name:-$name}
+            source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
+            read -p "Have there been any local modifications? (true/false): " modifications
+            read -p "Enter current version used: " current_version
+            latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
+            update_available=false
+            if [[ $current_version != $latest_version ]]; then
+                update_available=true
+            fi
+            #
+            if [[ $(yq e '.author' "$import_config_file") == "placeholder" ]]; then
+                yq e -i ".author = \"$source_action_author\"" "$import_config_file"
+            fi
+            yq e -i ".local.modifications = $modifications" "$import_config_file"
+            yq e -i ".source.action_name = \"$source_action_name\"" "$import_config_file"
+            yq e -i ".source.author = \"$source_action_author\"" "$import_config_file"
+            yq e -i ".source.repo_name = \"$source_repo_name\"" "$import_config_file"
+            yq e -i ".source.repo_url = \"$source_repo_url\"" "$import_config_file"
+            yq e -i ".source.current_version = \"$current_version\"" "$import_config_file"
+            yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
+            yq e -i ".source.update_available = $update_available" "$import_config_file"
+        else
+            yq e -i ".local.author = \"$local_author\"" "$import_config_file"
+            yq e -i ".local.modifications = true" "$import_config_file"
+        fi
+
+        # Add specs block, including action_file, inputs, outputs, and runs fields
+        yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
+        yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
+        yq -i '.specs.inputs style="flow"' "$import_config_file"
+        yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
+        yq -i '.specs.outputs style="flow"' "$import_config_file"
+        if [[ -n $runs_using ]]; then
+            yq e -i ".specs.runs.using = \"$runs_using\"" "$import_config_file"
+            if [[ -n $runs_main ]]; then
+                yq e -i ".specs.runs.main = \"$runs_main\"" "$import_config_file"
+            fi
+        fi
+        # Add the exclusions field with default values
+        yq e -i ".local.update.exclusions = [\"README-examples.md\", \"example-custom-notes.md\"]" "$import_config_file"
+        # Add tests block
+        yq e -i ".tests._comment = \"reserved for future use\"" "$import_config_file"
+    fi
+
+    # # Sort the import-config.yml file alphabetically
+    # yq eval --inplace 'sort_keys(..)' "$import_config_file"
+
+    echo "Processed import-config.yml for ${group_dir}/${action_dir}"
+    echo ""
+}
+
+# Iterate through each group directory
+for group_dir in "${target_dirs[@]}"; do
+    for action_subdir in "$group_dir"/*; do
+        if [[ -d "$action_subdir" ]]; then
+            action_dir=$(basename "$action_subdir")
+            create_or_update_import_config "$group_dir" "$action_dir"
+        fi
     done
 done
