@@ -118,8 +118,13 @@ function create_or_update_import_config() {
     #
     # Read required fields from action file while filtering out null values
     {
-        author=$(sanitize_value "$(yq e '.author // "placeholder"' "$action_file" 2>/dev/null)")
-        description=$(sanitize_value "$(yq e '.description // "placeholder"' "$action_file" 2>/dev/null)")
+        #author=$(sanitize_value "$(yq e '.author // "placeholder"' "$action_file" 2>/dev/null)")
+        author=$(yq e '.author' "$action_file")
+        if [[ "$author" == "null" ]]; then unset author; fi
+        #
+        #description=$(sanitize_value "$(yq e '.description // "placeholder"' "$action_file" 2>/dev/null)")
+        description=$(yq e '.description' "$action_file")
+        if [[ "$description" == "null" ]]; then unset description; fi
         #inputs=$(sanitize_value "$(yq e '.inputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
         #nope#inputs=$(yq e '.inputs | select(. != null) | keys' "$action_file" 2>/dev/null | grep -v '^#')
         inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
