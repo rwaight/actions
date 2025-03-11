@@ -49,7 +49,13 @@ fetch_latest_version() {
     local repo_owner="$1"
     local repo_name="$2"
     #
-    latest_version=$(curl -s "https://api.github.com/repos/${repo_owner}/${repo_name}/releases/latest" | jq -r .tag_name)
+    # using 'curl' with the GitHub API now requires an access token
+    ##latest_version=$(curl -s "https://api.github.com/repos/${repo_owner}/${repo_name}/releases/latest" | jq -r .tag_name)
+    # use 'gh release' or 'gh api' to fetch the latest version
+    # https://docs.github.com/rest/releases/releases#get-the-latest-release
+    latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo '${repo_owner}/${repo_name}')
+    #latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo '${repo_owner}/${repo_name}')
+    #latest_version=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/releases/latest")
     #
     if [[ "$latest_version" == "null" || -z "$latest_version" ]]; then
         #echo "[ERROR] Unable to fetch latest version for $repo_owner/$repo_name" | tee -a "$error_log"
