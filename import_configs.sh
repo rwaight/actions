@@ -104,7 +104,7 @@ create_or_update_import_config() {
     }
 
     import_config_file="${group_dir}/${action_dir}/import-config.yml"
-
+    # check to see if the import-config.yml file exists
     if [[ -f $import_config_file ]]; then
         echo "" # Improve CLI readability
         echo "Updating ${import_config_file}..."
@@ -158,19 +158,31 @@ create_or_update_import_config() {
             # did not have the 'fetch_latest_version' function before error checks
             #latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
             latest_version=$(fetch_latest_version "$source_action_author" "$source_repo_name")
-            update_available=false
-            if [[ $current_version != $latest_version ]]; then
-                update_available=true
+            # the commented out code below worked prior to adding error checks
+            # update_available=false
+            # if [[ $current_version != $latest_version ]]; then
+            #     update_available=true
+            # fi
+            # the commented out code above worked prior to adding error checks
+            # compare the current version with the latest version
+            if [[ -n "$latest_version" && "$current_version" != "$latest_version" ]]; then
+                yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
+                yq e -i ".source.update_available = true" "$import_config_file"
+                echo "[UPDATE] New version available for $source_repo: $latest_version" | tee -a "$error_log"
+            else
+                yq e -i ".source.update_available = false" "$import_config_file"
             fi
-            #
+            # update the author field if it is set to 'placeholder'
             if [[ $(yq e '.author' "$import_config_file") == "placeholder" ]]; then
                 yq e -i ".author = \"$source_action_author\"" "$import_config_file"
             fi
-            # Update source fields
-            yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
-            #import_config=$(echo "$import_config" | yq eval ".source.latest_version = \"$latest_version\"" -)
-            yq e -i ".source.update_available = $update_available" "$import_config_file"
-            #import_config=$(echo "$import_config" | yq eval ".source.update_available = $update_available" -)
+            # the commented out code below worked prior to adding error checks
+            # # Update source fields
+            # yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
+            # #not-this#import_config=$(echo "$import_config" | yq eval ".source.latest_version = \"$latest_version\"" -)
+            # yq e -i ".source.update_available = $update_available" "$import_config_file"
+            # #not-this#import_config=$(echo "$import_config" | yq eval ".source.update_available = $update_available" -)
+            # the commented out code above worked prior to adding error checks
         fi
         # Check if local.update.exclusions exists, and add it if missing
         exclusions_exist=$(yq e '.local.update.exclusions' "$import_config_file" 2>/dev/null)
@@ -185,8 +197,9 @@ create_or_update_import_config() {
                 yq e -i ".local.update.exclusions += [\"$exclusion\"]" "$import_config_file"
             fi
         done
-        #
+        # end of # if [[ -f $import_config_file ]]; then # block
     else
+        # the import-config.yml file DOES NOT exist
         # Prompt the user to find out if the action is imported or locally-created
         read -p "Is the action in ${group_dir}/${action_dir} imported or locally-created (imported/local)? " action_type
 
