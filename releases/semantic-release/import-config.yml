@@ -14,9 +14,9 @@ source:
   author: cycjimmy
   repo_name: semantic-release-action
   repo_url: https://github.com/cycjimmy/semantic-release-action
-  current_version: v4.1.0
+  current_version: v4.1.1
   latest_version: v4.1.1
-  update_available: true
+  update_available: false
 specs:
   action_file: action.yml
   inputs: [semantic_version, branches, branch, extra_plugins, dry_run, ci, extends, working_directory, tag_format, repository_url]
