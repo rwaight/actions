@@ -163,19 +163,21 @@ create_or_update_import_config() {
             #latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
             latest_version=$(fetch_latest_version "$source_action_author" "$source_repo_name")
             # the commented out code below worked prior to adding error checks
-            # update_available=false
-            # if [[ $current_version != $latest_version ]]; then
-            #     update_available=true
-            # fi
+            update_available=false
+            if [[ $current_version != $latest_version ]]; then
+                update_available=true
+            fi
             # the commented out code above worked prior to adding error checks
             # compare the current version with the latest version
             if [[ -n "$latest_version" && "$current_version" != "$latest_version" ]]; then
                 yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
-                yq e -i ".source.update_available = true" "$import_config_file"
+                #yq e -i ".source.update_available = true" "$import_config_file"
+                yq e -i ".source.update_available = $update_available" "$import_config_file"
                 #echo "[UPDATE] New version available for $source_repo_name: $latest_version" | tee -a "$error_log"
                 echo "[UPDATE] New version available for ${group_dir}/${action_dir}: $latest_version" | tee -a "$error_log"
             else
-                yq e -i ".source.update_available = false" "$import_config_file"
+                #yq e -i ".source.update_available = false" "$import_config_file"
+                yq e -i ".source.update_available = $update_available" "$import_config_file"
             fi
             # update the author field if it is set to 'placeholder'
             if [[ $(yq e '.author' "$import_config_file") == "placeholder" ]]; then
