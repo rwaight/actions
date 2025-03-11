@@ -37,9 +37,15 @@ read_action_file() {
 # Function to sanitize values (removes backticks to avoid parsing issues)
 sanitize_value() {
     local value="$1"
+    # Remove backticks
     if [[ "$value" == *"\`"* ]]; then
         echo "[WARNING] Backticks found in value: $value" | tee -a "$error_log"
         value="${value//\`/}"  # Remove backticks
+    fi
+    # Replace double quotes with single quotes
+    if [[ "$value" == *'"'* ]]; then
+        echo "[WARNING] Double quotes found in value: $value" | tee -a "$error_log"
+        value="${value//\"/\'}"  # Replace double quotes with single quotes
     fi
     echo "$value"
 }
