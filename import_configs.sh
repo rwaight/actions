@@ -42,11 +42,19 @@ sanitize_value() {
         echo "[WARNING] Backticks found in value: $value" | tee -a "$error_log"
         value="${value//\`/}"  # Remove backticks
     fi
+    # Replace double quotes with single quotes and escape existing single quotes
+    if [[ "$value" == *"\""* ]]; then
+        echo "[WARNING] Double quotes found in value: $value" | tee -a "$error_log"
+        # Replace double quotes with single quotes and escape existing single quotes
+        value="${value//\"/\'}"       # Replace " with '
+        value="${value//\'/\'\'}"     # Escape single quotes by doubling them
+    fi
     # Replace double quotes with single quotes
     if [[ "$value" == *'"'* ]]; then
         echo "[WARNING] Double quotes found in value: $value" | tee -a "$error_log"
         value="${value//\"/\'}"  # Replace double quotes with single quotes
     fi
+    #
     echo "$value"
 }
 
