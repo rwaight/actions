@@ -241,7 +241,7 @@ function create_or_update_import_config() {
         # Check if local.update.exclusions exists, and add it if missing
         exclusions_exist=$(yq e '.local.update.exclusions' "$import_config_file" 2>/dev/null)
         if [[ "$exclusions_exist" == "null" || -z "$exclusions_exist" ]]; then
-            echo "Adding default exclusions to ${import_config_file}..."
+            echo "    [INFO] Adding default exclusions to ${import_config_file}..."
             yq e -i '.local.update.exclusions = []' "$import_config_file"
         fi
         # Ensure default exclusions are present
