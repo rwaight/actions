@@ -41,16 +41,16 @@ sanitize_value() {
 
 # Function to fetch the latest version from GitHub API
 fetch_latest_version() {
-    local author="$1"
-    local repo="$2"
-    
-    latest_version=$(curl -s "https://api.github.com/repos/${author}/${repo}/releases/latest" | jq -r .tag_name)
-    
+    local repo_owner="$1"
+    local repo_name="$2"
+    #
+    latest_version=$(curl -s "https://api.github.com/repos/${repo_owner}/${repo_name}/releases/latest" | jq -r .tag_name)
+    #
     if [[ "$latest_version" == "null" || -z "$latest_version" ]]; then
-        echo "[ERROR] Unable to fetch latest version for $author/$repo" | tee -a "$error_log"
+        echo "[ERROR] Unable to fetch latest version for $repo_owner/$repo_name" | tee -a "$error_log"
         latest_version=""
     fi
-    
+    #
     echo "$latest_version"
 }
 
@@ -75,27 +75,44 @@ create_or_update_import_config() {
 
     # Extract the action file extension
     action_file_extension=$(basename "$action_file")
-
-    # Read first level keys of author, description, inputs, outputs, and runs from the action file
-    author=$(yq e '.author' "$action_file")
-    if [[ "$author" == "null" ]]; then unset author; fi
-    description=$(yq e '.description' "$action_file")
-    if [[ "$description" == "null" ]]; then unset description; fi
-    inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
-    outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
-    runs_using=$(yq e '.runs.using' "$action_file")
-    runs_main=$(yq e '.runs.main' "$action_file")
-    if [[ "$runs_main" == "null" ]]; then unset runs_main; fi
+    #
+    # the commented out code below worked prior to adding error checks
+    # # Read first level keys of author, description, inputs, outputs, and runs from the action file
+    # author=$(yq e '.author' "$action_file")
+    # if [[ "$author" == "null" ]]; then unset author; fi
+    # description=$(yq e '.description' "$action_file")
+    # if [[ "$description" == "null" ]]; then unset description; fi
+    # inputs=$(yq e '.inputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
+    # outputs=$(yq e '.outputs | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
+    # runs_using=$(yq e '.runs.using' "$action_file")
+    # runs_main=$(yq e '.runs.main' "$action_file")
+    # if [[ "$runs_main" == "null" ]]; then unset runs_main; fi
+    # the commented out code above worked prior to adding error checks
+    #
+    # Read required fields from action file while filtering out null values
+    {
+        author=$(sanitize_value "$(yq e '.author // "placeholder"' "$action_file" 2>/dev/null)")
+        description=$(sanitize_value "$(yq e '.description // "placeholder"' "$action_file" 2>/dev/null)")
+        inputs=$(sanitize_value "$(yq e '.inputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
+        outputs=$(sanitize_value "$(yq e '.outputs | select(. != null) | keys' "$action_file" | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')")
+        runs_using=$(sanitize_value "$(yq e '.runs.using // empty' "$action_file" 2>/dev/null)")
+        runs_main=$(sanitize_value "$(yq e '.runs.main // empty' "$action_file" 2>/dev/null)")
+    } || {
+        echo "[ERROR] A general issue occurred while reading fields in $action_file" | tee -a "$error_log"
+        error_actions+=("${group_dir}/${action_dir}")
+        return
+    }
 
     import_config_file="${group_dir}/${action_dir}/import-config.yml"
 
     if [[ -f $import_config_file ]]; then
-        echo ""
+        echo "" # Improve CLI readability
         echo "Updating ${import_config_file}..."
 
         # Read existing import-config.yml
         import_config=$(yq eval '.' "$import_config_file")
 
+        # =( # this was SKIPPED in 'import_configs_broken.sh' # =( #
         # Update author, description, specs.action_file, specs.inputs, and specs.outputs fields
         if [[ -n $author ]]; then
             yq e -i ".author = \"$author\"" "$import_config_file"
@@ -138,7 +155,9 @@ create_or_update_import_config() {
             source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
             current_version=$(yq e '.source.current_version' "$import_config_file")
             #current_version=$(echo "$import_config" | yq eval '.source.current_version' -)
-            latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
+            # did not have the 'fetch_latest_version' function before error checks
+            #latest_version=$(curl -s "https://api.github.com/repos/${source_action_author}/${source_repo_name}/releases/latest" | jq -r .tag_name)
+            latest_version=$(fetch_latest_version "$source_action_author" "$source_repo_name")
             update_available=false
             if [[ $current_version != $latest_version ]]; then
                 update_available=true
