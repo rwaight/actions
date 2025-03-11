@@ -168,7 +168,8 @@ create_or_update_import_config() {
             if [[ -n "$latest_version" && "$current_version" != "$latest_version" ]]; then
                 yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
                 yq e -i ".source.update_available = true" "$import_config_file"
-                echo "[UPDATE] New version available for $source_repo: $latest_version" | tee -a "$error_log"
+                #echo "[UPDATE] New version available for $source_repo_name: $latest_version" | tee -a "$error_log"
+                echo "[UPDATE] New version available for ${group_dir}/${action_dir}: $latest_version" | tee -a "$error_log"
             else
                 yq e -i ".source.update_available = false" "$import_config_file"
             fi
