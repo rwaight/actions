@@ -108,10 +108,10 @@ create_or_update_import_config() {
     if [[ -f $import_config_file ]]; then
         echo "" # Improve CLI readability
         echo "Updating ${import_config_file}..."
-
+        #
         # Read existing import-config.yml
         import_config=$(yq eval '.' "$import_config_file")
-
+        #
         # =( # this was SKIPPED in 'import_configs_broken.sh' # =( #
         # Update author, description, specs.action_file, specs.inputs, and specs.outputs fields
         if [[ -n $author ]]; then
@@ -132,7 +132,7 @@ create_or_update_import_config() {
         yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
         yq -i '.specs.outputs style="flow"' "$import_config_file"
         #import_config=$(echo "$import_config" | yq eval ".specs.outputs = [$outputs]" -)
-
+        #
         # Update runs field if using and main are present
         if [[ -n $runs_using ]]; then
             yq e -i ".specs.runs.using = \"$runs_using\"" "$import_config_file"
@@ -145,7 +145,7 @@ create_or_update_import_config() {
                 #import_config=$(echo "$import_config" | yq eval "del(.specs.runs.main)" -)
             fi
         fi
-
+        #
         # Check for updates if imported
         if [[ $(yq e '.imported' "$import_config_file") == "true" ]]; then
             source_action_author=$(yq e '.source.author' "$import_config_file")
@@ -200,17 +200,19 @@ create_or_update_import_config() {
         # end of # if [[ -f $import_config_file ]]; then # block
     else
         # the import-config.yml file DOES NOT exist
-        # Prompt the user to find out if the action is imported or locally-created
+        # Ask the user if the action is imported or locally created
         read -p "Is the action in ${group_dir}/${action_dir} imported or locally-created (imported/local)? " action_type
-
+        #
         # Set initial variables
         imported=false
         local_author="rwaight"
         modifications=false
-
+        #
         # Create an empty import-config.yml file
+        echo "[INFO] Creating new ${import_config_file}..."
         touch "$import_config_file"
-
+        #
+        # =( # this was SKIPPED in 'import_configs_broken.sh' # =( #
         # Set initial fields
         yq e -i ".name = \"$name\"" "$import_config_file"
         if [[ -n $author ]]; then
@@ -226,11 +228,12 @@ create_or_update_import_config() {
         fi
         yq e -i ".group = \"$group\"" "$import_config_file"
         yq e -i ".imported = false" "$import_config_file"
-
+        #
         # Add local and source blocks
         if [[ $action_type == "imported" ]]; then
             imported=true
             yq e -i ".imported = true" "$import_config_file"
+            #
             read -p "Enter source action name [default: $name]: " source_action_name
             source_action_name=${source_action_name:-$name}
             read -p "Enter source action author: " source_action_author
