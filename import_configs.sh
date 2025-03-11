@@ -5,8 +5,10 @@ error_log="import_configs_errors.log"
 > "$error_log"  # Clear the log file at the start
 
 # Print yq and jq versions for debugging
-echo "Running yq version: $(yq --version 2>&1)" | tee -a "$error_log"
-echo "Running jq version: $(jq --version 2>&1)" | tee -a "$error_log"
+#echo "Running yq version: $(yq --version 2>&1)" | tee -a "$error_log"
+echo "Running yq version: $(yq --version 2>&1)" >> "$error_log"
+#echo "Running jq version: $(jq --version 2>&1)" | tee -a "$error_log"
+echo "Running jq version: $(jq --version 2>&1)" >> "$error_log"
 
 # Read target directories from the config file
 target_dirs=($(cat target_dirs.conf))
@@ -47,8 +49,10 @@ fetch_latest_version() {
     latest_version=$(curl -s "https://api.github.com/repos/${repo_owner}/${repo_name}/releases/latest" | jq -r .tag_name)
     #
     if [[ "$latest_version" == "null" || -z "$latest_version" ]]; then
-        echo "[ERROR] Unable to fetch latest version for $repo_owner/$repo_name" | tee -a "$error_log"
-        latest_version=""
+        #echo "[ERROR] Unable to fetch latest version for $repo_owner/$repo_name" | tee -a "$error_log"
+        #latest_version=""
+        echo "[ERROR] Unable to fetch latest version for $repo_owner/$repo_name" >> "$error_log"
+        latest_version="error"
     fi
     #
     echo "$latest_version"
