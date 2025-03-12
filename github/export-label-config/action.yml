@@ -3,7 +3,7 @@ description: An action that lets you generate a file containing your label setti
 author: Federico Grandi <fgrandi30@gmail.com>
 
 runs:
-  using: node16
+  using: node20
   main: lib/index.js
 
 inputs:
