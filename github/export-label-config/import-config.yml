@@ -4,7 +4,7 @@ description: An action that lets you generate a file containing your label setti
 group: github
 imported: true
 local:
-  modifications: false
+  modifications: true
   update:
     exclusions:
       - README-examples.md
@@ -22,7 +22,7 @@ specs:
   inputs: [token, raw-result, add-aliases]
   outputs: []
   runs:
-    using: node16
+    using: node20
     main: lib/index.js
 tests:
   _comment: reserved for future use
