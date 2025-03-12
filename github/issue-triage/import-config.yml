@@ -4,7 +4,7 @@ description: Deals with stale issues in your project.
 group: github
 imported: true
 local:
-  modifications: false
+  modifications: true
   update:
     exclusions:
       - README-examples.md
@@ -22,7 +22,7 @@ specs:
   inputs: [ghToken, staleAfter, closeAfter, staleLabel, staleComment, closeComment, showLogs]
   outputs: []
   runs:
-    using: node16
+    using: node20
     main: dist/index.js
 tests:
   _comment: reserved for future use
