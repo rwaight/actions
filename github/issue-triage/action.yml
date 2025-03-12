@@ -32,7 +32,7 @@ inputs:
     description: Show logs with info like total number of issues found, stale issues, closed etc.
     required: false
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
 branding:
   icon: 'tag'
