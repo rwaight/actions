@@ -17,6 +17,16 @@
 
 Effortlessly track all changed files and directories relative to a target branch, the current branch (preceding commit or the last remote commit), multiple branches, or custom commits returning **relative paths** from the project root using this GitHub action.
 
+> \[!WARNING]\
+> **Security Alert:** A critical security issue was identified in this action due to a compromised commit: [0e58ed8671d6b60d0890c21b07f8835ace038e67](https://github.com/tj-actions/changed-files/commit/0e58ed8671d6b60d0890c21b07f8835ace038e67).
+>
+> This commit has been **removed** from all tags and branches, and necessary measures have been implemented to prevent similar issues in the future.
+>
+> #### **Action Required:**
+>
+> *   **If your workflows reference this commit directly by its SHA**, you must update them immediately to avoid using the compromised version.
+> *   **If you are using tagged versions** (e.g., `v35`, `v44.5.1`), no action is required as these tags have been updated and are now safe to use.
+
 > \[!NOTE]
 >
 > *   This action solely identifies files that have changed for events such as [`pull_request*`, `push`, `merge_group`, `release`, and many more](#other-supported-events-electron). However, it doesn't detect pending uncommitted changes created during the workflow execution.
@@ -328,7 +338,7 @@ Support this project with a :star:
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
 ```yaml
-- uses: tj-actions/changed-files@v45
+- uses: tj-actions/changed-files@v46
   id: changed-files
   with:
     # Github API URL.

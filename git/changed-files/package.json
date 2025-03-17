@@ -1,6 +1,6 @@
 {
   "name": "@tj-actions/changed-files",
-  "version": "45.0.4",
+  "version": "45.0.8",
   "description": "Github action to retrieve all (added, copied, modified, deleted, renamed, type changed, unmerged, unknown) files and directories.",
   "main": "lib/main.js",
   "publishConfig": {
@@ -52,7 +52,7 @@
     "@typescript-eslint/parser": "^7.0.0",
     "@vercel/ncc": "^0.38.0",
     "eslint": "^8.43.0",
-    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-github": "^5.0.0",
     "eslint-plugin-jest": "^28.0.0",
     "eslint-plugin-prettier": "^5.0.0-alpha.2",
