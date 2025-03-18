@@ -1,0 +1,151 @@
+name: 'Enable Nested Virtualization Action'
+description: 'Enable nested virtualization in a large GitHub runner.'
+author: 'rwaight'
+inputs:
+  gh-token:
+    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
+    required: false
+    default: ${{ github.token }}
+  my-example-input1:
+    description: 'An example input that you can use. '
+    required: true
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
+outputs:
+  action-output1:
+    description: "The example output from this action. "
+    value: ${{ steps.set-vars-output.outputs.EXAMPLE_ACTION_OUTPUT1 }}
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "::error title=⛔ error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Greet the triggering_actor
+      if: inputs.verbose=='true'
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
+
+    - name: Enable KVM group perms
+      # unique to nested virtualization
+      # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      # Other references
+      #     https://stackoverflow.com/questions/37300811/android-studio-dev-kvm-device-permission-denied/61984745#61984745
+      id: runner-enable-kvm-perms
+      #if: ${{ matrix.nested_virtualization == true }}
+      run: |
+        echo "::group::starting the 'runner-enable-kvm-perms' step... "
+        echo ""
+        echo "Adding the runner user to the KVM user group"
+        echo "see the following blog for more information: "
+        echo "https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/"
+        ##echo ""
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+        echo ""
+        echo "finishing the 'runner-enable-kvm-perms' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Install libvirt and qemu
+      id: install-libvirt-and-qemu
+      #if: ${{ matrix.nested_virtualization == true }}
+      run: |
+        echo "::group::starting the 'install-libvirt-and-qemu' step... "
+        echo ""
+        echo "Installing libvirt and qemu"
+        sudo apt-get update
+        sudo apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils qemu-system-x86 qemu-kvm
+        echo "attempt to add $USER to the kvm and libvirt groups"
+        sudo usermod -a -G kvm,libvirt $USER
+        echo "find out what groups the user is in"
+        id
+        echo ""
+        echo "finishing the 'install-libvirt-and-qemu' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Install virtualization packages
+      # unique to nested virtualization
+      id: install-virtualization-packages
+      # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/customizing-github-hosted-runners#installing-software-on-ubuntu-runners
+      # Installing virtualization packages on the runner
+        # See the following blog for more information: 
+        # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      # For available Ubuntu packages, see https://packages.ubuntu.com/
+      #if: ${{ matrix.nested_virtualization == true }}
+      run: |
+        echo "::group::starting the 'install-virtualization-packages' step... "
+        echo ""
+        ##
+        echo "Installing virtualization packages on the runner"
+        sudo apt-get -y install libguestfs-tools virt-manager
+        echo "might need to find a replacement for virt-install, if virt-manager is not sufficient"
+        echo ""
+        echo "Installing python packages on the runner"
+        sudo apt-get -y install python3-libvirt python3-pip
+        echo ""
+        echo "Installing utilities used during the build"
+        sudo apt-get -y install git curl vim wget jq p7zip p7zip-full
+        echo ""
+        echo "finishing the 'install-virtualization-packages' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Check libvirt group
+      id: check-libvirt-group
+      # verbose but used for nested virtualization -- maybe we can remove this step
+      #if: ${{ matrix.nested_virtualization == true }}
+      run: | 
+        echo "::group::starting the 'check-libvirt-group' step... "
+        echo ""
+        ##
+        echo "notes about issues with the libvirt group ... "
+        echo "  see the following: https://github.com/actions/runner-images/discussions/7191#discussioncomment-8184047 "
+        echo ""
+        echo "    we may need to run \"sudo bash -c 'exec su -l $USER'\" in the runner "
+        echo "    in order to ensure the user is properly part of the libvirt group"
+        echo "    or we may need to run \"sudo -E bash -c 'exec su -l '$USER\" in the runner "
+        echo "    according to https://github.com/actions/runner-images/discussions/7191#discussioncomment-8184075"
+        echo ""
+        echo ""
+        ##
+        echo "info about the current user ... "
+        echo "    going to output some info about the current user ... "
+        echo ""
+        echo "  running 'whoami' "
+        whoami
+        echo ""
+        echo "  running 'id' "
+        id
+        echo ""
+        echo "  running 'pwd' "
+        pwd
+        echo ""
+        ##
+        echo ""
+        echo "finishing the 'check-libvirt-group' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'edit'
+  color: 'blue'
