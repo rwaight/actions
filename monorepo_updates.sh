@@ -3,6 +3,28 @@
 # Read target directories from the config file
 target_dirs=($(cat target_dirs.conf))
 
+# Function to fetch the latest version from GitHub API
+function fetch_latest_version() {
+    local repo_owner="$1"
+    local repo_name="$2"
+    #
+    # using 'curl' with the GitHub API now requires an access token
+    ##latest_version=$(curl -s "https://api.github.com/repos/${repo_owner}/${repo_name}/releases/latest" | jq -r .tag_name)
+    # use 'gh release' or 'gh api' to fetch the latest version
+    # https://docs.github.com/rest/releases/releases#get-the-latest-release
+    # https://cli.github.com/manual/gh_release_list
+    latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo "${repo_owner}/${repo_name}")
+    # gh cli command ##latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo "${repo_owner}/${repo_name}")
+    # gh api command ##latest_version=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/releases/latest")
+    #
+    if [[ "$latest_version" == "null" || -z "$latest_version" ]]; then
+        echo "[ERROR] Unable to fetch latest version for $repo_owner/$repo_name" >> "$error_log"
+        latest_version="error"
+    fi
+    #
+    echo "$latest_version"
+}
+
 # Function to read the import-config.yml file and check for updates
 check_for_updates() {
     local config_file=$1
@@ -29,19 +51,41 @@ check_for_updates() {
         source_repo_name=$(yq e '.source.repo_name' "$config_file")
         source_repo_author=$(yq e '.source.author' "$config_file")
         current_version=$(yq e '.source.current_version' "$config_file")
-        latest_version=$(yq e '.source.latest_version' "$config_file")
-        update_available=$(yq e '.source.update_available' "$config_file")
-
-        echo "Checking for updates from $source_repo_url..."
-
+        #
+        echo "  Checking for updates from $source_repo_author/$source_repo_name ..."
+        # use the 'fetch_latest_version' function instead ## latest_version=$(yq e '.source.latest_version' "$config_file")
+        latest_version=$(fetch_latest_version "$source_repo_author" "$source_repo_name")
+        # do not get 'update_available' from the config file ## update_available=$(yq e '.source.update_available' "$config_file")
+        if [[ $current_version != $latest_version ]]; then
+            update_available=true
+        else
+            update_available=false
+        fi
+        # update the 'update_available' value in the config file
+        yq e -i ".source.update_available = $update_available" "$config_file"
+        #
         if [[ "$update_available" == "true" ]]; then
-            echo "Update available for $config_file"
-            repo_latest_tag=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/releases/latest" | jq -r '.tag_name')
-            repo_latest_tag_data=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${repo_latest_tag}" | jq -r '.object.type,.object.sha')
-            repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
-            repo_latest_sha=${repo_latest_tag_data##*$'\n'}
+            echo "  Update available for $group/$name "
+            # using 'curl' with the GitHub API now requires an access token #
+            ##repo_latest_tag=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/releases/latest" | jq -r '.tag_name')
+            ##repo_latest_tag_data=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${repo_latest_tag}" | jq -r '.object.type,.object.sha')
+            # using 'curl' with the GitHub API now requires an access token #
+            # use 'gh api' to fetch the reference from the latest tag
+            # https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#get-a-reference
+            # https://cli.github.com/manual/gh_api
+            # gh api command ##gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/git/ref/tags/${latest_version}"
+            # store the entire json response in a variable #
+            json_latest_ref=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/git/ref/tags/${latest_version}")
+            latest_tag_ref=$(echo $json_latest_ref | jq -r '. | .ref')
+            latest_tag_url=$(echo $json_latest_ref | jq -r '. | .url')
+            #repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
+            latest_tag_type=$(echo $json_latest_ref | jq -r '. | .object.type')
+            #repo_latest_sha=${repo_latest_tag_data##*$'\n'}
+            latest_tag_sha=$(echo $json_latest_ref | jq -r '. | .object.sha')
+            latest_tag_sha_url=$(echo $json_latest_ref | jq -r '. | .object.url')
+            #
             echo "Downloading updated source files for version $latest_version..."
-
+            #
             # Prep the local template files
             local_repo_dir=$(pwd)
             template_file="$local_repo_dir/assets/imported_readme_template.md"
@@ -140,7 +184,7 @@ check_for_updates() {
                     sed -i "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
                     ##not used##sed -i "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
                     sed -i "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
-                    sed -i "s/SED_NEWCOMMITSHA/${repo_latest_sha}/g" "$new_readme"
+                    sed -i "s/SED_NEWCOMMITSHA/${latest_tag_sha}/g" "$new_readme"
                     # Add additional find/replace commands as needed
                 fi
 
