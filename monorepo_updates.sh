@@ -51,11 +51,19 @@ check_for_updates() {
         source_repo_name=$(yq e '.source.repo_name' "$config_file")
         source_repo_author=$(yq e '.source.author' "$config_file")
         current_version=$(yq e '.source.current_version' "$config_file")
-        latest_version=$(yq e '.source.latest_version' "$config_file")
-        update_available=$(yq e '.source.update_available' "$config_file")
-
-        echo "Checking for updates from $source_repo_url..."
-
+        #
+        echo "  Checking for updates from $source_repo_author/$source_repo_name ..."
+        # use the 'fetch_latest_version' function instead ## latest_version=$(yq e '.source.latest_version' "$config_file")
+        latest_version=$(fetch_latest_version "$source_repo_author" "$source_repo_name")
+        # do not get 'update_available' from the config file ## update_available=$(yq e '.source.update_available' "$config_file")
+        if [[ $current_version != $latest_version ]]; then
+            update_available=true
+        else
+            update_available=false
+        fi
+        # update the 'update_available' value in the config file
+        yq e -i ".source.update_available = $update_available" "$config_file"
+        #
         if [[ "$update_available" == "true" ]]; then
             echo "Update available for $config_file"
             repo_latest_tag=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/releases/latest" | jq -r '.tag_name')
