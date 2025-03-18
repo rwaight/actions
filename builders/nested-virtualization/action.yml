@@ -2,13 +2,18 @@ name: 'Enable Nested Virtualization Action'
 description: 'Enable nested virtualization in a large GitHub runner.'
 author: 'rwaight'
 inputs:
-  gh-token:
-    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
+  python:
+    description: 'If python3 should be installed.'
     required: false
-    default: ${{ github.token }}
-  my-example-input1:
-    description: 'An example input that you can use. '
-    required: true
+    default: 'true'
+  qemu:
+    description: 'If the proper qemu packages should be installed.'
+    required: false
+    default: 'true'
+  utilities:
+    description: 'If the virtualization utilities packages should be installed.'
+    required: false
+    default: 'true'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false.'
     required: false
@@ -72,12 +77,12 @@ runs:
         echo "::endgroup::"
       shell: bash
 
-    - name: Install libvirt
+    - name: Install libvirt packages
       id: install-libvirt
       run: |
         echo "::group::starting the 'install-libvirt' step... "
         echo ""
-        echo "Installing libvirt "
+        echo "Installing libvirt packages on the runner"
         sudo apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils
         echo ""
         echo "finishing the 'install-libvirt' step... "
@@ -103,6 +108,7 @@ runs:
 
     - name: Install qemu
       id: install-qemu
+      if: ${{ inputs.qemu == 'true' }}
       run: |
         echo "::group::starting the 'install-qemu' step... "
         echo ""
@@ -118,30 +124,72 @@ runs:
         echo "::endgroup::"
       shell: bash
 
-    - name: Install virtualization packages
-      # unique to nested virtualization
-      id: install-virtualization-packages
+    - name: Install libguestfs-tools
+      id: install-libguestfs-tools
       # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/customizing-github-hosted-runners#installing-software-on-ubuntu-runners
       # Installing virtualization packages on the runner
         # See the following blog for more information: 
         # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
       # For available Ubuntu packages, see https://packages.ubuntu.com/
-      #if: ${{ matrix.nested_virtualization == true }}
       run: |
-        echo "::group::starting the 'install-virtualization-packages' step... "
+        echo "::group::starting the 'install-libguestfs-tools' step... "
         echo ""
+        echo "Installing libguestfs-tools on the runner"
+        sudo apt-get -y install libguestfs-tools
+        echo ""
+        echo "finishing the 'install-libguestfs-tools' step... "
         ##
-        echo "Installing virtualization packages on the runner"
-        sudo apt-get -y install libguestfs-tools virt-manager
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Install virt-manager
+      id: install-virt-manager
+      # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/customizing-github-hosted-runners#installing-software-on-ubuntu-runners
+      # Installing virtualization packages on the runner
+        # See the following blog for more information: 
+        # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      # For available Ubuntu packages, see https://packages.ubuntu.com/
+      run: |
+        echo "::group::starting the 'install-virt-manager' step... "
+        echo ""
+        echo "Installing virt-manager on the runner"
+        sudo apt-get -y install virt-manager
         echo "might need to find a replacement for virt-install, if virt-manager is not sufficient"
         echo ""
-        echo "Installing python packages on the runner"
+        echo "finishing the 'install-virt-manager' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Install python3
+      id: install-python3
+      if: ${{ inputs.python == 'true' }}
+      run: |
+        echo "::group::starting the 'install-python3' step... "
+        echo ""
+        echo "Installing python3 packages on the runner"
         sudo apt-get -y install python3-libvirt python3-pip
+        echo ""
+        echo "finishing the 'install-python3' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Install virtualization utilities
+      id: install-virtualization-utilities
+      # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/customizing-github-hosted-runners#installing-software-on-ubuntu-runners
+      # Installing virtualization packages on the runner
+        # See the following blog for more information: 
+        # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
+      # For available Ubuntu packages, see https://packages.ubuntu.com/
+      if: ${{ inputs.utilities == 'true' }}
+      run: |
+        echo "::group::starting the 'install-virtualization-utilities' step... "
         echo ""
         echo "Installing utilities used during the build"
         sudo apt-get -y install git curl vim wget jq p7zip p7zip-full
         echo ""
-        echo "finishing the 'install-virtualization-packages' step... "
+        echo "finishing the 'install-virtualization-utilities' step... "
         ##
         echo "::endgroup::"
       shell: bash
