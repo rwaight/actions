@@ -85,7 +85,7 @@ check_for_updates() {
             latest_tag_sha_url=$(echo $json_latest_ref | jq -r '. | .object.url')
             #
             echo "Downloading updated source files for version $latest_version..."
-
+            #
             # Prep the local template files
             local_repo_dir=$(pwd)
             template_file="$local_repo_dir/assets/imported_readme_template.md"
