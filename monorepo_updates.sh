@@ -3,6 +3,28 @@
 # Read target directories from the config file
 target_dirs=($(cat target_dirs.conf))
 
+# Function to fetch the latest version from GitHub API
+function fetch_latest_version() {
+    local repo_owner="$1"
+    local repo_name="$2"
+    #
+    # using 'curl' with the GitHub API now requires an access token
+    ##latest_version=$(curl -s "https://api.github.com/repos/${repo_owner}/${repo_name}/releases/latest" | jq -r .tag_name)
+    # use 'gh release' or 'gh api' to fetch the latest version
+    # https://docs.github.com/rest/releases/releases#get-the-latest-release
+    # https://cli.github.com/manual/gh_release_list
+    latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo "${repo_owner}/${repo_name}")
+    # gh cli command ##latest_version=$(gh release list --json name,tagName,isLatest --jq '.[] | select(.isLatest)|.tagName' --repo "${repo_owner}/${repo_name}")
+    # gh api command ##latest_version=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/releases/latest")
+    #
+    if [[ "$latest_version" == "null" || -z "$latest_version" ]]; then
+        echo "[ERROR] Unable to fetch latest version for $repo_owner/$repo_name" >> "$error_log"
+        latest_version="error"
+    fi
+    #
+    echo "$latest_version"
+}
+
 # Function to read the import-config.yml file and check for updates
 check_for_updates() {
     local config_file=$1
