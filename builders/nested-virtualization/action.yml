@@ -80,13 +80,23 @@ runs:
         echo "Installing libvirt "
         sudo apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils
         echo ""
+        echo "finishing the 'install-libvirt' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Add user to kvm and libvirt groups
+      id: add-user-to-kvm-libvirt-groups
+      run: |
+        echo "::group::starting the 'add-user-to-kvm-libvirt-groups' step... "
+        echo ""
         echo "attempt to add $USER to the kvm and libvirt groups"
         sudo usermod -a -G kvm,libvirt $USER
         echo ""
         echo "find out what groups the user is in"
         id
         echo ""
-        echo "finishing the 'install-libvirt' step... "
+        echo "finishing the 'add-user-to-kvm-libvirt-groups' step... "
         ##
         echo "::endgroup::"
       shell: bash
