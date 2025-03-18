@@ -65,11 +65,25 @@ check_for_updates() {
         yq e -i ".source.update_available = $update_available" "$config_file"
         #
         if [[ "$update_available" == "true" ]]; then
-            echo "Update available for $config_file"
-            repo_latest_tag=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/releases/latest" | jq -r '.tag_name')
-            repo_latest_tag_data=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${repo_latest_tag}" | jq -r '.object.type,.object.sha')
-            repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
-            repo_latest_sha=${repo_latest_tag_data##*$'\n'}
+            echo "  Update available for $group/$name "
+            # using 'curl' with the GitHub API now requires an access token #
+            ##repo_latest_tag=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/releases/latest" | jq -r '.tag_name')
+            ##repo_latest_tag_data=$(curl -s "https://api.github.com/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${repo_latest_tag}" | jq -r '.object.type,.object.sha')
+            # using 'curl' with the GitHub API now requires an access token #
+            # use 'gh api' to fetch the reference from the latest tag
+            # https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#get-a-reference
+            # https://cli.github.com/manual/gh_api
+            # gh api command ##gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/git/ref/tags/${latest_version}"
+            # store the entire json response in a variable #
+            json_latest_ref=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/git/ref/tags/${latest_version}")
+            latest_tag_ref=$(echo $json_latest_ref | jq -r '. | .ref')
+            latest_tag_url=$(echo $json_latest_ref | jq -r '. | .url')
+            #repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
+            latest_tag_type=$(echo $json_latest_ref | jq -r '. | .object.type')
+            #repo_latest_sha=${repo_latest_tag_data##*$'\n'}
+            latest_tag_sha=$(echo $json_latest_ref | jq -r '. | .object.sha')
+            latest_tag_sha_url=$(echo $json_latest_ref | jq -r '. | .object.url')
+            #
             echo "Downloading updated source files for version $latest_version..."
 
             # Prep the local template files
@@ -170,7 +184,7 @@ check_for_updates() {
                     sed -i "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
                     ##not used##sed -i "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
                     sed -i "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
-                    sed -i "s/SED_NEWCOMMITSHA/${repo_latest_sha}/g" "$new_readme"
+                    sed -i "s/SED_NEWCOMMITSHA/${latest_tag_sha}/g" "$new_readme"
                     # Add additional find/replace commands as needed
                 fi
 
