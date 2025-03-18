@@ -59,21 +59,51 @@ runs:
         echo "::endgroup::"
       shell: bash
 
-    - name: Install libvirt and qemu
-      id: install-libvirt-and-qemu
-      #if: ${{ matrix.nested_virtualization == true }}
+    - name: Run apt-get update
+      id: apt-get-update
       run: |
-        echo "::group::starting the 'install-libvirt-and-qemu' step... "
+        echo "::group::starting the 'apt-get-update' step... "
         echo ""
-        echo "Installing libvirt and qemu"
+        echo "Running 'sudo apt-get update' "
         sudo apt-get update
-        sudo apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils qemu-system-x86 qemu-kvm
+        echo ""
+        echo "finishing the 'apt-get-update' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Install libvirt
+      id: install-libvirt
+      run: |
+        echo "::group::starting the 'install-libvirt' step... "
+        echo ""
+        echo "Installing libvirt "
+        sudo apt-get install -y libvirt-clients libvirt-daemon-system libvirt-daemon virtinst bridge-utils
+        echo ""
         echo "attempt to add $USER to the kvm and libvirt groups"
         sudo usermod -a -G kvm,libvirt $USER
+        echo ""
         echo "find out what groups the user is in"
         id
         echo ""
-        echo "finishing the 'install-libvirt-and-qemu' step... "
+        echo "finishing the 'install-libvirt' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Install qemu
+      id: install-qemu
+      run: |
+        echo "::group::starting the 'install-qemu' step... "
+        echo ""
+        echo "Installing qemu "
+        sudo apt-get update
+        sudo apt-get install -y qemu-system-x86 qemu-kvm
+        echo ""
+        echo "find out what groups the user is in"
+        id
+        echo ""
+        echo "finishing the 'install-qemu' step... "
         ##
         echo "::endgroup::"
       shell: bash
