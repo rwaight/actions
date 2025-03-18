@@ -19,10 +19,10 @@ inputs:
     required: false
     default: 'false'
 
-outputs:
-  action-output1:
-    description: "The example output from this action. "
-    value: ${{ steps.set-vars-output.outputs.EXAMPLE_ACTION_OUTPUT1 }}
+# outputs:
+#   action-output1:
+#     description: "The example output from this action. "
+#     value: ${{ steps.set-vars-output.outputs.EXAMPLE_ACTION_OUTPUT1 }}
 
 runs:
   using: "composite"
