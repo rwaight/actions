@@ -1,5 +1,5 @@
-name: runner-debug
-description: placeholder
+name: GitHub Runner Debug
+description: An action to check if the GitHub Runner is in Debug Mode.
 group: github
 imported: false
 local:
