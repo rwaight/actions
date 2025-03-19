@@ -1,0 +1,15 @@
+name: Configure Nested Virtualization Action
+description: Configure nested virtualization in a large GitHub runner.
+group: builders
+imported: false
+local:
+  author: rwaight
+  modifications: true
+specs:
+  action_file: action.yml
+  inputs: [python, qemu, utilities, verbose]
+  outputs: []
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
