@@ -1,5 +1,5 @@
-name: 'Enable Nested Virtualization Action'
-description: 'Enable nested virtualization in a large GitHub runner.'
+name: 'Configure Nested Virtualization Action'
+description: 'Configure nested virtualization in a large GitHub runner.'
 author: 'rwaight'
 inputs:
   python:
