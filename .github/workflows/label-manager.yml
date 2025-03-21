@@ -122,12 +122,12 @@ jobs:
 
       - name: Sync labels using rwaight/actions/github/label-sync
         id: run-label-sync
-        if: | 
-          steps.export-label-config.outcome == 'success' && (
-          (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
-          (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
-          (github.event_name=='push' && github.ref_name=='main') 
-          )
+        #if: | 
+        #  steps.export-label-config.outcome == 'success' && (
+        #  (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
+        #  (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
+        #  (github.event_name=='push' && github.ref_name=='main') 
+        #  )
         #uses: rwaight/actions/github/label-sync@6848385d0cbaf286eda6311b6a3f11aa82d16679 # v0.1.44
         #uses: rwaight/actions/github/label-sync@v0.1.26
         uses: rwaight/actions/github/label-sync@main
