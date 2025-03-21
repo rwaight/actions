@@ -2,8 +2,8 @@
 
 This action is meant to be used with the `rwaight/actions/github/label-sync` action.
 
-The current version in this repo is based off of [**export-label-config** commit `555e14d` (after v1.0.1)](https://github.com/EndBug/export-label-config/commit/555e14d8623c4054e843aaf9669d85ab64df9aac)
-- Specifically [this commit](https://github.com/EndBug/export-label-config/commit/555e14d8623c4054e843aaf9669d85ab64df9aac)
+The current version in this repo is based off of [**export-label-config** commit `006dc66` (after v1.0.1)](https://github.com/EndBug/export-label-config/commit/006dc66313a93352fb0b7958e4152dce7152d285)
+- Specifically [this commit](https://github.com/EndBug/export-label-config/commit/006dc66313a93352fb0b7958e4152dce7152d285)
     - The commit is _newer than_ the [`v1.0.1` release](https://github.com/EndBug/export-label-config/releases/tag/v1.0.1)
 - **Note**: You must use the (classic) personal access tokens when configuring the `token`
 - This action is from https://github.com/EndBug/export-label-config.

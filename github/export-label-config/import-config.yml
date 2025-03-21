@@ -19,7 +19,7 @@ source:
   override:
     use_commits: true
     latest_version_commit: dd7608994f61774a59e9011a8386ee98976328c9
-    latest_repo_commit: 555e14d8623c4054e843aaf9669d85ab64df9aac
+    latest_repo_commit: 006dc66313a93352fb0b7958e4152dce7152d285
   update_available: false
 specs:
   action_file: action.yml
