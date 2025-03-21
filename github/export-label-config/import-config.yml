@@ -16,6 +16,10 @@ source:
   repo_url: https://github.com/EndBug/export-label-config
   current_version: v1.0.1
   latest_version: v1.0.1
+  override:
+    use_commits: true
+    latest_version_commit: dd7608994f61774a59e9011a8386ee98976328c9
+    latest_repo_commit: 555e14d8623c4054e843aaf9669d85ab64df9aac
   update_available: false
 specs:
   action_file: action.yml
