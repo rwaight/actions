@@ -1,0 +1,26 @@
+name: build-type
+author: rwaight
+description: Determine a build type based on predetermined conditions.
+group: vars
+imported: false
+local:
+  modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+source:
+  action_name: vars-build-type
+  author: rwaight
+  repo_name: actions
+  repo_url: https://github.com/rwaight/actions
+  latest_version: "null"
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [checkout, event-name, gh-token, ref, ref-name, ref-type, release-tag-name, workflow, workflow-summary, verbose]
+  outputs: [build-type]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
