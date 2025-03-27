@@ -1,5 +1,5 @@
 name: 'Set build version'
-description: 'Determine a build version using git describe.'
+description: 'Determine a build version using git describe, based on predetermined conditions.'
 # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
 author: 'rwaight'
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
@@ -9,8 +9,8 @@ branding:
   # Ref: https://haya14busa.github.io/github-action-brandings/
   # fork: https://github.com/rwaight/github-action-brandings
 
-# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
 inputs:
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
   checkout:
     description: 'If the action should checkout the repo using `actions/checkout`, defaults to false. '
     required: false
@@ -56,15 +56,15 @@ inputs:
     required: false
     default: 'false'
 
-# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
 outputs:
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
   build-version:
     description: "The determined build version. "
     value: ${{ steps.set-version-output.outputs.BUILD_VERSION }}
 
-# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
 runs:
   using: "composite"
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
   steps:
 
     - name: Validate that the runner OS is Linux

@@ -1,6 +1,6 @@
-name: 'Set build skip-create'
+name: 'Set Packer skip-create'
 description: >-
-  Determine a build skip-create option based on predetermined conditions.
+  Determine the Packer skip-create option based on predetermined conditions.
   This action is used with Packer to determine the `skip_create*` variable for either Amazon EBS (`skip_create_ami`) or Google Cloud Platform (`skip_create_image`).
 # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
 author: 'rwaight'
@@ -13,6 +13,7 @@ branding:
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
 inputs:
+  # 'checkout' is not used to set skip-create. 
   # checkout:
   #   description: >-
   #     This is not used to set skip-create. 
@@ -29,6 +30,7 @@ inputs:
     description: 'This should be the github.event_name variable. '
     default: ${{ github.event_name }}
     required: false
+  # 'gh-token' is not used to set skip-create. 
   # gh-token:
   #   description: >-
   #     This is not used to set skip-create. 
@@ -334,7 +336,7 @@ runs:
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
             PRERELEASE="${BASH_REMATCH[4]}"
-            if [ '${{ inputs.VERBOSE }}' == 'true' ]; then
+            if [ '${{ inputs.verbose }}' == 'true' ]; then
                 echo "VERSION is: $VERSION "
                 echo "RE is     : $RE "
                 echo "MAJOR is  : $MAJOR "
@@ -768,7 +770,6 @@ runs:
     - name: Output the image skip create results
       # Output the image skip create results
       id: set-skip-create-output
-      shell: bash
       run: |
         echo "::group::starting step 'set-skip-create-output' "
         echo ""
@@ -805,3 +806,4 @@ runs:
         echo ""
         echo "completing the 'set-skip-create-output' step. "
         echo "::endgroup::"
+      shell: bash

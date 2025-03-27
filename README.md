@@ -21,7 +21,8 @@ The actions are currently organized by the following categories:
 ├── git
 ├── github
 ├── releases
-└── utilities
+├── utilities
+└── vars
 ```
 
 #### Actions by category
@@ -30,38 +31,45 @@ Here is a current list of actions by category
 ```bash
 .
 ├── builders
-│   └── set-version
+│   └── nested-virtualization
 ├── chatops
 │   ├── create-or-update-comment
 │   └── find-comment
 ├── git
 │   ├── add-and-commit
+│   ├── changed-files
 │   ├── git-describe-semver
 │   ├── keep-a-changelog-action
 │   ├── repo-version-info
 │   └── semver-git-version
 ├── github
+│   ├── approve-pull-request
 │   ├── create-pull-request
 │   ├── export-label-config
 │   ├── find-pull-request
-│   ├── github-changelog-generator
 │   ├── issue-triage
 │   ├── label-checker
 │   ├── label-manager
 │   ├── label-sync
 │   ├── projectnext-label-assigner
 │   ├── repository-dispatch
+│   ├── runner-debug
 │   └── semantic-pull-request
 ├── releases
 │   ├── release-drafter
 │   ├── release-tag-updater
 │   └── semantic-release
-└── utilities
-    ├── copycat
-    ├── packer
-    ├── paths-filter
-    ├── public-ip
-    └── render-template
+├── utilities
+│   ├── copycat
+│   ├── packer
+│   ├── paths-filter
+│   ├── public-ip
+│   └── render-template
+└── vars
+    ├── build-method
+    ├── build-type
+    ├── build-version
+    └── packer-skip-create
 ```
 
 #### GitHub Actions Category Overview

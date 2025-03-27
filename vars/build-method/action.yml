@@ -77,7 +77,7 @@ runs:
         exit 1
 
     - name: Greet the triggering_actor
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       shell: bash
       run: | 
         echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
@@ -91,7 +91,7 @@ runs:
         echo ""
 
     - name: Show GitHub runner context
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       # to do:  run this if either the verbose input is true or the runner.debug is true
       id: show-runner-context
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
@@ -142,7 +142,7 @@ runs:
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
 
     - name: Verbose | Print the inputs
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       id: verbose-print-inputs
       shell: bash
       run: | 
@@ -169,7 +169,7 @@ runs:
         echo "::endgroup::"
 
     - name: Verbose | Print GitHub Context
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       id: verbose-github-context
       shell: bash
       run: | 

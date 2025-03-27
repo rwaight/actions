@@ -1,0 +1,19 @@
+name: build-method
+author: rwaight
+description: Determine a build method based on predetermined conditions.
+group: vars
+imported: false
+specs:
+  action_file: action.yml
+  inputs: [checkout, event-name, gh-token, ref, ref-name, ref-type, release-tag-name, strategy, workflow, workflow-summary, verbose]
+  outputs: [build-method]
+  runs:
+    using: composite
+local:
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+source:
+  latest_version: "null"
+  update_available: false

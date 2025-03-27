@@ -1,0 +1,27 @@
+name: build-version
+author: rwaight
+description: Determine a build version using git describe, based on predetermined conditions.
+group: vars
+imported: false
+local:
+  author: rwaight
+  modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+source:
+  latest_version: "null"
+  update_available: false
+  action_name: vars-build-version
+  author: rwaight
+  repo_name: actions
+  repo_url: https://github.com/rwaight/actions
+specs:
+  action_file: action.yml
+  inputs: [checkout, event-name, gh-token, ref, ref-name, ref-type, release-tag-name, strategy, workflow, workflow-summary, verbose]
+  outputs: [build-version]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
