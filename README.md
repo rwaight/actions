@@ -21,7 +21,8 @@ The actions are currently organized by the following categories:
 ├── git
 ├── github
 ├── releases
-└── utilities
+├── utilities
+└── vars
 ```
 
 #### Actions by category
