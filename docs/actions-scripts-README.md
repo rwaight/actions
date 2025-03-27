@@ -70,6 +70,8 @@ source:
   current_version: "v1.0.0"
   latest_version: "v1.1.0"
   update_available: true
+  monorepo: true
+  monorepo_path: "example/"
 
 local:
   author: "john-doe"
