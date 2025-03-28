@@ -35,7 +35,7 @@ tree . -d -L 2 --noreport
 #### Get the directories by category with `find`
 ```bash
 # store the categories into an array to use in a for loop
-categories=(builders chatops git github releases utilities vars)
+categories=(builders chatops git github instruqt releases utilities vars)
 
 # get the action names by category, using find
 for item in ${categories[@]}; do find $item -type d -maxdepth 1; done
@@ -50,7 +50,7 @@ for item in ${categories[@]}; do find $item -type d -maxdepth 1 | sed 's,^[^/]*/
 #### Get the directories by category with `tree`
 ```bash
 # store the categories into an array to use in a for loop
-categories=(builders chatops git github releases utilities vars)
+categories=(builders chatops git github instruqt releases utilities vars)
 
 # get the action names by category, using tree
 for item in ${categories[@]}; do tree $item -d -L 1; done
