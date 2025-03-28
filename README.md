@@ -31,7 +31,8 @@ Here is a current list of actions by category
 ```bash
 .
 ├── builders
-│   └── nested-virtualization
+│   ├── nested-virtualization
+│   └── packer-docker
 ├── chatops
 │   ├── create-or-update-comment
 │   └── find-comment
@@ -61,7 +62,6 @@ Here is a current list of actions by category
 │   └── semantic-release
 ├── utilities
 │   ├── copycat
-│   ├── packer
 │   ├── paths-filter
 │   ├── public-ip
 │   └── render-template
