@@ -20,12 +20,16 @@ The actions are currently organized by the following categories:
 ├── composite
 ├── git
 ├── github
+├── instruqt
 ├── releases
 ├── utilities
 └── vars
 ```
 
 #### Actions by category
+
+<details>
+<summary>Actions by category (click to expand)</summary>
 
 Here is a current list of actions by category
 ```bash
@@ -56,12 +60,22 @@ Here is a current list of actions by category
 │   ├── repository-dispatch
 │   ├── runner-debug
 │   └── semantic-pull-request
+├── instruqt
+│   ├── track-delete
+│   ├── track-dev
+│   ├── track-promote
+│   ├── track-pull
+│   ├── track-push
+│   ├── track-tags
+│   ├── track-test
+│   └── track-validate
 ├── releases
 │   ├── release-drafter
 │   ├── release-tag-updater
 │   └── semantic-release
 ├── utilities
 │   ├── copycat
+│   ├── install-yq
 │   ├── paths-filter
 │   ├── public-ip
 │   └── render-template
@@ -71,6 +85,9 @@ Here is a current list of actions by category
     ├── build-version
     └── packer-skip-create
 ```
+
+</details>
+
 
 #### GitHub Actions Category Overview
 
