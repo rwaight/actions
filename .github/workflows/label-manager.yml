@@ -20,24 +20,24 @@ on:
       export_labels:
         description: 'Export labels from repo'
         required: true
-        default: true
+        default: false
         type: boolean
       sync_labels:
         description: 'Sync labels from config files'
         required: true
         default: false
         type: boolean
-      debug_output:
-        description: 'Debug output'
-        required: true
-        default: false
-        type: boolean
+      # verbose_output:
+      #   description: 'Verbose output'
+      #   required: true
+      #   default: false
+      #   type: boolean
   # On a schedule: every six months, at 10:00 on the first of the month
   schedule:
     - cron: '0 10 1 */6 *'  # export labels once every six months, at 10:00 on the first of the month
 
 env:
-  VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
+  #VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
   # the bot name without the '[bot]' suffix
   GH_LOCAL_BOT_NAME: 'rw-actions-bot'
   # the owner of the repo, used in conditionals below
@@ -47,8 +47,8 @@ jobs:
   export-and-sync-labels:
     name: Export and sync repo labels
     runs-on: ubuntu-latest
-    env:
-      MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
+    #env:
+    #  MY_WORKFLOW_DEBUG: ${{ inputs.verbose_output || 'false' }}
     permissions:
       contents: write
       issues: write
@@ -100,13 +100,15 @@ jobs:
 
       - name: Export label config using rwaight/actions/github/export-label-config
         id: export-label-config
+        continue-on-error: true
+        ## configure 'continue-on-error: true' until the 'export-label-config' action is fixed
         if: |
-          (github.event_name=='schedule' && github.event.schedule=='0 10 1 */6 *') || 
+          (github.event_name=='schedule') || 
           (github.event_name=='workflow_dispatch' && inputs.export_labels==true) || 
-          (github.event_name=='repository_dispatch' && github.event.action=='export-labels') ||
-          (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
-          (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
-          (github.event_name=='push' && github.ref_name=='main') 
+          (github.event_name=='repository_dispatch' && github.event.action=='export-labels')
+        ## disable (github.event_name=='push' && github.ref_name=='main') until the 'export-label-config' action is fixed
+        ##  (github.event_name=='repository_dispatch' && github.event.action=='export-labels') ||
+        ##  (github.event_name=='push' && github.ref_name=='main')
         uses: rwaight/actions/github/export-label-config@6848385d0cbaf286eda6311b6a3f11aa82d16679 # v0.1.44
         #uses: rwaight/actions/github/export-label-config@v0.1.26
         #uses: rwaight/actions/github/export-label-config@main
@@ -122,11 +124,10 @@ jobs:
       - name: Sync labels using rwaight/actions/github/label-sync
         id: run-label-sync
         if: | 
-          steps.export-label-config.outcome == 'success' && (
-          (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
+          (github.event_name=='schedule') ||
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
-          (github.event_name=='push' && github.ref_name=='main') 
-          )
+          (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
+          (github.event_name=='push' && github.ref_name=='main')
         uses: rwaight/actions/github/label-sync@6848385d0cbaf286eda6311b6a3f11aa82d16679 # v0.1.44
         #uses: rwaight/actions/github/label-sync@v0.1.26
         #uses: rwaight/actions/github/label-sync@main
