@@ -1029,7 +1029,7 @@ tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-
 
 #### Get the directories by category with `find`
 <div class="highlight"><pre><span></span><code><span class="c1"># store the categories into an array to use in a for loop</span>
-<span class="nv">categories</span><span class="o">=(</span>builders<span class="w"> </span>chatops<span class="w"> </span>git<span class="w"> </span>github<span class="w"> </span>releases<span class="w"> </span>utilities<span class="w"> </span>vars<span class="o">)</span>
+<span class="nv">categories</span><span class="o">=(</span>builders<span class="w"> </span>chatops<span class="w"> </span>git<span class="w"> </span>github<span class="w"> </span>instruqt<span class="w"> </span>releases<span class="w"> </span>utilities<span class="w"> </span>vars<span class="o">)</span>
 
 <span class="c1"># get the action names by category, using find</span>
 <span class="k">for</span><span class="w"> </span>item<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">categories</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>find<span class="w"> </span><span class="nv">$item</span><span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
@@ -1043,7 +1043,7 @@ tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-
 
 #### Get the directories by category with `tree`
 <div class="highlight"><pre><span></span><code><span class="c1"># store the categories into an array to use in a for loop</span>
-<span class="nv">categories</span><span class="o">=(</span>builders<span class="w"> </span>chatops<span class="w"> </span>git<span class="w"> </span>github<span class="w"> </span>releases<span class="w"> </span>utilities<span class="w"> </span>vars<span class="o">)</span>
+<span class="nv">categories</span><span class="o">=(</span>builders<span class="w"> </span>chatops<span class="w"> </span>git<span class="w"> </span>github<span class="w"> </span>instruqt<span class="w"> </span>releases<span class="w"> </span>utilities<span class="w"> </span>vars<span class="o">)</span>
 
 <span class="c1"># get the action names by category, using tree</span>
 <span class="k">for</span><span class="w"> </span>item<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">categories</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>tree<span class="w"> </span><span class="nv">$item</span><span class="w"> </span>-d<span class="w"> </span>-L<span class="w"> </span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
