@@ -37,7 +37,7 @@ This action runs packer build.
 
 To configure the action simply add the following lines to your `.github/workflows/packer-build.yml` workflow file:
 
-```
+```yml
 name: Run packer build on a template file
 
 on:
@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run packer build action
-        uses: rwaight/actions/utilities/packer@v1
+        uses: rwaight/actions/builders/packer-docker@main
         with:
           templateFile: 'packer-template.json'
           varFile: 'packer-vars.json'
