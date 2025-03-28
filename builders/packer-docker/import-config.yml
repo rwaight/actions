@@ -1,14 +1,17 @@
-name: packer
+name: packer-docker
 author: Robert Anderson <riznob@gmail.com>
 description: Run packer build on a template file
 group: utilities
 imported: true
 local:
-  modifications: false
+  author: rwaight
+  modifications: true
   update:
     exclusions:
       - README-examples.md
       - example-custom-notes.md
+      - packer-build-action_Dockerfile
+      - packer-build-action_entrypoint.sh
 source:
   action_name: packer-docker
   author: riznob
