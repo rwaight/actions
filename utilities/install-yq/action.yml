@@ -1,5 +1,6 @@
 name: Install yq
 description: Installs the yq package for parsing YAML files
+author: 'openshift-instruqt'
 runs:
   using: composite
   steps:
@@ -11,3 +12,9 @@ runs:
     - name: Configure yq executable
       shell: bash
       run: sudo mv yq_linux_amd64 /usr/bin/yq && chmod +x /usr/bin/yq
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: download
+  color: blue
