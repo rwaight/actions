@@ -1,5 +1,11 @@
 {
     "my_custom_version": "0.2.1",
+    "build": {
+      "matrix": {
+        "os": "linux",
+        "sandwich": "yes please"
+      }
+    },
     "release_type": "not-set",
     "reviewed_image_id": "not-set",
     "other_var_01": "asdf",

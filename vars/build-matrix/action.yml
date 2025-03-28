@@ -1,0 +1,496 @@
+name: 'Set build matrix'
+description: 'Determine a build matrix based on a JSON vars file and user input.'
+# Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+author: 'rwaight'
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
+branding:
+  icon: 'info'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+
+inputs:
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+  checkout:
+    description: 'If the action should checkout the repo using `actions/checkout`, defaults to false. '
+    required: false
+    default: 'false'
+  gh-token:
+    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
+    required: false
+    default: ${{ github.token }}
+  input-base-image:
+    description: 'The base image to build'
+    required: true
+  input-provider:
+    description: 'The cloud provider to build the image on'
+    required: true
+  json-vars-file:
+    description: >-
+      The name and path of the JSON variables file.
+      Examples: `repo-variables.json` or `vars/repo-variables.json`
+    #default: 'not-set'
+    required: true
+  json-matrix-path:
+    description: >-
+      The JSON path to the build matrix object within the JSON variables file.
+      Examples: `build.matrix`, `github.matrix`, or `matrix`
+    default: 'build.matrix'
+    required: true
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false. '
+    required: false
+    default: 'false'
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
+outputs:
+  build-matrix:
+    description: "The determined build matrix. "
+    value: ${{ steps.set-matrix-output.outputs.BUILD_MATRIX }}
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
+runs:
+  using: "composite"
+  steps:
+
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=vars/build-matrix/action.yml,title=⛔ build-matrix error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Greet the triggering_actor
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      run: | 
+        echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
+        echo ""
+        echo "Here is some information about this action: "
+        echo "  action name  :  ${{ github.action }} "
+        echo "  action path  :  ${{ github.action_path }} "
+        echo "  action ref   :  ${{ github.action_ref }} "
+        echo "  action repo  :  ${{ github.action_repository }} "
+        echo "  action status:  ${{ github.action_status }} "
+        echo ""
+      shell: bash
+
+    - name: Show GitHub runner context
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      # to do:  run this if either the verbose input is true or the runner.debug is true
+      id: show-runner-context
+      ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+      env:
+        EVAL_GH_VAR_RUNNER_DEBUG_EQ0: ${{ runner.debug == '0' }}
+        EVAL_GH_VAR_RUNNER_DEBUG_EQ1: ${{ runner.debug == '1' }}
+        FOOBAR: ${{ runner.debug == '1' && 'foo' || 'bar' }}
+        # https://github.com/actions/runner/issues/2204#issuecomment-1287947031
+        # https://github.com/orgs/community/discussions/27627#discussioncomment-3302259
+        GH_RUNNER_LOG: "${{ runner.debug == '1' && 'INFO' || 'ERROR' }}"
+        GH_VAR_RUNNER_DEBUG1: ${{ runner.debug }}
+        GH_VAR_RUNNER_DEBUG2: ${{ env.RUNNER_DEBUG }}
+        GH_VAR_RUNNER_OS1: ${{ runner.os }}
+        GH_VAR_RUNNER_OS2: ${{ env.RUNNER_OS }}
+        GH_VAR_RUNNER_ARCH1: ${{ runner.arch }}
+        GH_VAR_RUNNER_ARCH2: ${{ env.RUNNER_ARCH }}
+      run: |
+        echo "::group::starting the 'show-runner-context' step... "
+        echo ""
+        echo "NOTE: The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context "
+        echo ""
+        echo "eval if the 'runner.debug' is set to either '0' or '1' "
+        echo "     runner.debug equal 0:  ${EVAL_GH_VAR_RUNNER_DEBUG_EQ0} "
+        echo "     runner.debug equal 1:  ${EVAL_GH_VAR_RUNNER_DEBUG_EQ1} "
+        echo ""
+        echo "set FOOBAR to 'foo' if 'runner.debug' is '1'; otherwise set FOOBAR to 'bar' "
+        echo "    FOOBAR:  ${FOOBAR} "
+        echo ""
+        echo "set GH_RUNNER_LOG to 'INFO' if 'runner.debug' is '1'; otherwise set GH_RUNNER_LOG to 'ERROR' "
+        echo "    GH_RUNNER_LOG:  ${GH_RUNNER_LOG} "
+        echo ""
+        echo "the values of 'runner.debug' and 'env.RUNNER_DEBUG': "
+        echo "    GH_VAR_RUNNER_DEBUG1:  ${GH_VAR_RUNNER_DEBUG1} "
+        echo "    GH_VAR_RUNNER_DEBUG2:  ${GH_VAR_RUNNER_DEBUG2} "
+        echo ""
+        echo "the values of 'runner.os' and 'env.RUNNER_OS': "
+        echo "    GH_VAR_RUNNER_OS1:  ${GH_VAR_RUNNER_OS1} "
+        echo "    GH_VAR_RUNNER_OS2:  ${GH_VAR_RUNNER_OS2} "
+        echo ""
+        echo "the values of 'runner.arch' and 'env.RUNNER_ARCH': "
+        echo "    GH_VAR_RUNNER_ARCH1:  ${GH_VAR_RUNNER_ARCH1} "
+        echo "    GH_VAR_RUNNER_ARCH2:  ${GH_VAR_RUNNER_ARCH2} "
+        echo ""
+        echo "finishing the 'show-runner-context' step... "
+        ##
+        echo "::endgroup::"
+      ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      id: verbose-print-inputs
+      run: | 
+        echo "::group::starting the 'verbose-print-inputs' step... "
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo ""
+        echo "Here are the inputs provided to the action: "
+        echo "    input-base-image:  ${{ inputs.input-base-image }} "
+        echo "    input-provider      :  ${{ inputs.input-provider }} "
+        echo "    json-vars-file             :  ${{ inputs.json-vars-file }} "
+        echo "    json-matrix-path        :  ${{ inputs.json-matrix-path }} "
+        echo "    verbose         :  ${{ inputs.verbose }} "
+        echo ""
+        echo "finishing the 'verbose-print-inputs' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Verbose | Print GitHub Context
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      id: verbose-github-context
+      run: | 
+        echo "::group::starting the 'verbose-github-context' step... "
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo ""
+        echo "GitHub context values: "
+        echo "    event_name:  ${{ github.event_name }} "
+        echo "    ref       :  ${{ github.ref }} "
+        echo "    ref_name  :  ${{ github.ref_name }} "
+        echo "    ref_type  :  ${{ github.ref_type }} "
+        echo "    workflow  :  ${{ github.workflow }} "
+        echo ""
+        echo "GitHub event context values: "
+        echo "    event.release.tag_name         :  ${{ github.event.release.tag_name }} "
+        echo "    event.repository.default_branch:  ${{ github.event.repository.default_branch }} "
+        echo ""
+        echo "GitHub release event context values: "
+        echo "    created_at:  ${{ github.event.release.created_at }} "
+        echo "    draft     :  ${{ github.event.release.draft }} "
+        echo "    id        :  ${{ github.event.release.id }} "
+        echo "    name      :  ${{ github.event.release.name }} "
+        echo "    tag_name  :  ${{ github.event.release.tag_name }} "
+        echo "    prerelease:  ${{ github.event.release.prerelease }} "
+        echo "    url       :  ${{ github.event.release.url }} "
+        echo ""
+        echo "finishing the 'verbose-github-context' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Checkout files from commit tree
+      # Verified creator: https://github.com/marketplace/actions/checkout
+      # GitHub Action for checking out a repo
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      id: checkout-without-token
+      if: inputs.checkout=='true'
+      continue-on-error: true
+      with:
+        fetch-depth: 0
+
+    - name: Checkout files from commit tree with the token
+      # Verified creator: https://github.com/marketplace/actions/checkout
+      # GitHub Action for checking out a repo
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      id: checkout-with-token
+      if: steps.checkout-without-token.outcome == 'failure'
+      with:
+        fetch-depth: 0
+        token: ${{ inputs.gh-token }}
+
+    - name: Ensure the '${{ inputs.json-vars-file }}' file exists
+      id: check-json-vars-file
+      run: |
+        echo "::group::starting the 'check-json-vars-file' step... "
+        echo ""
+        echo "Checking if the JSON vars file '${{ inputs.json-vars-file }}' exists"
+        ##
+        if [[ -f ${{ inputs.json-vars-file }} ]]; then
+            echo "  The JSON vars file '${{ inputs.json-vars-file }}' exists. "
+            file_status=exists
+            ##echo "    The variable 'file_status' has been set to '${file_status}' "
+            echo "    Copying the JSON vars file to use for import ... "
+            TEMP_VARS_FILE="actions-temp-${{ inputs.json-vars-file }}"
+            echo "TEMP_VARS_FILE=${TEMP_VARS_FILE}" >> $GITHUB_ENV
+            echo "    The temporary file will be named '${TEMP_VARS_FILE}' ..."
+            cp ${{ inputs.json-vars-file }} ${TEMP_VARS_FILE}
+            echo ""
+        else
+            echo "  The JSON vars file '${{ inputs.json-vars-file }}' DOES NOT exist... "
+            file_status=does_not_exist
+            echo "    The variable 'file_status' has been set to '${file_status}' "
+            echo "::error file=vars/build-matrix/action.yml,title=⛔ error in step 'check-json-vars-file'::This repo does not have the provided JSON vars file '${{ inputs.json-vars-file }}'. "
+            exit 1
+        fi
+        echo "finishing the 'check-json-vars-file' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+To do:
+- Delete the 'actions/checkout' steps and document that 'actions/checkout' MUST be completed before calling this action
+- Delete the 'checkout' and 'gh-token' inputs
+- Delete the 'checkout-without-token' and 'checkout-with-token' steps
+- Ensure the 'TEMP_VARS_FILE' env var is passed to the next steps
+- Ensure only the 'TEMP_VARS_FILE' is updated when checking the 'base_image' and 'provider' inputs
+- Ensure the 'TEMP_VARS_FILE' is used in the 'validate-json-matrix-path' step
+- Ensure the 'TEMP_VARS_FILE' is used in the 'validate-base-image-input' step
+- Ensure the 'TEMP_VARS_FILE' is used in the 'validate-provider-input' step
+- Ensure the 'TEMP_VARS_FILE' is used in the 'get-matrix' step
+- Ensure the 'TEMP_VARS_FILE' is used in the 'set-matrix-output' step
+- Ensure the 'TEMP_VARS_FILE' is removed at the end of the action
+- Ensure the 'TEMP_VARS_FILE' is removed if the action fails
+- Ensure the 'TEMP_VARS_FILE' is removed if the action is cancelled
+
+
+    - name: Validate the JSON path to the build matrix object
+      id: validate-json-matrix-path
+      env:
+        MATRIX_PATH: ${{ inputs.json-matrix-path }}
+        JSON_FILE: ${{ env.TEMP_VARS_FILE }}
+      run: |
+        echo "::group::starting step 'validate-json-matrix-path' "
+        echo ""
+        jq --arg path "$MATRIX_PATH" -e '
+          # Convert the dotted path (e.g. "build.matrix") to an array of keys: ["build","matrix"]
+          ($path | split(".")) as $keys
+          |
+          # Check whether getpath($keys) produces a non-null value.
+          # The ? operator suppresses an error if any key is missing and returns null instead.
+          if getpath($keys)? then
+            "Path \"" + $path + "\" is present"
+          else
+            error("Path \"" + $path + "\" not found")
+          end
+        ' ${{ env.JSON_FILE }}
+        ##
+        echo ""
+        echo "completing the 'validate-json-matrix-path' step. "
+        echo "::endgroup::"
+      ##
+      ##
+      #### code for checking '.build.matrix' 
+        # jq -e 'if .build? | .matrix? then "build.matrix is present" else "build.matrix not found" end' ${{ inputs.json-vars-file }}
+        # jq -e 'if .build? | .matrix? then "build.matrix is present" else error("build.matrix not found") end' ${{ inputs.json-vars-file }}
+        # jq -e 'if .build.matrix? then "build.matrix is present" else "build.matrix not found" end' ${{ inputs.json-vars-file }}
+        # jq -e 'if .build.matrix? then "build.matrix is present" else error("build.matrix not found") end' ${{ inputs.json-vars-file }}
+      ## one-liner examples are above
+      #### code for checking the JSON path as a variable
+        # MATRIX_PATH="build.matrix"
+        # jq --arg path "$MATRIX_PATH" -e '($path | split(".")) as $keys | 
+        #   if getpath($keys)? then "Path \"" + $path + "\" is present" else error("Path \"" + $path + "\" not found") end' ${{ inputs.json-vars-file }}
+      ## two-liner example is above
+      #### code for checking '.build.matrix' 
+        # jq -e '
+        #   if .build? | .matrix? then
+        #     "build.matrix is present"
+        #   else
+        #     error("build.matrix not found")
+        #   end
+        # ' ${{ inputs.json-vars-file }}
+      ## multi-line example is above
+      shell: bash
+
+
+    - name: Validate the base image input
+      id: validate-base-image-input
+      env:
+        MATRIX_PATH: ${{ inputs.json-matrix-path }}
+        JSON_FILE: ${{ env.TEMP_VARS_FILE }}
+      run: |
+        echo "::group::starting step 'validate-base-image-input' "
+        echo ""
+        if [[ '${{ github.event_name }}' == 'workflow_dispatch' ]]; then
+            echo "the 'github.event_name' is 'workflow_dispatch', going to override the build matrix in the JSON file "
+            ##
+            if [[ '${{ inputs.input-base-image }}' == 'all' ]]; then
+                echo "    the 'input-base-image' input is '${{ inputs.input-base-image }}', copying the JSON vars file to use for import ... "
+                cp ${{ inputs.json-vars-file }} "temp-${{ inputs.json-vars-file }}"
+            elif [[ '${{ inputs.input-base-image }}' == 'invalid' ]]; then
+                echo "    the 'input-base-image' input is '${{ inputs.input-base-image }}', the workflow will exit with an error. "
+                echo "This workflow will now fail and exit. "
+                echo "::error file=vars/build-matrix/action.yml,title=⛔ error in step 'get-matrix' hint::The 'input-base-image' input was invalid. "
+                exit 1
+            else
+                echo "    replacing the 'build.matrix.base_image' value with the 'input-base-image' input, which is '${{ inputs.input-base-image }}' "
+                jq '.build.matrix.base_image = ["${{ inputs.input-base-image }}"]' ${{ inputs.json-vars-file }} > "temp-${{ inputs.json-vars-file }}"
+                mv "temp-${{ inputs.json-vars-file }}" ${{ inputs.json-vars-file }}
+                #
+                # only keep 'include' entries that do match the 'input-base-image' input
+                echo "    checking for any 'include' entries within 'build.matrix' for '${{ inputs.input-base-image }}' "
+                jq --arg inputimage "${{ inputs.input-base-image }}" '.build.matrix.include |= map(select(.base_image == $inputimage))' ${{ inputs.json-vars-file }} > "temp-${{ inputs.json-vars-file }}"
+                mv "temp-${{ inputs.json-vars-file }}" ${{ inputs.json-vars-file }}
+                echo "::notice file=vars/build-matrix/action.yml,title=To-do in step 'get-matrix'::we may need to check to make sure the '.build.matrix.include' length is not 0. "
+                ## code for removing '.build.matrix.include' if it has a length of 0
+                ## jq --arg inputimage "${{ inputs.input-base-image }}" '.build.matrix.include |= map(select(.base_image == $inputimage)) | if (.build.matrix.include | length) == 0 then del(.build.matrix.include) else . end' ${{ inputs.json-vars-file }}
+                ## one-liner is above
+                echo ""
+            fi
+            echo "::notice file=vars/build-matrix/action.yml,title=To-do in step 'get-matrix'::Require specific values for the 'input-base-image' input. "
+            echo "::notice file=vars/build-matrix/action.yml,title=To-do in step 'get-matrix'::Check for 'all' or a specific value for the 'input-base-image' input. "
+            echo ""
+        else
+            echo "the 'github.event_name' is '${{ github.event_name }}', nothing to do ... "
+        fi
+        echo ""
+        echo "completing the 'validate-base-image-input' step. "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Validate the provider input
+      id: validate-provider-input
+      env:
+        MATRIX_PATH: ${{ inputs.json-matrix-path }}
+        JSON_FILE: ${{ env.TEMP_VARS_FILE }}
+      run: |
+        echo "::group::starting step 'validate-provider-input' "
+        echo ""
+        if [[ '${{ github.event_name }}' == 'workflow_dispatch' ]]; then
+            echo "the 'github.event_name' is 'workflow_dispatch', going to override the build matrix in the JSON file "
+            ##
+            if [[ '${{ inputs.input-provider }}' == 'all' ]]; then
+                echo "    the 'input-provider' input is '${{ inputs.input-provider }}', nothing to do ... "
+            elif [[ '${{ inputs.input-provider }}' == 'invalid' ]]; then
+                echo "    the 'input-provider' input is '${{ inputs.input-provider }}', the workflow will exit with an error. "
+                echo "This workflow will now fail and exit. "
+                echo "::error file=vars/build-matrix/action.yml,title=⛔ error in step 'get-matrix' hint::The 'input-provider' input was invalid. "
+                exit 1
+            else
+                echo "    the 'input-provider' input is '${{ inputs.input-provider }}' and needs to override the 'build.matrix.provider' value ... "
+                echo "    replacing the 'build.matrix.provider' value, it will be set to '${{ inputs.input-provider }}' "
+                jq '.build.matrix.provider = ["${{ inputs.input-provider }}"]' ${{ inputs.json-vars-file }} > "temp-${{ inputs.json-vars-file }}"
+                mv "temp-${{ inputs.json-vars-file }}" ${{ inputs.json-vars-file }}
+            fi
+            echo "::notice file=vars/build-matrix/action.yml,title=To-do in step 'get-matrix'::Require specific values for the 'input-provider' input. "
+            echo ""
+        else
+            echo "the 'github.event_name' is '${{ github.event_name }}', nothing to do ... "
+        fi
+        echo ""
+        echo "completing the 'validate-provider-input' step. "
+        echo "::endgroup::"
+      shell: bash
+
+
+    - name: Get the build matrix data from the '.build.matrix' object in the '${{ inputs.json-vars-file }}' file
+      id: get-matrix
+      env:
+        MATRIX_PATH: ${{ inputs.json-matrix-path }}
+        JSON_FILE: ${{ env.TEMP_VARS_FILE }}
+      run: |
+        echo "::group::starting step 'get-matrix' "
+        echo ""
+        if [[ '${{ github.event_name }}' == 'workflow_dispatch' ]]; then
+            echo "the 'github.event_name' is 'workflow_dispatch', going to override the build matrix in the JSON file "
+            ##
+            if [[ '${{ inputs.input-base-image }}' == 'all' ]]; then
+                echo "    the 'input-base-image' input is '${{ inputs.input-base-image }}', nothing to do ... "
+            elif [[ '${{ inputs.input-base-image }}' == 'invalid' ]]; then
+                echo "    the 'input-base-image' input is '${{ inputs.input-base-image }}', the workflow will exit with an error. "
+                echo "This workflow will now fail and exit. "
+                echo "::error file=vars/build-matrix/action.yml,title=⛔ error in step 'get-matrix' hint::The 'input-base-image' input was invalid. "
+                exit 1
+            else
+                echo "    replacing the 'build.matrix.base_image' value with the 'input-base-image' input, which is '${{ inputs.input-base-image }}' "
+                jq '.build.matrix.base_image = ["${{ inputs.input-base-image }}"]' ${{ inputs.json-vars-file }} > "temp-${{ inputs.json-vars-file }}"
+                mv "temp-${{ inputs.json-vars-file }}" ${{ inputs.json-vars-file }}
+                #
+                # only keep 'include' entries that do match the 'input-base-image' input
+                echo "    checking for any 'include' entries within 'build.matrix' for '${{ inputs.input-base-image }}' "
+                jq --arg inputimage "${{ inputs.input-base-image }}" '.build.matrix.include |= map(select(.base_image == $inputimage))' ${{ inputs.json-vars-file }} > "temp-${{ inputs.json-vars-file }}"
+                mv "temp-${{ inputs.json-vars-file }}" ${{ inputs.json-vars-file }}
+                echo "::notice file=vars/build-matrix/action.yml,title=To-do in step 'get-matrix'::we may need to check to make sure the '.build.matrix.include' length is not 0. "
+                ## code for removing '.build.matrix.include' if it has a length of 0
+                ## jq --arg inputimage "${{ inputs.input-base-image }}" '.build.matrix.include |= map(select(.base_image == $inputimage)) | if (.build.matrix.include | length) == 0 then del(.build.matrix.include) else . end' ${{ inputs.json-vars-file }}
+                ## one-liner is above
+                echo ""
+            fi
+            echo "::notice file=vars/build-matrix/action.yml,title=To-do in step 'get-matrix'::Require specific values for the 'input-base-image' input. "
+            echo "::notice file=vars/build-matrix/action.yml,title=To-do in step 'get-matrix'::Check for 'all' or a specific value for the 'input-base-image' input. "
+            ##
+            if [[ '${{ inputs.input-provider }}' == 'all' ]]; then
+                echo "    the 'input-provider' input is '${{ inputs.input-provider }}', nothing to do ... "
+            elif [[ '${{ inputs.input-provider }}' == 'invalid' ]]; then
+                echo "    the 'input-provider' input is '${{ inputs.input-provider }}', the workflow will exit with an error. "
+                echo "This workflow will now fail and exit. "
+                echo "::error file=vars/build-matrix/action.yml,title=⛔ error in step 'get-matrix' hint::The 'input-provider' input was invalid. "
+                exit 1
+            else
+                echo "    the 'input-provider' input is '${{ inputs.input-provider }}' and needs to override the 'build.matrix.provider' value ... "
+                echo "    replacing the 'build.matrix.provider' value, it will be set to '${{ inputs.input-provider }}' "
+                jq '.build.matrix.provider = ["${{ inputs.input-provider }}"]' ${{ inputs.json-vars-file }} > "temp-${{ inputs.json-vars-file }}"
+                mv "temp-${{ inputs.json-vars-file }}" ${{ inputs.json-vars-file }}
+            fi
+            echo "::notice file=vars/build-matrix/action.yml,title=To-do in step 'get-matrix'::Require specific values for the 'input-provider' input. "
+            echo ""
+        else
+            echo "the 'github.event_name' is '${{ github.event_name }}', nothing to do ... "
+        fi
+        echo ""
+        echo "build-matrix=$(jq -c .build.matrix < ${{ inputs.json-vars-file }})" >> $GITHUB_OUTPUT
+        echo ""
+        echo "completing the 'get-matrix' step. "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Print build matrix
+      id: print-build-matrix
+      if: ${{ steps.get-matrix.outputs.build-matrix }}
+      run: |
+        echo "::group::starting step 'print-build-matrix' "
+        echo ""
+        echo "Output from the 'get-matrix' step"
+        echo "    build-matrix:  "
+        echo "        ${{ steps.get-matrix.outputs.build-matrix }} "
+        echo ""
+        echo "completing the 'print-build-matrix' step. "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Error if the build matrix was not set
+      id: set-eval-matrix-error
+      if: ${{ env.BUILD_MATRIX == '' }}
+      run: |
+        echo "The build matrix was not set correctly. "
+        echo "This workflow will now fail and exit. "
+        echo "::error file=vars/build-matrix/action.yml,title=⛔ error in the '${{ github.workflow }}' workflow hint::Build matrix not set correctly "
+        exit 1
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      shell: bash
+
+    - name: Output the build matrix
+      id: set-matrix-output
+      run: |
+        echo "::group::starting the 'set-matrix-output' step ... "
+        echo "The BUILD_MATRIX has been set to '${{ env.BUILD_MATRIX }}' ... "
+        echo "BUILD_MATRIX=${{ env.BUILD_MATRIX }}" >> "$GITHUB_OUTPUT"
+        echo ""
+        echo ""
+        echo "The remaining information is probably extra and can probably be removed in the future. "
+        echo ""
+        echo "Variables used to evaluate the build matrix: "
+        echo "    EVAL_BUILD_MATRIX  : ${{ env.EVAL_BUILD_MATRIX }} "
+        echo "    Strategy (input)   : ${{ inputs.strategy }} "
+        echo ""
+        echo "  get-tag-version outputs: "
+        echo "    FULL_VERSION_REF   : ${{ env.FULL_VERSION_REF }} "
+        echo ""
+        echo "  GitHub context values: "
+        echo "    event_name:  ${{ github.event_name }} "
+        echo "    ref       :  ${{ github.ref }} "
+        echo "    ref_name  :  ${{ github.ref_name }} "
+        echo "    ref_type  :  ${{ github.ref_type }} "
+        echo "    workflow  :  ${{ github.workflow }} "
+        echo ""
+        echo "  GitHub event context values: "
+        echo "    event.release.tag_name         :  ${{ github.event.release.tag_name }} "
+        echo "    event.repository.default_branch:  ${{ github.event.repository.default_branch }} "
+        echo ""
+        echo ""
+        echo "finishing the 'set-matrix-output' step ... "
+        echo "::endgroup::"
+      shell: bash
