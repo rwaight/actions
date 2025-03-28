@@ -1,0 +1,27 @@
+name: track-promote
+author: openshift-instruqt
+description: Prepares track for validate, push and test.
+group: instruqt
+imported: true
+local:
+  modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+source:
+  action_name: track-promote
+  author: openshift-instruqt
+  repo_name: instruqt
+  repo_url: https://github.com/openshift-instruqt/instruqt
+  current_version: ""
+  latest_version: error
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [path, id]
+  outputs: []
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use

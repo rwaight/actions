@@ -1,0 +1,27 @@
+name: track-delete
+author: openshift-instruqt
+description: Deletes an Instruqt track. Must be in the track directory to run.
+group: instruqt
+imported: true
+local:
+  modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+source:
+  action_name: track-delete
+  author: openshift-instruqt
+  repo_name: instruqt
+  repo_url: https://github.com/openshift-instruqt/instruqt
+  current_version: ""
+  latest_version: error
+  update_available: true
+specs:
+  action_file: action.yml
+  inputs: [path]
+  outputs: []
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
