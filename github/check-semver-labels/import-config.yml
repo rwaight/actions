@@ -1,6 +1,6 @@
 name: check-semver-labels
-description: placeholder
-group: test
+description: Check a pull request for semver labels using the label-checker action
+group: github
 imported: false
 local:
   author: rwaight
