@@ -44,6 +44,7 @@ jobs:
         id: check-semver-labels
         with:
           gh-token: ${{ github.token }}
+          composite-ref: 'v1'
           allow_failure: true
           semver-fallback: 'triage:version-needed'
           semver-prefix: 'version:'

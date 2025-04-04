@@ -8,6 +8,12 @@ branding:
   # fork: https://github.com/rwaight/github-action-brandings
 
 inputs:
+  composite-ref:
+    description: >
+      The reference, commit hash, or tag to use with the action that is called from this composite action.
+      If a value is not provided, the action will use the 'main' branch.
+    required: false
+    default: 'main'
   gh-token:
     description: >
       GITHUB_TOKEN or a repo scoped Personal Access Token (PAT), may be needed for the GitHub CLI.
@@ -81,6 +87,7 @@ runs:
         echo "Here are the inputs provided to the action: "
         echo ""
         echo "allow-failure is  :  ${{ inputs.allow-failure }} "
+        echo "composite-ref is  :  ${{ inputs.composite-ref }} "
         echo "semver-prefix is  :  ${{ inputs.semver-prefix }} "
         echo "semver-fallback is:  ${{ inputs.semver-fallback }} "
         echo "verbose is:  ${{ inputs.verbose }} "
@@ -124,7 +131,9 @@ runs:
         semver-fallback: ${{ inputs.semver-fallback }}
 
     - name: Check for semantic version labels
-      uses: rwaight/actions/github/label-checker@main # can use version specific or main
+      # https://github.com/rwaight/actions/tree/main/github/label-checker
+      uses: rwaight/actions/github/label-checker@${{ inputs.composite-ref }}
+      #uses: rwaight/actions/github/label-checker@main # can use version specific or main
       #uses: rwaight/actions/github/label-checker@v1
       id: semver-labels-check
       with:
@@ -151,7 +160,9 @@ runs:
         echo "completing the 'verbose-semver-labels-check' step. "
 
     - name: Check for the fallback label
-      uses: rwaight/actions/github/label-checker@main # can use version specific or main
+      # https://github.com/rwaight/actions/tree/main/github/label-checker
+      uses: rwaight/actions/github/label-checker@${{ inputs.composite-ref }}
+      #uses: rwaight/actions/github/label-checker@main # can use version specific or main
       #uses: rwaight/actions/github/label-checker@v1
       id: fallback-label-check
       with:
