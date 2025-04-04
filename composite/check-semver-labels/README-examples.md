@@ -48,6 +48,6 @@ jobs:
           allow_failure: true
           semver-fallback: 'triage:version-needed'
           semver-prefix: 'version:'
-          verbose: true
+          verbose: ${{ runner.debug == '1' }}
 ```
 
