@@ -5,6 +5,10 @@ imported: false
 local:
   author: rwaight
   modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
 specs:
   action_file: action.yml
   inputs: [gh-token, allow-failure, semver-fallback, semver-prefix, my_action_debug]
