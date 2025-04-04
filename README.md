@@ -40,6 +40,8 @@ Here is a current list of actions by category
 ├── chatops
 │   ├── create-or-update-comment
 │   └── find-comment
+├── composite
+│   └── check-semver-labels
 ├── git
 │   ├── add-and-commit
 │   ├── changed-files
