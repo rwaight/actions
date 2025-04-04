@@ -47,6 +47,6 @@ jobs:
           allow_failure: true
           semver-fallback: 'triage:version-needed'
           semver-prefix: 'version:'
-          my_action_debug: true
+          verbose: true
 ```
 

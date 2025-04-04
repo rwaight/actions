@@ -11,7 +11,7 @@ local:
       - example-custom-notes.md
 specs:
   action_file: action.yml
-  inputs: [gh-token, allow-failure, semver-fallback, semver-prefix, my_action_debug]
+  inputs: [gh-token, allow-failure, semver-fallback, semver-prefix, verbose]
   outputs: [semver-check-results, fallback-check-results]
   runs:
     using: composite
