@@ -1,11 +1,6 @@
 name: 'Check semver labels'
 description: 'Check a pull request for semver labels using the github/label-checker action'
 author: 'rwaight'
-branding:
-  icon: 'check-square'
-  color: 'blue'
-  # Ref: https://haya14busa.github.io/github-action-brandings/
-  # fork: https://github.com/rwaight/github-action-brandings
 
 inputs:
   composite-ref:
@@ -257,3 +252,9 @@ runs:
         echo "    Check the output above. "
         ##
         echo "completing the 'verbose-action-complete' step. "
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'check-square'
+  color: 'blue'
