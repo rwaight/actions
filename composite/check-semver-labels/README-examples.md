@@ -40,7 +40,7 @@ jobs:
           repo-token: ${{ github.token }}
 
       - name: Check for semantic version labels
-        uses: rwaight/actions/github/check-semver-labels@main
+        uses: rwaight/actions/composite/check-semver-labels@main
         id: check-semver-labels
         with:
           gh-token: ${{ github.token }}

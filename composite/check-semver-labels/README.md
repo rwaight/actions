@@ -1,6 +1,6 @@
-# Check Semver Labels Action
+# Check Semver Labels Composite Action
 
-Check a pull request for semver labels using the label-checker action
+Check a pull request for semver labels using the [github/label-checker](../../github/label-checker/) action
 
 ## Deploying this action
 
