@@ -8,7 +8,6 @@ local:
   update:
     exclusions:
       - README-examples.md
-      - example-custom-notes.md
 specs:
   action_file: action.yml
   inputs: [composite-ref, gh-token, allow-failure, semver-fallback, semver-prefix, verbose]
