@@ -78,6 +78,20 @@ Get the next version for the release (Step 1a)
 
  --->
 
+### Autorelease Step 1b
+
+**Test the build process** (if the build type is NOT '`none`')
+
+### Autorelease Step 1c
+
+**Create the autorelease pull request**
+
+### Autorelease Step 1d
+
+**Print autorelease pull request results**
+
+- - -
+
 ## Autorelease Step 2
 
 ## Autorelease Step 3
