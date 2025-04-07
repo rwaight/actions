@@ -77,3 +77,11 @@ Get the next version for the release (Step 1a)
 #   Check inputs, get next version, determine next steps
 
  --->
+
+## Autorelease Step 2
+
+## Autorelease Step 3
+
+## Autorelease Step ??
+
+## Autorelease Step ??
