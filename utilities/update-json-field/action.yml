@@ -1,11 +1,6 @@
-name: 'Deprecated - Update JSON field'
-description: 'Use the utilities/update-json-field action instead of this action to update a specific field in a JSON file.'
+name: 'Update JSON field'
+description: 'Update a specific field in a JSON file'
 author: 'rwaight'
-branding:
-  icon: 'info'
-  color: 'blue'
-  # Ref: https://haya14busa.github.io/github-action-brandings/
-  # fork: https://github.com/rwaight/github-action-brandings
 
 inputs:
   # author-name:
@@ -66,6 +61,7 @@ runs:
   using: "composite"
   # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
   steps:
+
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
       shell: bash
@@ -108,8 +104,6 @@ runs:
         ## Get the current value of ${{ env.vars_field }}
         ## the double number signs below are for line spacing and readability only
         ##
-        echo "::warning file=test/update-json-field/action.yml,title=warning hint::This test action is deprecated, use the utilities/update-json-field action instead."
-        ##
         if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'get-current-value' step. "
             echo "json_vars_file is:  ${{ env.json_vars_file }} "
@@ -142,8 +136,6 @@ runs:
       run: |
         ## Update the value of the json field
         ## the double number signs below are for line spacing and readability only
-        ##
-        echo "::warning file=test/update-json-field/action.yml,title=warning hint::This test action is deprecated, use the utilities/update-json-field action instead."
         ##
         if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'update-json-field-value' step. "
@@ -191,8 +183,6 @@ runs:
       run: |
         ## Get the updated value of the ${{ inputs.vars-field }} field
         ## the double number signs below are for line spacing and readability only
-        ##
-        echo "::warning file=test/update-json-field/action.yml,title=warning hint::This test action is deprecated, use the utilities/update-json-field action instead."
         ##
         if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'get-updated-value' step. "
@@ -299,3 +289,9 @@ runs:
     #     echo "https://stackoverflow.com/questions/42716734/modify-a-key-value-in-a-json-using-jq-in-place "
     #     tmp=$(mktemp)
     #     jq '.my_custom_field = "ami-02d8sdfsdf"' my-custom-variables.json > "$tmp" && mv "$tmp" my-custom-variables.json
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'info'
+  color: 'blue'

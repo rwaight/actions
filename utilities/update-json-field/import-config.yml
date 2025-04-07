@@ -1,14 +1,16 @@
 name: update-json-field
-description: placeholder
-group: test
+description: Update a specific field in a JSON file
+group: utilities
 imported: false
 local:
   author: rwaight
   modifications: true
-  status: deprecated
+  update:
+    exclusions:
+      - README-examples.md
 specs:
   action_file: action.yml
-  inputs: null
+  inputs: [json-file, vars-field, vars-new-value, verbose]
   outputs: [previous-value, new-value]
   runs:
     using: composite

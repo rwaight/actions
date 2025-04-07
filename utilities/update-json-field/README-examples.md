@@ -1,27 +1,9 @@
-# DEPRECATED - Update JSON Field Action
-
-***NOTICE***: This "test" action has been deprecated, please use [the `utilities/update-json-field` action](../../utilities/update-json-field/).
-
-Update a field to a custom value in a JSON file.
-
-## Deploying this action
-
-### Inputs
-
-See the `inputs` configured in the [action.yml](action.yml) file.
-
-### Outputs
-
-See the `inputs` configured in the [action.yml](action.yml) file.
-
-
-## Example Usage
-
+# Update JSON Field Action - Example Usage
 
 ### Update the value in a JSON file
 
 Create a file named `.github/workflows/update-json-field.yml` with the following:
-```
+```yml
 name: Update JSON field
 run-name: Update JSON field on branch ${{ github.ref_name }}
 
@@ -57,7 +39,7 @@ jobs:
 
       - name: Update the JSON field
         id: update-json-field
-        uses: rwaight/actions/test/update-json-field@main
+        uses: rwaight/actions/utilities/update-json-field@main
         with:
           json-file: 'my-json-file.json'
           vars-field: 'my-custom-field'
