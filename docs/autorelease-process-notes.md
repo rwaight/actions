@@ -1,0 +1,1 @@
+./autorelease/autorelease-process-notes.md
