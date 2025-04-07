@@ -31,6 +31,18 @@ path/to/repo/docs> New-Item -ItemType SymbolicLink -Target ..\autorelease\autore
 Autorelease Reusable Workflows
 
 ## Autorelease Step 1
+<!---  # Autorelease Reusable Workflows -- Process Notes -- THIS SHOULD BE PUT INTO SOME FORMAL DOCUMENTATION...
+#
+### Autorelease Step 1
+# Jobs in Step 1                                              **if applicable**
+#   a. Get the next version for the release                        (get-next-version)
+#   b. Test the build process, if the build type is NOT 'none'
+#       b1. Validate the reviewed image ID                         (verify-reviewed-image)
+#       b2. Test converting the peer-reviewed image to production  (test-build-convert)
+#       b3. Print build results                                    (print-build-results)
+#   c. Create the autorelease pull request                         (prepare-autorelease-pr)
+#   d. Print autorelease pull request results                      (autorelease-pr-results)
+ --->
 
 ### Autorelease Step 1a
 
