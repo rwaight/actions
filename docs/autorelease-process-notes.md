@@ -1,1 +1,1 @@
-./autorelease/autorelease-process-notes.md
+../autorelease/autorelease-process-notes.md
