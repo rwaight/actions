@@ -1,5 +1,30 @@
 # Actions used for Autorelease
 
+**Note**: The original [process notes document](autorelease-process-notes.md) is now sourced in **this directory** with a symlink to the [`docs/` directory](../docs/).  The symlink was created with:
+```bash
+$ cd path/to/repo
+$ git config --get core.symlinks
+false
+$ git config core.symlinks true
+$ git config --get core.symlinks
+true
+$ cd ./docs/
+$ ln -s ../autorelease/autorelease-process-notes.md ./autorelease-process-notes.md
+$ cd ..
+$ git add ./docs/autorelease-process-notes.md
+$ git commit -m 'docs: symlink for autorelease process notes'
+```
+
+<!--- for windows users... from the docs directory
+
+use either:
+path/to/repo/docs> cmd /c mklink .\autorelease-process-notes.md ..\autorelease\autorelease-process-notes.md
+
+or
+
+path/to/repo/docs> New-Item -ItemType SymbolicLink -Target ..\autorelease\autorelease-process-notes.md -Path .\autorelease-process-notes.md
+
+--->
 
 # Autorelease Process Notes
 
