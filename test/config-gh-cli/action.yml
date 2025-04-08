@@ -62,10 +62,12 @@ runs:
         echo "::error title=⛔ error hint::This action supports Linux only"
         exit 1
 
+
     - name: Greet the triggering_actor
       if: inputs.verbose=='true'
       shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+
 
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true'
@@ -80,28 +82,50 @@ runs:
         echo "verbose is set to ${{ inputs.verbose }} "
         ##
 
-    - name: This is a template only
-      id: template-example-output
-      shell: bash
-      run: |
-        ## Print a message about this being a template action only.
-        ## the double number signs below are for line spacing and readability only
-        ##
-        echo "This action is only a template for building composite actions. "
-        echo "Reference GitHub's creating a composite action guide, at "
-        echo "https://docs.github.com/en/actions/creating-actions/creating-a-composite-action "
-        echo " for more information. "
-        echo ""
-        echo "Running step 'template-example-output', which sends variables to GitHub output. "
-        template_action_datetime=$(date +%Y%m%d-%Z-%H%M)
-        echo "The current datetime is ${template_action_datetime}"
-        echo "Setting EXAMPLE_ACTION_OUTPUT1 to '${template_action_datetime}'..."
-        echo "EXAMPLE_ACTION_OUTPUT1=${template_action_datetime}" >> $GITHUB_ENV
-        echo "EXAMPLE_ACTION_OUTPUT1=${template_action_datetime}" >> "$GITHUB_OUTPUT"
-        echo ""
 
-    # Output variables for the action
+    - name: Login with a GitHub Token
+      id: gh-user-auth
+      # switch to this #if: ${{ steps.pr-from-commit.outputs.result && inputs.account-type=='user' }}
+      if: inputs.account-type=='user'
+      # references:
+      #  # https://cli.github.com/manual/gh_auth_login
+      #  # https://josh-ops.com/posts/gh-auth-login-in-actions/
+      #  # https://stackoverflow.com/questions/75968833/does-gh-auth-login-create-a-github-token-or-gh-token
+      env:
+        # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
+        #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
+        #user#GH_TOKEN: ${{ inputs.gh-token }}
+        GH_TOKEN: ${{ inputs.gh-token }}
+      run: |
+        echo "Login with the user actions token "
+        echo ${{ secrets.BOT_USER_ACTIONS_TOKEN }} | gh auth login --with-token
+        echo ""
+        echo "Check the GitHub authentication status "
+        gh auth status
+        echo ""
+      shell: bash
+
+
+    - name: Create a GitHub App Token
+      # Verified creator: https://github.com/marketplace/actions/create-github-app-token
+      # GitHub Action for creating a GitHub App installation access token.
+      uses: actions/create-github-app-token@21cfef2b496dd8ef5b904c159339626a10ad380e # v1.11.6
+      id: app-token
+      #if: ${{ steps.pr-from-commit.outputs.result && fromJson(steps.pr-from-commit.outputs.result).number }}
+      # this worked when we were using the 'bot' for authentication
+      if: inputs.account-type=='bot'
+      #if: ${{ steps.pr-from-commit.outputs.result && fromJson(steps.pr-from-commit.outputs.result).number && inputs.account-type=='bot' }}
+      with:
+        # required
+        app-id: ${{ secrets.GH_APP_ID }}
+        private-key: ${{ inputs.gh-app-key }}
+        # create a token for all repositories in the current owner's installation
+        # https://github.com/actions/create-github-app-token#create-a-token-for-all-repositories-in-the-current-owners-installation
+        owner: ${{ github.repository_owner }}
+
+
     - name: Output variables from this job to the action output
+      # Output variables for the action
       id: set-vars-output
       shell: bash
       run: |
