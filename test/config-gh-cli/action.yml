@@ -61,22 +61,21 @@ runs:
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
-      shell: bash
       run: |
         echo "::error title=⛔ error hint::This action supports Linux only"
         exit 1
+      shell: bash
 
 
     - name: Greet the triggering_actor
       if: inputs.verbose=='true'
-      shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
 
 
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true'
       id: verbose-print-inputs
-      shell: bash
       run: | 
         ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
@@ -85,6 +84,7 @@ runs:
         echo "my-example-input1 is set to ${{ inputs.my-example-input1 }} "
         echo "verbose is set to ${{ inputs.verbose }} "
         ##
+      shell: bash
 
 
     - name: Login with a GitHub Token
@@ -119,7 +119,7 @@ runs:
       if: inputs.account-type=='bot'
       with:
         # required
-        app-id: ${{ secrets.GH_APP_ID }}
+        app-id: ${{ inputs.gh-app-id }}
         private-key: ${{ inputs.gh-app-key }}
         # create a token for all repositories in the current owner's installation
         # https://github.com/actions/create-github-app-token#create-a-token-for-all-repositories-in-the-current-owners-installation
@@ -143,8 +143,17 @@ runs:
       shell: bash
 
 
-    - name: Get the GitHub User ID
-      id: gh-user-id
+    - name: Get the GitHub user information
+      id: gh-user-info
+      env:
+        GH_LOCAL_PRIMARY: ${{ inputs.account-type }}
+        # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
+        #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
+        #user#GH_TOKEN: ${{ inputs.gh-token }}
+        GH_TOKEN: ${{ inputs.gh-token }}
+        #
+        #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
+        #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
       run: |
         echo "Get the GitHub User information "
         cli_user_id=$(gh api user -q ".id")
@@ -184,23 +193,11 @@ runs:
         echo ""
         #
         echo "consolidate this with the 'configure-git' step"
-      env:
-        # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
-        #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
-        #user#GH_TOKEN: ${{ inputs.gh-token }}
-        GH_TOKEN: ${{ inputs.gh-token }}
-        #
-        #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
-        #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
       shell: bash
 
 
     - name: Configure git for the GitHub user
       id: configure-git
-      run: |
-        git config --global user.name '${{ steps.gh-user-id.outputs.user-name }}'
-        git config --global user.email '${{ steps.gh-user-id.outputs.user-email }}'
-        echo "consolidate this with the 'gh-user-id' step"
       env:
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
@@ -209,12 +206,17 @@ runs:
         #
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
+      run: |
+        git config --global user.name '${{ steps.gh-user-info.outputs.user-name }}'
+        git config --global user.email '${{ steps.gh-user-info.outputs.user-email }}'
+        echo "consolidate this with the 'gh-user-info' step"
       shell: bash
 
 
     - name: Output variables from this job to the action output
       # Output variables for the action
       id: set-vars-output
-      shell: bash
       run: |
         echo "EXAMPLE_ACTION_OUTPUT1=${EXAMPLE_ACTION_OUTPUT1}" >> "$GITHUB_OUTPUT"
+      shell: bash
+
