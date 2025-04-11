@@ -147,7 +147,7 @@ jobs:
       - name: Generate artifact attestation
         # Verified creator: https://github.com/marketplace/actions/attest-build-provenance
         # Action for generating build provenance attestations for workflow artifacts
-        uses: actions/attest-build-provenance@bd77c077858b8d561b7a36cbe48ef4cc642ca39d # v2.2.2
+        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
         #uses: actions/attest-build-provenance@v1.0.0
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
