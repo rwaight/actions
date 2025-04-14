@@ -1,15 +1,21 @@
-name: template-composite
-description: placeholder
+name: config-gh-cli
+description: 'Configure the GitHub CLI using either a GitHub App (`bot`) or a GitHub User Account (`user`).'
 group: test
 imported: false
 local:
   author: rwaight
   modifications: true
+  update:
+    exclusions:
+      - README-examples.md
 specs:
   action_file: action.yml
-  inputs: [gh-token, my-example-input1, verbose]
-  outputs: [action-output1]
+  inputs: [account-type, gh-app-id, gh-app-key, gh-token, verbose]
+  outputs: [user-id, user-login, user-name, user-type, user-email, user-committer]
   runs:
     using: composite
+source:
+  latest_version: "null"
+  update_available: false
 tests:
   _comment: reserved for future use
