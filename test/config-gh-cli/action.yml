@@ -60,6 +60,7 @@ runs:
 
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
+      id: validate-runner-os
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
       run: |
         echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
