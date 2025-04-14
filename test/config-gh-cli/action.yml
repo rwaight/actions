@@ -206,8 +206,10 @@ runs:
       shell: bash
 
 
-    - name: Configure git for the GitHub user
+    - name: Configure git for the provided GitHub user account
       id: configure-git
+      continue-on-error: true
+      # See the 'GitHub steps context' section in the actions README file
       env:
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
