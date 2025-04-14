@@ -160,7 +160,7 @@ runs:
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
         #user#GH_TOKEN: ${{ inputs.gh-token }}
-        GH_TOKEN: ${{ inputs.gh-token }}
+        GH_TOKEN: ${{ steps.app-token.outputs.token || inputs.gh-token }}
         #
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
@@ -193,12 +193,19 @@ runs:
         echo "the user login is ${cli_user_login} "
         echo "the user email is ${cli_user_email} "
         #
-        # Output the user information
+        # Send the user information to GitHub output
         echo "user-id=${cli_user_id}" >> "$GITHUB_OUTPUT"
         echo "user-login=${cli_user_login}" >> "$GITHUB_OUTPUT"
         echo "user-name=${cli_user_name}" >> "$GITHUB_OUTPUT"
         echo "user-type=${cli_user_type}" >> "$GITHUB_OUTPUT"
         echo "user-email=${cli_user_email}" >> "$GITHUB_OUTPUT"
+        #
+        # Send the user information to the GitHub runner environment
+        echo "user-id=${cli_user_id}" >> $GITHUB_ENV
+        echo "user-login=${cli_user_login}" >> $GITHUB_ENV
+        echo "user-name=${cli_user_name}" >> $GITHUB_ENV
+        echo "user-type=${cli_user_type}" >> $GITHUB_ENV
+        echo "user-email=${cli_user_email}" >> $GITHUB_ENV
         # 
         echo ""
         #
