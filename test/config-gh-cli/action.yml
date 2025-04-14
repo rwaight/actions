@@ -129,6 +129,10 @@ runs:
         echo ""
         echo "Check the GitHub authentication status "
         gh auth status
+        exitcode="$?"
+        # capture the initial 'gh auth status' exit code for debugging
+        # capture the gh auth status for debugging
+        cli_auth_status=$(gh auth status)
         echo ""
         echo "finishing the 'gh-user-auth' step... "
         echo "::endgroup::"
@@ -164,6 +168,10 @@ runs:
         echo ""
         echo "Check the GitHub authentication status "
         gh auth status
+        exitcode="$?"
+        # capture the initial 'gh auth status' exit code for debugging
+        # capture the gh auth status for debugging
+        cli_auth_status=$(gh auth status)
         echo ""
         echo "finishing the 'check-github-auth' step... "
         echo "::endgroup::"
