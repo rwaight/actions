@@ -62,10 +62,10 @@ runs:
       if: ${{ runner.os != 'Linux' }}
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
       run: |
-        echo "::error title=⛔ error hint::This action supports Linux only"
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=test/config-gh-cli/action.yml,title=⛔ config-gh-cli error hint::This action supports Linux only"
         exit 1
       shell: bash
-
 
     - name: Greet the triggering_actor
       if: inputs.verbose=='true'
