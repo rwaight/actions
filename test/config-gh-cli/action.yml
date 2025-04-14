@@ -159,7 +159,10 @@ runs:
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
         #user#GH_TOKEN: ${{ inputs.gh-token }}
-        GH_TOKEN: ${{ inputs.gh-token }}
+        #GH_TOKEN: ${{ steps.app-token.outputs.token || inputs.gh-token }}
+        # set GH_TOKEN to 'steps.app-token.outputs.token' if the account-type is 'bot'
+        #   otherwise set GH_TOKEN to 'inputs.gh-token'
+        GH_TOKEN: ${{ inputs.account-type == 'bot' && steps.app-token.outputs.token || inputs.gh-token }}
         #
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
@@ -184,7 +187,10 @@ runs:
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
         #user#GH_TOKEN: ${{ inputs.gh-token }}
-        GH_TOKEN: ${{ steps.app-token.outputs.token || inputs.gh-token }}
+        #GH_TOKEN: ${{ steps.app-token.outputs.token || inputs.gh-token }}
+        # set GH_TOKEN to 'steps.app-token.outputs.token' if the account-type is 'bot'
+        #   otherwise set GH_TOKEN to 'inputs.gh-token'
+        GH_TOKEN: ${{ inputs.account-type == 'bot' && steps.app-token.outputs.token || inputs.gh-token }}
         #
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
@@ -249,7 +255,11 @@ runs:
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
         #user#GH_TOKEN: ${{ inputs.gh-token }}
-        GH_TOKEN: ${{ inputs.gh-token }}
+        #old-do-not-use#GH_TOKEN: ${{ inputs.gh-token }}
+        #GH_TOKEN: ${{ steps.app-token.outputs.token || inputs.gh-token }}
+        # set GH_TOKEN to 'steps.app-token.outputs.token' if the account-type is 'bot'
+        #   otherwise set GH_TOKEN to 'inputs.gh-token'
+        GH_TOKEN: ${{ inputs.account-type == 'bot' && steps.app-token.outputs.token || inputs.gh-token }}
         #
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
