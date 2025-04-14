@@ -90,6 +90,8 @@ runs:
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       id: verbose-print-inputs
+      env:
+        USER_TYPE: ${{ inputs.account-type == 'bot' && 'bot' || 'user' }}
       run: | 
         echo "::group::starting the 'verbose-print-inputs' step... "
         ## Print the inputs if inputs.verbose=='true'
