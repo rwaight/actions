@@ -68,8 +68,18 @@ runs:
       shell: bash
 
     - name: Greet the triggering_actor
-      if: inputs.verbose=='true'
-      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      id: verbose-greeting
+      run: | 
+        echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
+        echo ""
+        echo "Here is some information about this action: "
+        echo "  action name  :  ${{ github.action }} "
+        echo "  action path  :  ${{ github.action_path }} "
+        echo "  action ref   :  ${{ github.action_ref }} "
+        echo "  action repo  :  ${{ github.action_repository }} "
+        echo "  action status:  ${{ github.action_status }} "
+        echo ""
       shell: bash
 
 
