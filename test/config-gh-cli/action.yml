@@ -4,10 +4,10 @@ description: 'Configure the GitHub CLI using either a GitHub App (`bot`) or a Gi
 author: 'rwaight'
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
 branding:
-  icon: 'edit'
-  color: 'blue'
   # Ref: https://haya14busa.github.io/github-action-brandings/
   # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'git-commit'
+  color: 'blue'
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
 inputs:
