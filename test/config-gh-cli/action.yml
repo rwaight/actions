@@ -12,7 +12,7 @@ branding:
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
 inputs:
   account-type:
-    description: 'The type of GitHub account to use, either `bot` (GitHub App) or `user` (GitHub User Account).'
+    description: 'The type of GitHub account to use: either GitHub App (`bot`) or GitHub User Account (`user`).'
     required: true
     #default: 'bot'
   gh-app-id:
