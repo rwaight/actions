@@ -19,7 +19,7 @@ inputs:
     description: 'The GitHub App ID used to authenticate to the GitHub CLI.'
     required: false
   gh-app-key:
-    description: 'The GitHub App Key used to authenticate to the GitHub CLI.'
+    description: 'The GitHub App Key used to authenticate to the GitHub CLI. This is a private key that is used to create a GitHub App Token.'
     required: false
     default: ${{ github.token }}
   gh-token:
