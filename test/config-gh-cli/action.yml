@@ -72,6 +72,8 @@ runs:
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       id: verbose-greeting
       run: | 
+        echo "::group::starting the 'verbose-greeting' step... "
+        echo ""
         echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
         echo ""
         echo "Here is some information about this action: "
@@ -81,6 +83,8 @@ runs:
         echo "  action repo  :  ${{ github.action_repository }} "
         echo "  action status:  ${{ github.action_status }} "
         echo ""
+        echo "finishing the 'verbose-greeting' step... "
+        echo "::endgroup::"
       shell: bash
 
     - name: Verbose | Print the inputs
@@ -117,12 +121,16 @@ runs:
         #user#GH_TOKEN: ${{ inputs.gh-token }}
         GH_TOKEN: ${{ inputs.gh-token }}
       run: |
+        echo "::group::starting the 'gh-user-auth' step... "
+        echo ""
         echo "Login with the user actions token "
         echo ${{ inputs.gh-token }} | gh auth login --with-token
         echo ""
         echo "Check the GitHub authentication status "
         gh auth status
         echo ""
+        echo "finishing the 'gh-user-auth' step... "
+        echo "::endgroup::"
       shell: bash
 
 
@@ -152,9 +160,13 @@ runs:
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
       run: |
+        echo "::group::starting the 'check-github-auth' step... "
+        echo ""
         echo "Check the GitHub authentication status "
         gh auth status
         echo ""
+        echo "finishing the 'check-github-auth' step... "
+        echo "::endgroup::"
       shell: bash
 
 
@@ -170,6 +182,8 @@ runs:
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
       run: |
+        echo "::group::starting the 'gh-user-info' step... "
+        echo ""
         echo "Get the GitHub User information "
         cli_user_id=$(gh api user -q ".id")
         cli_user_login=$(gh api user -q ".login")
@@ -215,6 +229,9 @@ runs:
         echo ""
         #
         echo "consolidate this with the 'configure-git' step"
+        echo ""
+        echo "finishing the 'gh-user-info' step... "
+        echo "::endgroup::"
       shell: bash
 
 
@@ -231,9 +248,14 @@ runs:
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
       run: |
+        echo "::group::starting the 'configure-git' step... "
+        echo ""
         git config --global user.name '${{ steps.gh-user-info.outputs.user-name }}'
         git config --global user.email '${{ steps.gh-user-info.outputs.user-email }}'
         echo "consolidate this with the 'gh-user-info' step"
+        echo ""
+        echo "finishing the 'configure-git' step... "
+        echo "::endgroup::"
       shell: bash
 
     - name: Configure git as the GitHub Actions Bot
@@ -249,6 +271,8 @@ runs:
         user-type: 'bot'
         user-email: '41898282+github-actions[bot]@users.noreply.github.com'
       run: |
+        echo "::group::starting the 'configure-gh-actions-bot' step... "
+        echo ""
         echo "fallback step: configure git as the GitHub actions bot"
         ## Configure git to login as the GitHub Actions Bot.
         #
@@ -267,12 +291,19 @@ runs:
         echo "user-email=${user-email}" >> $GITHUB_ENV
         #
         echo ""
+        echo "finishing the 'configure-gh-actions-bot' step... "
+        echo "::endgroup::"
       shell: bash
 
     - name: Output variables from this job to the action output
       # Output variables for the action
       id: set-vars-output
       run: |
+        echo "::group::starting the 'set-vars-output' step... "
+        echo ""
         echo "EXAMPLE_ACTION_OUTPUT1=${EXAMPLE_ACTION_OUTPUT1}" >> "$GITHUB_OUTPUT"
+        echo ""
+        echo "finishing the 'set-vars-output' step... "
+        echo "::endgroup::"
       shell: bash
 
