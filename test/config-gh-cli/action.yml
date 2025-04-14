@@ -1,5 +1,5 @@
 name: 'Configure GitHub CLI'
-description: 'A template for building composite actions.'
+description: 'Configure the GitHub CLI using either a GitHub App (`bot`) or a GitHub User Account (`user`).'
 # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
 author: 'rwaight'
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
