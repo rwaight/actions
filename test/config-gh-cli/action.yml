@@ -225,11 +225,12 @@ runs:
     - name: Configure git as the GitHub Actions Bot
       id: configure-gh-actions-bot
       # This is a fallback step in case the GitHub CLI fails to authenticate
+      if: steps.configure-git.outcome == 'failure'
       env:
         # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
         GH_TOKEN: ${{ github.token }}
         user-id: '41898282'
-        #user-login: 'github-actions[bot]'
+        user-login: 'github-actions[bot]'
         user-name: 'github-actions[bot]'
         user-type: 'bot'
         user-email: '41898282+github-actions[bot]@users.noreply.github.com'
@@ -243,6 +244,14 @@ runs:
         # git config user.email 41898282+github-actions[bot]@users.noreply.github.com
         git config user.email ${{ env.user-email }}
         echo "fallback step: configure git as the GitHub actions bot"
+        #
+        # Fallback | Send the user information to the GitHub runner environment
+        echo "user-id=${user-id}" >> $GITHUB_ENV
+        echo "user-login=${user-login}" >> $GITHUB_ENV
+        echo "user-name=${user-name}" >> $GITHUB_ENV
+        echo "user-type=${user-type}" >> $GITHUB_ENV
+        echo "user-email=${user-email}" >> $GITHUB_ENV
+        #
         echo ""
       shell: bash
 
