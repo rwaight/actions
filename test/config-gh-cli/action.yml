@@ -222,6 +222,29 @@ runs:
         echo "consolidate this with the 'gh-user-info' step"
       shell: bash
 
+    - name: Configure git as the GitHub Actions Bot
+      id: configure-gh-actions-bot
+      # This is a fallback step in case the GitHub CLI fails to authenticate
+      env:
+        # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+        GH_TOKEN: ${{ github.token }}
+        user-id: '41898282'
+        #user-login: 'github-actions[bot]'
+        user-name: 'github-actions[bot]'
+        user-type: 'bot'
+        user-email: '41898282+github-actions[bot]@users.noreply.github.com'
+      run: |
+        echo "fallback step: configure git as the GitHub actions bot"
+        ## Configure git to login as the GitHub Actions Bot.
+        #
+        # git config user.name github-actions[bot]
+        git config user.name ${{ env.user-name }}
+        #
+        # git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+        git config user.email ${{ env.user-email }}
+        echo "fallback step: configure git as the GitHub actions bot"
+        echo ""
+      shell: bash
 
     - name: Output variables from this job to the action output
       # Output variables for the action
