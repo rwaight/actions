@@ -106,7 +106,6 @@ runs:
         echo "::endgroup::"
       shell: bash
 
-
     - name: User Account | Login with a GitHub Token
       id: gh-user-auth
       # switch to this #if: ${{ steps.pr-from-commit.outputs.result && inputs.account-type=='user' }}
@@ -132,7 +131,6 @@ runs:
         echo "finishing the 'gh-user-auth' step... "
         echo "::endgroup::"
       shell: bash
-
 
     - name: Bot Account | Create a GitHub App Token
       # Verified creator: https://github.com/marketplace/actions/create-github-app-token
@@ -168,7 +166,6 @@ runs:
         echo "finishing the 'check-github-auth' step... "
         echo "::endgroup::"
       shell: bash
-
 
     - name: Get the GitHub user information
       id: gh-user-info
@@ -233,7 +230,6 @@ runs:
         echo "finishing the 'gh-user-info' step... "
         echo "::endgroup::"
       shell: bash
-
 
     - name: Configure git for the provided GitHub user account
       id: configure-git
