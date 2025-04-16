@@ -36,22 +36,22 @@ inputs:
 outputs:
   user-id:
     description: "The ID of the authenticated GitHub user."
-    value: ${{ steps.gh-user-info.outputs.user-id }}
+    value: ${{ steps.set-action-outputs.outputs.user-id }}
   user-login:
     description: "The login of the authenticated GitHub user."
-    value: ${{ steps.gh-user-info.outputs.user-login }}
+    value: ${{ steps.set-action-outputs.outputs.user-login }}
   user-name:
     description: "The name of the authenticated GitHub user."
-    value: ${{ steps.gh-user-info.outputs.user-name }}
+    value: ${{ steps.set-action-outputs.outputs.user-name }}
   user-type:
     description: "The type of the authenticated GitHub user."
-    value: ${{ steps.gh-user-info.outputs.user-type }}
+    value: ${{ steps.set-action-outputs.outputs.user-type }}
   user-email:
     description: "The email of the authenticated GitHub user."
-    value: ${{ steps.gh-user-info.outputs.user-email }}
+    value: ${{ steps.set-action-outputs.outputs.user-email }}
   user-committer:
     description: "The committer information for the authenticated GitHub user."
-    value: ${{ steps.gh-user-info.outputs.user-committer }}
+    value: ${{ steps.set-action-outputs.outputs.user-committer }}
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
 runs:
@@ -325,13 +325,24 @@ runs:
 
     - name: Output variables from this job to the action output
       # Output variables for the action
-      id: set-vars-output
+      id: set-action-outputs
+      env:
+        user-id: ${{ env.user-id }}
+        user-login: ${{ env.user-login }}
+        user-name: ${{ env.user-name }}
+        user-type: ${{ env.user-type }}
+        user-email: ${{ env.user-email }}
       run: |
-        echo "::group::starting the 'set-vars-output' step... "
+        echo "::group::starting the 'set-action-outputs' step... "
         echo ""
-        echo "EXAMPLE_ACTION_OUTPUT1=${EXAMPLE_ACTION_OUTPUT1}" >> "$GITHUB_OUTPUT"
+        # Send the user information to GitHub output
+        echo "user-id=${user-id}" >> "$GITHUB_OUTPUT"
+        echo "user-login=${user-login}" >> "$GITHUB_OUTPUT"
+        echo "user-name=${user-name}" >> "$GITHUB_OUTPUT"
+        echo "user-type=${user-type}" >> "$GITHUB_OUTPUT"
+        echo "user-email=${user-email}" >> "$GITHUB_OUTPUT"
         echo ""
-        echo "finishing the 'set-vars-output' step... "
+        echo "finishing the 'set-action-outputs' step... "
         echo "::endgroup::"
       shell: bash
 
