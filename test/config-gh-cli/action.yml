@@ -114,6 +114,7 @@ runs:
       if: inputs.account-type=='user'
       # references:
       #  # https://cli.github.com/manual/gh_auth_login
+      #  # https://github.com/jongio/gh-setup-git-credential-helper/blob/main/gh-setup-git-credential-helper
       #  # https://josh-ops.com/posts/gh-auth-login-in-actions/
       #  # https://stackoverflow.com/questions/75968833/does-gh-auth-login-create-a-github-token-or-gh-token
       env:
