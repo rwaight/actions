@@ -124,6 +124,12 @@ runs:
       run: |
         echo "::group::starting the 'gh-user-auth' step... "
         echo ""
+        echo "  [INFO] Going to unset GITHUB_TOKEN from the runner environment, then run gh command."
+        echo "             See https://stackoverflow.com/a/41749660 & https://github.com/cli/cli/issues/3799 for more."
+        # unset GITHUB_TOKEN from gh's process environment and run gh command.
+        # see https://stackoverflow.com/a/41749660 & https://github.com/cli/cli/issues/3799 for more.
+        export GITHUB_TOKEN=
+        echo ""
         echo "Login with the user actions token "
         echo ${{ inputs.gh-token }} | gh auth login --with-token
         echo ""
