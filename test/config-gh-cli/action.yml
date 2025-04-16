@@ -161,8 +161,9 @@ runs:
         # https://github.com/actions/create-github-app-token#create-a-token-for-all-repositories-in-the-current-owners-installation
         owner: ${{ github.repository_owner }}
 
-    - name: Check GitHub auth status
-      id: check-github-auth
+    - name: Bot Account | Check GitHub auth status
+      id: check-bot-github-auth
+      if: inputs.account-type=='bot'
       env:
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
@@ -175,7 +176,7 @@ runs:
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
       run: |
-        echo "::group::starting the 'check-github-auth' step... "
+        echo "::group::starting the 'check-bot-github-auth' step... "
         echo ""
         echo "Check the GitHub authentication status "
         gh auth status
@@ -184,7 +185,7 @@ runs:
         # capture the gh auth status for debugging
         cli_auth_status=$(gh auth status)
         echo ""
-        echo "finishing the 'check-github-auth' step... "
+        echo "finishing the 'check-bot-github-auth' step... "
         echo "::endgroup::"
       shell: bash
 
