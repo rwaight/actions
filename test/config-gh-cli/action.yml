@@ -117,25 +117,27 @@ runs:
       #  # https://github.com/jongio/gh-setup-git-credential-helper/blob/main/gh-setup-git-credential-helper
       #  # https://josh-ops.com/posts/gh-auth-login-in-actions/
       #  # https://stackoverflow.com/questions/75968833/does-gh-auth-login-create-a-github-token-or-gh-token
-      env:
+      ##nope##env:
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
         #user#GH_TOKEN: ${{ inputs.gh-token }}
-        GH_TOKEN: ${{ inputs.gh-token }}
+        ##nope##GH_TOKEN: ${{ inputs.gh-token }}
       run: |
         echo "::group::starting the 'gh-user-auth' step... "
         echo ""
+        export GITHUB_TOKEN=
+        export GH_TOKEN=
         ##nope## echo "  [INFO] Going to unset GITHUB_TOKEN from the runner environment, then run gh command."
         ##nope## echo "             See https://stackoverflow.com/a/41749660 & https://github.com/cli/cli/issues/3799 for more."
         ##nope## # unset GITHUB_TOKEN from gh's process environment and run gh command.
         ##nope## # see https://stackoverflow.com/a/41749660 & https://github.com/cli/cli/issues/3799 for more.
         ##nope## export GITHUB_TOKEN=
         ##nope##echo ""
-        ##nope## ##echo "Login with the user actions token "
-        ##nope## echo ${{ inputs.gh-token }} | gh auth login --with-token
-        ##nope## echo ""
-        echo "Login using 'gh auth login' "
-        gh auth login
+        echo "Login with the user actions token "
+        echo ${{ inputs.gh-token }} | gh auth login --with-token
+        echo ""
+        ##nope## echo "Login using 'gh auth login' "
+        ##nope## gh auth login
         echo "Check the GitHub authentication status "
         gh auth status
         exitcode="$?"
