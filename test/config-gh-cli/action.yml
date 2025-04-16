@@ -142,6 +142,9 @@ runs:
         # capture the gh auth status for debugging
         ##extra - cleanup## cli_auth_status=$(gh auth status)
         echo ""
+        echo "  [INFO] Going to set the GitHub CLI as the credential helper "
+        gh auth setup-git
+        echo ""
         echo "finishing the 'gh-user-auth' step... "
         echo "::endgroup::"
       shell: bash
