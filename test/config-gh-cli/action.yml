@@ -122,7 +122,6 @@ runs:
         #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
         #user#GH_TOKEN: ${{ inputs.gh-token }}
         GH_TOKEN: ${{ inputs.gh-token }}
-        GITHUB_TOKEN: ${{ inputs.gh-token }}
       run: |
         echo "::group::starting the 'gh-user-auth' step... "
         echo ""
