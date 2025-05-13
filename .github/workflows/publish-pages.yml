@@ -10,6 +10,10 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - '.github/workflows/publish-pages.yml'
+    tags:
+      - 'v*.*.*'
+      - '!v*.*'
+      - '!v*'
 
 permissions:
   contents: write
