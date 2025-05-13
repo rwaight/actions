@@ -1,0 +1,6 @@
+## use https://github.com/lukasgeiter/mkdocs-awesome-nav for navigation
+## https://lukasgeiter.github.io/mkdocs-awesome-nav/features/nav/
+#    https://lukasgeiter.github.io/mkdocs-awesome-nav/features/hiding/
+hide: true
+# https://squidfunk.github.io/mkdocs-material/plugins/tags/#config.tags_file
+# https://github.com/lukasgeiter/mkdocs-awesome-nav/issues/102

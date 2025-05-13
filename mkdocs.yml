@@ -6,25 +6,15 @@ repo_url: https://github.com/rwaight/actions
 repo_name: rwaight/actions
 edit_uri: blob/main/docs/
 
-## use https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin for navigation
-## the plugin won't do anything if `mkdocs.yml` defines a `nav` or `pages` entry
-## https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin?tab=readme-ov-file#customize-navigation
-## use https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin for navigation
-# # https://www.mkdocs.org/user-guide/configuration/#nav
-# # https://www.mkdocs.org/user-guide/writing-your-docs/#configure-pages-and-navigation
-# nav:
-#   - Home: 'index.md'
-#   - Blog:
-#     - blog/index.md
-#     # If you do have a navigation defined then you need to add the blog index page only to it.
-#     # You need not and should not add the individual blog posts.
-#     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-a-blog/#built-in-blog-plugin
-#   - Guides:
-#     - guides/
-#   - Random:
-#     - random/
-## use https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin for navigation
-## https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin?tab=readme-ov-file#customize-navigation
+# this site uses https://github.com/lukasgeiter/mkdocs-awesome-nav for navigation
+  ## the plugin won't do anything if `mkdocs.yml` defines a `nav` or `pages` entry
+  ## https://lukasgeiter.github.io/mkdocs-awesome-nav/features/nav/
+  # nav:
+  #   - Home: 'index.md'
+  #   # https://www.mkdocs.org/user-guide/configuration/#nav
+  #   # https://www.mkdocs.org/user-guide/writing-your-docs/#configure-pages-and-navigation
+  ## use https://github.com/lukasgeiter/mkdocs-awesome-nav for navigation
+  ## https://lukasgeiter.github.io/mkdocs-awesome-nav/features/nav/
 
 # https://www.mkdocs.org/user-guide/configuration/#theme
 theme:
@@ -39,7 +29,8 @@ theme:
     - navigation.instant
     - navigation.sections
     - navigation.tracking
-    - navigation.tabs
+    # do not use 'navigation.tabs' in the 'rwaight/actions' repo
+    #- navigation.tabs
   icon:
     # # https://squidfunk.github.io/mkdocs-material/setup/changing-the-logo-and-icons/?h=icon#favicon
     # favicon: 
@@ -98,8 +89,8 @@ markdown_extensions:
 plugins:
   # https://squidfunk.github.io/mkdocs-material/setup/ensuring-data-privacy/#built-in-privacy-plugin
   - privacy
-  # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin
-  - awesome-pages
+  # https://github.com/lukasgeiter/mkdocs-awesome-nav
+  - awesome-nav
   - search
   # the blog plugin is NOT enabled for the 'actions' repo
   # # https://squidfunk.github.io/mkdocs-material/plugins/blog/
@@ -113,7 +104,7 @@ plugins:
   - tags:
       enabled: true
       # https://squidfunk.github.io/mkdocs-material/plugins/tags/#config.tags_file
-      # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin/issues/102
+      # https://github.com/lukasgeiter/mkdocs-awesome-nav/issues/102
       tags_file: plugins/tags.md
       # # https://squidfunk.github.io/mkdocs-material/plugins/tags/?h=tags+allowed#config.tags_allowed
       # # 'tags_allowed' is for sponsors only

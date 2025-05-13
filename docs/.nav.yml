@@ -1,0 +1,16 @@
+## use https://github.com/lukasgeiter/mkdocs-awesome-nav for navigation
+## https://lukasgeiter.github.io/mkdocs-awesome-nav/features/nav/
+nav:
+    - Home: index.md
+    - Monorepo: 
+        - "actions-*.md"
+        - "*-actions-*.md"
+        - "*-actions.md"
+    - Git: 
+        - "git-*.md"
+    - Random: 
+        - adding-commitlint.md
+        - automating-pull-requests.md
+    - Uncategorized: 
+        # group the remainding '*.md' files using the glob pattern
+        - "*.md"
