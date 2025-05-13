@@ -30,6 +30,17 @@ theme:
     - navigation.tracking
     # do not use 'navigation.tabs' in the 'rwaight/actions' repo
     #- navigation.tabs
+    # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
+    - content.action.edit
+    # https://squidfunk.github.io/mkdocs-material/reference/content-tabs/#linked-content-tabs
+    - content.tabs.link
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-copy-button
+    - content.code.copy
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-selection-button
+    - content.code.select
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-annotations
+    - content.code.annotate
+    #
   icon:
     # # https://squidfunk.github.io/mkdocs-material/setup/changing-the-logo-and-icons/?h=icon#favicon
     # favicon: 
