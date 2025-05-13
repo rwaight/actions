@@ -1,6 +1,14 @@
+---
+title: Manual Release Process
+date:
+  created: 2024-03-18
+  updated: 2025-05-13
+---
+
 ## Updates and releases to this actions monorepo
 
 In order to push changes to the actions, so that any downstream workflows can use the changes **or** when any of the actions or workflows need to be updated.  The current process for this `actions` repo is:
+
 1. Set up your workstation with this repo and to sign commits and tags
    1. Ensure you have a local copy of this `actions` repo cloned to your workstation
    2. Follow GitHub's [signing tags](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-tags) docs to ensure you can sign tags from your workstation
@@ -49,6 +57,7 @@ In order to push changes to the actions, so that any downstream workflows can us
 #### Notes about reducing time spent on the release process
 
 There are a few things to consider when attempting to reduce the time spent on the release process.
+
 - Keeping a changelog or other documentation for the changes made, without having to look through PRs
 - Keeping the **major** and **minor** tags updated when a new version is released
 - Using automation but [now allowing automation to push to protected branches](https://github.com/orgs/community/discussions/25305)
