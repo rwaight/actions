@@ -70,6 +70,37 @@ jobs:
         # https://github.com/lukasgeiter/mkdocs-awesome-nav
         run: pip install mkdocs-awesome-nav
 
+      # Reserved for future use, see https://backstage.github.io/mkdocs-monorepo-plugin/
+      # - name: Install mkdocs-monorepo-plugin
+      #   # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+      #   # https://backstage.github.io/mkdocs-monorepo-plugin/
+      #   run: pip install mkdocs-monorepo-plugin
+
+      # Reserved for future use, see https://guts.github.io/mkdocs-rss-plugin/
+      # - name: Install mkdocs-rss-plugin
+      #   # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+      #   # https://guts.github.io/mkdocs-rss-plugin/
+      #   run: pip install mkdocs-rss-plugin
+
+      # Reserved for future use, see https://mkdocs-macros-plugin.readthedocs.io/
+      # Added for https://mkdocs-macros-plugin.readthedocs.io/en/stable/advanced/#including-external-files-in-pages
+      - name: Install mkdocs-macros-plugin
+        # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+        # https://mkdocs-macros-plugin.readthedocs.io/
+        run: pip install mkdocs-macros-plugin
+
+      # Added for https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-dates
+      - name: Install mkdocs-git-revision-date-localized-plugin
+        # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+        # https://timvink.github.io/mkdocs-git-revision-date-localized-plugin/index.html#setup
+        run: pip install mkdocs-git-revision-date-localized-plugin
+
+      # Added for https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-contributors
+      - name: Install mkdocs-git-committers-plugin-2
+        # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+        # https://github.com/ojacques/mkdocs-git-committers-plugin-2
+        run: pip install mkdocs-git-committers-plugin-2
+
       - name: Run mkdocs gh-deploy
         run: mkdocs gh-deploy --force
 
