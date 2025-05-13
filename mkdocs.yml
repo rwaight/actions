@@ -4,7 +4,6 @@ site_url: https://rwaight.github.io/actions
 site_author: rwaight
 repo_url: https://github.com/rwaight/actions
 repo_name: rwaight/actions
-edit_uri: blob/main/docs/
 
 # this site uses https://github.com/lukasgeiter/mkdocs-awesome-nav for navigation
   ## the plugin won't do anything if `mkdocs.yml` defines a `nav` or `pages` entry
@@ -47,9 +46,11 @@ theme:
 # https://www.mkdocs.org/user-guide/configuration/#docs_dir
 docs_dir: 'docs'
 
-# # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
-# using 'blob/main/docs/' above, instead of 'edit/main/docs/' here
-# edit_uri: edit/main/docs/
+# https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
+# the edit_uri should include configuring the 'content.action.edit' plugin
+#edit_uri: edit/main/docs/
+# testing 'blob/main/docs/' instead of 'edit/main/docs/'
+edit_uri: blob/main/docs/
 
 markdown_extensions:
   # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/#betterem
