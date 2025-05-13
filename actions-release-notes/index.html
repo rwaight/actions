@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://rwaight.github.io/actions/actions-release-notes/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../automating-pull-requests/">
       
       
         <link rel="next" href="../actions-repo-update-readme/">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Actions release notes - Actions monorepo</title>
+        <title>Manual Release Process - Actions monorepo</title>
       
     
     
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Actions release notes
+              Manual Release Process
             
           </span>
         </div>
@@ -230,12 +230,12 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="https://rwaight.github.io/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Home
+    Docs Home
     
   </span>
   
@@ -249,39 +249,34 @@
       
   
   
-    
   
   
-  
     
     
       
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-        
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
-            
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href=".." class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -290,170 +285,17 @@
   </span>
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+          </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Monorepo
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Actions release notes
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    Actions release notes
-    
-  </span>
-  
-
-      </a>
-      
-        
-
-  
-
-<nav class="md-nav md-nav--secondary" aria-label="On this page">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      On this page
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#updates-and-releases-to-this-actions-monorepo" class="md-nav__link">
-    <span class="md-ellipsis">
-      Updates and releases to this actions monorepo
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Updates and releases to this actions monorepo">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#notes-about-reducing-time-spent-on-the-release-process" class="md-nav__link">
-    <span class="md-ellipsis">
-      Notes about reducing time spent on the release process
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../actions-repo-update-readme/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Actions repo update readme
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../actions-scripts-README/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Scripts for the actions monorepo
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../actions-to-import/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Actions to import
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
               
             
           </ul>
@@ -671,8 +513,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -686,6 +530,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -695,11 +547,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -715,12 +567,168 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Uncategorized
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Manual Release Process
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Manual Release Process
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#updates-and-releases-to-this-actions-monorepo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updates and releases to this actions monorepo
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Updates and releases to this actions monorepo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes-about-reducing-time-spent-on-the-release-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes about reducing time spent on the release process
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-repo-update-readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Actions repo update readme
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-scripts-README/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Scripts for the actions monorepo
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-to-import/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Actions to import
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -910,67 +918,93 @@
 
 
   
+    <a href="https://github.com/rwaight/actions/blob/main/docs/actions-release-notes.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
   
 
 
-  <h1>Actions release notes</h1>
+  <h1>Manual Release Process</h1>
 
 <h2 id="updates-and-releases-to-this-actions-monorepo">Updates and releases to this actions monorepo<a class="headerlink" href="#updates-and-releases-to-this-actions-monorepo" title="Permanent link">&para;</a></h2>
-<p>In order to push changes to the actions, so that any downstream workflows can use the changes <strong>or</strong> when any of the actions or workflows need to be updated.  The current process for this <code>actions</code> repo is:
-1. Set up your workstation with this repo and to sign commits and tags
-   1. Ensure you have a local copy of this <code>actions</code> repo cloned to your workstation
-   2. Follow GitHub's <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-tags">signing tags</a> docs to ensure you can sign tags from your workstation
-2. Create a development branch and make the proper code changes
-    -  You should use the <code>dev-*</code> naming convention (example: <code>dev-unique_branch_name_here</code>)
-    -  Update the specific action or workflow, as needed
-3. Determine the next version for this <code>actions</code> repo
-    - Check with <a href="https://github.com/rwaight"><code>@rwaight</code></a> to determine the <strong>version level change</strong>
-    - The changes should be either <code>patch</code>, <code>minor</code>, or <code>major</code>
-    - Make note of the <strong>next version</strong>, as it will be used later in the release process
-4. Open a pull request from your development branch into <code>base: main</code>
-    - Be sure to include the proper <code>version:</code> label
-5. Have your pull request reviewed, then merge the changes into <code>main</code>
-   1. Make a note of the <strong>commit</strong> that was merged into main (example: "merged commit <code>8675309</code> into <code>main</code>")
-   2. The value listed for <strong>commit</strong> is the first seven (7) characters of the commit hash
-6. Update your local clone of this <code>actions</code> repo with the changes from <code>main</code>
-   1. If you have your development branch open, issue <code>git stash</code> to save the local changes
-   2. Fetch the remote branches with <code>git fetch --all</code>
-   3. Switch to the <code>main</code> branch with <code>git checkout main</code>
-   4. Use <code>git pull origin main</code> to ensure your local clone is updated from origin
-7. Verify your local clone has the latest commit to <code>main</code>
-   1. Use one of the following commands to get the list of recent commits:
-      - <code>git log --pretty=format:"%h - %an, %ar : %s" --since=3.days</code>
-      - <code>git log --pretty=oneline</code>
-      - <code>git log --pretty=format:"%h - %an, %ar : %s" --since=2.weeks</code>
-      - <code>git log --pretty=format:"%h - %an, %ar : %s" --since=1.week</code>
-   2. Look for the <strong>commit</strong> that was merged into main
-   3. Alternatively, pipe the output from the <code>git log</code> command into <code>grep</code> and add the <strong>commit</strong>
-      - Example: <code>git log --pretty=oneline | grep 8675309</code>
-   4. Use <code>echo</code> to remind yourself of the commit that will be used for the new <code>git tag</code>, example:
-      1. <code>echo "the commit linked to v1.1.1 is 8675309"</code>
-8. Create a <strong>signed</strong> <code>git tag</code> and verify the signed tag
-   1. Follow GitHub's <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-tags">signing tags</a> docs to ensure you can sign tags from your workstation
-   2. You will use the <code>-a</code>, <code>-m</code>, and <code>-s</code> options when creating and signing the tag
-   3. Use <code>git tag</code> and the <code>-s</code> option to create the tag for the <strong>next version</strong>, example:
-      - <code>git tag -a v1.1.1 -m "Code updated to v1.1.1" -s 8675309</code>
-   4. You will use the <code>-v</code> option to verify the signed tag
-   5. Sign the tag with <code>git tag -v v1.1.1</code>
-   6. Confirm you see a <code>gpg: Good signature</code> response from issuing the <code>git tag -v</code> command
-9. Push the <strong>signed and verified</strong> tag to this repo (origin)
-   1.  Be cerain that you have signed and verified the tag before proceeding
-   2.  Push the <strong>signed and verified</strong> tag with <code>git push -f origin v1.1.1</code>
-10. Ask <code>@rwaight</code> why this is not part of a GitHub workflow (or a composite action) in this repo... because it should be</p>
+<p>In order to push changes to the actions, so that any downstream workflows can use the changes <strong>or</strong> when any of the actions or workflows need to be updated.  The current process for this <code>actions</code> repo is:</p>
+<ol>
+<li>Set up your workstation with this repo and to sign commits and tags</li>
+<li>Ensure you have a local copy of this <code>actions</code> repo cloned to your workstation</li>
+<li>Follow GitHub's <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-tags">signing tags</a> docs to ensure you can sign tags from your workstation</li>
+<li>Create a development branch and make the proper code changes<ul>
+<li>You should use the <code>dev-*</code> naming convention (example: <code>dev-unique_branch_name_here</code>)</li>
+<li>Update the specific action or workflow, as needed</li>
+</ul>
+</li>
+<li>Determine the next version for this <code>actions</code> repo<ul>
+<li>Check with <a href="https://github.com/rwaight"><code>@rwaight</code></a> to determine the <strong>version level change</strong></li>
+<li>The changes should be either <code>patch</code>, <code>minor</code>, or <code>major</code></li>
+<li>Make note of the <strong>next version</strong>, as it will be used later in the release process</li>
+</ul>
+</li>
+<li>Open a pull request from your development branch into <code>base: main</code><ul>
+<li>Be sure to include the proper <code>version:</code> label</li>
+</ul>
+</li>
+<li>Have your pull request reviewed, then merge the changes into <code>main</code></li>
+<li>Make a note of the <strong>commit</strong> that was merged into main (example: "merged commit <code>8675309</code> into <code>main</code>")</li>
+<li>The value listed for <strong>commit</strong> is the first seven (7) characters of the commit hash</li>
+<li>Update your local clone of this <code>actions</code> repo with the changes from <code>main</code></li>
+<li>If you have your development branch open, issue <code>git stash</code> to save the local changes</li>
+<li>Fetch the remote branches with <code>git fetch --all</code></li>
+<li>Switch to the <code>main</code> branch with <code>git checkout main</code></li>
+<li>Use <code>git pull origin main</code> to ensure your local clone is updated from origin</li>
+<li>Verify your local clone has the latest commit to <code>main</code></li>
+<li>Use one of the following commands to get the list of recent commits:<ul>
+<li><code>git log --pretty=format:"%h - %an, %ar : %s" --since=3.days</code></li>
+<li><code>git log --pretty=oneline</code></li>
+<li><code>git log --pretty=format:"%h - %an, %ar : %s" --since=2.weeks</code></li>
+<li><code>git log --pretty=format:"%h - %an, %ar : %s" --since=1.week</code></li>
+</ul>
+</li>
+<li>Look for the <strong>commit</strong> that was merged into main</li>
+<li>Alternatively, pipe the output from the <code>git log</code> command into <code>grep</code> and add the <strong>commit</strong><ul>
+<li>Example: <code>git log --pretty=oneline | grep 8675309</code></li>
+</ul>
+</li>
+<li>Use <code>echo</code> to remind yourself of the commit that will be used for the new <code>git tag</code>, example:<ol>
+<li><code>echo "the commit linked to v1.1.1 is 8675309"</code></li>
+</ol>
+</li>
+<li>Create a <strong>signed</strong> <code>git tag</code> and verify the signed tag</li>
+<li>Follow GitHub's <a href="https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-tags">signing tags</a> docs to ensure you can sign tags from your workstation</li>
+<li>You will use the <code>-a</code>, <code>-m</code>, and <code>-s</code> options when creating and signing the tag</li>
+<li>Use <code>git tag</code> and the <code>-s</code> option to create the tag for the <strong>next version</strong>, example:<ul>
+<li><code>git tag -a v1.1.1 -m "Code updated to v1.1.1" -s 8675309</code></li>
+</ul>
+</li>
+<li>You will use the <code>-v</code> option to verify the signed tag</li>
+<li>Sign the tag with <code>git tag -v v1.1.1</code></li>
+<li>Confirm you see a <code>gpg: Good signature</code> response from issuing the <code>git tag -v</code> command</li>
+<li>Push the <strong>signed and verified</strong> tag to this repo (origin)</li>
+<li>Be cerain that you have signed and verified the tag before proceeding</li>
+<li>Push the <strong>signed and verified</strong> tag with <code>git push -f origin v1.1.1</code></li>
+<li>Ask <code>@rwaight</code> why this is not part of a GitHub workflow (or a composite action) in this repo... because it should be</li>
+</ol>
 <h4 id="notes-about-reducing-time-spent-on-the-release-process">Notes about reducing time spent on the release process<a class="headerlink" href="#notes-about-reducing-time-spent-on-the-release-process" title="Permanent link">&para;</a></h4>
-<p>There are a few things to consider when attempting to reduce the time spent on the release process.
-- Keeping a changelog or other documentation for the changes made, without having to look through PRs
-- Keeping the <strong>major</strong> and <strong>minor</strong> tags updated when a new version is released
-- Using automation but <a href="https://github.com/orgs/community/discussions/25305">now allowing automation to push to protected branches</a></p>
+<p>There are a few things to consider when attempting to reduce the time spent on the release process.</p>
+<ul>
+<li>Keeping a changelog or other documentation for the changes made, without having to look through PRs</li>
+<li>Keeping the <strong>major</strong> and <strong>minor</strong> tags updated when a new version is released</li>
+<li>Using automation but <a href="https://github.com/orgs/community/discussions/25305">now allowing automation to push to protected branches</a></li>
+</ul>
 
 
 
 
 
 
+
+  
+  
 
 
 
@@ -982,6 +1016,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -1013,7 +1049,7 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "content.action.edit", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
