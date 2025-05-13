@@ -1,8 +1,9 @@
 ## use https://github.com/lukasgeiter/mkdocs-awesome-nav for navigation
 ## https://lukasgeiter.github.io/mkdocs-awesome-nav/features/nav/
 nav:
-    - Home: index.md
+    - Docs Home: https://rwaight.github.io/
     - Monorepo: 
+        - index.md
         - "actions-*.md"
         - "*-actions-*.md"
         - "*-actions.md"
