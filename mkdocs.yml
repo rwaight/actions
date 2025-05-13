@@ -29,7 +29,8 @@ theme:
     - navigation.instant
     - navigation.sections
     - navigation.tracking
-    - navigation.tabs
+    # do not use 'navigation.tabs' in the 'rwaight/actions' repo
+    #- navigation.tabs
   icon:
     # # https://squidfunk.github.io/mkdocs-material/setup/changing-the-logo-and-icons/?h=icon#favicon
     # favicon: 
