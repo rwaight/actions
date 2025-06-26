@@ -175,7 +175,12 @@ runs:
         private-key: ${{ inputs.gh-app-key }}
         # create a token for all repositories in the current owner's installation
         # https://github.com/actions/create-github-app-token#create-a-token-for-all-repositories-in-the-current-owners-installation
-        owner: ${{ github.repository_owner }}
+        owner: ${{ github.repository_owner }}  # https://github.com/actions/create-github-app-token#owner
+        # optional inputs
+        #repositories:  # https://github.com/actions/create-github-app-token#repositories
+        #permission-<permission name>:  # https://github.com/actions/create-github-app-token#permission-permission-name
+        #skip-token-revoke:  # https://github.com/actions/create-github-app-token#skip-token-revoke
+        #github-api-url:  # https://github.com/actions/create-github-app-token#github-api-url
 
     - name: Bot Account | Check GitHub auth status
       id: check-bot-github-auth
