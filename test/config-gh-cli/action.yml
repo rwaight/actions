@@ -169,7 +169,8 @@ runs:
       # this worked when we were using the 'bot' for authentication
       if: inputs.account-type=='bot'
       with:
-        # required
+        # https://github.com/actions/create-github-app-token#inputs
+        # required inputs
         app-id: ${{ inputs.gh-app-id }}
         private-key: ${{ inputs.gh-app-key }}
         # create a token for all repositories in the current owner's installation
