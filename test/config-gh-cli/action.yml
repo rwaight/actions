@@ -34,6 +34,18 @@ inputs:
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
 outputs:
+  app-token:
+    description: "GitHub App installation access token"
+    # https://github.com/actions/create-github-app-token#outputs
+    value: ${{ steps.app-token.outputs.token }}
+  app-installation-id:
+    description: "GitHub App installation ID"
+    # https://github.com/actions/create-github-app-token#outputs
+    value: ${{ steps.app-token.outputs.installation-id }}
+  app-slug:
+    description: "GitHub App slug"
+    # https://github.com/actions/create-github-app-token#outputs
+    value: ${{ steps.app-token.outputs.app-slug }}
   user-id:
     description: "The ID of the authenticated GitHub user."
     value: ${{ steps.set-action-outputs.outputs.user-id }}
