@@ -1,0 +1,185 @@
+name: 'Build Material for MkDocs'
+description: 'A composite action to build Material for MkDocs.'
+author: 'rwaight'
+branding:
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'edit'
+  color: 'blue'
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+inputs:
+  gh-token:
+    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), may be needed for the GitHub CLI. '
+    required: false
+    default: ${{ github.token }}
+  plugins:
+    description: 'The plugins to install'
+    required: false
+    default: '["mkdocs-awesome-nav"]'
+  python-version:
+    description: 'The python version to use'
+    required: false
+    default: '3.x'
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
+outputs:
+  install-summary:
+    description: "The example output from this action. "
+    value: ${{ steps.set-vars-output.outputs.EXAMPLE_ACTION_OUTPUT1 }}
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
+runs:
+  using: "composite"
+  steps:
+
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "::error title=⛔ error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=builders/mkdocs-material/action.yml,title=⛔ build-mkdocs-material error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Greet the triggering_actor
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      run: | 
+        echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
+        echo ""
+        echo "Here is some information about this action: "
+        echo "  action name  :  ${{ github.action }} "
+        echo "  action path  :  ${{ github.action_path }} "
+        echo "  action ref   :  ${{ github.action_ref }} "
+        echo "  action repo  :  ${{ github.action_repository }} "
+        echo "  action status:  ${{ github.action_status }} "
+        echo ""
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true'
+      id: verbose-print-inputs
+      run: | 
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "gh-token SHOULD BE MASKED, but is set to ${{ inputs.gh-token }} "
+        echo "my-example-input1 is set to ${{ inputs.my-example-input1 }} "
+        echo "verbose is set to ${{ inputs.verbose }} "
+        ##
+      shell: bash
+
+    - name: This is a template only
+      id: template-example-output
+      run: |
+        ## Print a message about this being a template action only.
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "This action is only a template for building composite actions. "
+        echo "Reference GitHub's creating a composite action guide, at "
+        echo "https://docs.github.com/en/actions/creating-actions/creating-a-composite-action "
+        echo " for more information. "
+        echo ""
+        echo "Running step 'template-example-output', which sends variables to GitHub output. "
+        template_action_datetime=$(date +%Y%m%d-%Z-%H%M)
+        echo "The current datetime is ${template_action_datetime}"
+        echo "Setting EXAMPLE_ACTION_OUTPUT1 to '${template_action_datetime}'..."
+        echo "EXAMPLE_ACTION_OUTPUT1=${template_action_datetime}" >> $GITHUB_ENV
+        echo "EXAMPLE_ACTION_OUTPUT1=${template_action_datetime}" >> "$GITHUB_OUTPUT"
+        echo ""
+      shell: bash
+
+
+    - name: Set up Python
+      # Verified creator: https://github.com/marketplace/actions/setup-python
+      # Set up your GitHub Actions workflow with a specific version of Python
+      uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+      with:
+        python-version: 3.x
+
+    - name: generate the cache ID
+      run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Cache dependencies and build outputs
+      # Verified creator: https://github.com/marketplace/actions/cache
+      # Cache dependencies and build outputs in GitHub Actions
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        key: mkdocs-material-${{ env.cache_id }}
+        path: .cache
+        restore-keys: |
+          mkdocs-material-
+
+    - name: Install mkdocs-material
+      run: pip install mkdocs-material
+      shell: bash
+
+    - name: Install mkdocs-awesome-nav
+      # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+      # https://lukasgeiter.github.io/mkdocs-awesome-nav/#installation
+      # https://github.com/lukasgeiter/mkdocs-awesome-nav
+      run: pip install mkdocs-awesome-nav
+      shell: bash
+
+    # Reserved for future use, see https://backstage.github.io/mkdocs-monorepo-plugin/
+    # - name: Install mkdocs-monorepo-plugin
+    #   # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+    #   # https://backstage.github.io/mkdocs-monorepo-plugin/
+    #   run: pip install mkdocs-monorepo-plugin
+
+    # Reserved for future use, see https://guts.github.io/mkdocs-rss-plugin/
+    # - name: Install mkdocs-rss-plugin
+    #   # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+    #   # https://guts.github.io/mkdocs-rss-plugin/
+    #   run: pip install mkdocs-rss-plugin
+
+    # Reserved for future use, see https://mkdocs-macros-plugin.readthedocs.io/
+    # Added for https://mkdocs-macros-plugin.readthedocs.io/en/stable/advanced/#including-external-files-in-pages
+    - name: Install mkdocs-macros-plugin
+      # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+      # https://mkdocs-macros-plugin.readthedocs.io/
+      run: pip install mkdocs-macros-plugin
+      shell: bash
+
+    # Added for https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-dates
+    - name: Install mkdocs-git-revision-date-localized-plugin
+      # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+      # https://timvink.github.io/mkdocs-git-revision-date-localized-plugin/index.html#setup
+      run: pip install mkdocs-git-revision-date-localized-plugin
+      shell: bash
+
+    # Added for https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-contributors
+    - name: Install mkdocs-git-committers-plugin-2
+      # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
+      # https://github.com/ojacques/mkdocs-git-committers-plugin-2
+      run: pip install mkdocs-git-committers-plugin-2
+      shell: bash
+
+    - name: Run mkdocs gh-deploy
+      run: mkdocs gh-deploy --force
+      env:
+        # https://github.com/ojacques/mkdocs-git-committers-plugin-2#setup
+        MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.GITHUB_TOKEN }}
+      shell: bash
+
+
+    # Output variables for the action
+    - name: Output variables from this job to the action output
+      id: set-vars-output
+      run: |
+        echo "EXAMPLE_ACTION_OUTPUT1=${EXAMPLE_ACTION_OUTPUT1}" >> "$GITHUB_OUTPUT"
+      shell: bash
