@@ -72,15 +72,14 @@ runs:
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
-      shell: bash
       run: |
         echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
         echo "::error file=builders/set-type/action.yml,title=⛔ build-type error hint::This action supports Linux only"
         exit 1
+      shell: bash
 
     - name: Greet the triggering_actor
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
-      shell: bash
       run: | 
         echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
         echo ""
@@ -91,13 +90,13 @@ runs:
         echo "  action repo  :  ${{ github.action_repository }} "
         echo "  action status:  ${{ github.action_status }} "
         echo ""
+      shell: bash
 
     - name: Show GitHub runner context
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       # to do:  run this if either the verbose input is true or the runner.debug is true
       id: show-runner-context
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
-      shell: bash
       env:
         EVAL_GH_VAR_RUNNER_DEBUG_EQ0: ${{ runner.debug == '0' }}
         EVAL_GH_VAR_RUNNER_DEBUG_EQ1: ${{ runner.debug == '1' }}
@@ -142,11 +141,11 @@ runs:
         ##
         echo "::endgroup::"
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+      shell: bash
 
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       id: verbose-print-inputs
-      shell: bash
       run: | 
         echo "::group::starting the 'verbose-print-inputs' step... "
         ## Print the inputs if inputs.verbose=='true'
@@ -169,11 +168,11 @@ runs:
         echo "finishing the 'verbose-print-inputs' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Verbose | Print GitHub Context
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       id: verbose-github-context
-      shell: bash
       run: | 
         echo "::group::starting the 'verbose-github-context' step... "
         ## Print the inputs if inputs.verbose=='true'
@@ -203,6 +202,7 @@ runs:
         echo "finishing the 'verbose-github-context' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Checkout files from commit tree
       # Verified creator: https://github.com/marketplace/actions/checkout
@@ -227,7 +227,6 @@ runs:
     - name: Extra | The ref_type is 'tag'
       id: extra-ref-type-tag
       if: github.ref_type == 'tag'
-      shell: bash
       run: |
         echo "::group::starting the 'extra-ref-type-tag' step... "
         echo "The ref_type is 'tag' "
@@ -242,6 +241,7 @@ runs:
         echo "finishing the 'extra-ref-type-tag' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Extra | The tag starts with the proper version numbering syntax
       id: extra-tag-with-version-syntax
@@ -252,7 +252,6 @@ runs:
       #    or keep the single digit, but match one or more with `+`:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      shell: bash
       run: |
         echo "::group::starting the 'extra-tag-with-version-syntax' step... "
         echo "The ref_type is 'tag' and the tag starts with the proper version numbering syntax "
@@ -267,6 +266,7 @@ runs:
         echo "finishing the 'extra-tag-with-version-syntax' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Set environmental variables used to evaluate the build type
       id: set-eval-type-env-vars
@@ -274,7 +274,6 @@ runs:
       #   - 'EVAL_BUILD_TYPE' is set to 'false'
       #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
       if: ${{ always() }}
-      shell: bash
       run: |
         echo "::group::starting the 'set-eval-type-env-vars' step... "
         echo ""
@@ -285,11 +284,11 @@ runs:
         echo ""
         echo "finishing the 'set-eval-type-env-vars' step... "
         echo "::endgroup::"
+      shell: bash
 
     - name: get-tag-version
       id: get-tag-version
       if: (github.ref_type == 'tag')
-      shell: bash
       run: |
         echo "::group::starting step 'get-tag-version' "
         echo ""
@@ -326,12 +325,12 @@ runs:
         echo ""
         echo "completing the 'get-tag-version' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: get-tag-version | Print outputs
       id: check-get-tag-version
       #if: (github.ref_type == 'tag')
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
-      shell: bash
       run: |
         echo "::group::starting step 'check-get-tag-version' "
         echo ""
@@ -351,6 +350,7 @@ runs:
         MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
         PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
         IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+      shell: bash
 
     - name: BUILD_TYPE | Check for a full version tag, set the build type to prod
       #name: BUILD_TYPE | Check for 'v*.*.*' tags, set the build type to prod
@@ -363,7 +363,6 @@ runs:
       #using 'v*.*.*' does not work# #was#if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
       #using 'v*.*.*' does not work# #if: (contains('refs/tags/v*.*.*', github.ref) && github.ref_type == 'tag' && github.event_name=='push')
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
-      shell: bash
       run: |
         echo "::group::starting step 'set-build-type-prod-full-version-tag' "
         echo ""
@@ -402,6 +401,7 @@ runs:
         echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
 
     - name: BUILD_TYPE | Check for 'v*.*.*' tags (fallback), set the build type to prod
       # This step is run when the branch is a 'v*.*.*' tag
@@ -414,7 +414,6 @@ runs:
       if: (github.ref_type == 'tag' && env.EVAL_BUILD_TYPE=='false')
       #try this next#if: (startsWith('refs/tags/v[0-9].[0-9].[0-9]', github.ref) && github.ref_type == 'tag')
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      shell: bash
       run: |
         echo "::group::starting step 'set-build-type-prod-fallback' "
         echo ""
@@ -432,6 +431,7 @@ runs:
         echo ""
         echo "completing the 'set-build-type-prod-fallback' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_TYPE | Check for main branch (contains), set the build type to main
       id: set-eval-type-main-contains
@@ -443,7 +443,6 @@ runs:
       if: (contains(github.ref_name, 'main') && env.EVAL_BUILD_TYPE=='false')
       # try this next#if: ${{ startsWith(github.ref_name, 'main') && (env.EVAL_BUILD_TYPE=='false') }}
       # try this next#if: ${{ contains(github.ref_name, 'main*') && (env.EVAL_BUILD_TYPE=='false') }}
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-type-main-contains' "
         echo ""
@@ -465,6 +464,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-type-main-contains' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_TYPE | Check for main branch (startsWith), set the build type to main
       id: set-eval-type-main-startswith
@@ -475,7 +475,6 @@ runs:
       # does not work#   ${{ contains(github.ref_name, 'main-2.x') && (env.EVAL_BUILD_TYPE=='false') }}
       # does not work# if: ${{ startsWith(github.ref_name, 'main') }} && ${{ env.EVAL_BUILD_TYPE=='false'}}
       if: (startsWith(github.ref_name, 'main') && env.EVAL_BUILD_TYPE=='false')
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-type-main-startswith' "
         echo ""
@@ -489,6 +488,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-type-main-startswith' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_TYPE | Check for 'main-*' branch (contains), set the build type to main
       id: set-eval-type-contains-main-dash
@@ -497,7 +497,6 @@ runs:
       #was#if: ${{ contains('refs/heads/main-*', github.ref) && (env.EVAL_BUILD_TYPE=='false') }}
       if: (contains('main-*', github.ref_name) && env.EVAL_BUILD_TYPE=='false')
       #try next# if: contains('refs/heads/main-*', github.ref) && (env.EVAL_BUILD_TYPE=='false')
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-type-contains-main-dash' "
         echo ""
@@ -511,6 +510,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-type-contains-main-dash' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_TYPE | Check for dev branch (startsWith), set the build type to dev
       id: set-eval-type-dev-startswith
@@ -519,7 +519,6 @@ runs:
       #was#if: ${{ startsWith(github.ref_name, 'dev') && (env.EVAL_BUILD_TYPE=='false') }}
       if: (startsWith(github.ref_name, 'dev') && env.EVAL_BUILD_TYPE=='false')
       #if: env.EVAL_BUILD_TYPE=='false'
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-type-dev-startswith' "
         echo ""
@@ -533,6 +532,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-type-dev-startswith' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_TYPE | Check for 'dev' branch (contains), set the build type to dev
       id: set-eval-type-dev-contains
@@ -540,7 +540,6 @@ runs:
       #was#if: ${{ contains(github.ref_name, 'dev') && (env.EVAL_BUILD_TYPE=='false') }}
       if: (contains(github.ref_name, 'dev') && env.EVAL_BUILD_TYPE=='false')
       #if: env.EVAL_BUILD_TYPE=='false'
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-type-dev-contains' "
         echo ""
@@ -554,6 +553,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-type-dev-contains' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_TYPE | Check for test branch (startsWith), set the build type to test
       id: set-eval-type-test-startswith
@@ -561,7 +561,6 @@ runs:
       #was#if: ${{ startsWith(github.ref_name, 'test') && (env.EVAL_BUILD_TYPE=='false') }}
       if: (startsWith(github.ref_name, 'test') && env.EVAL_BUILD_TYPE=='false')
       #if: env.EVAL_BUILD_TYPE=='false'
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-type-test-startswith' "
         echo ""
@@ -575,6 +574,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-type-test-startswith' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_TYPE | Check for 'test' branch (contains), set the build type to test
       id: set-eval-type-test-contains
@@ -582,7 +582,6 @@ runs:
       #was#if: ${{ contains(github.ref_name, 'test') && (env.EVAL_BUILD_TYPE=='false') }}
       if: (contains(github.ref_name, 'test') && env.EVAL_BUILD_TYPE=='false')
       #if: env.EVAL_BUILD_TYPE=='false'
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-type-test-contains' "
         echo ""
@@ -596,6 +595,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-type-test-contains' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_TYPE | Fallback value - Set the build type to dev
       id: set-eval-type-fallback
@@ -603,7 +603,6 @@ runs:
       #if: github.ref != 'refs/heads/main'
       # If this runs, then that means the previous steps were skipped
       if: env.EVAL_BUILD_TYPE=='false'
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-type-fallback' "
         echo ""
@@ -626,22 +625,22 @@ runs:
         echo ""
         echo "completing the 'set-eval-type-fallback' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: Error if the build type was not set
       id: set-eval-type-error
       if: ${{ env.BUILD_TYPE == '' }}
-      shell: bash
       run: |
         echo "The build type was not set correctly. "
         echo "This workflow will now fail and exit. "
         echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::Build type not set correctly "
         exit 1
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      shell: bash
 
     # Output the build type
     - name: Output the build type
       id: set-type-output
-      shell: bash
       run: |
         echo "::group::starting the 'set-type-output' step ... "
         echo ""
@@ -650,3 +649,4 @@ runs:
         echo ""
         echo "finishing the 'set-type-output' step ... "
         echo "::endgroup::"
+      shell: bash

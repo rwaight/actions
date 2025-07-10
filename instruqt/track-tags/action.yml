@@ -11,7 +11,6 @@ runs:
   using: composite
   steps:
   - name: Run CURL request 
-    shell: bash
     run: |
       
       cat >query.json <<EOF
@@ -32,3 +31,4 @@ runs:
       else 
         echo "CI is enabled for this track"
       fi
+    shell: bash

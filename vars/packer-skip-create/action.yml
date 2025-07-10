@@ -92,15 +92,14 @@ runs:
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
-      shell: bash
       run: |
         echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
         echo "::error file=builders/set-skip-create/action.yml,title=⛔ set-skip-create error hint::This action supports Linux only"
         exit 1
+      shell: bash
 
     - name: Greet the triggering_actor
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
-      shell: bash
       run: | 
         echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
         echo ""
@@ -111,13 +110,13 @@ runs:
         echo "  action repo  :  ${{ github.action_repository }} "
         echo "  action status:  ${{ github.action_status }} "
         echo ""
+      shell: bash
 
     - name: Show GitHub runner context
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       # to do:  run this if either the verbose input is true or the runner.debug is true
       id: show-runner-context
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
-      shell: bash
       env:
         EVAL_GH_VAR_RUNNER_DEBUG_EQ0: ${{ runner.debug == '0' }}
         EVAL_GH_VAR_RUNNER_DEBUG_EQ1: ${{ runner.debug == '1' }}
@@ -162,11 +161,11 @@ runs:
         ##
         echo "::endgroup::"
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+      shell: bash
 
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       id: verbose-print-inputs
-      shell: bash
       run: | 
         echo "::group::starting the 'verbose-print-inputs' step... "
         ## Print the inputs if inputs.verbose=='true'
@@ -190,11 +189,11 @@ runs:
         echo "finishing the 'verbose-print-inputs' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Verbose | Print GitHub Context
       if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       id: verbose-github-context
-      shell: bash
       run: | 
         echo "::group::starting the 'verbose-github-context' step... "
         ## Print the inputs if inputs.verbose=='true'
@@ -224,6 +223,7 @@ runs:
         echo "finishing the 'verbose-github-context' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     # #     This is not used to set skip-create.
     # - name: Checkout files from commit tree
@@ -250,7 +250,6 @@ runs:
     - name: Extra | The ref_type is 'tag'
       id: extra-ref-type-tag
       if: github.ref_type == 'tag'
-      shell: bash
       run: |
         echo "::group::starting the 'extra-ref-type-tag' step... "
         echo "The ref_type is 'tag' "
@@ -265,6 +264,7 @@ runs:
         echo "finishing the 'extra-ref-type-tag' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Extra | The tag starts with the proper version numbering syntax
       id: extra-tag-with-version-syntax
@@ -275,7 +275,6 @@ runs:
       #    or keep the single digit, but match one or more with `+`:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      shell: bash
       run: |
         echo "::group::starting the 'extra-tag-with-version-syntax' step... "
         echo "The ref_type is 'tag' and the tag starts with the proper version numbering syntax "
@@ -290,6 +289,7 @@ runs:
         echo "finishing the 'extra-tag-with-version-syntax' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Set environmental variables used to evaluate the build skip-create
       id: set-eval-skip-create-env-vars
@@ -299,7 +299,6 @@ runs:
       #   - 'IMAGE_SKIP_REASON' is set to 'tbd'
       #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
       if: ${{ always() }}
-      shell: bash
       run: |
         echo "::group::starting the 'set-eval-skip-create-env-vars' step... "
         echo ""
@@ -320,11 +319,11 @@ runs:
         echo ""
         echo "finishing the 'set-eval-skip-create-env-vars' step... "
         echo "::endgroup::"
+      shell: bash
 
     - name: get-tag-version
       id: get-tag-version
       if: (github.ref_type == 'tag')
-      shell: bash
       run: |
         echo "::group::starting step 'get-tag-version' "
         echo ""
@@ -361,12 +360,12 @@ runs:
         echo ""
         echo "completing the 'get-tag-version' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: get-tag-version | Print outputs
       id: check-get-tag-version
       #if: (github.ref_type == 'tag')
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
-      shell: bash
       run: |
         echo "::group::starting step 'check-get-tag-version' "
         echo ""
@@ -386,6 +385,7 @@ runs:
         MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
         PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
         IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+      shell: bash
 
     - name: IMAGE_SKIP_CREATE | Enable image creation for a full version tag
       #name: IMAGE_SKIP_CREATE | Enable image creation for creating (push) a 'v*.*.*' tag
@@ -395,7 +395,6 @@ runs:
       #using 'v*.*.*' does not work#was#if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (github.event_name=='push') }}
       #using 'v*.*.*' does not work#if: (contains('refs/tags/v*.*.*', github.ref) && github.ref_type == 'tag' && github.event_name=='push')
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-full-version-tag' "
         echo ""
@@ -457,13 +456,13 @@ runs:
         echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
 
     - name: IMAGE_SKIP_CREATE | Skip image creation for manual workflow runs
       id: set-eval-skip-create-manual-skip
       # Manual builds where the 'Create an image from build' option is NOT checked
       if: (github.event_name=='workflow_dispatch' && inputs.create-image=='false' && env.EVAL_SKIP_CREATE=='false')
       #try-next#if: env.EVAL_SKIP_CREATE=='false' && (github.event_name=='workflow_dispatch' && inputs.create-image=='false')
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-manual-skip' "
         echo ""
@@ -488,13 +487,13 @@ runs:
         echo ""
         echo "completing the 'set-eval-skip-create-manual-skip' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: IMAGE_SKIP_CREATE | Enable image creation for manual workflow runs
       id: set-eval-skip-create-manual-create
       # Manual builds where the 'Create an image from build' option is checked
       if: (github.event_name=='workflow_dispatch' && inputs.create-image=='true' && env.EVAL_SKIP_CREATE=='false')
       #try-next#if: env.EVAL_SKIP_CREATE=='false' && (github.event_name=='workflow_dispatch' && inputs.create-image=='true')
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-manual-create' "
         echo ""
@@ -519,6 +518,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-skip-create-manual-create' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: IMAGE_SKIP_CREATE | Skip image creation for scheduled workflow run at ${{ github.event.schedule }}
       id: set-eval-skip-create-scheduled
@@ -527,7 +527,6 @@ runs:
       # do not check the 'env.BUILD_SCHEDULE', only check if `github.event_name=='schedule'`
       if: (github.event_name=='schedule' && env.EVAL_SKIP_CREATE=='false')
       #try-next#if: env.EVAL_SKIP_CREATE=='false' && (github.event_name=='schedule' && github.event.schedule==env.BUILD_SCHEDULE)
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-scheduled' "
         echo ""
@@ -553,12 +552,12 @@ runs:
         echo ""
         echo "completing the 'set-eval-skip-create-scheduled' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: IMAGE_SKIP_CREATE | Skip image creation for pull requests
       id: set-eval-skip-create-pull-request
       # Do not create an image when a pull request has been opened
       if: (github.event_name=='pull_request' && env.EVAL_SKIP_CREATE=='false')
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-pull-request' "
         echo ""
@@ -598,12 +597,12 @@ runs:
         echo ""
         echo "completing the 'set-eval-skip-create-pull-request' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: IMAGE_SKIP_CREATE | Skip image creation for push (commit) to main
       id: set-eval-skip-create-push-to-main
       # Do not create an image when we push (commit) to main (from a pull request) and the github.ref is 'refs/heads/main'
       # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
-      shell: bash
       if: |
         (github.event_name=='push' && github.ref == 'refs/heads/main' && env.EVAL_SKIP_CREATE=='false') || 
         (github.event_name=='push' && startsWith(github.ref_name, 'main') && env.EVAL_SKIP_CREATE=='false')
@@ -640,6 +639,7 @@ runs:
         echo ""
         echo "completing the 'set-eval-skip-create-push-to-main' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: IMAGE_SKIP_CREATE | Skip image creation for push (commit) to default
       id: set-eval-skip-create-push-to-default
@@ -655,7 +655,6 @@ runs:
       #if: (github.event_name=='push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-2.x'))
       ## https://stackoverflow.com/questions/68928595/strange-boolean-evaluation-in-github-actions
       ## https://github.com/actions/runner/issues/1173
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-push-to-default' "
         echo ""
@@ -703,12 +702,12 @@ runs:
         echo ""
         echo "completing the 'set-eval-skip-create-push-to-default' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: IMAGE_SKIP_CREATE | Fallback value - Skip image creation for other events
       id: set-eval-skip-create-fallback
       # If this runs, then that means the previous steps were skipped
       if: env.EVAL_SKIP_CREATE=='false'
-      shell: bash
       run: |
         echo "::group::starting step 'set-eval-skip-create-fallback' "
         echo ""
@@ -755,17 +754,18 @@ runs:
         echo ""
         echo "completing the 'set-eval-skip-create-fallback' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: Error if the image skip create variable was not set
       id: set-eval-skip-create-error
       if: ${{ env.IMAGE_SKIP_CREATE == '' }}
-      shell: bash
       run: |
         echo "The image skip create variable was not set. "
         echo "This workflow will now fail and exit. "
         echo "::error title=⛔ error in the '${{ github.workflow }}' workflow hint::Image skip create variable not set correctly. "
         exit 1
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      shell: bash
 
     - name: Output the image skip create results
       # Output the image skip create results
