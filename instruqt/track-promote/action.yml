@@ -11,7 +11,6 @@ runs:
   using: composite
   steps:
   - name: Inject track id and prepare for push
-    shell: bash
     run: |
 
       cd ${{ inputs.path }}
@@ -26,3 +25,4 @@ runs:
 
       # Remove maintenance tag
       sed -i 's/^maintenance: true/maintenance: false/g' track.yml
+    shell: bash

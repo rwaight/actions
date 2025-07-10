@@ -8,7 +8,6 @@ runs:
   using: composite
   steps:
   - name: Create dev track
-    shell: bash
     run: |
       cd ${{ inputs.path }}
 
@@ -36,3 +35,4 @@ runs:
       
       # Set into maintenance mode
       yq eval --inplace '.maintenance = true' track.yml
+    shell: bash
