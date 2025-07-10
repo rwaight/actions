@@ -76,20 +76,19 @@ runs:
   steps:
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
-      shell: bash
       run: |
         echo "::error file=get-next-semver,title=⛔ error::This action supports Linux only"
         exit 1
+      shell: bash
 
     - name: Greet the triggering_actor
       if: inputs.verbose=='true'
-      shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
 
     - name: Verbose | Print the release-type
       if: inputs.verbose=='true'
       id: verbose-print-release-type
-      shell: bash
       run: | 
         ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
@@ -99,6 +98,7 @@ runs:
         echo "release-type is:  ${{ inputs.release-type }} "
         ##
         echo "completing the 'verbose-print-release-type' step. "
+      shell: bash
 
     - name: Validate the release-type input
       # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
@@ -112,7 +112,6 @@ runs:
         contains('preminor', inputs.release-type) ||
         contains('prepatch', inputs.release-type) ||
         contains('pretoprod', inputs.release-type)
-      shell: bash
       run: |
         ## Validate the release-type input
         ## the double number signs below are for line spacing and readability only
@@ -122,11 +121,11 @@ runs:
             echo "::notice file=get-next-semver,title=validate-input-release-type::The 'release-type' is valid."
         fi
         ##
+      shell: bash
 
     - name: Error if the release-type input is incorrect
       id: error-incorrect-release-type
       if: ${{ !contains(fromJSON('["major", "minor", "patch", "prerelease", "premajor", "preminor", "prepatch", "pretoprod"]'), inputs.release-type) }}
-      shell: bash
       run: |
         ## Error if the release-type input is incorrect
         ## the double number signs below are for line spacing and readability only
@@ -136,6 +135,7 @@ runs:
         echo "::error file=get-next-semver,title=⛔ error-incorrect-release-type,hint::Invalid 'release-type', must be one of: major, minor, patch, prerelease, premajor, preminor, prepatch, or pretoprod"
         echo "completing the 'error-incorrect-release-type' step. "
         exit 1
+      shell: bash
 
     # - name: Validate the release-type input
     #   # https://github.com/orgs/community/discussions/25252#discussioncomment-3247116
@@ -147,15 +147,14 @@ runs:
     #   #   ${{ !contains(inputs.release-type, 'minor') }} || 
     #   #   ${{ !contains(inputs.release-type, 'patch') }} || 
     #   #   ${{ !contains(inputs.release-type, 'pre') }}
-    #   shell: bash
     #   run: |
     #     echo "::error file=get-next-semver,title=⛔ validate-input-release-type-2::Invalid 'release-type', must be one of: major, minor, patch, premajor, preminor, prepatch, or prerelease"
     #     #exit 1
+    #   shell: bash
 
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true'
       id: verbose-print-inputs
-      shell: bash
       run: | 
         ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
@@ -170,11 +169,11 @@ runs:
         echo "verbose is             :  ${{ inputs.verbose }} "
         ##
         echo "completing the 'verbose-print-inputs' step. "
+      shell: bash
 
     - name: Notice | The pre-release-id value is blank
       if: inputs.pre-release-id==''
       id: blank-pre-release-id
-      shell: bash
       run: | 
         ## Ensure the pre-release-id is not blank
         ## the double number signs below are for line spacing and readability only
@@ -183,10 +182,10 @@ runs:
         echo ""
         echo "::notice file=get-next-semver,title=blank-pre-release-id::The pre-release-id value is blank, it is not using the default value."
         echo "completing the 'blank-pre-release-id' step. "
+      shell: bash
 
     - name: Add inputs to the environment
       id: add-inputs-to-env
-      shell: bash
       run: | 
         ## the double number signs below are for line spacing and readability only
         ##
@@ -215,10 +214,10 @@ runs:
         echo "VERBOSE=${{ inputs.verbose }}" >> $GITHUB_ENV
         ##
         echo "The 'add-inputs-to-env' step has finished."
+      shell: bash
 
     - name: Determine if pre-releases are included
       id: determine-prereleases
-      shell: bash
       run: | 
         ## the double number signs below are for line spacing and readability only
         ##
@@ -243,10 +242,10 @@ runs:
         echo "prerelease_eval=${prerelease_eval}" >> $GITHUB_OUTPUT
         ##
         echo "The 'determine-prereleases' step has finished."
+      shell: bash
 
     - name: Get the current release version
       id: get-current-release
-      shell: bash
       run: |
         ## Get the current release version
         ## the double number signs below are for line spacing and readability only
@@ -377,10 +376,10 @@ runs:
         if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'get-current-release' step. "; fi
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
+      shell: bash
 
     - name: Get the current tag
       id: get-current-tag
-      shell: bash
       run: |
         ## Get the current tag
         ## the double number signs below are for line spacing and readability only
@@ -510,10 +509,10 @@ runs:
         if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'get-current-tag' step. "; fi
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
+      shell: bash
 
     - name: Compare the current tag to the current release version
       id: compare-tag-to-current-release
-      shell: bash
       run: |
         ## Compare the current release version to the current tag version
         ## the double number signs below are for line spacing and readability only
@@ -548,10 +547,10 @@ runs:
       env:
         current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
+      shell: bash
 
     - name: Set the next tag version
       id: set-next-tag
-      shell: bash
       run: |
         ## Set the next tag version
         ## the double number signs below are for line spacing and readability only
@@ -726,13 +725,13 @@ runs:
         ## echo "$version" | awk 'BEGIN{FS=OFS="."} {$1+=1;$2=0;$3=0} 1' | awk 'BEGIN{FS=OFS="-rc"} {$2+=1} 1'
         ## Remove the prerelease ID:
         ## echo "$version" | awk 'BEGIN{FS=OFS="-rc"} { print $1 }'
+      shell: bash
 
     - name: Set the next release version number
       # remove 'v' from the 'next_tag_version'
       # syntax is: `echo "${VERSION//v}"`
       # command: `next_ver_number=$(echo "${VERSION//v}")`
       id: set-next-version
-      shell: bash
       run: |
         ## Set the next release version
         ## the double number signs below are for line spacing and readability only
@@ -808,10 +807,10 @@ runs:
       # next_ver_number=$(echo "$VERSION" | awk 'BEGIN{FS=OFS="v"} { print $2 }')
       env:
         next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
+      shell: bash
 
     - name: Validate the next tag version
       id: validate-next-release
-      shell: bash
       run: |
         ## Validate the next tag version
         ## the double number signs below are for line spacing and readability only
@@ -841,10 +840,10 @@ runs:
       env:
         next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
         is_next_prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
+      shell: bash
 
     - name: Validate the next version number
       id: validate-next-version-number
-      shell: bash
       run: |
         ## Validate the next version number
         ## the double number signs below are for line spacing and readability only
@@ -876,10 +875,10 @@ runs:
       env:
         next_version_number: ${{ steps.set-next-version.outputs.next-version-number }}
         is_next_number_prerelease: ${{ steps.set-next-version.outputs.is-next-number-prerelease }}
+      shell: bash
 
     - name: Compare the current release version to the next tag version
       id: compare-current-to-next-release
-      shell: bash
       run: |
         ## Compare the current release version to the next tag version
         ## the double number signs below are for line spacing and readability only
@@ -915,10 +914,10 @@ runs:
         #current_tag_version: ${{ steps.get-current-tag.outputs.current-tag-version }}
         current_release_version: ${{ steps.get-current-release.outputs.current-release-version }}
         next_tag_version: ${{ steps.set-next-tag.outputs.next-tag-version }}
+      shell: bash
 
     - name: Compare the the next version match the next tag version
       id: compare-next-version-to-next-tag
-      shell: bash
       run: |
         ## Compare the the next version match the next tag version
         ## the double number signs below are for line spacing and readability only
@@ -957,13 +956,13 @@ runs:
         next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
         is-next-number-prerelease: ${{ steps.set-next-version.outputs.is-next-number-prerelease }}
         next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
+      shell: bash
 
     # - name: Error if the current version matches the next version
     #   id: error-matched-versions
     #   if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} == 'true' )
     #   #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
     #   #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' == 'true' )
-    #   shell: bash
     #   run: |
     #     ## Error if the current version matches the next version
     #     ## the double number signs below are for line spacing and readability only
@@ -981,10 +980,10 @@ runs:
     #     current-release-version: ${{ steps.get-current-release.outputs.current-release-version }}
     #     next-tag-version: ${{ steps.set-next-tag.outputs.next-tag-version }}
     #     does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
+    #   shell: bash
 
     - name: Validate that the next version match the next tag version
       id: validate-next-versions-are-matched
-      shell: bash
       run: |
         ## Validate that the next version match the next tag version
         ## the double number signs below are for line spacing and readability only
@@ -1017,13 +1016,13 @@ runs:
         next-version-number: ${{ steps.set-next-version.outputs.next-version-number }}
         is-next-number-prerelease: ${{ steps.set-next-version.outputs.is-next-number-prerelease }}
         does-next-version-match-next-tag: ${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }}
+      shell: bash
 
     - name: Validate that the current version does not match the next version
       id: validate-version-not-matched
       #if: ( ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true' )
       #not working properly#if: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }} != 'true'
       #not working properly#if: ( '${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}' != 'true' )
-      shell: bash
       run: |
         ## Validate that the current version does not match the next version
         ## the double number signs below are for line spacing and readability only
@@ -1061,11 +1060,11 @@ runs:
         is-next-prerelease: ${{ steps.set-next-tag.outputs.is-next-prerelease }}
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
+      shell: bash
 
     - name: Verbose | Print the outputs
       if: inputs.verbose=='true'
       id: verbose-print-outputs
-      shell: bash
       run: | 
         ## Print the outputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
@@ -1103,3 +1102,4 @@ runs:
         does-current-match-next: ${{ steps.compare-current-to-next-release.outputs.does-current-match-next }}
         does-tag-match-release: ${{ steps.compare-tag-to-current-release.outputs.does-tag-match-release }}
         does-next-version-match-next-tag: ${{ steps.compare-next-version-to-next-tag.outputs.does-next-version-match-next-tag }}
+      shell: bash
