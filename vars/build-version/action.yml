@@ -70,15 +70,14 @@ runs:
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
-      shell: bash
       run: |
         echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
         echo "::error file=builders/set-version/action.yml,title=⛔ build-version error hint::This action supports Linux only"
         exit 1
+      shell: bash
 
     - name: Greet the triggering_actor
       if: inputs.verbose=='true'
-      shell: bash
       run: | 
         echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
         echo ""
@@ -89,13 +88,13 @@ runs:
         echo "  action repo  :  ${{ github.action_repository }} "
         echo "  action status:  ${{ github.action_status }} "
         echo ""
+      shell: bash
 
     - name: Show GitHub runner context
       #if: inputs.verbose=='true'
       # to do:  run this if either the verbose input is true or the runner.debug is true
       id: show-runner-context
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
-      shell: bash
       env:
         EVAL_GH_VAR_RUNNER_DEBUG_EQ0: ${{ runner.debug == '0' }}
         EVAL_GH_VAR_RUNNER_DEBUG_EQ1: ${{ runner.debug == '1' }}
@@ -140,11 +139,11 @@ runs:
         ##
         echo "::endgroup::"
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+      shell: bash
 
     - name: Verbose | Print the inputs
       if: inputs.verbose=='true'
       id: verbose-print-inputs
-      shell: bash
       run: | 
         echo "::group::starting the 'verbose-print-inputs' step... "
         ## Print the inputs if inputs.verbose=='true'
@@ -166,11 +165,11 @@ runs:
         echo "finishing the 'verbose-print-inputs' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Verbose | Print GitHub Context
       if: inputs.verbose=='true'
       id: verbose-github-context
-      shell: bash
       run: | 
         echo "::group::starting the 'verbose-github-context' step... "
         ## Print the inputs if inputs.verbose=='true'
@@ -200,6 +199,7 @@ runs:
         echo "finishing the 'verbose-github-context' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Checkout files from commit tree
       # Verified creator: https://github.com/marketplace/actions/checkout
@@ -224,7 +224,6 @@ runs:
     - name: Extra | The ref_type is 'tag'
       id: extra-ref-type-tag
       if: github.ref_type == 'tag'
-      shell: bash
       run: |
         echo "::group::starting the 'extra-ref-type-tag' step... "
         echo "The ref_type is 'tag' "
@@ -239,6 +238,7 @@ runs:
         echo "finishing the 'extra-ref-type-tag' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Extra | The tag starts with the proper version numbering syntax
       id: extra-tag-with-version-syntax
@@ -249,7 +249,6 @@ runs:
       #    or keep the single digit, but match one or more with `+`:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      shell: bash
       run: |
         echo "::group::starting the 'extra-tag-with-version-syntax' step... "
         echo "The ref_type is 'tag' and the tag starts with the proper version numbering syntax "
@@ -264,13 +263,13 @@ runs:
         echo "finishing the 'extra-tag-with-version-syntax' step... "
         ##
         echo "::endgroup::"
+      shell: bash
 
     - name: Fetch the tags from the repo
       id: git-fetch-first
       # error: 'fatal: --unshallow on a complete repository does not make sense'
       #run: "git fetch --force --prune --unshallow --tags"
       # end error for the command above
-      shell: bash
       run: |
         echo "::group::starting the 'git-fetch-first' step... "
         echo ""
@@ -279,6 +278,7 @@ runs:
         git fetch --force --prune --tags
         echo "finishing the 'git-fetch-first' step... "
         echo "::endgroup::"
+      shell: bash
 
     - name: Set environmental variables used to evaluate the build version
       id: set-eval-version-env-vars
@@ -286,7 +286,6 @@ runs:
       #   - 'EVAL_BUILD_VERSION' is set to 'false'
       #   - 'GH_DEFAULT_BRANCH' is set to '${{ github.event.repository.default_branch }}'
       if: ${{ always() }}
-      shell: bash
       run: |
         echo "::group::Setting EVAL_BUILD_VERSION to false..."
         echo "EVAL_BUILD_VERSION=false" >> $GITHUB_ENV
@@ -295,11 +294,11 @@ runs:
         echo ""
         echo "finishing the 'set-eval-version-env-vars' step... "
         echo "::endgroup::"
+      shell: bash
 
     - name: get-tag-version
       id: get-tag-version
       if: (github.ref_type == 'tag')
-      shell: bash
       run: |
         echo "::group::starting step 'get-tag-version' "
         VERSION="${{ github.event.release.tag_name || github.ref_name }}"
@@ -334,12 +333,12 @@ runs:
         echo "is-prerelease=$pre" >> $GITHUB_OUTPUT
         echo "completing the 'get-tag-version' step. "
         echo "::endgroup::"
+      shell: bash
 
     - name: get-tag-version | Print outputs
       id: check-get-tag-version
       #if: (github.ref_type == 'tag')
       if: ${{ steps.get-tag-version.outputs.full-version-ref }}
-      shell: bash
       run: |
         echo "::group::starting step 'check-get-tag-version' "
         echo "## get-tag-version outputs"
@@ -358,6 +357,7 @@ runs:
         MINOR_REF: ${{ steps.get-tag-version.outputs.minor-ref }}
         PATCH_REF: ${{ steps.get-tag-version.outputs.patch-ref }}
         IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
+      shell: bash
 
     - name: tag-version | Use 'full-version-ref' from 'get-tag-version' to set the build version
       # This step is run when the branch is a 'v*.*.*' tag
@@ -371,7 +371,6 @@ runs:
       #    or keep the single digit, but match one or more with `+`:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      shell: bash
       run: |
         echo "::group::starting step 'set-build-version-full-version-tag' "
         echo ""
@@ -393,6 +392,7 @@ runs:
         echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
 
     - name: tag-version | Duplicate check for the 'full-version-ref' from 'get-tag-version'
       # This step is run when the branch is a 'v*.*.*' tag
@@ -406,7 +406,6 @@ runs:
       #    or keep the single digit, but match one or more with `+`:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      shell: bash
       run: |
         echo "::group::starting step 'set-build-version-duplicate-check' "
         echo ""
@@ -443,6 +442,7 @@ runs:
         echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
 
     - name: tag-version | Fallback 1 check for a semver compliant tag to set the build version
       # This step is run when the branch is a 'v*.*.*' tag
@@ -454,7 +454,6 @@ runs:
       #using 'v*.*.*' does not work# #if: ${{ contains('refs/tags/v*.*.*', github.ref) && (github.ref_type == 'tag') && (env.EVAL_BUILD_VERSION=='false') }}
       if: (contains('refs/tags/v[0-9].[0-9].[0-9]', github.ref) && github.ref_type == 'tag' && env.EVAL_BUILD_VERSION=='false')
       #if: {{ github.ref == 'ref/head/v*' }}
-      shell: bash
       run: |
         echo "::group::starting step 'set-build-version-fallback-1-semver-compliant-tag' "
         echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}' ..."
@@ -466,6 +465,7 @@ runs:
         echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
 
     - name: tag-version | Fallback 2 check for a semver compliant tag to set the build version
       # This step is run when the branch is a 'v*.*.*' tag
@@ -482,7 +482,6 @@ runs:
       #    or keep the single digit, but match one or more with `+`:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
-      shell: bash
       run: |
         echo "::group::starting step 'set-build-version-fallback-2-semver-compliant-tag' "
         echo "Setting BUILD_VERSION to '${{ env.FULL_VERSION_REF }}' ..."
@@ -494,6 +493,7 @@ runs:
         echo "::endgroup::"
       env:
         FULL_VERSION_REF: ${{ steps.get-tag-version.outputs.full-version-ref }}
+      shell: bash
 
     - name: simple-semver | Look for simple semver with git describe
       #name: simple-semver | Look for simple semver with git describe
@@ -507,7 +507,6 @@ runs:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
       if: ${{ always() }}
-      shell: bash
       run: |
         echo "::group::starting the 'simple-semver' step ... "
         if [ '${{ inputs.VERBOSE }}' == 'true' ]; then echo "  verbose - issuing 'set +e' to ignore errors... "; fi
@@ -542,11 +541,11 @@ runs:
         echo "simple-semver=${semver_simple}" >> $GITHUB_OUTPUT
         echo "finishing the 'simple-semver' step ... "
         echo "::endgroup::"
+      shell: bash
 
     - name: simple-semver | Print output
       id: check-simple-semver
       if: ${{ steps.simple-semver.outputs.simple-semver }}
-      shell: bash
       run: |
         echo "::group::starting the 'check-simple-semver' step ... "
         echo "## simple-semver outputs"
@@ -555,11 +554,11 @@ runs:
         echo "::endgroup::"
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
+      shell: bash
 
     - name: simple-semver | Set the build version using simple-semver output
       id: set-build-version-using-simple-semver
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='simple' && ${{ steps.simple-semver.outputs.simple-semver }})
-      shell: bash
       run: |
         echo "::group::starting the 'set-build-version-using-simple-semver' step ... "
         echo ""
@@ -571,6 +570,7 @@ runs:
         echo "::endgroup::"
       env:
         SEMVER_SIMPLE: ${{ steps.simple-semver.outputs.simple-semver }}
+      shell: bash
 
     - name: wildcard-semver | Look for wildcard semver with git describe
       # name: 06a | Run 'git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"'
@@ -581,7 +581,6 @@ runs:
       #    or keep the single digit, but match one or more with `+`:
       #        'v[0-9]+.[0-9]+.[0-9]+'
       if: (env.EVAL_BUILD_VERSION=='false' || inputs.strategy=='wildcard')
-      shell: bash
       run: |
         echo "::group::starting the 'wildcard-semver' step... "
         ## old wildcard-semver match ##git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*"
@@ -620,11 +619,11 @@ runs:
         echo "wildcard-semver=${semver_wildcard}" >> $GITHUB_OUTPUT
         echo "finishing the 'wildcard-semver' step... "
         echo "::endgroup::"
+      shell: bash
 
     - name: wildcard-semver | Print output
       id: check-wildcard-semver
       if: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
-      shell: bash
       run: |
         echo "::group::starting the 'check-wildcard-semver' step ... "
         echo "## wildcard-semver outputs"
@@ -633,11 +632,11 @@ runs:
         echo "::endgroup::"
       env:
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+      shell: bash
 
     - name: wildcard-semver | Set the build version using wildcard-semver output
       id: set-build-version-using-wildcard-semver
       if: (env.EVAL_BUILD_VERSION=='false' && inputs.strategy=='wildcard' && ${{ steps.wildcard-semver.outputs.wildcard-semver }})
-      shell: bash
       run: |
         echo "::group::starting the 'set-build-version-using-wildcard-semver' step ... "
         echo ""
@@ -649,6 +648,7 @@ runs:
         echo "::endgroup::"
       env:
         SEMVER_WILDCARD: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+      shell: bash
 
     - name: Fetch the tags from the repo
       id: git-fetch-second
@@ -656,7 +656,6 @@ runs:
       # error: 'fatal: --unshallow on a complete repository does not make sense'
       #run: "git fetch --force --prune --unshallow --tags"
       # end error for the command above
-      shell: bash
       run: |
         echo "::group::starting the 'git-fetch-second' step... "
         echo ""
@@ -665,12 +664,12 @@ runs:
         git fetch --prune --prune-tags --force --depth=1
         echo "finishing the 'git-fetch-second' step... "
         echo "::endgroup::"
+      shell: bash
 
     - name: BUILD_VERSION | Fallback value using simple-semver output
       # This step is run when the build is not production
       if: (env.EVAL_BUILD_VERSION=='false' || env.BUILD_VERSION == '')
       id: set-fallback-version
-      shell: bash
       run: |
         echo "::group::starting the 'set-fallback-version' step ... "
         ## Compare the simple and wildcard semver versions
@@ -715,6 +714,7 @@ runs:
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+      shell: bash
 
     - name: TEST | Parse the build version information
       # Parse the build version information when the build is not a 'tag' and the build version is set
@@ -722,7 +722,6 @@ runs:
       if: ${{ env.BUILD_VERSION }} && github.ref_type != 'tag'
       id: parse-build-version-info
       # to do: output the parsed build version information:  major, minor, patch, incre, short
-      shell: bash
       continue-on-error: true
       run: |
         echo "::group::starting the 'parse-build-version-info' step ... "
@@ -804,21 +803,21 @@ runs:
       env:
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+      shell: bash
 
     - name: Error if the build version was not set
       if: ${{ env.BUILD_VERSION == '' }}
-      shell: bash
       run: |
         echo "The build version was not set correctly. "
         echo "This '${{ github.action }}' action at path '${{ github.action_path }}' will now fail and exit. "
         echo "::error file=${{ github.action_path }},title=⛔ '${{ github.action }}' error in the '${{ github.workflow }}' workflow hint::Build version not set correctly "
         exit 1
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      shell: bash
 
       # Output the build version
     - name: Output the build version
       id: set-version-output
-      shell: bash
       run: |
         echo "::group::starting the 'set-version-output' step ... "
         echo "The BUILD_VERSION has been set to '${{ env.BUILD_VERSION }}' ... "
@@ -833,3 +832,4 @@ runs:
         IS_PRERELEASE: ${{ steps.get-tag-version.outputs.is-prerelease }}
         semver_simple: ${{ steps.simple-semver.outputs.simple-semver }}
         semver_wildcard: ${{ steps.wildcard-semver.outputs.wildcard-semver }}
+      shell: bash
