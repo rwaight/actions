@@ -1,0 +1,31 @@
+name: Ngrok Tunnel
+author: apogiatzis
+description: A github action to tunnel traffic into Github Workflow pipeline using ngrok
+group: utilities
+imported: true
+local:
+  modifications: false
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+source:
+  action_name: ngrok-tunneling-action
+  author: apogiatzis
+  repo_name: ngrok-tunneling-action
+  repo_url: https://github.com/apogiatzis/ngrok-tunneling-action
+  current_version: v0.1.4
+  latest_version: v0.1.4
+  override:
+    use_commits: true
+    latest_version_commit: a88c9e0ef5b0f1932a5715f210f2fde239fc2630
+    latest_repo_commit: a88c9e0ef5b0f1932a5715f210f2fde239fc2630
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [timeout, port, ngrok_authtoken]
+  outputs: []
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
