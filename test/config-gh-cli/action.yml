@@ -34,6 +34,18 @@ inputs:
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
 outputs:
+  app-token:
+    description: "GitHub App installation access token"
+    # https://github.com/actions/create-github-app-token#outputs
+    value: ${{ steps.app-token.outputs.token }}
+  app-installation-id:
+    description: "GitHub App installation ID"
+    # https://github.com/actions/create-github-app-token#outputs
+    value: ${{ steps.app-token.outputs.installation-id }}
+  app-slug:
+    description: "GitHub App slug"
+    # https://github.com/actions/create-github-app-token#outputs
+    value: ${{ steps.app-token.outputs.app-slug }}
   user-id:
     description: "The ID of the authenticated GitHub user."
     value: ${{ steps.set-action-outputs.outputs.user-id }}
@@ -157,12 +169,18 @@ runs:
       # this worked when we were using the 'bot' for authentication
       if: inputs.account-type=='bot'
       with:
-        # required
+        # https://github.com/actions/create-github-app-token#inputs
+        # required inputs
         app-id: ${{ inputs.gh-app-id }}
         private-key: ${{ inputs.gh-app-key }}
         # create a token for all repositories in the current owner's installation
         # https://github.com/actions/create-github-app-token#create-a-token-for-all-repositories-in-the-current-owners-installation
-        owner: ${{ github.repository_owner }}
+        owner: ${{ github.repository_owner }}  # https://github.com/actions/create-github-app-token#owner
+        # optional inputs
+        #repositories:  # https://github.com/actions/create-github-app-token#repositories
+        #permission-<permission name>:  # https://github.com/actions/create-github-app-token#permission-permission-name
+        #skip-token-revoke:  # https://github.com/actions/create-github-app-token#skip-token-revoke
+        #github-api-url:  # https://github.com/actions/create-github-app-token#github-api-url
 
     - name: Bot Account | Check GitHub auth status
       id: check-bot-github-auth
@@ -293,6 +311,7 @@ runs:
       env:
         # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
         GH_TOKEN: ${{ github.token }}
+        #not this -> #GH_TOKEN: ${{ inputs.account-type == 'bot' && steps.app-token.outputs.token || inputs.gh-token }}
         user-id: '41898282'
         user-login: 'github-actions[bot]'
         user-name: 'github-actions[bot]'
