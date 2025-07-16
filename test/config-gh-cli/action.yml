@@ -311,6 +311,7 @@ runs:
       env:
         # user: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
         GH_TOKEN: ${{ github.token }}
+        #not this -> #GH_TOKEN: ${{ inputs.account-type == 'bot' && steps.app-token.outputs.token || inputs.gh-token }}
         user-id: '41898282'
         user-login: 'github-actions[bot]'
         user-name: 'github-actions[bot]'
