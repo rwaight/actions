@@ -1,0 +1,114 @@
+name: 'GitHub Merge Pull Request'
+description: 'Merge a Pull Request and cleanup the head branch.'
+
+author: 'rwaight'
+
+inputs:
+  gh-token:
+    description: 'GITHUB_TOKEN or a `repo` scoped Personal Access Token (PAT), needed for the GitHub CLI.'
+    required: false
+    default: ${{ github.token }}
+  head-ref:
+    description: 'The head_ref or source branch of the pull request in a workflow run.'
+    required: false
+    default: ${{ github.event.pull_request.head.ref }}
+  merge-method:
+    description: 'The GitHub merge method to use.'
+    # https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/about-merge-methods-on-github
+    required: false
+    default: 'squash'
+  pr-number:
+    description: 'The pull request number of the pull request in a workflow run.'
+    required: false
+    default: ${{ github.event.pull_request.number }}
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=github/merge-pr/action.yml,title=⛔ GitHub Merge PR error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Greet the triggering_actor
+      if: inputs.verbose=='true'
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true'
+      id: verbose-print-inputs
+      run: | 
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "gh-token SHOULD BE MASKED, but is set to '${{ inputs.gh-token }}' "
+        echo "head-ref     is set to '${{ inputs.head-ref }}' "
+        echo "merge-method is set to '${{ inputs.merge-method }}' "
+        echo "pr-number    is set to '${{ inputs.pr-number }}' "
+        echo "verbose      is set to '${{ inputs.verbose }}' "
+        ##
+      shell: bash
+
+    - name: Squash and merge
+      id: squash-and-merge
+      # https://cli.github.com/manual/gh_pr_merge
+      if: inputs.merge-method=='squash'
+      # added the 'for i in {1..3}; do' due to the following error
+      # `GraphQL: Head branch is out of date. Review and try the merge again. (mergePullRequest)`
+      # the code is from https://github.com/cli/cli/issues/8092#issuecomment-1743904069
+      run: |
+        echo "::group::starting the 'squash-and-merge' step... "
+        echo ""
+        echo "Checking if PR can be merged using 'squash-and-merge' "
+        ## Retry to work around "Base branch was modified." error.
+        ## Ref: https://github.com/cli/cli/issues/8092
+        for i in {1..3}; do
+          if gh pr merge ${{ github.event.pull_request.number }} --auto --squash --delete-branch; then
+            break
+          fi
+          if [[ $i -eq 3 ]]; then
+            echo "attempted to run 'gh pr merge' multiple times without success... "
+            exit 1
+          fi
+          sleep 5
+        done
+        ## working 'gh pr merge' command is
+        ## gh pr merge ${{ github.event.pull_request.number }} --auto --squash --delete-branch
+        echo ""
+        echo "finishing the 'squash-and-merge' step... "
+        echo "::endgroup::"
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+      shell: bash
+
+    - name: Use the GitHub CLI to see if the pull request was actually merged
+      id: check-pr-status
+      run: | 
+        echo "::group::starting the 'check-pr-status' step... "
+        echo ""
+        echo "Use the GitHub CLI to see if the pull request was actually merged"
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "this step needs to be completed"
+        ##
+        echo ""
+        echo "finishing the 'check-pr-status' step... "
+        echo "::endgroup::"
+      shell: bash
+
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'edit'
+  color: 'blue'
