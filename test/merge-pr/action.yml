@@ -106,6 +106,20 @@ runs:
         echo "::endgroup::"
       shell: bash
 
+    - name: Delete the head branch if the Pull Request was merged
+      id: check-pr-status
+      run: | 
+        echo "::group::starting the 'check-pr-status' step... "
+        echo ""
+        echo "Use the GitHub CLI to see if the pull request was actually merged"
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "this step needs to be completed"
+        ##
+        echo ""
+        echo "finishing the 'check-pr-status' step... "
+        echo "::endgroup::"
+      shell: bash
 
 branding:
   # Ref: https://haya14busa.github.io/github-action-brandings/
