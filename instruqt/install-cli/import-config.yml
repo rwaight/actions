@@ -1,0 +1,26 @@
+name: install-instruqt-cli
+author: rwaight
+description: Installs the Instruqt CLI into the GitHub Runner
+group: instruqt
+imported: false
+local:
+  modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+source:
+  action_name: instruqt-install-cli
+  author: rwaight
+  repo_name: actions
+  repo_url: https://github.com/rwaight/actions
+  latest_version: "null"
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [version, verbose]
+  outputs: []
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
