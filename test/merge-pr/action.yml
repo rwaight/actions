@@ -35,7 +35,7 @@ runs:
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
       run: |
         echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
-        echo "::error file=github/merge-pr/action.yml,title=⛔ GitHub Merge PR error hint::This action supports Linux only"
+        echo "::error file=test/merge-pr/action.yml,title=⛔ GitHub Merge PR error hint::This action supports Linux only"
         exit 1
       shell: bash
 

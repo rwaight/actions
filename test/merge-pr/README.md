@@ -1,8 +1,6 @@
-# GitHub Template Composite Action
+# GitHub Merge Pull Request Action
 
-A template for building composite actions.
-
-Reference GitHub's [creating a composite action guide](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action) for more information.
+Merge a Pull Request and cleanup the head branch.
 
 
 ## Deploying this action
@@ -42,24 +40,27 @@ jobs:
         uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b # v4.1.5
 
       - name: Run the composite template action
-        id: run-template-composite
-        uses: rwaight/actions/test/template-composite@main
+        id: run-merge-pr
+        uses: rwaight/actions/test/merge-pr@main
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
-          my-example-input1: 'hello'
+          gh-token
+          head-ref
+          merge-method
+          pr-number
           verbose: true
 
-      - name: Report the output from the run-template-composite step
-        if: ${{ steps.run-template-composite.outputs.action-output1 }}
-        run: echo "The output in the 'run-template-composite' step was ${template_output1} ."
+      - name: Report the output from the run-merge-pr step
+        if: ${{ steps.run-merge-pr.outputs.action-output1 }}
+        run: echo "The output in the 'run-merge-pr' step was ${template_output1} ."
         env:
-          template_output1: ${{ steps.run-template-composite.outputs.action-output1 }}
+          template_output1: ${{ steps.run-merge-pr.outputs.action-output1 }}
 
-      - name: Fail if the 'run-template-composite' step did not provide output
-        if: ${{ ! steps.run-template-composite.outputs.action-output1 }}
+      - name: Fail if the 'run-merge-pr' step did not provide output
+        if: ${{ ! steps.run-merge-pr.outputs.action-output1 }}
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
         run: |
-          echo "::error title=⛔ error in the 'run-template-composite' step hint::No output provided"
+          echo "::error title=⛔ error in the 'run-merge-pr' step hint::No output provided"
           exit 1
 
 ```
