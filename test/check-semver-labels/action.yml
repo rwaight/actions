@@ -27,7 +27,7 @@ inputs:
     description: 'The prefix for the semver labels used in the repo'
     required: false
     default: 'version:'
-  my_action_debug:
+  verbose:
     description: 'Determine if the workflow should run debug tasks, defaults to false'
     required: false
     default: 'false'
@@ -52,16 +52,16 @@ runs:
         exit 1
 
     - name: Greet the triggering_actor
-      if: inputs.my_action_debug=='true'
+      if: inputs.verbose=='true'
       shell: bash
-      run: echo Hello ${{ github.triggering_actor }}, the my_action_debug variable is set to true.
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
 
     - name: Debug | Print the inputs
-      if: inputs.my_action_debug=='true'
+      if: inputs.verbose=='true'
       id: debug-print-inputs
       shell: bash
       run: | 
-        ## Print the inputs if inputs.my_action_debug=='true'
+        ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'debug-print-inputs' step. "
@@ -69,7 +69,7 @@ runs:
         echo "allow-failure is  :  ${{ inputs.allow-failure }} "
         echo "semver-prefix is  :  ${{ inputs.semver-prefix }} "
         echo "semver-fallback is:  ${{ inputs.semver-fallback }} "
-        echo "my_action_debug is:  ${{ inputs.my_action_debug }} "
+        echo "verbose is:  ${{ inputs.verbose }} "
         echo ""
         ##
         echo "completing the 'debug-print-inputs' step. "
@@ -78,7 +78,7 @@ runs:
       id: ensure-alternate-label-exists
       shell: bash
       run: |
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'ensure-alternate-label-exists' step. "
             echo "  the value of 'semver-fallback' is '${{ env.semver-fallback }}'. "
             echo ""
@@ -91,7 +91,7 @@ runs:
         fi
         ##
         LABEL=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "  the value of LABEL is '${LABEL}'. "
         fi
         ##
@@ -102,7 +102,7 @@ runs:
           echo "  step 'ensure-alternate-label-exists' - the '${{ env.semver-fallback }}' label exists"
         fi
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
       env:
         #GITHUB_TOKEN: ${{ inputs.gh-token }}
         GH_TOKEN: ${{ inputs.gh-token }}
@@ -120,11 +120,11 @@ runs:
         repo_token: ${{ inputs.gh-token }}
 
     - name: Debug | Print the output from 'semver-labels-check'
-      if: inputs.my_action_debug=='true'
+      if: inputs.verbose=='true'
       id: debug-semver-labels-check
       shell: bash
       run: | 
-        ## Print the output from 'semver-labels-check' if inputs.my_action_debug=='true'
+        ## Print the output from 'semver-labels-check' if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'debug-semver-labels-check' step. "
@@ -146,11 +146,11 @@ runs:
         repo_token: ${{ inputs.gh-token }}
 
     - name: Debug | Print the output from 'fallback-label-check'
-      if: inputs.my_action_debug=='true'
+      if: inputs.verbose=='true'
       id: debug-fallback-label-check
       shell: bash
       run: | 
-        ## Print the output from 'fallback-label-check' if inputs.my_action_debug=='true'
+        ## Print the output from 'fallback-label-check' if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'debug-fallback-label-check' step. "
@@ -212,7 +212,7 @@ runs:
         exit 1
 
     - name: Debug | Action complete
-      if: inputs.my_action_debug=='true'
+      if: inputs.verbose=='true'
       id: debug-action-complete
       shell: bash
       run: | 
