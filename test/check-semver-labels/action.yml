@@ -44,39 +44,40 @@ runs:
   using: "composite"
   # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
   steps:
+
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
-      shell: bash
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
       run: |
         echo "::error title=⛔ error hint::This action supports Linux only"
         exit 1
+      shell: bash
 
     - name: Greet the triggering_actor
       if: inputs.verbose=='true'
-      shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
 
     - name: Debug | Print the inputs
       if: inputs.verbose=='true'
       id: debug-print-inputs
-      shell: bash
       run: | 
         ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
         echo "starting the 'debug-print-inputs' step. "
         echo ""
-        echo "allow-failure is  :  ${{ inputs.allow-failure }} "
-        echo "semver-prefix is  :  ${{ inputs.semver-prefix }} "
-        echo "semver-fallback is:  ${{ inputs.semver-fallback }} "
-        echo "verbose is:  ${{ inputs.verbose }} "
+        echo "allow-failure  :  ${{ inputs.allow-failure }} "
+        echo "semver-prefix  :  ${{ inputs.semver-prefix }} "
+        echo "semver-fallback:  ${{ inputs.semver-fallback }} "
+        echo "verbose        :  ${{ inputs.verbose }} "
         echo ""
         ##
         echo "completing the 'debug-print-inputs' step. "
+      shell: bash
 
     - name: Ensure the ${{ inputs.semver-fallback }} label exists
       id: ensure-alternate-label-exists
-      shell: bash
       run: |
         if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'ensure-alternate-label-exists' step. "
@@ -107,6 +108,7 @@ runs:
         #GITHUB_TOKEN: ${{ inputs.gh-token }}
         GH_TOKEN: ${{ inputs.gh-token }}
         semver-fallback: ${{ inputs.semver-fallback }}
+      shell: bash
 
     - name: Check for semantic version labels
       uses: rwaight/actions/github/label-checker@main # can use version specific or main
@@ -122,7 +124,6 @@ runs:
     - name: Debug | Print the output from 'semver-labels-check'
       if: inputs.verbose=='true'
       id: debug-semver-labels-check
-      shell: bash
       run: | 
         ## Print the output from 'semver-labels-check' if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
@@ -134,6 +135,7 @@ runs:
         echo "    Check the output above. "
         ##
         echo "completing the 'debug-semver-labels-check' step. "
+      shell: bash
 
     - name: Check for the fallback label
       uses: rwaight/actions/github/label-checker@main # can use version specific or main
@@ -148,7 +150,6 @@ runs:
     - name: Debug | Print the output from 'fallback-label-check'
       if: inputs.verbose=='true'
       id: debug-fallback-label-check
-      shell: bash
       run: | 
         ## Print the output from 'fallback-label-check' if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
@@ -160,6 +161,7 @@ runs:
         echo "    Check the output above. "
         ##
         echo "completing the 'debug-fallback-label-check' step. "
+      shell: bash
 
     - name: Apply the '${{ inputs.semver-fallback }}' label
       # the semver label did not exist AND the fallback label did not exist
@@ -186,7 +188,6 @@ runs:
       # Verified creator: https://github.com/marketplace/actions/github-script
       # Run simple scripts using the GitHub client
       # Latest version: https://github.com/actions/github-script/releases/latest
-      continue-on-error: true
       if: |
         steps.semver-labels-check.outputs.label_check == 'success' &&
         steps.fallback-label-check.outputs.label_check == 'success'
@@ -199,6 +200,7 @@ runs:
             repo: context.repo.repo,
             name: '${{ inputs.semver-fallback }}'
           })
+      continue-on-error: true
 
     - name: Error - Missing proper '${{ inputs.semver-prefix }}' label
       # Fail the workflow because the proper version label has not been applied
@@ -206,7 +208,6 @@ runs:
       if: | 
         steps.semver-labels-check.outputs.label_check != 'success' && 
         inputs.allow-failure=='true'
-      shell: bash
       run: |
         echo "Running 'semver-labels-check' failed! The outcome was ${{ steps.semver-labels-check.outputs.label_check }} ."
         echo ""
@@ -216,11 +217,11 @@ runs:
         ##
         echo "::error file=action.yml,title=Check semver labels::semver-labels-check error"
         exit 1
+      shell: bash
 
     - name: Debug | Action complete
       if: inputs.verbose=='true'
       id: debug-action-complete
-      shell: bash
       run: | 
         ## Print a notice that the action has finished
         ## the double number signs below are for line spacing and readability only
@@ -237,3 +238,4 @@ runs:
         echo "    Check the output above. "
         ##
         echo "completing the 'debug-action-complete' step. "
+      shell: bash
