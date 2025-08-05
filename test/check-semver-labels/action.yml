@@ -29,6 +29,7 @@ inputs:
     default: 'version:'
   verbose:
     description: 'Determine if the workflow should run verbose tasks, defaults to false'
+    # can be set dynamically using `verbose: ${{ runner.debug == '1' && 'true' || 'false' }}`
     required: false
     default: 'false'
 
@@ -54,12 +55,12 @@ runs:
       shell: bash
 
     - name: Greet the triggering_actor
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || runner.debug == '1'
       run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
       shell: bash
 
     - name: Verbose | Print the inputs
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || runner.debug == '1'
       id: verbose-print-inputs
       run: | 
         ## Print the inputs if inputs.verbose=='true'
@@ -122,7 +123,7 @@ runs:
         repo_token: ${{ inputs.gh-token }}
 
     - name: Verbose | Print the output from 'semver-labels-check'
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || runner.debug == '1'
       id: verbose-semver-labels-check
       run: | 
         ## Print the output from 'semver-labels-check' if inputs.verbose=='true'
@@ -148,7 +149,7 @@ runs:
         repo_token: ${{ inputs.gh-token }}
 
     - name: Verbose | Print the output from 'fallback-label-check'
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || runner.debug == '1'
       id: verbose-fallback-label-check
       run: | 
         ## Print the output from 'fallback-label-check' if inputs.verbose=='true'
@@ -220,7 +221,7 @@ runs:
       shell: bash
 
     - name: Verbose | Action complete
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || runner.debug == '1'
       id: verbose-action-complete
       run: | 
         ## Print a notice that the action has finished
