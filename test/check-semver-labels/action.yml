@@ -177,6 +177,7 @@ runs:
             repo: context.repo.repo,
             labels: ['${{ inputs.semver-fallback }}']
           })
+      id: apply-fallback-label
 
     - name: Remove the '${{ inputs.semver-fallback }}' label
       # the semver label did exist and the fallback label did exist
@@ -197,6 +198,7 @@ runs:
             name: '${{ inputs.semver-fallback }}'
           })
       continue-on-error: true
+      id: remove-fallback-label
 
     - name: Error - Missing proper '${{ inputs.semver-prefix }}' label
       # Fail the workflow because the proper version label has not been applied
