@@ -109,13 +109,13 @@ runs:
     - name: Check for semantic version labels
       uses: rwaight/actions/github/label-checker@main # can use version specific or main
       #uses: rwaight/actions/github/label-checker@v1
-      id: semver-labels-check
       with:
         prefix_mode: true
         one_of: ${{ inputs.semver-prefix }}
         #none_of: "skip-changelog"
         allow_failure: ${{ inputs.allow-failure }}
         repo_token: ${{ inputs.gh-token }}
+      id: semver-labels-check
 
     - name: Verbose | Print the output from 'semver-labels-check'
       if: inputs.verbose=='true' || runner.debug == '1'
@@ -136,12 +136,12 @@ runs:
     - name: Check for the fallback label
       uses: rwaight/actions/github/label-checker@main # can use version specific or main
       #uses: rwaight/actions/github/label-checker@v1
-      id: fallback-label-check
       with:
         prefix_mode: false
         one_of: ${{ inputs.semver-fallback }}
         allow_failure: ${{ inputs.allow-failure }}
         repo_token: ${{ inputs.gh-token }}
+      id: fallback-label-check
 
     - name: Verbose | Print the output from 'fallback-label-check'
       if: inputs.verbose=='true' || runner.debug == '1'
