@@ -54,7 +54,7 @@ jobs:
         id: check-semver-labels
         with:
           gh-token: ${{ github.token }}
-          allow_failure: true
+          allow-failure: true
           semver-fallback: 'triage:version-needed'
           semver-prefix: 'version:'
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
