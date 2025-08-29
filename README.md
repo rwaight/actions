@@ -49,6 +49,7 @@ Here is a current list of actions by category
 │   └── semver-git-version
 ├── github
 │   ├── approve-pull-request
+│   ├── check-semver-labels
 │   ├── create-pull-request
 │   ├── export-label-config
 │   ├── find-pull-request
