@@ -1,13 +1,13 @@
-name: check-semver-labels
-description: placeholder
-group: test
+name: Check semver labels
+description: Check a pull request for semver labels using the label-checker action
+group: github
 imported: false
 local:
   author: rwaight
   modifications: true
 specs:
   action_file: action.yml
-  inputs: [gh-token, allow-failure, semver-fallback, semver-prefix, my_action_debug]
+  inputs: [gh-token, allow-failure, semver-fallback, semver-prefix, verbose]
   outputs: [semver-check-results, fallback-check-results]
   runs:
     using: composite

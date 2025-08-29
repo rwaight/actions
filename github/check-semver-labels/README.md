@@ -50,14 +50,14 @@ jobs:
           repo-token: ${{ github.token }}
 
       - name: Check for semantic version labels
-        uses: rwaight/actions/test/check-semver-labels@main
+        uses: rwaight/actions/github/check-semver-labels@main
         id: check-semver-labels
         with:
           gh-token: ${{ github.token }}
-          allow_failure: true
+          allow-failure: true
           semver-fallback: 'triage:version-needed'
           semver-prefix: 'version:'
-          my_action_debug: true
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 ```
 
 ### About `actions/checkout`

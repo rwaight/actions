@@ -1,11 +1,6 @@
 name: 'Check semver labels'
 description: 'Check a pull request for semver labels using the label-checker action'
 author: 'rwaight'
-branding:
-  icon: 'check-square'
-  color: 'blue'
-  # Ref: https://haya14busa.github.io/github-action-brandings/
-  # fork: https://github.com/rwaight/github-action-brandings
 
 inputs:
   gh-token:
@@ -27,8 +22,9 @@ inputs:
     description: 'The prefix for the semver labels used in the repo'
     required: false
     default: 'version:'
-  my_action_debug:
-    description: 'Determine if the workflow should run debug tasks, defaults to false'
+  verbose:
+    description: 'Determine if the workflow should run verbose tasks, defaults to false'
+    # can be set dynamically using `verbose: ${{ runner.debug == '1' && 'true' || 'false' }}`
     required: false
     default: 'false'
 
@@ -44,41 +40,42 @@ runs:
   using: "composite"
   # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
   steps:
+
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
-      shell: bash
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
       run: |
         echo "::error title=⛔ error hint::This action supports Linux only"
         exit 1
+      shell: bash
 
     - name: Greet the triggering_actor
-      if: inputs.my_action_debug=='true'
+      if: inputs.verbose=='true' || runner.debug == '1'
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
       shell: bash
-      run: echo Hello ${{ github.triggering_actor }}, the my_action_debug variable is set to true.
 
-    - name: Debug | Print the inputs
-      if: inputs.my_action_debug=='true'
-      id: debug-print-inputs
-      shell: bash
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true' || runner.debug == '1'
+      id: verbose-print-inputs
       run: | 
-        ## Print the inputs if inputs.my_action_debug=='true'
+        ## Print the inputs if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
-        echo "starting the 'debug-print-inputs' step. "
+        echo "starting the 'verbose-print-inputs' step. "
         echo ""
-        echo "allow-failure is  :  ${{ inputs.allow-failure }} "
-        echo "semver-prefix is  :  ${{ inputs.semver-prefix }} "
-        echo "semver-fallback is:  ${{ inputs.semver-fallback }} "
-        echo "my_action_debug is:  ${{ inputs.my_action_debug }} "
+        echo "allow-failure  :  ${{ inputs.allow-failure }} "
+        echo "semver-prefix  :  ${{ inputs.semver-prefix }} "
+        echo "semver-fallback:  ${{ inputs.semver-fallback }} "
+        echo "verbose        :  ${{ inputs.verbose }} "
         echo ""
         ##
-        echo "completing the 'debug-print-inputs' step. "
+        echo "completing the 'verbose-print-inputs' step. "
+      shell: bash
 
     - name: Ensure the ${{ inputs.semver-fallback }} label exists
       id: ensure-alternate-label-exists
-      shell: bash
       run: |
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "starting the 'ensure-alternate-label-exists' step. "
             echo "  the value of 'semver-fallback' is '${{ env.semver-fallback }}'. "
             echo ""
@@ -91,7 +88,7 @@ runs:
         fi
         ##
         LABEL=$(gh label list --search "${{ env.semver-fallback }}" --limit 1 --json name --jq '.[].name')
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then
+        if [ '${{ inputs.verbose }}' == 'true' ]; then
             echo "  the value of LABEL is '${LABEL}'. "
         fi
         ##
@@ -102,68 +99,72 @@ runs:
           echo "  step 'ensure-alternate-label-exists' - the '${{ env.semver-fallback }}' label exists"
         fi
         ##
-        if [ '${{ inputs.my_action_debug }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
+        if [ '${{ inputs.verbose }}' == 'true' ]; then echo "completing the 'ensure-alternate-label-exists' step. "; fi
       env:
         #GITHUB_TOKEN: ${{ inputs.gh-token }}
         GH_TOKEN: ${{ inputs.gh-token }}
         semver-fallback: ${{ inputs.semver-fallback }}
+      shell: bash
 
     - name: Check for semantic version labels
       uses: rwaight/actions/github/label-checker@main # can use version specific or main
       #uses: rwaight/actions/github/label-checker@v1
-      id: semver-labels-check
       with:
         prefix_mode: true
         one_of: ${{ inputs.semver-prefix }}
         #none_of: "skip-changelog"
         allow_failure: ${{ inputs.allow-failure }}
         repo_token: ${{ inputs.gh-token }}
+      id: semver-labels-check
 
-    - name: Debug | Print the output from 'semver-labels-check'
-      if: inputs.my_action_debug=='true'
-      id: debug-semver-labels-check
-      shell: bash
+    - name: Verbose | Print the output from 'semver-labels-check'
+      if: inputs.verbose=='true' || runner.debug == '1'
+      id: verbose-semver-labels-check
       run: | 
-        ## Print the output from 'semver-labels-check' if inputs.my_action_debug=='true'
+        ## Print the output from 'semver-labels-check' if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
-        echo "starting the 'debug-semver-labels-check' step. "
+        echo "starting the 'verbose-semver-labels-check' step. "
         echo ""
         echo "  The output from the 'semver-labels-check' step is below: "
         echo "    ${{ steps.semver-labels-check.outputs.label_check }} "
         echo "    Check the output above. "
         ##
-        echo "completing the 'debug-semver-labels-check' step. "
+        echo "completing the 'verbose-semver-labels-check' step. "
+      shell: bash
 
     - name: Check for the fallback label
       uses: rwaight/actions/github/label-checker@main # can use version specific or main
       #uses: rwaight/actions/github/label-checker@v1
-      id: fallback-label-check
       with:
         prefix_mode: false
         one_of: ${{ inputs.semver-fallback }}
         allow_failure: ${{ inputs.allow-failure }}
         repo_token: ${{ inputs.gh-token }}
+      id: fallback-label-check
 
-    - name: Debug | Print the output from 'fallback-label-check'
-      if: inputs.my_action_debug=='true'
-      id: debug-fallback-label-check
-      shell: bash
+    - name: Verbose | Print the output from 'fallback-label-check'
+      if: inputs.verbose=='true' || runner.debug == '1'
+      id: verbose-fallback-label-check
       run: | 
-        ## Print the output from 'fallback-label-check' if inputs.my_action_debug=='true'
+        ## Print the output from 'fallback-label-check' if inputs.verbose=='true'
         ## the double number signs below are for line spacing and readability only
         ##
-        echo "starting the 'debug-fallback-label-check' step. "
+        echo "starting the 'verbose-fallback-label-check' step. "
         echo ""
         echo "  The output from the 'fallback-label-check' step is below: "
         echo "    ${{ steps.fallback-label-check.outputs.label_check }} "
         echo "    Check the output above. "
         ##
-        echo "completing the 'debug-fallback-label-check' step. "
+        echo "completing the 'verbose-fallback-label-check' step. "
+      shell: bash
 
     - name: Apply the '${{ inputs.semver-fallback }}' label
       # the semver label did not exist AND the fallback label did not exist
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
+      # Verified creator: https://github.com/marketplace/actions/github-script
+      # Run simple scripts using the GitHub client
+      # Latest version: https://github.com/actions/github-script/releases/latest
       if: |
         steps.semver-labels-check.outputs.label_check != 'success' &&
         steps.fallback-label-check.outputs.label_check != 'success'
@@ -176,11 +177,14 @@ runs:
             repo: context.repo.repo,
             labels: ['${{ inputs.semver-fallback }}']
           })
+      id: apply-fallback-label
 
     - name: Remove the '${{ inputs.semver-fallback }}' label
       # the semver label did exist and the fallback label did exist
-      uses: actions/github-script@v6
-      continue-on-error: true
+      uses: actions/github-script@v7
+      # Verified creator: https://github.com/marketplace/actions/github-script
+      # Run simple scripts using the GitHub client
+      # Latest version: https://github.com/actions/github-script/releases/latest
       if: |
         steps.semver-labels-check.outputs.label_check == 'success' &&
         steps.fallback-label-check.outputs.label_check == 'success'
@@ -193,6 +197,8 @@ runs:
             repo: context.repo.repo,
             name: '${{ inputs.semver-fallback }}'
           })
+      continue-on-error: true
+      id: remove-fallback-label
 
     - name: Error - Missing proper '${{ inputs.semver-prefix }}' label
       # Fail the workflow because the proper version label has not been applied
@@ -200,7 +206,6 @@ runs:
       if: | 
         steps.semver-labels-check.outputs.label_check != 'success' && 
         inputs.allow-failure=='true'
-      shell: bash
       run: |
         echo "Running 'semver-labels-check' failed! The outcome was ${{ steps.semver-labels-check.outputs.label_check }} ."
         echo ""
@@ -210,16 +215,16 @@ runs:
         ##
         echo "::error file=action.yml,title=Check semver labels::semver-labels-check error"
         exit 1
-
-    - name: Debug | Action complete
-      if: inputs.my_action_debug=='true'
-      id: debug-action-complete
       shell: bash
+
+    - name: Verbose | Action complete
+      if: inputs.verbose=='true' || runner.debug == '1'
+      id: verbose-action-complete
       run: | 
         ## Print a notice that the action has finished
         ## the double number signs below are for line spacing and readability only
         ##
-        echo "starting the 'debug-action-complete' step. "
+        echo "starting the 'verbose-action-complete' step. "
         echo ""
         echo "  The 'Check semver labels' action is on the last step. "
         echo ""
@@ -230,4 +235,11 @@ runs:
         echo "    ${{ steps.fallback-label-check.outputs.label_check }} "
         echo "    Check the output above. "
         ##
-        echo "completing the 'debug-action-complete' step. "
+        echo "completing the 'verbose-action-complete' step. "
+      shell: bash
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'check-square'
+  color: 'blue'
