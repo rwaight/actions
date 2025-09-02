@@ -123,12 +123,31 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/docker-metadata-action
         # GitHub Action to extract metadata (tags, labels) from Git reference and GitHub events for Docker 
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
-        #uses: docker/metadata-action@v5.5.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # https://github.com/docker/metadata-action#latest-tag
+          # https://github.com/docker/metadata-action#typesha
+          # https://github.com/docker/metadata-action#typeref
+          # https://github.com/docker/metadata-action#typesemver
           tags: |
-            type=ref,event=branch
-            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,priority=100,prefix=sha-,format=short
+            type=ref,priority=600,event=branch
+            type=ref,priority=600,event=tag
+            type=ref,priority=600,event=pr
+            type=semver,priority=900,pattern={{version}}
+            type=semver,priority=900,pattern={{major}}.{{minor}}
+            type=semver,priority=900,pattern={{major}}
+          labels: |
+            org.opencontainers.image.title=${{ matrix.name }}
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/main/${{ matrix.dir }}/README.md
+            org.opencontainers.image.url=https://github.com/${{ github.repository }}/tree/main/${{ matrix.dir }}
+          annotations: |
+            org.opencontainers.image.title=${{ matrix.name }}
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/main/${{ matrix.dir }}/README.md
+            org.opencontainers.image.url=https://github.com/${{ github.repository }}/tree/main/${{ matrix.dir }}
         id: meta
 
       # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
