@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        action: [render-template, pr-label-checker, git-describe-semver]
+        action: [render-template, pr-label-checker]
         # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs#example-expanding-configurations
         # use 'include' to specify additional variables
         include:
@@ -46,12 +46,6 @@ jobs:
             description: "Checks pull requests for given labels"
             dir: github/label-checker
             go-version: 1.21.x
-            #test: "-e DOCKER_TEST_ONLY=true"
-          - action: git-describe-semver
-            name: git-describe-semver
-            description: "Produces semver compatible versions that follow to semver sorting rules"
-            dir: git/git-describe-semver
-            go-version: 1.19.x
             #test: "-e DOCKER_TEST_ONLY=true"
     # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
     env:
