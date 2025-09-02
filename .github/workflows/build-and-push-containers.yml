@@ -193,6 +193,17 @@ jobs:
           platforms: linux/amd64
         id: load-image
 
+      - name: Test the ${{ matrix.name }} Docker image
+        id: test-image
+        if: steps.load-image.outcome == 'success'
+        run: |
+          echo "going to test the image with '${{ matrix.test }}'"
+          echo "testing tag '${{ steps.print-metadata-info.outputs.tag0 }}' "
+          docker run --rm ${{ matrix.test }} ${{ steps.print-metadata-info.outputs.tag0 }}
+          echo "testing tag '${{ steps.print-metadata-info.outputs.tag1 }}' "
+          docker run --rm ${{ matrix.test }} ${{ steps.print-metadata-info.outputs.tag1 }}
+          echo "the 'test-image' step has now completed"
+
       # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see "[AUTOTITLE](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)." 
       - name: Generate artifact attestation
         # Verified creator: https://github.com/marketplace/actions/attest-build-provenance
