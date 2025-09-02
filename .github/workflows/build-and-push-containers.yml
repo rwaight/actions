@@ -204,6 +204,32 @@ jobs:
           docker run --rm ${{ matrix.test }} ${{ steps.print-metadata-info.outputs.tag1 }}
           echo "the 'test-image' step has now completed"
 
+      - name: Build and push the ${{ matrix.name }} container image
+        # Verified creator: https://github.com/marketplace/actions/build-and-push-docker-images
+        # GitHub Action to build and push Docker images with Buildx
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        # Skip running on forks or Dependabot since neither has access to secrets
+        if: |
+          (github.repository == 'rwaight/actions') &&
+          (github.actor!= 'dependabot[bot]') &&
+          (contains(github.head_ref, 'dependabot-') == false)
+        with:
+          #context: .
+          context: "{{defaultContext}}:${{ matrix.dir }}"
+          tags: ${{ steps.metadata.outputs.tags }}
+          annotations: ${{ steps.metadata.outputs.annotations }}
+          # maybe switch to this # annotations: ${{ steps.metadata.outputs.labels }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          push: true
+          #platforms: linux/amd64,linux/arm64
+          # do not specify platforms, otherwise multiple images will be created without tags
+          # https://github.com/docker/build-push-action/issues/894
+          platforms: linux/amd64
+          # secrets: |
+          #   GIT_AUTH_TOKEN=${{ secrets.MY_PACKAGE_MGR_TOKEN }}
+          provenance: false
+        id: build-image
+
       # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see "[AUTOTITLE](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)." 
       - name: Generate artifact attestation
         # Verified creator: https://github.com/marketplace/actions/attest-build-provenance
@@ -216,17 +242,17 @@ jobs:
           (github.actor!= 'dependabot[bot]') &&
           (contains(github.head_ref, 'dependabot-') == false)
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build-image.outputs.digest }}
           push-to-registry: true
         id: artifact-attestation
 
-      - name: Print outputs from the push step
+      - name: Print the output from the build-image step
         id: print-image-info
-        if: steps.push.outcome == 'success'
+        if: steps.build-image.outcome == 'success'
         run: |
-          echo "The image id is: ${{ steps.push.outputs.imageid }}"
-          echo "The image digest is ${{ steps.push.outputs.digest }}"
+          echo "The image id is: ${{ steps.build-image.outputs.imageid }}"
+          echo "The image digest is ${{ steps.build-image.outputs.digest }}"
           echo "The image metadata is: "
-          echo "${{ fromJSON(steps.push.outputs.metadata) }}"
+          echo "${{ fromJSON(steps.build-image.outputs.metadata) }}"
           echo ""
