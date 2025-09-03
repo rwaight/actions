@@ -1,7 +1,10 @@
 # GitHub Composite Action - Repo version information
 
+Provide version information from a git repo.
+<!--- 
 The current version in this repo was based off of [rwaight/actions **repo-version-info** v0.1.31](https://github.com/rwaight/actions/releases/tag/v0.1.31)
 - This action is from https://github.com/rwaight/actions.
+ --->
 
 ## Deploying this action
 
@@ -16,7 +19,8 @@ See the `outputs` section of the [action.yml](action.yml) file.
 ## Example Usage
 
 Create a file named `.github/workflows/my-workflow.yml` with the following:
-```
+
+```yaml
 name: Print repo version information
 on:
   pull_request:
