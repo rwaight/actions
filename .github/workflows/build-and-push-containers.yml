@@ -6,8 +6,10 @@ on:
   push:
     tags:
       - 'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'
-      - 'v[0-9][0-9]?.[0-9][0-9]?'
-      - 'v[0-9][0-9]?'
+      # the major.minor and major tags are evaluated below
+      #- 'v[0-9][0-9]?.[0-9][0-9]?'
+      #- 'v[0-9][0-9]?'
+      #
       # the 'v[0-9].[0-9].[0-9]' filter pattern will need to be updated to allow double digits, using either: 
       #    specify 2 digits with a second range followed by `?`:
       #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
