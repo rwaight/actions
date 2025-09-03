@@ -191,7 +191,7 @@ jobs:
 
       - name: Test the ${{ matrix.name }} Docker image
         id: test-image
-        if: steps.load-image.outcome == 'success'
+        if: ${{ matrix.test && steps.load-image.outcome == 'success' }}
         run: |
           echo "going to test the image with '${{ matrix.test }}'"
           echo "testing tag '${{ steps.print-metadata-info.outputs.tag0 }}' "
