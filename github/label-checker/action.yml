@@ -62,7 +62,12 @@ inputs:
       examples.
     required: false
     default: ''
+
+# runs:
+#   using: 'docker'
+#   image: 'Dockerfile'
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "docker"
+  image: "docker://ghcr.io/rwaight/actions/label-checker:v0.2"
 
