@@ -74,7 +74,6 @@ runs:
       id: print-tag-information
       # eventually only run this job when:  inputs.verbose=='true'
       #if: inputs.verbose=='true'
-      shell: bash
       run: |
         echo "Using git to obtain branch tag information"
         echo ""
@@ -122,12 +121,12 @@ runs:
         echo ""
         ##
         echo "The 'print-tag-information' step is complete."
+      shell: bash
 
     - name: Get the branch tags information with git
       id: get-branch-tags
       # eventually only run this job when:  inputs.strategy=='branch-tag'
       #if: inputs.strategy=='branch-tag'
-      shell: bash
       run: |
         echo "Using git to obtain branch tag information"
         echo ""
@@ -166,12 +165,12 @@ runs:
         ##
         echo ""
         echo "The 'get-branch-tags' step is complete."
+      shell: bash
 
     - name: Get the repo tags information with git
       id: repo-tags-with-git
       # eventually only run this job when:  inputs.strategy=='repo-tag'
       #if: inputs.strategy=='repo-tag'
-      shell: bash
       run: |
         echo "step id: repo-tags-with-git "
         echo "Get the repo tags information with git "
@@ -187,6 +186,7 @@ runs:
         fi
         ##
         echo "The 'repo-tags-with-git' step is complete."
+      shell: bash
 
     - name: Verbose | Get the repo tags information with git
       id: verbose--extra--repo-tags-with-git
@@ -194,7 +194,6 @@ runs:
       #if: inputs.strategy=='repo-tag' && inputs.verbose=='true'
       if: inputs.verbose=='true'
       continue-on-error: true
-      shell: bash
       run: |
         echo "step id: verbose--extra--repo-tags-with-git "
         echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
@@ -307,13 +306,13 @@ runs:
         echo ""
         ########
         echo "The 'verbose--extra--repo-tags-with-git' step is complete."
+      shell: bash
 
     - name: Get the latest repo tags information with git
       ## The output from this step is NOT USED
       id: get-latest-repo-tags
       # eventually only run this job when:  inputs.strategy=='branch-tag'
       #if: inputs.strategy=='branch-tag'
-      shell: bash
       run: |
         echo "step id: get-latest-repo-tags "
         echo "The output from this step is NOT USED"
@@ -332,6 +331,7 @@ runs:
         ##
         echo "The output from this step is NOT USED"
         echo "The 'get-latest-repo-tags' step is complete."
+      shell: bash
 
     - name: Verbose | Get the latest repo tags information with git
       id: verbose--extra--get-latest-repo-tags
@@ -339,7 +339,6 @@ runs:
       #if: inputs.strategy=='branch-tag' && inputs.verbose=='true'
       if: inputs.verbose=='true'
       continue-on-error: true
-      shell: bash
       run: |
         echo "step id: verbose--extra--get-latest-repo-tags "
         echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
@@ -436,12 +435,12 @@ runs:
         echo ""
         ########
         echo "The 'verbose--extra--get-latest-repo-tags' step is complete."
+      shell: bash
 
     - name: Get the repo release information with the GitHub CLI
       id: releases-with-gh-cli
       # eventually only run this job when:  inputs.strategy=='gh-release'
       #if: inputs.strategy=='gh-release'
-      shell: bash
       run: |
         echo "step id: releases-with-gh-cli "
         echo "Get the repo release information with the GitHub CLI "
@@ -486,6 +485,7 @@ runs:
         echo "The 'releases-with-gh-cli' step is complete."
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
+      shell: bash
 
     - name: Verbose | Get the repo release information with the GitHub CLI
       id: verbose--extra--releases-with-gh-cli
@@ -493,7 +493,6 @@ runs:
       #if: inputs.strategy=='gh-release' && inputs.verbose=='true'
       if: inputs.verbose=='true'
       continue-on-error: true
-      shell: bash
       run: |
         echo "step id: verbose--extra--releases-with-gh-cli "
         echo " THE REMAINING COMMANDS ARE VERBOSE AND SHOULD BE REMOVED IN THE FUTURE ... "
@@ -528,10 +527,10 @@ runs:
         echo ""
         ########
         echo "The 'verbose--extra--releases-with-gh-cli' step is complete."
+      shell: bash
 
     - name: Set action outputs
       id: set-action-outputs
-      shell: bash
       env:
         latest-branch-tag: ${{ steps.get-branch-tags.outputs.latest-branch-tag }}
         latest-release: ${{ steps.releases-with-gh-cli.outputs.latest-release }}
@@ -565,4 +564,5 @@ runs:
         echo "version=${version}" >> "$GITHUB_OUTPUT"
         #
         echo "The 'set-action-outputs' step is complete."
+      shell: bash
 
