@@ -6,8 +6,10 @@ on:
   push:
     tags:
       - 'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'
-      - 'v[0-9][0-9]?.[0-9][0-9]?'
-      - 'v[0-9][0-9]?'
+      # the major.minor and major tags are evaluated below
+      #- 'v[0-9][0-9]?.[0-9][0-9]?'
+      #- 'v[0-9][0-9]?'
+      #
       # the 'v[0-9].[0-9].[0-9]' filter pattern will need to be updated to allow double digits, using either: 
       #    specify 2 digits with a second range followed by `?`:
       #        'v[0-9][0-9]?.[0-9][0-9]?.[0-9][0-9]?'     
@@ -29,6 +31,8 @@ jobs:
       contents: read
       packages: write
       attestations: write
+      # https://github.com/actions/deploy-pages/issues/28#issuecomment-1087299632
+      id-token: write
       # 
     strategy:
       fail-fast: false
@@ -55,6 +59,7 @@ jobs:
       #IMAGE_NAME: ${{ github.repository }}
       IMAGE_NAME: ${{ github.repository }}/${{ matrix.name }}
       #IMAGE_NAME: ${{ matrix.name }}
+      IS_REF_TAG: ${{ github.ref_type == 'tag' && 'true' || 'false' }}
     defaults:
       run:
         # set the the runners 'working-directory' to '${{ matrix.dir }}'
@@ -131,9 +136,9 @@ jobs:
             type=ref,priority=600,event=branch
             type=ref,priority=600,event=tag
             type=ref,priority=600,event=pr
-            type=semver,priority=900,pattern={{version}}
-            type=semver,priority=900,pattern={{major}}.{{minor}}
-            type=semver,priority=900,pattern={{major}}
+            type=semver,priority=900,enable=${{ env.IS_REF_TAG }},pattern={{version}}
+            type=semver,priority=900,enable=${{ env.IS_REF_TAG }},pattern={{major}}.{{minor}}
+            type=semver,priority=900,enable=${{ env.IS_REF_TAG }},pattern={{major}}
           labels: |
             org.opencontainers.image.title=${{ matrix.name }}
             org.opencontainers.image.description=${{ matrix.description }}
@@ -168,7 +173,7 @@ jobs:
       # This step uses the `docker/build-push-action` action to build the image, based on your repository's `Dockerfile`. If the build succeeds, it pushes the image to GitHub Packages.
       # It uses the `context` parameter to define the build's context as the set of files located in the specified path. For more information, see "[Usage](https://github.com/docker/build-push-action#usage)" in the README of the `docker/build-push-action` repository.
       # It uses the `tags` and `labels` parameters to tag and label the image with the output from the "meta" step.
-      - name: Build and push Docker image
+      - name: Load the container image
         # Verified creator: https://github.com/marketplace/actions/build-and-push-docker-images
         # GitHub Action to build and push Docker images with Buildx
         uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
@@ -191,7 +196,7 @@ jobs:
 
       - name: Test the ${{ matrix.name }} Docker image
         id: test-image
-        if: steps.load-image.outcome == 'success'
+        if: ${{ matrix.test && steps.load-image.outcome == 'success' }}
         run: |
           echo "going to test the image with '${{ matrix.test }}'"
           echo "testing tag '${{ steps.print-metadata-info.outputs.tag0 }}' "
