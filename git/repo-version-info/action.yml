@@ -21,10 +21,6 @@ inputs:
     description: 'Include pre-releases in the search, defaults to false.'
     required: false
     default: 'false'
-  my_workflow_debug:
-    description: 'Determine if the workflow should run debug tasks, defaults to false'
-    required: false
-    default: 'false'
   pre-release-id:
     description: >-
       The pre-release identifier (only for pre-release builds).
@@ -40,6 +36,10 @@ inputs:
       - 'gh-release': Use the latest release from the repo
     required: false
     default: 'branch-tag'
+  verbose:
+    description: 'Determine if the workflow should run debug tasks, defaults to false'
+    required: false
+    default: 'false'
 
 outputs:
   latest-release:
@@ -64,14 +64,14 @@ runs:
         exit 1
 
     - name: Greet the triggering_actor
-      if: inputs.my_workflow_debug=='true'
+      if: inputs.verbose=='true'
       shell: bash
-      run: echo Hello ${{ github.triggering_actor }}, the my_workflow_debug variable is set to true.
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
 
     - name: Print verbose information about git tags
       id: print-tag-information
-      # eventually only run this job when:  inputs.my_workflow_debug=='true'
-      #if: inputs.my_workflow_debug=='true'
+      # eventually only run this job when:  inputs.verbose=='true'
+      #if: inputs.verbose=='true'
       shell: bash
       run: |
         echo "Using git to obtain branch tag information"
@@ -189,8 +189,8 @@ runs:
     - name: Verbose | Get the repo tags information with git
       id: verbose--extra--repo-tags-with-git
       # eventually only run this job when:  inputs.strategy=='repo-tag'
-      #if: inputs.strategy=='repo-tag' && inputs.my_workflow_debug=='true'
-      if: inputs.my_workflow_debug=='true'
+      #if: inputs.strategy=='repo-tag' && inputs.verbose=='true'
+      if: inputs.verbose=='true'
       continue-on-error: true
       shell: bash
       run: |
@@ -334,8 +334,8 @@ runs:
     - name: Verbose | Get the latest repo tags information with git
       id: verbose--extra--get-latest-repo-tags
       # eventually only run this job when:  inputs.strategy=='branch-tag'
-      #if: inputs.strategy=='branch-tag' && inputs.my_workflow_debug=='true'
-      if: inputs.my_workflow_debug=='true'
+      #if: inputs.strategy=='branch-tag' && inputs.verbose=='true'
+      if: inputs.verbose=='true'
       continue-on-error: true
       shell: bash
       run: |
@@ -488,8 +488,8 @@ runs:
     - name: Verbose | Get the repo release information with the GitHub CLI
       id: verbose--extra--releases-with-gh-cli
       # eventually only run this job when:  inputs.strategy=='gh-release'
-      #if: inputs.strategy=='gh-release' && inputs.my_workflow_debug=='true'
-      if: inputs.my_workflow_debug=='true'
+      #if: inputs.strategy=='gh-release' && inputs.verbose=='true'
+      if: inputs.verbose=='true'
       continue-on-error: true
       shell: bash
       run: |

@@ -12,7 +12,7 @@ local:
       - example-custom-notes.md
 specs:
   action_file: action.yml
-  inputs: [gh-token, include-drafts, include-pre-releases, my_workflow_debug, pre-release-id, strategy]
+  inputs: [gh-token, include-drafts, include-pre-releases, verbose, pre-release-id, strategy]
   outputs: [latest-release, latest-tag, version]
   runs:
     using: composite
