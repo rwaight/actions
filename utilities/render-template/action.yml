@@ -34,10 +34,10 @@ outputs:
   result:
     description: Rendered file content
 
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
-
 # runs:
-#   using: docker
-#   image: "docker://chuhlomin/render-template:v1.10"
+#   using: 'docker'
+#   image: 'Dockerfile'
+
+runs:
+  using: "docker"
+  image: "docker://ghcr.io/rwaight/actions/render-template:v0.2"
