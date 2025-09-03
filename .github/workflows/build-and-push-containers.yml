@@ -57,6 +57,7 @@ jobs:
       #IMAGE_NAME: ${{ github.repository }}
       IMAGE_NAME: ${{ github.repository }}/${{ matrix.name }}
       #IMAGE_NAME: ${{ matrix.name }}
+      IS_REF_TAG: ${{ github.ref_type == 'tag' && 'true' || 'false' }}
     defaults:
       run:
         # set the the runners 'working-directory' to '${{ matrix.dir }}'
@@ -133,9 +134,9 @@ jobs:
             type=ref,priority=600,event=branch
             type=ref,priority=600,event=tag
             type=ref,priority=600,event=pr
-            type=semver,priority=900,pattern={{version}}
-            type=semver,priority=900,pattern={{major}}.{{minor}}
-            type=semver,priority=900,pattern={{major}}
+            type=semver,priority=900,enable=${{ env.IS_REF_TAG }},pattern={{version}}
+            type=semver,priority=900,enable=${{ env.IS_REF_TAG }},pattern={{major}}.{{minor}}
+            type=semver,priority=900,enable=${{ env.IS_REF_TAG }},pattern={{major}}
           labels: |
             org.opencontainers.image.title=${{ matrix.name }}
             org.opencontainers.image.description=${{ matrix.description }}
