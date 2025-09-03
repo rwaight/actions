@@ -56,17 +56,19 @@ runs:
   using: "composite"
   # Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
   steps:
+
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
-      shell: bash
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
       run: |
         echo "::error title=⛔ error hint::This action supports Linux only"
         exit 1
+      shell: bash
 
     - name: Greet the triggering_actor
       if: inputs.verbose=='true'
-      shell: bash
       run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
 
     - name: Print verbose information about git tags
       id: print-tag-information
