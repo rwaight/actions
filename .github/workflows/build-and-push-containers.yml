@@ -29,6 +29,8 @@ jobs:
       contents: read
       packages: write
       attestations: write
+      # https://github.com/actions/deploy-pages/issues/28#issuecomment-1087299632
+      id-token: write
       # 
     strategy:
       fail-fast: false
