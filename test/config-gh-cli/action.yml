@@ -260,11 +260,26 @@ runs:
             git config --global user.email '${cli_user_email}'
         elif [[ "${GH_LOCAL_PRIMARY}" == "bot" ]]; then
             echo "Configure git as the GitHub Bot using the app token. "
+            ## https://github.com/actions/create-github-app-token#configure-git-cli-for-an-apps-bot-user
             git config --global url.https://x-access-token:${GH_TOKEN}@github.com/.insteadOf https://github.com/
             git config --global credential.helper store
             ## https://github.com/actions/create-github-app-token/issues/204#issuecomment-2654464094
             echo "  this should have worked, if not then need to check the 'actions/create-github-app-token' repo "
             echo "  see https://github.com/actions/create-github-app-token/issues/204#issuecomment-2654464094 "
+            #### if above does not work then try:
+            #### # git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+            #### # git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+            #### from https://github.com/actions/create-github-app-token#configure-git-cli-for-an-apps-bot-user
+            ##
+            echo "Setting variables to export the GitHub Bot account information."
+            cli_user_id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)
+            ##cli_user_login=$(gh api user -q ".login")
+            cli_user_login="${{ steps.app-token.outputs.app-slug }}"
+            ##cli_user_name=$(git config user.name)
+            cli_user_name="${{ steps.app-token.outputs.app-slug }}[bot]"
+            cli_user_type=${GH_LOCAL_PRIMARY}
+            ##cli_user_email=$(git config user.email)
+            cli_user_email="${{ steps.app-token.outputs.app-slug }}[bot] <${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>"
         else
             echo "this workflow will now fail"
             exit 1
