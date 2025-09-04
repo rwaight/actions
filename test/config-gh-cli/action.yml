@@ -210,8 +210,8 @@ runs:
         echo "::endgroup::"
       shell: bash
 
-    - name: Get the GitHub user information
-      id: gh-user-info
+    - name: Configure git for the GitHub ${{ inputs.account-type }} account
+      id: configure-git
       env:
         GH_LOCAL_PRIMARY: ${{ inputs.account-type }}
         # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
@@ -221,84 +221,74 @@ runs:
         # set GH_TOKEN to 'steps.app-token.outputs.token' if the account-type is 'bot'
         #   otherwise set GH_TOKEN to 'inputs.gh-token'
         GH_TOKEN: ${{ inputs.account-type == 'bot' && steps.app-token.outputs.token || inputs.gh-token }}
-        #
-        #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
-        #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
-      run: |
-        echo "::group::starting the 'gh-user-info' step... "
-        echo ""
-        echo "Get the GitHub User information "
-        cli_user_id=$(gh api user -q ".id")
-        cli_user_login=$(gh api user -q ".login")
-        cli_user_name=$(gh api user -q ".name")
-        cli_user_type=$(gh api user -q ".type")
-        #
-        #
-        if [[ "${GH_LOCAL_PRIMARY}" == "bot" ]]; then
-            # append '[bot]' to the user login
-            cli_user_login="${cli_user_login}[bot]"
-        elif [[ "${GH_LOCAL_PRIMARY}" == "user" ]]; then
-            # do nothing, maybe set cli_user_login again
-            cli_user_login="${cli_user_login}"
-        else
-            echo "this workflow will now fail"
-            exit 1
-        fi
-        #
-        cli_user_email="${cli_user_id}+${cli_user_login}@users.noreply.github.com"
-        #
-        #
-        # Print user information
-        echo "the user ID is ${cli_user_id} "
-        echo "the user type is ${cli_user_type} "
-        echo "the user name is ${cli_user_name} "
-        echo "the user login is ${cli_user_login} "
-        echo "the user email is ${cli_user_email} "
-        #
-        # Send the user information to GitHub output
-        echo "user-id=${cli_user_id}" >> "$GITHUB_OUTPUT"
-        echo "user-login=${cli_user_login}" >> "$GITHUB_OUTPUT"
-        echo "user-name=${cli_user_name}" >> "$GITHUB_OUTPUT"
-        echo "user-type=${cli_user_type}" >> "$GITHUB_OUTPUT"
-        echo "user-email=${cli_user_email}" >> "$GITHUB_OUTPUT"
-        #
-        # Send the user information to the GitHub runner environment
-        echo "user-id=${cli_user_id}" >> $GITHUB_ENV
-        echo "user-login=${cli_user_login}" >> $GITHUB_ENV
-        echo "user-name=${cli_user_name}" >> $GITHUB_ENV
-        echo "user-type=${cli_user_type}" >> $GITHUB_ENV
-        echo "user-email=${cli_user_email}" >> $GITHUB_ENV
-        # 
-        echo ""
-        #
-        echo "consolidate this with the 'configure-git' step"
-        echo ""
-        echo "finishing the 'gh-user-info' step... "
-        echo "::endgroup::"
-      shell: bash
-
-    - name: Configure git for the provided GitHub user account
-      id: configure-git
-      continue-on-error: true
-      # See the 'GitHub steps context' section in the actions README file
-      env:
-        # use GH_TOKEN per https://josh-ops.com/posts/gh-auth-login-in-actions/
-        #bot#GH_TOKEN: ${{ inputs.gh-app-key }}
-        #user#GH_TOKEN: ${{ inputs.gh-token }}
-        #old-do-not-use#GH_TOKEN: ${{ inputs.gh-token }}
-        #GH_TOKEN: ${{ steps.app-token.outputs.token || inputs.gh-token }}
-        # set GH_TOKEN to 'steps.app-token.outputs.token' if the account-type is 'bot'
-        #   otherwise set GH_TOKEN to 'inputs.gh-token'
-        GH_TOKEN: ${{ inputs.account-type == 'bot' && steps.app-token.outputs.token || inputs.gh-token }}
+        ## https://github.com/actions/create-github-app-token/issues/204#issuecomment-2654464094
         #
         #bot#GITHUB_TOKEN: ${{ inputs.gh-app-key }}
         #user#GITHUB_TOKEN: ${{ inputs.gh-token }}
       run: |
         echo "::group::starting the 'configure-git' step... "
         echo ""
-        git config --global user.name '${{ steps.gh-user-info.outputs.user-name }}'
-        git config --global user.email '${{ steps.gh-user-info.outputs.user-email }}'
-        echo "consolidate this with the 'gh-user-info' step"
+        ## the order is as follows:
+        ## 1. set variables needed for the applicable GitHub account
+        ## 2. print information about the GitHub user
+        ## 3. configure git for the applicable GitHub account
+        ## 4. send the user information to GitHub output and the GitHub runner environment
+        ##
+        if [[ "${GH_LOCAL_PRIMARY}" == "user" ]]; then
+            echo "Setting variables needed for the GitHub user account."
+            cli_user_id=$(gh api user -q ".id")
+            cli_user_login=$(gh api user -q ".login")
+            cli_user_name=$(gh api user -q ".name")
+            cli_user_type=$(gh api user -q ".type")
+            ##
+            cli_user_email="${cli_user_id}+${cli_user_login}@users.noreply.github.com"
+            ##
+            ## Print user information
+            echo "  Information about the GitHub user account: "
+            echo "    - user ID is '${cli_user_id}' "
+            echo "    - user type is '${cli_user_type}' "
+            echo "    - user name is '${cli_user_name}' "
+            echo "    - user login is '${cli_user_login}' "
+            echo "    - user email is '${cli_user_email}' "
+            ##
+        fi
+        ##
+        ##
+        if [[ "${GH_LOCAL_PRIMARY}" == "user" ]]; then
+            echo "Configure git as the GitHub user account using the provided token. "
+            git config --global user.name '${cli_user_name}'
+            git config --global user.email '${cli_user_email}'
+        elif [[ "${GH_LOCAL_PRIMARY}" == "bot" ]]; then
+            echo "Configure git as the GitHub Bot using the app token. "
+            git config --global url.https://x-access-token:${GH_TOKEN}@github.com/.insteadOf https://github.com/
+            git config --global credential.helper store
+            ## https://github.com/actions/create-github-app-token/issues/204#issuecomment-2654464094
+            echo "  this should have worked, if not then need to check the 'actions/create-github-app-token' repo "
+            echo "  see https://github.com/actions/create-github-app-token/issues/204#issuecomment-2654464094 "
+        else
+            echo "this workflow will now fail"
+            exit 1
+        fi
+        ##
+        ##
+        if [[ "${GH_LOCAL_PRIMARY}" == "user" ]]; then
+            echo "  Sending the user information to GitHub output."
+            echo "user-id=${cli_user_id}" >> "$GITHUB_OUTPUT"
+            echo "user-login=${cli_user_login}" >> "$GITHUB_OUTPUT"
+            echo "user-name=${cli_user_name}" >> "$GITHUB_OUTPUT"
+            echo "user-type=${cli_user_type}" >> "$GITHUB_OUTPUT"
+            echo "user-email=${cli_user_email}" >> "$GITHUB_OUTPUT"
+            ##
+            echo "  Sending the user information to the GitHub runner environment."
+            echo "user-id=${cli_user_id}" >> $GITHUB_ENV
+            echo "user-login=${cli_user_login}" >> $GITHUB_ENV
+            echo "user-name=${cli_user_name}" >> $GITHUB_ENV
+            echo "user-type=${cli_user_type}" >> $GITHUB_ENV
+            echo "user-email=${cli_user_email}" >> $GITHUB_ENV
+            ##
+        fi
+        echo ""
+        ##
         echo ""
         echo "finishing the 'configure-git' step... "
         echo "::endgroup::"
