@@ -258,6 +258,10 @@ runs:
             echo "Configure git as the GitHub user account using the provided token. "
             git config --global user.name '${cli_user_name}'
             git config --global user.email '${cli_user_email}'
+            ##
+            echo "Setting the committer string for the GitHub user account."
+            cli_committer=$(git var GIT_COMMITTER_IDENT | awk '{ NF-=2; print }')
+            ##
         elif [[ "${GH_LOCAL_PRIMARY}" == "bot" ]]; then
             echo "Configure git as the GitHub Bot using the app token. "
             ## https://github.com/actions/create-github-app-token#configure-git-cli-for-an-apps-bot-user
