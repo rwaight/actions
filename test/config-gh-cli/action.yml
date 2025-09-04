@@ -279,7 +279,7 @@ runs:
             cli_user_name="${{ steps.app-token.outputs.app-slug }}[bot]"
             cli_user_type=${GH_LOCAL_PRIMARY}
             ##cli_user_email=$(git config user.email)
-            cli_user_email="${{ steps.app-token.outputs.app-slug }}[bot] <${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>"
+            cli_user_email="${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
         else
             echo "Error in the 'configure-git' step! This workflow will now fail."
             echo "::error file=test/config-gh-cli/action.yml,title=⛔ config-gh-cli error hint::Error in the 'configure-git' step!"
