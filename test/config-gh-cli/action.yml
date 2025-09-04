@@ -270,6 +270,7 @@ runs:
             ## https://github.com/actions/create-github-app-token/issues/204#issuecomment-2654464094
             echo "  this should have worked, if not then need to check the 'actions/create-github-app-token' repo "
             echo "  see https://github.com/actions/create-github-app-token/issues/204#issuecomment-2654464094 "
+            echo "  also check https://github.com/actions/create-github-app-token/issues/270 "
             #### if above does not work then try:
             #### # git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
             #### # git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
