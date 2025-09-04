@@ -286,23 +286,20 @@ runs:
         fi
         ##
         ##
-        if [[ "${GH_LOCAL_PRIMARY}" == "user" ]]; then
-            echo "  Sending the user information to GitHub output."
-            echo "user-id=${cli_user_id}" >> "$GITHUB_OUTPUT"
-            echo "user-login=${cli_user_login}" >> "$GITHUB_OUTPUT"
-            echo "user-name=${cli_user_name}" >> "$GITHUB_OUTPUT"
-            echo "user-type=${cli_user_type}" >> "$GITHUB_OUTPUT"
-            echo "user-email=${cli_user_email}" >> "$GITHUB_OUTPUT"
-            ##
-            echo "  Sending the user information to the GitHub runner environment."
-            echo "user-id=${cli_user_id}" >> $GITHUB_ENV
-            echo "user-login=${cli_user_login}" >> $GITHUB_ENV
-            echo "user-name=${cli_user_name}" >> $GITHUB_ENV
-            echo "user-type=${cli_user_type}" >> $GITHUB_ENV
-            echo "user-email=${cli_user_email}" >> $GITHUB_ENV
-            ##
-        fi
-        echo ""
+        echo "Sending the user information to GitHub output."
+        echo "user-id=${cli_user_id}" >> "$GITHUB_OUTPUT"
+        echo "user-login=${cli_user_login}" >> "$GITHUB_OUTPUT"
+        echo "user-name=${cli_user_name}" >> "$GITHUB_OUTPUT"
+        echo "user-type=${cli_user_type}" >> "$GITHUB_OUTPUT"
+        echo "user-email=${cli_user_email}" >> "$GITHUB_OUTPUT"
+        ##
+        echo "Sending the user information to the GitHub runner environment."
+        echo "user-id=${cli_user_id}" >> $GITHUB_ENV
+        echo "user-login=${cli_user_login}" >> $GITHUB_ENV
+        echo "user-name=${cli_user_name}" >> $GITHUB_ENV
+        echo "user-type=${cli_user_type}" >> $GITHUB_ENV
+        echo "user-email=${cli_user_email}" >> $GITHUB_ENV
+        ##
         ##
         echo ""
         echo "finishing the 'configure-git' step... "
