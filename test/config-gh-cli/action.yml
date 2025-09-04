@@ -361,6 +361,7 @@ runs:
         user-name: ${{ env.user-name }}
         user-type: ${{ env.user-type }}
         user-email: ${{ env.user-email }}
+        user-committer: ${{ env.user-committer }}
       run: |
         echo "::group::starting the 'set-action-outputs' step... "
         echo ""
@@ -370,6 +371,7 @@ runs:
         echo "user-name=${user-name}" >> "$GITHUB_OUTPUT"
         echo "user-type=${user-type}" >> "$GITHUB_OUTPUT"
         echo "user-email=${user-email}" >> "$GITHUB_OUTPUT"
+        echo "user-committer=${user-committer}" >> "$GITHUB_OUTPUT"
         echo ""
         echo "finishing the 'set-action-outputs' step... "
         echo "::endgroup::"
