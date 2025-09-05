@@ -90,7 +90,7 @@ jobs:
         id: checkout
 
       - name: Display structure of files in working directory
-        #if: env.MY_WORKFLOW_DEBUG=='true'
+        #if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
         run: ls -R
 
       - name: Get the build version
