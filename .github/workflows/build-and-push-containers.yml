@@ -84,6 +84,14 @@ jobs:
         #if: env.MY_WORKFLOW_DEBUG=='true'
         run: ls -R
 
+      - name: Get the build version
+        id: get-version
+        uses: rwaight/actions/vars/build-version@main
+        with:
+          checkout: false
+          strategy: 'simple'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
+
       - name: Setup Go environment
         if: ${{ matrix.go-version }}
         # Verified creator: https://github.com/marketplace/actions/setup-go-environment
