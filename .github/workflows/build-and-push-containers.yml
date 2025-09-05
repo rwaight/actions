@@ -38,6 +38,7 @@ jobs:
       fail-fast: false
       matrix:
         container: [render-template, pr-label-checker]
+        registry: [ghcr.io]
         # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs#example-expanding-configurations
         # use 'include' to specify additional variables
         include:
@@ -55,7 +56,8 @@ jobs:
             #test: "-e DOCKER_TEST_ONLY=true"
     # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
     env:
-      REGISTRY: ghcr.io
+      REGISTRY: ${{ matrix.registry }}
+      IS_GHCR: ${{ matrix.registry == 'ghcr.io' && 'true' || 'false' }}
       #IMAGE_NAME: ${{ github.repository }}
       IMAGE_NAME: ${{ github.repository }}/${{ matrix.name }}
       #IMAGE_NAME: ${{ matrix.name }}
@@ -130,19 +132,18 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
         id: setup-buildx
 
-      # Uses the `docker/login-action` action to log in to the Container registry registry using the account and password that will publish the packages. Once published, the packages are scoped to the account defined here.
-      - name: Log in to the ${{ env.REGISTRY }} container registry
+      - name: Login to the GitHub Container Registry
+        # Uses the `docker/login-action` action to log in to the Container registry registry using the account and password that will publish the packages. Once published, the packages are scoped to the account defined here.
+        if: matrix.registry == 'ghcr.io'
         # Verified creator: https://github.com/marketplace/actions/docker-login
         # GitHub Action to login against a Docker registry
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
-        #uses: docker/login-action@v3.0.0
         with:
-          #registry: ghcr.io
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           #username: ${{ github.actor }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        id: docker-login
+        id: docker-login-ghcr
 
       # This step uses [docker/metadata-action](https://github.com/docker/metadata-action#about) to extract tags and labels that will be applied to the specified image. The `id` "meta" allows the output of this step to be referenced in a subsequent step. The `images` value provides the base name for the tags and labels.
       - name: Extract metadata (tags, labels) for Docker
@@ -150,7 +151,10 @@ jobs:
         # GitHub Action to extract metadata (tags, labels) from Git reference and GitHub events for Docker 
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # https://github.com/docker/metadata-action#images-input
+          images: |
+            name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            name=ghcr.io/${{ env.IMAGE_NAME }},enable=${{ env.IS_GHCR }}
           # https://github.com/docker/metadata-action#latest-tag
           # https://github.com/docker/metadata-action#typesha
           # https://github.com/docker/metadata-action#typeref
