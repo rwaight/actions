@@ -23,7 +23,7 @@ env:
 jobs:
 
   commitlint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     if: (github.repository_owner == 'rwaight')
     permissions:
       contents: write
