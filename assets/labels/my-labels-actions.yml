@@ -37,6 +37,11 @@
   description: 'Actions in the ''github'' group'
   aliases: []
 -
+  name: 'group:instruqt'
+  color: '50790C'
+  description: 'Actions in the ''instruqt'' group'
+  aliases: []
+-
   name: 'group:releases'
   color: '50790C'
   description: 'Actions in the ''releases'' group'
@@ -50,5 +55,10 @@
   name: 'group:utilities'
   color: '50790C'
   description: 'Actions in the ''utilities'' group'
+  aliases: []
+-
+  name: 'group:vars'
+  color: '50790C'
+  description: 'Actions in the ''vars'' group'
   aliases: []
 #
