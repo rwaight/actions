@@ -237,7 +237,7 @@ jobs:
       - name: Create an App Token
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
@@ -305,7 +305,7 @@ jobs:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/test/check-semver-labels@6848385d0cbaf286eda6311b6a3f11aa82d16679 # v0.1.44
+        uses: rwaight/actions/test/check-semver-labels@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
         id: check-version-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
@@ -318,7 +318,7 @@ jobs:
           my_action_debug: true
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@6848385d0cbaf286eda6311b6a3f11aa82d16679 # v0.1.44
+        uses: rwaight/actions/github/label-checker@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
         id: check-type-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
@@ -392,7 +392,7 @@ jobs:
           echo "The 'write-results' step has finished. "
 
       - name: Look for a comment
-        uses: rwaight/actions/chatops/find-comment@6848385d0cbaf286eda6311b6a3f11aa82d16679 # v0.1.44
+        uses: rwaight/actions/chatops/find-comment@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
@@ -409,7 +409,7 @@ jobs:
 
       - name: Generate comment template
         id: comment-template
-        uses: rwaight/actions/utilities/render-template@6848385d0cbaf286eda6311b6a3f11aa82d16679 # v0.1.44
+        uses: rwaight/actions/utilities/render-template@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
         # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
@@ -435,7 +435,7 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/chatops/create-or-update-comment@6848385d0cbaf286eda6311b6a3f11aa82d16679 # v0.1.44
+        uses: rwaight/actions/chatops/create-or-update-comment@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
         # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
