@@ -305,7 +305,7 @@ jobs:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/test/check-semver-labels@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/github/check-semver-labels@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
         id: check-version-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')

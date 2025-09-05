@@ -1,4 +1,4 @@
-:disappointed: The PR labeler checks have failed!  This pull request is missing the proper `{{ .label_scope }}:` label.
+:disappointed: The PR labeler checks have failed!  This pull request is missing the proper `{{ .label_scope }}:` label; only one `{{ .label_scope }}:` label is allowed.
 - Label check result: {{ .label_check }}
 - Label test name:    {{ .test_name }}
 - Label test scope:   {{ .label_scope }}

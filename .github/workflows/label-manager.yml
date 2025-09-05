@@ -111,7 +111,7 @@ jobs:
         with:
           account-type: user
           gh-token: ${{ secrets.BOT_USER_ACTIONS_TOKEN }}
-          verbose: ${{ runner.debug == '1' }}
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
       - name: Export label config using rwaight/actions/github/export-label-config
         id: export-label-config
