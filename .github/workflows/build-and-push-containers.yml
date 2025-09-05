@@ -172,7 +172,7 @@ jobs:
         with:
           # https://github.com/docker/metadata-action#images-input
           images: |
-            name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},enable=${{ env.IS_GHCR }}
             name=ghcr.io/${{ env.IMAGE_NAME }},enable=${{ env.IS_GHCR }}
             name=${{ env.IMAGE_NAME }},enable=${{ env.IS_GCP_AR }}
             name=${{ env.GCP_AR_REGION }}-docker.pkg.dev/${{ env.GCP_AR_PROJECT }}/${{ env.GCP_AR_REPO }}/${{ env.IMAGE_NAME }},enable=${{ env.IS_GCP_AR }}
