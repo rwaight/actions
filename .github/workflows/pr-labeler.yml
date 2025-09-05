@@ -315,7 +315,7 @@ jobs:
           #allow-failure: false
           semver-fallback: 'triage:version-needed'
           semver-prefix: 'version:'
-          my_action_debug: true
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
       - name: Check for type labels
         uses: rwaight/actions/github/label-checker@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
