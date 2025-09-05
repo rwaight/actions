@@ -39,6 +39,8 @@ jobs:
       matrix:
         container: [render-template, pr-label-checker]
         registry: [ghcr.io]
+          # not all containers will be pushed to GCP Artifact Registry
+          #registry: [ghcr.io,gcp]
         # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs#example-expanding-configurations
         # use 'include' to specify additional variables
         include:
@@ -58,6 +60,11 @@ jobs:
     env:
       REGISTRY: ${{ matrix.registry }}
       IS_GHCR: ${{ matrix.registry == 'ghcr.io' && 'true' || 'false' }}
+      # GCP Artifact Registry
+      IS_GCP_AR: ${{ matrix.registry == 'gcp' && 'true' || 'false' }}
+      GCP_AR_REGION: us-central1
+      GCP_AR_PROJECT: my-gcp-project
+      GCP_AR_REPO: my-artifact-repo
       #IMAGE_NAME: ${{ github.repository }}
       IMAGE_NAME: ${{ github.repository }}/${{ matrix.name }}
       #IMAGE_NAME: ${{ matrix.name }}
@@ -145,6 +152,18 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
         id: docker-login-ghcr
 
+      - name: Login to the GCP Artifact Registry
+        if: matrix.registry == 'gcp'
+        uses: docker/login-action@v3
+        # Verified creator: https://github.com/marketplace/actions/docker-login
+        # GitHub Action to login against a Docker registry
+        with:
+          #registry: us-central1-docker.pkg.dev
+          registry: "${{ env.GCP_AR_REGION }}-docker.pkg.dev"
+          username: _json_key
+          password: ${{ secrets.GCP_BUILD_CONTAINERS_KEY }}
+        id: docker-login-gcp-ar
+
       # This step uses [docker/metadata-action](https://github.com/docker/metadata-action#about) to extract tags and labels that will be applied to the specified image. The `id` "meta" allows the output of this step to be referenced in a subsequent step. The `images` value provides the base name for the tags and labels.
       - name: Extract metadata (tags, labels) for Docker
         # Verified creator: https://github.com/marketplace/actions/docker-metadata-action
@@ -155,6 +174,8 @@ jobs:
           images: |
             name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             name=ghcr.io/${{ env.IMAGE_NAME }},enable=${{ env.IS_GHCR }}
+            name=${{ env.IMAGE_NAME }},enable=${{ env.IS_GCP_AR }}
+            name=${{ env.GCP_AR_REGION }}-docker.pkg.dev/${{ env.GCP_AR_PROJECT }}/${{ env.GCP_AR_REPO }}/${{ env.IMAGE_NAME }},enable=${{ env.IS_GCP_AR }}
           # https://github.com/docker/metadata-action#latest-tag
           # https://github.com/docker/metadata-action#typesha
           # https://github.com/docker/metadata-action#typeref
