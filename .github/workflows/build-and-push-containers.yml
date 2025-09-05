@@ -92,6 +92,23 @@ jobs:
           strategy: 'simple'
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
+      - name: Print build version
+        id: print-build-version
+        if: ${{ steps.get-version.outputs.build-version }}
+        run: |
+          echo "::group::starting step 'print-build-version' "
+          echo ""
+          echo "Output from the 'get-version' step"
+          echo "    build-version: ${{ steps.get-version.outputs.build-version }} "
+          echo ""
+          echo "The output in the 'get-version' step was ${build_version} ."
+          echo ""
+          echo "completing the 'print-build-version' step. "
+          echo "::endgroup::"
+        env:
+          build_version: ${{ steps.get-version.outputs.build-version }}
+        shell: bash
+
       - name: Setup Go environment
         if: ${{ matrix.go-version }}
         # Verified creator: https://github.com/marketplace/actions/setup-go-environment
