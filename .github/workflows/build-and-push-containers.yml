@@ -67,7 +67,6 @@ jobs:
       GCP_AR_REPO: my-artifact-repo
       #IMAGE_NAME: ${{ github.repository }}
       IMAGE_NAME: ${{ github.repository }}/${{ matrix.name }}
-      #IMAGE_NAME: ${{ matrix.name }}
       IS_REF_TAG: ${{ github.ref_type == 'tag' && 'true' || 'false' }}
     defaults:
       run:
