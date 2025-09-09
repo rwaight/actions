@@ -79,7 +79,7 @@ jobs:
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) )
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         with:
           # required
           app-id: ${{ secrets.GH_APP_ID }}
