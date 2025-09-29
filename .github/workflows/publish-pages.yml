@@ -95,10 +95,10 @@ jobs:
         # https://timvink.github.io/mkdocs-git-revision-date-localized-plugin/index.html#setup
         run: pip install mkdocs-git-revision-date-localized-plugin
 
-      # Added for https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-contributors
       - name: Install mkdocs-git-committers-plugin-2
         # https://www.mkdocs.org/dev-guide/plugins/#installing-plugins
         # https://github.com/ojacques/mkdocs-git-committers-plugin-2
+        # Added for https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-contributors
         run: pip install mkdocs-git-committers-plugin-2
 
       - name: Run mkdocs gh-deploy
