@@ -132,4 +132,20 @@ plugins:
       # tags_hierarchy: true
       # By default, tags are separated by a forward slash `/`, but you can change this to any string, e.g., `.`
       # https://squidfunk.github.io/mkdocs-material/plugins/tags/#config.tags_hierarchy_separator
+  - git-committers:
+      # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#document-contributors
+      # https://github.com/ojacques/mkdocs-git-committers-plugin-2
+      repository: rwaight/actions
+      branch: main
+      # https://github.com/ojacques/mkdocs-git-committers-plugin-2/pull/79
+      exclude_committers:
+        - web-flow
+      exclude:
+        - index.md
+        - blog/index.md
+        - test-*.md
+        - '!**/index.md'
+      # allow the plugin to be disabled locally by setting the environment variable 'ENABLE_GIT_COMMITTERS' to 'false'
+      # use 'ENABLE_GIT_COMMITTERS=false mkdocs serve' to run mkdocs and disable the plugin locally
+      enabled: !ENV [ENABLE_GIT_COMMITTERS, true]   # defaults to true
 
