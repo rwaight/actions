@@ -1,5 +1,5 @@
 name: Install yq
-author: openshift-instruqt
+author: instruqt
 description: Installs the yq package for parsing YAML files
 group: utilities
 imported: true
@@ -11,11 +11,11 @@ local:
       - example-custom-notes.md
 source:
   action_name: install-yq
-  author: openshift-instruqt
-  repo_name: instruqt
-  repo_url: https://github.com/openshift-instruqt/instruqt
   current_version: a63841cfbca845fbba74f532aa9cd2e0ec5cbdcf
   latest_version: 36ac5139684cd447116f7231f1e6b3a76f1b4b9d
+  author: instruqt
+  repo_name: examples
+  repo_url: https://github.com/instruqt/examples
   override:
     use_commits: true
     latest_version_commit: a63841cfbca845fbba74f532aa9cd2e0ec5cbdcf

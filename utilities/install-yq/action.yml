@@ -1,6 +1,6 @@
 name: Install yq
 description: Installs the yq package for parsing YAML files
-author: 'openshift-instruqt'
+author: 'instruqt'
 runs:
   using: composite
   steps:
