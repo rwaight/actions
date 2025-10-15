@@ -32,6 +32,23 @@ runs:
       run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
       shell: bash
 
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true'
+      id: verbose-print-inputs
+      run: | 
+        echo "::group::starting the 'verbose-print-inputs' step... "
+        echo ""
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "version is set to '${{ inputs.version }}' "
+        echo "verbose is set to '${{ inputs.verbose }}' "
+        ##
+        echo ""
+        echo "finishing the 'verbose-print-inputs' step... "
+        echo "::endgroup::"
+      shell: bash
+
     - name: Download yq package
       run: wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64
       shell: bash
