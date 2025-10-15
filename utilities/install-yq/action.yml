@@ -105,8 +105,11 @@ runs:
         echo ""
         ## Verify yq installation
         if command -v yq &> /dev/null; then
-            echo "yq is installed, version information: "
-            yq --version
+            echo "yq is installed "
+            if [[ "${verbose}" == "true" ]]; then
+                echo "verbose mode enabled. the yq version information is: "
+                yq --version
+            fi
         else
             echo "Error, yq is not installed, this workflow will now fail and exit. "
             echo "::error title=⛔ Error, yq is not installed. hint::yq is required for this workflow to run. "
