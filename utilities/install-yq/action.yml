@@ -50,8 +50,34 @@ runs:
         echo "::endgroup::"
       shell: bash
 
-    - name: Download yq package
-      run: wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64
+    - name: Download the ${{ inputs.version }} yq package
+      id: download-yq-versioned
+      if: inputs.version!='latest'
+      # run: wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64
+      run: |
+        echo "::group::starting the 'download-yq-versioned' step... "
+        echo ""
+        echo "the version '${version}' was specified and will be downloaded"
+        wget https://github.com/mikefarah/yq/releases/download/${{ inputs.version }}/yq_linux_amd64
+        echo "yq '${version}' downloaded"
+        echo ""
+        echo "finishing the 'download-yq-versioned' step... "
+        echo "::endgroup::"
+      env:
+        version: ${{ inputs.version }}
+      shell: bash
+
+    - name: Download the latest yq package
+      id: download-yq-latest
+      if: inputs.version=='latest'
+      run: |
+        echo "::group::starting the 'download-yq-latest' step... "
+        echo ""
+        wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        echo "yq latest version downloaded"
+        echo ""
+        echo "finishing the 'download-yq-latest' step... "
+        echo "::endgroup::"
       shell: bash
 
     - name: Configure yq executable
