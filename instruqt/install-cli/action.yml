@@ -87,6 +87,30 @@ runs:
         echo "::endgroup::"
       shell: bash
 
+    - name: Ensure the Instruqt CLI is installed
+      id: check-instruqt-cli
+      run: | 
+        echo "::group::starting the 'check-instruqt-cli' step... "
+        echo ""
+        ## Verify instruqt-cli installation
+        if command -v instruqt &> /dev/null; then
+            echo "The Instruqt CLI is installed "
+            if [[ "${verbose}" == "true" ]]; then
+                echo "verbose mode enabled. the Instruqt CLI version information is: "
+                instruqt version
+            fi
+        else
+            echo "Error, Instruqt CLI is not installed, this workflow will now fail and exit. "
+            echo "::error title=⛔ Error, Instruqt CLI is not installed. hint::Instruqt CLI is required for this workflow to run. "
+            exit 1
+        fi
+        ##
+        echo ""
+        echo "finishing the 'check-instruqt-cli' step... "
+        echo "::endgroup::"
+      shell: bash
+
+
 branding:
   # Ref: https://haya14busa.github.io/github-action-brandings/
   # fork: https://github.com/rwaight/github-action-brandings
