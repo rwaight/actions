@@ -1,17 +1,131 @@
 name: Install yq
 description: Installs the yq package for parsing YAML files
-author: 'openshift-instruqt'
+author: 'instruqt'
+
+inputs:
+  version:
+    description: >-
+      The version of the yq package to be used, defaults to latest.
+      If a different version is needed, use a valid release tag from https://github.com/mikefarah/yq/tags
+      Example versions: v4, v4.26.1, v4.47.2, v4.48.1
+    required: false
+    default: 'latest'
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
+outputs:
+  version:
+    description: The installed yq version.
+    value: ${{ steps.check-yq.outputs.yq-version }}
+
 runs:
   using: composite
   steps:
 
-    - name: Download yq package
-      run: wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=utilities/install-yq/action.yml,title=⛔ Install yq error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Verbose | Greet the triggering_actor
+      if: inputs.verbose=='true'
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true'
+      id: verbose-print-inputs
+      run: | 
+        echo "::group::starting the 'verbose-print-inputs' step... "
+        echo ""
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "version is set to '${{ inputs.version }}' "
+        echo "verbose is set to '${{ inputs.verbose }}' "
+        ##
+        echo ""
+        echo "finishing the 'verbose-print-inputs' step... "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Download the ${{ inputs.version }} yq package
+      id: download-yq-versioned
+      if: inputs.version!='latest'
+      # run: wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64
+      run: |
+        echo "::group::starting the 'download-yq-versioned' step... "
+        echo ""
+        echo "the version '${version}' was specified and will be downloaded"
+        wget https://github.com/mikefarah/yq/releases/download/${{ inputs.version }}/yq_linux_amd64
+        echo "yq '${version}' downloaded"
+        echo ""
+        echo "finishing the 'download-yq-versioned' step... "
+        echo "::endgroup::"
+      env:
+        version: ${{ inputs.version }}
+      shell: bash
+
+    - name: Download the latest yq package
+      id: download-yq-latest
+      if: inputs.version=='latest'
+      run: |
+        echo "::group::starting the 'download-yq-latest' step... "
+        echo ""
+        wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        echo "yq latest version downloaded"
+        echo ""
+        echo "finishing the 'download-yq-latest' step... "
+        echo "::endgroup::"
       shell: bash
 
     - name: Configure yq executable
-      run: sudo mv yq_linux_amd64 /usr/bin/yq && chmod +x /usr/bin/yq
+      id: configure-yq
+      run: |
+        echo "::group::starting the 'configure-yq' step... "
+        echo ""
+        sudo mv yq_linux_amd64 /usr/bin/yq
+        sudo chmod +x /usr/bin/yq
+        echo "yq installed"
+        echo ""
+        echo "finishing the 'configure-yq' step... "
+        echo "::endgroup::"
       shell: bash
+
+    - name: Ensure yq is installed
+      id: check-yq
+      run: | 
+        echo "::group::starting the 'check-yq' step... "
+        echo ""
+        ## Verify yq installation
+        if command -v yq &> /dev/null; then
+            echo "yq is installed "
+            if [[ "${verbose}" == "true" ]]; then
+                echo "verbose mode enabled. the yq version information is: "
+                yq --version
+            fi
+        else
+            echo "Error, yq is not installed, this workflow will now fail and exit. "
+            echo "::error title=⛔ Error, yq is not installed. hint::yq is required for this workflow to run. "
+            exit 1
+        fi
+        ##
+        echo ""
+        ## Set the output variable for yq version
+        INSTALLED_VERSION=$(yq --version | sed -E 's/.*\ (v[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+        echo "yq-version=$INSTALLED_VERSION" >> $GITHUB_OUTPUT
+        echo "The version of 'yq' that is installed is: $INSTALLED_VERSION "
+        echo ""
+        echo "finishing the 'check-yq' step... "
+        echo "::endgroup::"
+      shell: bash
+
 
 branding:
   # Ref: https://haya14busa.github.io/github-action-brandings/

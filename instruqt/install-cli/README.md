@@ -9,11 +9,10 @@ Installs the Instruqt CLI into the GitHub Runner
 
 See the `inputs` configured in the [action.yml](action.yml) file.
 
-<!--- 
 ### Outputs
 
 See the `outputs` configured in the [action.yml](action.yml) file.
---->
+
 
 ## Example Usage
 
