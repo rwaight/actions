@@ -4,7 +4,7 @@ description: Installs the yq package for parsing YAML files
 group: utilities
 imported: true
 local:
-  modifications: false
+  modifications: true
   update:
     exclusions:
       - README-examples.md
@@ -23,7 +23,7 @@ source:
   update_available: false
 specs:
   action_file: action.yml
-  inputs: []
+  inputs: [version, verbose]
   outputs: []
   runs:
     using: composite

@@ -1,6 +1,19 @@
 name: Install yq
 description: Installs the yq package for parsing YAML files
 author: 'instruqt'
+
+inputs:
+  version:
+    description: >-
+      The version of the yq package to be used, defaults to latest.
+      If a different version is needed, use a valid release tag from https://github.com/mikefarah/yq/tags
+    required: false
+    default: 'latest'
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
 runs:
   using: composite
   steps:
