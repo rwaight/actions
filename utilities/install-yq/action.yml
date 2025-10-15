@@ -93,6 +93,27 @@ runs:
         echo "::endgroup::"
       shell: bash
 
+    - name: Ensure yq is installed
+      id: check-yq
+      run: | 
+        echo "::group::starting the 'check-yq' step... "
+        echo ""
+        ## Verify yq installation
+        if command -v yq &> /dev/null; then
+            echo "yq is installed, version information: "
+            yq --version
+        else
+            echo "Error, yq is not installed, this workflow will now fail and exit. "
+            echo "::error title=⛔ Error, yq is not installed. hint::yq is required for this workflow to run. "
+            exit 1
+        fi
+        ##
+        echo ""
+        echo "finishing the 'check-yq' step... "
+        echo "::endgroup::"
+      shell: bash
+
+
 branding:
   # Ref: https://haya14busa.github.io/github-action-brandings/
   # fork: https://github.com/rwaight/github-action-brandings
