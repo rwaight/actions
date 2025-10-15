@@ -27,6 +27,11 @@ runs:
         exit 1
       shell: bash
 
+    - name: Verbose | Greet the triggering_actor
+      if: inputs.verbose=='true'
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
+
     - name: Download yq package
       run: wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64
       shell: bash
