@@ -18,6 +18,15 @@ runs:
   using: composite
   steps:
 
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=utilities/install-yq/action.yml,title=⛔ Install yq error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
     - name: Download yq package
       run: wget https://github.com/mikefarah/yq/releases/download/v4.26.1/yq_linux_amd64
       shell: bash
