@@ -81,7 +81,16 @@ runs:
       shell: bash
 
     - name: Configure yq executable
-      run: sudo mv yq_linux_amd64 /usr/bin/yq && chmod +x /usr/bin/yq
+      id: configure-yq
+      run: |
+        echo "::group::starting the 'configure-yq' step... "
+        echo ""
+        sudo mv yq_linux_amd64 /usr/bin/yq
+        sudo chmod +x /usr/bin/yq
+        echo "yq installed"
+        echo ""
+        echo "finishing the 'configure-yq' step... "
+        echo "::endgroup::"
       shell: bash
 
 branding:
