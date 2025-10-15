@@ -7,6 +7,7 @@ inputs:
     description: >-
       The version of the yq package to be used, defaults to latest.
       If a different version is needed, use a valid release tag from https://github.com/mikefarah/yq/tags
+      Example versions: v4, v4.26.1, v4.47.2, v4.48.1
     required: false
     default: 'latest'
   verbose:
