@@ -19,7 +19,7 @@ source:
 specs:
   action_file: action.yml
   inputs: [version, verbose]
-  outputs: []
+  outputs: [version]
   runs:
     using: composite
 tests:
