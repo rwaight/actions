@@ -9,21 +9,24 @@ This document lists all available fields that can be retrieved for users in the 
 The script currently collects the following fields:
 
 ### From `UserProfile` (user.node.profile)
+
 - **display_name** (String): User's display name (e.g., "John Doe")
 - **email** (String): User's email address
 - **avatar** (String): Gravatar URL for the user's profile picture
 
 ### From `TeamUserEdge` (user_edge)
+
 - **role** (RoleName): User's role within the team
-  - Possible values: `content_creator`, `owner`, `member`, `instructor`
+    - Possible values: `content_creator`, `owner`, `member`, `instructor`
 - **scope** (ScopeName): User's scope within the team
-  - Observed value: `all`
+    - Observed value: `all`
 
 ### From `User` (user.node)
+
 - **id** (ID): Unique user identifier
 - **is_anonymous** (Boolean): Whether the user account is anonymous
 - **teams** (Array): List of teams the user is a member of
-  - Each team includes: `id`, `name`, `slug`, `role`
+    - Each team includes: `id`, `name`, `slug`, `role`
 
 ## ❌ NOT Available Fields
 
@@ -38,6 +41,7 @@ The following fields were requested but are **NOT available** through the Instru
 ### Note on Activity Data
 
 The `UserReportItem` type does have a `lastStartedAt` field that shows when a user last started a track, but:
+
 - It requires passing `input: {teamSlug: $teamSlug}` parameter
 - It causes significant API performance issues (timeouts)
 - It's not recommended for bulk user queries
@@ -47,6 +51,7 @@ The `UserReportItem` type does have a `lastStartedAt` field that shows when a us
 The following fields are available but not currently collected:
 
 ### From `User` type
+
 - **~~teams~~**: List of teams the user is a member of (✅ **NOW INCLUDED**)
 - **segments**: User's segments
 - **claims**: User's invite claims
@@ -57,6 +62,7 @@ The following fields are available but not currently collected:
 
 ### From `UserDetails` type (user.node.details)
 Note: Requires `teamSlug` argument
+
 - **firstName** (String)
 - **lastName** (String)  
 - **email** (String)
@@ -74,6 +80,7 @@ Note: Requires `teamSlug` argument
 ## 📊 Output Structure
 
 ### JSON Output (team_users_details.json)
+
 ```json
 {
   "id": "abc123xyz",
@@ -89,6 +96,7 @@ Note: Requires `teamSlug` argument
 ```
 
 ### Text Output (team_users_list.txt)
+
 ```
 Name: John Doe
   Email: user@mydomain.lan
@@ -116,5 +124,5 @@ To add more fields, you would need to:
 - The `slug` field in UserProfile always returns `null` for all users
 - Performance degrades significantly when trying to fetch report/activity data for all users
 - The `teams` field returns an empty array when querying users through a specific team's context
-  - This is expected behavior as the query is already scoped to a particular team
-  - To get a user's full team membership list, you would need to query the user directly (not through a team)
+    - This is expected behavior as the query is already scoped to a particular team
+    - To get a user's full team membership list, you would need to query the user directly (not through a team)

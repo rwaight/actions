@@ -8,7 +8,6 @@ local:
   update:
     exclusions:
       - README-examples.md
-      - example-custom-notes.md
       - AVAILABLE_FIELDS.md
       - VIRTUAL_ENV_USAGE.md
 source:

@@ -3,6 +3,7 @@
 Use Instruqt API to get a list of users and their information.
 
 This action interacts with the Instruqt GraphQL API to:
+
 1. Get team information
 2. List all users in the team
 3. Get detailed information about each user
@@ -32,6 +33,7 @@ See the `outputs` configured in the [action.yml](action.yml) file.
 ## Example Usage
 
 Create a file named `.github/workflows/my-workflow.yml` with the following:
+
 ```yml
 name: Get Instruqt Users
 
@@ -107,7 +109,7 @@ jobs:
             .[] | 
             "\(.role): \(.count) users - \(.users | join(", "))"
           ' > user-roles-report.txt
-          
+          #
           echo "User Roles Report:"
           cat user-roles-report.txt
           #

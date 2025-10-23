@@ -54,6 +54,7 @@ runs:
 
     - name: Run inline Python script to get users via Instruqt API
       id: run-get-users-api
+      # the VIRTUAL_ENV_USAGE.md file has more details on using a virtual environment for local testing
       env:
         INSTRUQT_TOKEN: ${{ inputs.api-key }}
         TEAM_WORKSPACE: ${{ inputs.team-workspace }}

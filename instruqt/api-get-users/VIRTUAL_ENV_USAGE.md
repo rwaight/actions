@@ -8,7 +8,7 @@ This guide explains how to set up and run the `api-get-users.py` script within a
 
 - Python 3.7 or higher installed on your system
 - Access to a terminal/command line
-- `yq` command-line YAML processor (for extracting the script from action.yml)
+- `yq` command-line YAML processor (for extracting the script from `action.yml`)
 
 ## Extracting the Script from action.yml
 
@@ -16,12 +16,12 @@ The Python script is embedded in the `action.yml` file and must be extracted for
 
 ### Installing yq (if not already installed)
 
-**On macOS:**
+**On macOS**:
 ```bash
 brew install yq
 ```
 
-**On Linux:**
+**On Linux**:
 ```bash
 # Using snap
 sudo snap install yq
@@ -42,7 +42,7 @@ cd /path/to/repo/instruqt/api-get-users
 yq eval '.runs.steps[] | select(.id == "run-get-users-api") | .run' action.yml > api-get-users.py
 ```
 
-**Alternative method using sed (if yq is not available):**
+**Alternative method using sed (if yq is not available)**:
 
 ```bash
 cd /path/to/repo/instruqt/api-get-users
@@ -54,7 +54,7 @@ sed -n '/- name: Run inline Python script to get users via Instruqt API/,/shell:
   sed 's/^        //' > api-get-users.py
 ```
 
-**Simpler alternative using awk:**
+**Simpler alternative using awk**:
 
 ```bash
 cd /path/to/repo/instruqt/api-get-users
@@ -80,6 +80,7 @@ python3 -m py_compile api-get-users.py
 ```
 
 The extracted file should start with the docstring and imports:
+
 ```python
 """
 Instruqt GraphQL API Client - Get Users
@@ -101,17 +102,17 @@ python3 -m venv .venv
 
 Activate the virtual environment using the appropriate command for your shell:
 
-**On macOS/Linux (bash/zsh):**
+**On macOS/Linux (bash/zsh)**:
 ```bash
 source .venv/bin/activate
 ```
 
-**On Windows (PowerShell):**
+**On Windows (PowerShell)**:
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-**On Windows (Command Prompt):**
+**On Windows (Command Prompt)**:
 ```cmd
 .venv\Scripts\activate.bat
 ```
@@ -170,9 +171,6 @@ export INSTRUQT_TOKEN="your-api-token-here"
 # Specify a team workspace (if not set, auto-detects from API key)
 export TEAM_WORKSPACE="your-team-slug"
 
-# Include draft users in the results
-export INCLUDE_DRAFTS="true"
-
 # Enable verbose output to print the full user list
 export VERBOSE="true"
 
@@ -188,7 +186,6 @@ Alternatively, create a `.env` file in the `instruqt/api-get-users` directory:
 # .env file example
 INSTRUQT_TOKEN="your-api-token-here"
 # TEAM_WORKSPACE="your-team-slug"  # Optional
-# INCLUDE_DRAFTS="false"
 # VERBOSE="false"
 # REQUESTS_VERSION="2.32.3"
 ```
@@ -205,7 +202,7 @@ Here's a complete example from start to finish:
 
 ```bash
 # 1. Navigate to the repository root
-cd /Users/rob/rw_local/GitHub/rw-actions
+cd /path/to/repo
 
 # 2. Create virtual environment (one-time setup)
 python3 -m venv .venv
@@ -285,7 +282,7 @@ ls -la /path/to/repo/.venv
 If it doesn't exist, create it:
 
 ```bash
-cd /Users/rob/rw_local/GitHub/rw-actions
+cd /path/to/repo
 python3 -m venv .venv
 ```
 
@@ -299,7 +296,7 @@ chmod +x /path/to/repo/.venv/bin/activate
 
 ### Module Not Found
 
-If you see "ModuleNotFoundError: No module named 'requests'", the script will automatically attempt to install it. If automatic installation fails, manually install it:
+If you see "`ModuleNotFoundError: No module named 'requests'`", the script will automatically attempt to install it. If automatic installation fails, manually install it:
 
 ```bash
 source /path/to/repo/.venv/bin/activate
