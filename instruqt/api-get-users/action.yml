@@ -1,0 +1,446 @@
+name: Instruqt Get Users
+description: Use Instruqt API to get a list of users
+author: rwaight
+
+inputs:
+  api-key:
+    description: >-
+      The API key to authenticate with the Instruqt API.
+    required: true
+  team-workspace:
+    description: >-
+      The team workspace slug to get users from. If not provided, defaults to the team associated with the API key.
+    required: true
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
+outputs:
+  users-json:
+    description: "a JSON string containing user information"
+    value: ${{ steps.run-get-users-api.outputs.USERS_JSON }}
+
+runs:
+  using: composite
+  steps:
+
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=instruqt/api-get-users/action.yml,title=⛔ Instruqt action error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Verbose | Greet the triggering_actor
+      if: inputs.verbose=='true'
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true'
+      id: verbose-print-inputs
+      run: | 
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "include-drafts is set to '${{ inputs.include-drafts }}' "
+        echo "team-workspace is set to '${{ inputs.team-workspace }}' "
+        echo "verbose is set to '${{ inputs.verbose }}' "
+        ##
+      shell: bash
+
+    - name: Run inline Python script to get users via Instruqt API
+      id: run-get-users-api
+      env:
+        INSTRUQT_TOKEN: ${{ inputs.api-key }}
+        TEAM_WORKSPACE: ${{ inputs.team-workspace }}
+        VERBOSE: ${{ runner.debug == '1' && 'true' || 'false' }}
+        # variables for pinned python package versions
+        REQUESTS_VERSION: "2.25.0"
+      run: |
+        """
+        Instruqt GraphQL API Client - Get Users
+        This script interacts with the Instruqt API to:
+        1. Get team information
+        2. List all users in the team
+        3. Get detailed information about each user
+        4. Save results to files and environment variables for further use in GitHub Actions
+        5. Print a summary of users found
+
+        Based on the Instruqt GraphQL API schema for user management.
+
+        Dependencies:
+          - requests (version can be specified via REQUESTS_VERSION environment variable)
+        
+        Installation:
+          pip install requests==${REQUESTS_VERSION:-2.25.0}
+        
+          Or in GitHub Actions, set the REQUESTS_VERSION environment variable:
+          env:
+            REQUESTS_VERSION: "2.25.0"
+        """
+        #
+        import os
+        import sys
+        #
+        # Check and install requests if needed
+        try:
+            import requests
+        except ImportError:
+            print("⚠️  'requests' module not found. Installing...")
+            import subprocess
+            requests_version = os.getenv('REQUESTS_VERSION', '2.25.0')
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', f'requests=={requests_version}'])
+            import requests
+        #
+        import json
+        import uuid
+        #
+        API_URL = "https://play.instruqt.com/graphql"
+        #
+        def query_instruqt(query, variables=None):
+            """Execute a GraphQL query against the Instruqt API"""
+            token = os.getenv('INSTRUQT_TOKEN')
+            if not token:
+                return {"error": "INSTRUQT_TOKEN not found in environment variables"}
+            #
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+            #
+            payload = {"query": query}
+            if variables:
+                payload["variables"] = variables
+            #
+            try:
+                response = requests.post(API_URL, json=payload, headers=headers)
+                response.raise_for_status()
+                return response.json()
+            except requests.exceptions.RequestException as e:
+                return {"error": str(e), "response": response.text if response else None}
+        #
+        def get_team_info(team_slug):
+            """Get information about a team"""
+            query = """
+            query GetTeam($teamSlug: String!) {
+                team(teamSlug: $teamSlug) {
+                id
+                name
+                slug
+                }
+            }
+            """
+            return query_instruqt(query, {"teamSlug": team_slug})
+        #
+        def get_current_user_teams():
+            """Get the teams accessible with the current API key"""
+            query = """
+            query GetTeams {
+                teams {
+                    id
+                    name
+                    slug
+                }
+            }
+            """
+            return query_instruqt(query)
+        #
+        def get_team_users(team_slug):
+            """
+            Get all users in a team
+            
+            Args:
+                team_slug: Team slug (e.g., 'my-team')
+            
+            Returns:
+                dict: API response with list of team users
+            """
+            query = """
+            query GetTeamUsers($teamSlug: String!) {
+                team(teamSlug: $teamSlug) {
+                id
+                name
+                slug
+                users {
+                    node {
+                        id
+                        profile {
+                            display_name
+                            email
+                            avatar
+                        }
+                        is_anonymous
+                        teams {
+                            node {
+                                id
+                                name
+                                slug
+                            }
+                            role
+                        }
+                    }
+                    role
+                    scope
+                }
+                }
+            }
+            """
+            #
+            return query_instruqt(query, {"teamSlug": team_slug})
+        #
+        def get_user_details(user_id):
+            """
+            Get detailed information about a specific user
+            
+            Args:
+                user_id: The user ID to get details for
+            
+            Returns:
+                dict: API response with user details
+            """
+            query = """
+            query GetUserDetails($userId: ID!) {
+                user(id: $userId) {
+                id
+                email
+                name
+                firstName
+                lastName
+                role
+                createdAt
+                lastSeenAt
+                profilePicture
+                teams {
+                    id
+                    name
+                    slug
+                    role
+                }
+                }
+            }
+            """
+            #
+            return query_instruqt(query, {"userId": user_id})
+        #
+        # function to send single-line variable to github output
+        def set_output(name, value):
+            if 'GITHUB_OUTPUT' in os.environ:
+                with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+                    print(f'{name}={value}', file=fh)
+            else:
+                print(f"Would set GitHub output: {name}={value}")
+        #
+        # function to send multi-line variable to github output
+        def set_multiline_output(name, value):
+            if 'GITHUB_OUTPUT' in os.environ:
+                with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+                    delimiter = uuid.uuid1()
+                    print(f'{name}<<{delimiter}', file=fh)
+                    print(value, file=fh)
+                    print(delimiter, file=fh)
+            else:
+                print(f"Would set GitHub multiline output: {name} (length: {len(value)} chars)")
+        # functions to send to github output are from
+        # https://github.com/orgs/community/discussions/28146#discussioncomment-5638023
+        # https://github.com/orgs/community/discussions/28146#discussioncomment-5638014
+        # Example usage
+        #
+        if __name__ == "__main__":
+            # Get parameters from environment variables set by the action
+            team_slug = os.getenv('TEAM_WORKSPACE')
+            include_drafts = os.getenv('INCLUDE_DRAFTS', 'false').lower() == 'true'
+            verbose = os.getenv('VERBOSE', 'false').lower() == 'true'
+            #
+            # If TEAM_WORKSPACE is not set, get the team associated with the API key
+            if not team_slug:
+                print("🔍 TEAM_WORKSPACE not set, detecting team from API key...")
+                teams_data = get_current_user_teams()
+                #
+                if not teams_data or "data" not in teams_data or "teams" not in teams_data["data"]:
+                    print("❌ Error: Unable to get teams from API")
+                    exit(1)
+                #
+                teams = teams_data["data"]["teams"]
+                if not teams:
+                    print("❌ Error: No teams found for this API key")
+                    exit(1)
+                #
+                # Use the first team (team API keys typically have access to one team)
+                team_slug = teams[0]["slug"]
+                print(f"✅ Auto-detected team: {team_slug}")
+            #
+            print("=" * 70)
+            print("Instruqt API Client - Get Users")
+            print("=" * 70)
+            print(f"Team Workspace: {team_slug}")
+            print()
+            #
+            # Test 1: Get team info
+            print("1. Fetching team info for:", team_slug)
+            team_result = get_team_info(team_slug)
+            #
+            if "errors" in team_result:
+                print("   ❌ Error:", json.dumps(team_result["errors"], indent=2))
+                exit(1)
+            elif "data" in team_result and team_result["data"]["team"]:
+                team = team_result["data"]["team"]
+                print(f"   ✅ Team Name: {team['name']}")
+                print(f"   ✅ Team ID: {team['id']}")
+                print(f"   ✅ Team Slug: {team['slug']}")
+            else:
+                print("   ❌ Error: Team not found")
+                exit(1)
+            print()
+            #
+            # Test 2: Get team users
+            print("2. Fetching users for team:", team_slug)
+            users_result = get_team_users(team_slug)
+            #
+            if "errors" in users_result:
+                print("   ❌ Error:", json.dumps(users_result["errors"], indent=2))
+                exit(1)
+            elif "data" in users_result and users_result["data"]["team"]:
+                team_data = users_result["data"]["team"]
+                users = team_data.get("users", [])
+                print(f"   ✅ Found {len(users)} user(s)")
+                #
+                if verbose:
+                    print()
+                #
+                if users:
+                    if verbose:
+                        print("   Team users:")
+                    all_user_details = []
+                    #
+                    for idx, user_edge in enumerate(users, 1):
+                        user = user_edge.get('node', {})
+                        profile = user.get('profile', {})
+                        role = user_edge.get('role', 'Unknown')
+                        scope = user_edge.get('scope', 'Unknown')
+                        is_anonymous = user.get('is_anonymous', False)
+                        teams = user.get('teams', [])
+                        #
+                        display_name = profile.get('display_name', 'No Name')
+                        email = profile.get('email', 'No Email')
+                        #
+                        # Format teams info
+                        teams_info = []
+                        for team_edge in teams:
+                            team_node = team_edge.get('node', {})
+                            team_role = team_edge.get('role', 'Unknown')
+                            teams_info.append({
+                                "id": team_node.get('id'),
+                                "name": team_node.get('name'),
+                                "slug": team_node.get('slug'),
+                                "role": team_role
+                            })
+                        #
+                        # Only print individual user details if verbose mode is enabled
+                        if verbose:
+                            print(f"      [{idx}] {display_name} ({email})")
+                            print(f"          Role: {role}")
+                            print(f"          Scope: {scope}")
+                            print(f"          ID: {user.get('id')}")
+                            print(f"          Anonymous: {is_anonymous}")
+                            print(f"          Teams: {len(teams_info)}")
+                        #
+                        # Build clean user data structure
+                        user_data = {
+                            "id": user.get("id"),
+                            "email": email,
+                            "name": display_name,
+                            "display_name": display_name,
+                            "role": role,
+                            "scope": scope,
+                            "is_anonymous": is_anonymous,
+                            "avatar": profile.get("avatar"),
+                            "teams": teams_info
+                        }
+                        #
+                        all_user_details.append(user_data)
+                        #
+                        if verbose:
+                            print()
+                    #
+                    # Save to file
+                    with open("team_users_list.txt", "w") as f:
+                        f.write(f"Team Users for {team_data['name']} ({team_data['slug']})\n")
+                        f.write("=" * 50 + "\n\n")
+                        for user_edge in users:
+                            user = user_edge.get('node', {})
+                            profile = user.get('profile', {})
+                            role = user_edge.get('role', 'Unknown')
+                            scope = user_edge.get('scope', 'Unknown')
+                            is_anonymous = user.get('is_anonymous', False)
+                            teams = user.get('teams', [])
+                            display_name = profile.get('display_name', 'No Name')
+                            email = profile.get('email', 'No Email')
+                            #
+                            f.write(f"Name: {display_name}\n")
+                            f.write(f"  Email: {email}\n")
+                            f.write(f"  Role: {role}\n")
+                            f.write(f"  Scope: {scope}\n")
+                            f.write(f"  ID: {user.get('id')}\n")
+                            f.write(f"  Anonymous: {is_anonymous}\n")
+                            f.write(f"  Teams: {len(teams)}\n")
+                            if teams:
+                                for team_edge in teams:
+                                    team_node = team_edge.get('node', {})
+                                    team_role = team_edge.get('role', 'Unknown')
+                                    f.write(f"    - {team_node.get('name')} ({team_node.get('slug')}) as {team_role}\n")
+                            f.write(f"  Avatar: {profile.get('avatar', 'None')}\n\n")
+                    #
+                    # Save all details to JSON file
+                    output_file = "team_users_details.json"
+                    with open(output_file, "w") as f:
+                        json.dump(all_user_details, f, indent=2)
+                    #
+                    # Export to environment variable for GitHub Actions
+                    set_multiline_output("USERS_JSON", json.dumps(all_user_details))
+                    #
+                    print(f"   💾 User list saved to: team_users_list.txt")
+                    print(f"   💾 Full details saved to: {output_file}")
+                    #
+                    # Print summary by role
+                    print()
+                    print("   Summary by role:")
+                    roles = {}
+                    for user_edge in users:
+                        role = user_edge.get('role', 'Unknown')
+                        roles[role] = roles.get(role, 0) + 1
+                    #
+                    for role, count in sorted(roles.items()):
+                        print(f"      • {role}: {count}")
+                else:
+                    print("   ℹ️  No users found in this team")
+                    set_output("USERS_JSON", "[]")
+            else:
+                print("   ❌ Error: Could not retrieve team users")
+                exit(1)
+            #
+            print()
+            print("=" * 70)
+      shell: python
+
+    - name: Print the users JSON output from the previous step
+      id: print-users-json
+      run: |
+        echo "::group::Print the users JSON output from the previous step"
+        echo ""
+        echo "the users JSON is: "
+        echo "$USERS_JSON" | jq '.'
+        echo ""
+        echo "::endgroup::"  
+      env:
+        USERS_JSON: ${{ steps.run-get-users-api.outputs.USERS_JSON }}
+      shell: bash
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: download
+  color: blue
