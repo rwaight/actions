@@ -1,0 +1,27 @@
+name: api-get-users
+author: rwaight
+description: Use Instruqt API to get a list of users
+group: instruqt
+imported: false
+local:
+  modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - AVAILABLE_FIELDS.md
+      - VIRTUAL_ENV_USAGE.md
+source:
+  action_name: api-get-users
+  author: rwaight
+  repo_name: actions
+  repo_url: https://github.com/rwaight/actions
+  latest_version: "null"
+  update_available: false
+specs:
+  action_file: action.yml
+  inputs: [api-key, team-workspace, verbose]
+  outputs: [users-json]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
