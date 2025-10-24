@@ -187,39 +187,6 @@ runs:
             #
             return query_instruqt(query, {"teamSlug": team_slug})
         #
-        def get_user_details(user_id):
-            """
-            Get detailed information about a specific user
-            
-            Args:
-                user_id: The user ID to get details for
-            
-            Returns:
-                dict: API response with user details
-            """
-            query = """
-            query GetUserDetails($userId: ID!) {
-                user(id: $userId) {
-                id
-                email
-                name
-                firstName
-                lastName
-                role
-                createdAt
-                lastSeenAt
-                profilePicture
-                teams {
-                    id
-                    name
-                    slug
-                    role
-                }
-                }
-            }
-            """
-            #
-        #
         # function to send single-line variable to github output
         def set_output(name, value):
             if 'GITHUB_OUTPUT' in os.environ:
