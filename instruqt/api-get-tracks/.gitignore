@@ -1,0 +1,5 @@
+# The canonical source of the Python script is in the `action.yml` file within the `run-get-tracks-api` step.
+api-get-tracks.py
+
+team_tracks_list.txt
+team_tracks_details.json
