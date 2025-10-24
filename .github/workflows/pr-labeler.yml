@@ -237,7 +237,7 @@ jobs:
       - name: Create an App Token
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: app-token
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
@@ -299,7 +299,7 @@ jobs:
       - name: Apply non-versioning labels
         # Verified creator: https://github.com/marketplace/actions/labeler
         # An action for automatically labelling pull requests
-        uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
+        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6.0.1
         id: label-pull-request
         with:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
