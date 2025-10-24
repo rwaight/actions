@@ -135,7 +135,7 @@ jobs:
       - name: Setup Docker Buildx
         # Verified creator: https://github.com/marketplace/actions/docker-setup-buildx
         # GitHub Action to set up Docker Buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         id: setup-buildx
 
       - name: Login to the GitHub Container Registry
@@ -167,7 +167,7 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         # Verified creator: https://github.com/marketplace/actions/docker-metadata-action
         # GitHub Action to extract metadata (tags, labels) from Git reference and GitHub events for Docker 
-        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
         with:
           # https://github.com/docker/metadata-action#images-input
           images: |
@@ -229,7 +229,7 @@ jobs:
       - name: Load the container image
         # Verified creator: https://github.com/marketplace/actions/build-and-push-docker-images
         # GitHub Action to build and push Docker images with Buildx
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
           (github.repository == 'rwaight/actions') &&
@@ -262,7 +262,7 @@ jobs:
       - name: Build and push the ${{ matrix.name }} container image
         # Verified creator: https://github.com/marketplace/actions/build-and-push-docker-images
         # GitHub Action to build and push Docker images with Buildx
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
           (github.repository == 'rwaight/actions') &&
