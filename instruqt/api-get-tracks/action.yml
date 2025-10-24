@@ -1,0 +1,436 @@
+name: Instruqt Get Tracks
+description: Use Instruqt API to get a list of tracks
+author: rwaight
+
+inputs:
+  api-key:
+    description: >-
+      The API key to authenticate with the Instruqt API.
+    required: true
+  team-workspace:
+    description: >-
+      The team workspace slug to get tracks from. If not provided, defaults to the team associated with the API key.
+    required: true
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
+outputs:
+  tracks-json:
+    description: "a JSON string containing track information"
+    value: ${{ steps.run-get-tracks-api.outputs.TRACKS_JSON }}
+
+runs:
+  using: composite
+  steps:
+
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=instruqt/api-get-tracks/action.yml,title=⛔ Instruqt action error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Verbose | Greet the triggering_actor
+      if: inputs.verbose=='true'
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true'
+      id: verbose-print-inputs
+      run: | 
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "team-workspace is set to '${{ inputs.team-workspace }}' "
+        echo "verbose is set to '${{ inputs.verbose }}' "
+        ##
+      shell: bash
+
+    - name: Run inline Python script to get tracks via Instruqt API
+      id: run-get-tracks-api
+      # the VIRTUAL_ENV_USAGE.md file has more details on using a virtual environment for local testing
+      env:
+        INSTRUQT_TOKEN: ${{ inputs.api-key }}
+        TEAM_WORKSPACE: ${{ inputs.team-workspace }}
+        VERBOSE: ${{ runner.debug == '1' && 'true' || 'false' }}
+        # variables for pinned python package versions
+        REQUESTS_VERSION: "2.25.0"
+      run: |
+        """
+        Instruqt GraphQL API Client - Get Tracks
+        This script interacts with the Instruqt API to:
+        1. Get team information
+        2. List all tracks in the team
+        3. Get detailed information about each track
+        4. Save results to files and environment variables for further use in GitHub Actions
+        5. Print a summary of tracks found
+
+        Based on the Instruqt GraphQL API schema for track management.
+
+        Dependencies:
+          - requests (version can be specified via REQUESTS_VERSION environment variable)
+        
+        Installation:
+          pip install requests==${REQUESTS_VERSION:-2.25.0}
+        
+          Or in GitHub Actions, set the REQUESTS_VERSION environment variable:
+          env:
+            REQUESTS_VERSION: "2.25.0"
+        """
+        #
+        import os
+        import sys
+        #
+        # Check and install requests if needed
+        try:
+            import requests
+        except ImportError:
+            print("⚠️  'requests' module not found. Installing...")
+            import subprocess
+            requests_version = os.getenv('REQUESTS_VERSION', '2.25.0')
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', f'requests=={requests_version}'])
+            import requests
+        #
+        import json
+        import uuid
+        #
+        API_URL = "https://play.instruqt.com/graphql"
+        #
+        def query_instruqt(query, variables=None):
+            """Execute a GraphQL query against the Instruqt API"""
+            token = os.getenv('INSTRUQT_TOKEN')
+            if not token:
+                return {"error": "INSTRUQT_TOKEN not found in environment variables"}
+            #
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+            #
+            payload = {"query": query}
+            if variables:
+                payload["variables"] = variables
+            #
+            try:
+                response = requests.post(API_URL, json=payload, headers=headers)
+                response.raise_for_status()
+                return response.json()
+            except requests.exceptions.RequestException as e:
+                return {"error": str(e), "response": response.text if response else None}
+        #
+        def get_team_info(team_slug):
+            """Get information about a team"""
+            query = """
+            query GetTeam($teamSlug: String!) {
+                team(teamSlug: $teamSlug) {
+                id
+                name
+                slug
+                }
+            }
+            """
+            return query_instruqt(query, {"teamSlug": team_slug})
+        #
+        def get_current_user_teams():
+            """Get the teams accessible with the current API key"""
+            query = """
+            query GetTeams {
+                teams {
+                    id
+                    name
+                    slug
+                }
+            }
+            """
+            return query_instruqt(query)
+        #
+        def get_team_tracks(team_slug):
+            """
+            Get all tracks in a team
+            
+            Args:
+                team_slug: Team slug (e.g., 'my-team')
+            
+            Returns:
+                dict: API response with list of team tracks
+            """
+            query = """
+            query GetTeamTracks($teamSlug: String!) {
+                tracks(teamSlug: $teamSlug) {
+                    id
+                    slug
+                    title
+                    description
+                    tags
+                    level
+                    teaser
+                    icon
+                    owner
+                    published
+                    private
+                    maintenance
+                    challenges {
+                        id
+                        slug
+                        title
+                        type
+                        assignment
+                    }
+                }
+            }
+            """
+            #
+            return query_instruqt(query, {"teamSlug": team_slug})
+        #
+        def get_user_details(user_id):
+            """
+            Get detailed information about a specific user
+            
+            Args:
+                user_id: The user ID to get details for
+            
+            Returns:
+                dict: API response with user details
+            """
+            query = """
+            query GetUserDetails($userId: ID!) {
+                user(id: $userId) {
+                id
+                email
+                name
+                firstName
+                lastName
+                role
+                createdAt
+                lastSeenAt
+                profilePicture
+                teams {
+                    id
+                    name
+                    slug
+                    role
+                }
+                }
+            }
+            """
+            #
+        #
+        # function to send single-line variable to github output
+        def set_output(name, value):
+            if 'GITHUB_OUTPUT' in os.environ:
+                with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+                    print(f'{name}={value}', file=fh)
+            else:
+                print(f"Would set GitHub output: {name}={value}")
+        #
+        # function to send multi-line variable to github output
+        def set_multiline_output(name, value):
+            if 'GITHUB_OUTPUT' in os.environ:
+                with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+                    delimiter = uuid.uuid1()
+                    print(f'{name}<<{delimiter}', file=fh)
+                    print(value, file=fh)
+                    print(delimiter, file=fh)
+            else:
+                print(f"Would set GitHub multiline output: {name} (length: {len(value)} chars)")
+        # functions to send to github output are from
+        # https://github.com/orgs/community/discussions/28146#discussioncomment-5638023
+        # https://github.com/orgs/community/discussions/28146#discussioncomment-5638014
+        # Example usage
+        #
+        if __name__ == "__main__":
+            # Get parameters from environment variables set by the action
+            team_slug = os.getenv('TEAM_WORKSPACE')
+            verbose = os.getenv('VERBOSE', 'false').lower() == 'true'
+            #
+            # If TEAM_WORKSPACE is not set, get the team associated with the API key
+            if not team_slug:
+                print("🔍 TEAM_WORKSPACE not set, detecting team from API key...")
+                teams_data = get_current_user_teams()
+                #
+                if not teams_data or "data" not in teams_data or "teams" not in teams_data["data"]:
+                    print("❌ Error: Unable to get teams from API")
+                    exit(1)
+                #
+                teams = teams_data["data"]["teams"]
+                if not teams:
+                    print("❌ Error: No teams found for this API key")
+                    exit(1)
+                #
+                # Use the first team (team API keys typically have access to one team)
+                team_slug = teams[0]["slug"]
+                print(f"✅ Auto-detected team: {team_slug}")
+            #
+            print("=" * 70)
+            print("Instruqt API Client - Get Tracks")
+            print("=" * 70)
+            print(f"Team Workspace: {team_slug}")
+            print()
+            #
+            # Test 1: Get team info
+            print("1. Fetching team info for:", team_slug)
+            team_result = get_team_info(team_slug)
+            #
+            if "errors" in team_result:
+                print("   ❌ Error:", json.dumps(team_result["errors"], indent=2))
+                exit(1)
+            elif "data" in team_result and team_result["data"]["team"]:
+                team = team_result["data"]["team"]
+                print(f"   ✅ Team Name: {team['name']}")
+                print(f"   ✅ Team ID: {team['id']}")
+                print(f"   ✅ Team Slug: {team['slug']}")
+            else:
+                print("   ❌ Error: Team not found")
+                exit(1)
+            print()
+            #
+            # Test 2: Get team tracks
+            print("2. Fetching tracks for team:", team_slug)
+            tracks_result = get_team_tracks(team_slug)
+            #
+            if "errors" in tracks_result:
+                print("   ❌ Error:", json.dumps(tracks_result["errors"], indent=2))
+                exit(1)
+            elif "data" in tracks_result and "tracks" in tracks_result["data"]:
+                tracks = tracks_result["data"]["tracks"]
+                print(f"   ✅ Found {len(tracks)} track(s)")
+                #
+                if verbose:
+                    print()
+                #
+                if tracks:
+                    if verbose:
+                        print("   Team tracks:")
+                    all_track_details = []
+                    #
+                    for idx, track in enumerate(tracks, 1):
+                        track_id = track.get('id', 'Unknown')
+                        slug = track.get('slug', 'Unknown')
+                        title = track.get('title', 'No Title')
+                        description = track.get('description', '')
+                        level = track.get('level', 'Unknown')
+                        published = track.get('published', False)
+                        private = track.get('private', False)
+                        maintenance = track.get('maintenance', False)
+                        tags = track.get('tags', [])
+                        challenges = track.get('challenges', [])
+                        #
+                        # Only print individual track details if verbose mode is enabled
+                        if verbose:
+                            print(f"      [{idx}] {title} ({slug})")
+                            print(f"          ID: {track_id}")
+                            print(f"          Level: {level}")
+                            print(f"          Published: {published}")
+                            print(f"          Private: {private}")
+                            print(f"          Challenges: {len(challenges)}")
+                            if tags:
+                                print(f"          Tags: {', '.join(tags)}")
+                        #
+                        # Build clean track data structure
+                        track_data = {
+                            "id": track_id,
+                            "slug": slug,
+                            "title": title,
+                            "description": description,
+                            "level": level,
+                            "published": published,
+                            "private": private,
+                            "maintenance": maintenance,
+                            "tags": tags,
+                            "teaser": track.get("teaser", ""),
+                            "icon": track.get("icon", ""),
+                            "owner": track.get("owner", ""),
+                            "challenge_count": len(challenges),
+                            "challenges": challenges
+                        }
+                        #
+                        all_track_details.append(track_data)
+                        #
+                        if verbose:
+                            print()
+                    #
+                    # Save to file
+                    with open("team_tracks_list.txt", "w") as f:
+                        f.write(f"Team Tracks for {team['name']} ({team['slug']})\n")
+                        f.write("=" * 50 + "\n\n")
+                        for track in tracks:
+                            f.write(f"Title: {track.get('title', 'No Title')}\n")
+                            f.write(f"  Slug: {track.get('slug', 'Unknown')}\n")
+                            f.write(f"  ID: {track.get('id', 'Unknown')}\n")
+                            f.write(f"  Level: {track.get('level', 'Unknown')}\n")
+                            f.write(f"  Published: {track.get('published', False)}\n")
+                            f.write(f"  Private: {track.get('private', False)}\n")
+                            f.write(f"  Maintenance: {track.get('maintenance', False)}\n")
+                            f.write(f"  Challenges: {len(track.get('challenges', []))}\n")
+                            tags = track.get('tags', [])
+                            if tags:
+                                f.write(f"  Tags: {', '.join(tags)}\n")
+                            if track.get('description'):
+                                f.write(f"  Description: {track.get('description')[:100]}...\n")
+                            f.write("\n")
+                    #
+                    # Save all details to JSON file
+                    output_file = "team_tracks_details.json"
+                    with open(output_file, "w") as f:
+                        json.dump(all_track_details, f, indent=2)
+                    #
+                    # Export to environment variable for GitHub Actions
+                    set_multiline_output("TRACKS_JSON", json.dumps(all_track_details))
+                    #
+                    print(f"   💾 Track list saved to: team_tracks_list.txt")
+                    print(f"   💾 Full details saved to: {output_file}")
+                    #
+                    # Print summary by status
+                    print()
+                    print("   Summary by status:")
+                    published_count = sum(1 for t in tracks if t.get('published', False))
+                    private_count = sum(1 for t in tracks if t.get('private', False))
+                    maintenance_count = sum(1 for t in tracks if t.get('maintenance', False))
+                    print(f"      • Published: {published_count}")
+                    print(f"      • Private: {private_count}")
+                    print(f"      • In Maintenance: {maintenance_count}")
+                    #
+                    # Print summary by level
+                    print()
+                    print("   Summary by level:")
+                    levels = {}
+                    for track in tracks:
+                        level = track.get('level', 'Unknown')
+                        levels[level] = levels.get(level, 0) + 1
+                    #
+                    for level, count in sorted(levels.items()):
+                        print(f"      • {level}: {count}")
+                else:
+                    print("   ℹ️  No tracks found in this team")
+                    set_output("TRACKS_JSON", "[]")
+            else:
+                print("   ❌ Error: Could not retrieve team tracks")
+                exit(1)
+            #
+            print()
+            print("=" * 70)
+      shell: python
+
+    - name: Print the tracks JSON output from the previous step
+      id: print-tracks-json
+      run: |
+        echo "::group::Print the tracks JSON output from the previous step"
+        echo ""
+        echo "the tracks JSON is: "
+        echo "$TRACKS_JSON" | jq '.'
+        echo ""
+        echo "::endgroup::"  
+      env:
+        TRACKS_JSON: ${{ steps.run-get-tracks-api.outputs.TRACKS_JSON }}
+      shell: bash
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: download
+  color: blue
