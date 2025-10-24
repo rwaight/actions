@@ -147,9 +147,6 @@ jobs:
             tracks-by-level-report.txt
             tracks-status-report.txt
             tracks-export.csv
-            user-roles-report.txt
-            user-domains-report.txt
-            users-export.csv
 
       - name: Create summary
         run: |

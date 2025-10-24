@@ -136,7 +136,7 @@ runs:
             """
             return query_instruqt(query, {"teamSlug": team_slug})
         #
-        def get_current_user_teams():
+        def get_current_workspace_team():
             """Get the teams accessible with the current API key"""
             query = """
             query GetTeams {
@@ -218,7 +218,7 @@ runs:
             # If TEAM_WORKSPACE is not set, get the team associated with the API key
             if not team_slug:
                 print("🔍 TEAM_WORKSPACE not set, detecting team from API key...")
-                teams_data = get_current_user_teams()
+                teams_data = get_current_workspace_team()
                 #
                 if not teams_data or "data" not in teams_data or "teams" not in teams_data["data"]:
                     print("❌ Error: Unable to get teams from API")
