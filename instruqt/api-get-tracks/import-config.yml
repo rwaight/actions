@@ -20,7 +20,7 @@ source:
 specs:
   action_file: action.yml
   inputs: [api-key, team-workspace, verbose]
-  outputs: [tracks-json]
+  outputs: [tracks-json, tracks-json-available, total-tracks, total-published, total-private, total-maintenance]
   runs:
     using: composite
 tests:

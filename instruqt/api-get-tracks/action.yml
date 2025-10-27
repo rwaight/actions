@@ -18,8 +18,23 @@ inputs:
 
 outputs:
   tracks-json:
-    description: "a JSON string containing track information"
+    description: "a JSON string containing track information (only available if under size limit)"
     value: ${{ steps.run-get-tracks-api.outputs.TRACKS_JSON }}
+  tracks-json-available:
+    description: "whether the tracks JSON is available in outputs (true/false)"
+    value: ${{ steps.run-get-tracks-api.outputs.TRACKS_JSON_AVAILABLE }}
+  total-tracks:
+    description: "total number of tracks found"
+    value: ${{ steps.run-get-tracks-api.outputs.TOTAL_TRACKS }}
+  total-published:
+    description: "total number of published tracks"
+    value: ${{ steps.run-get-tracks-api.outputs.TOTAL_PUBLISHED }}
+  total-private:
+    description: "total number of private tracks"
+    value: ${{ steps.run-get-tracks-api.outputs.TOTAL_PRIVATE }}
+  total-maintenance:
+    description: "total number of tracks in maintenance mode"
+    value: ${{ steps.run-get-tracks-api.outputs.TOTAL_MAINTENANCE }}
 
 runs:
   using: composite
@@ -265,7 +280,11 @@ runs:
                 exit(1)
             elif "data" in tracks_result and "tracks" in tracks_result["data"]:
                 tracks = tracks_result["data"]["tracks"]
-                print(f"   ✅ Found {len(tracks)} track(s)")
+                total_tracks = len(tracks)
+                print(f"   ✅ Found {total_tracks} track(s)")
+                #
+                # Set total tracks count to output
+                set_output("TOTAL_TRACKS", str(total_tracks))
                 #
                 if verbose:
                     print()
@@ -274,6 +293,11 @@ runs:
                     if verbose:
                         print("   Team tracks:")
                     all_track_details = []
+                    #
+                    # Initialize counters for track status
+                    published_count = 0
+                    private_count = 0
+                    maintenance_count = 0
                     #
                     for idx, track in enumerate(tracks, 1):
                         track_id = track.get('id', 'Unknown')
@@ -286,6 +310,14 @@ runs:
                         maintenance = track.get('maintenance', False)
                         tags = track.get('tags', [])
                         challenges = track.get('challenges', [])
+                        #
+                        # Count track statuses
+                        if published:
+                            published_count += 1
+                        if private:
+                            private_count += 1
+                        if maintenance:
+                            maintenance_count += 1
                         #
                         # Only print individual track details if verbose mode is enabled
                         if verbose:
@@ -321,6 +353,11 @@ runs:
                         if verbose:
                             print()
                     #
+                    # Set status counts to output
+                    set_output("TOTAL_PUBLISHED", str(published_count))
+                    set_output("TOTAL_PRIVATE", str(private_count))
+                    set_output("TOTAL_MAINTENANCE", str(maintenance_count))
+                    #
                     # Save to file
                     with open("team_tracks_list.txt", "w") as f:
                         f.write(f"Team Tracks for {team['name']} ({team['slug']})\n")
@@ -346,8 +383,20 @@ runs:
                     with open(output_file, "w") as f:
                         json.dump(all_track_details, f, indent=2)
                     #
-                    # Export to environment variable for GitHub Actions
-                    set_multiline_output("TRACKS_JSON", json.dumps(all_track_details))
+                    # Conditionally export to environment variable for GitHub Actions based on size
+                    tracks_json_str = json.dumps(all_track_details)
+                    tracks_json_size = len(tracks_json_str)
+                    size_limit_mb = 1  # GitHub Actions output size limit is 1MB
+                    size_limit_bytes = size_limit_mb * 1024 * 1024
+                    #
+                    if tracks_json_size < size_limit_bytes:
+                        set_multiline_output("TRACKS_JSON", tracks_json_str)
+                        set_output("TRACKS_JSON_AVAILABLE", "true")
+                        print(f"   ✅ Tracks JSON exported to output ({tracks_json_size:,} bytes)")
+                    else:
+                        set_output("TRACKS_JSON_AVAILABLE", "false")
+                        print(f"   ⚠️  Tracks JSON too large for output ({tracks_json_size:,} bytes > {size_limit_bytes:,} bytes)")
+                        print(f"   ℹ️  Use the JSON file artifact instead: {output_file}")
                     #
                     print(f"   💾 Track list saved to: team_tracks_list.txt")
                     print(f"   💾 Full details saved to: {output_file}")
@@ -355,9 +404,6 @@ runs:
                     # Print summary by status
                     print()
                     print("   Summary by status:")
-                    published_count = sum(1 for t in tracks if t.get('published', False))
-                    private_count = sum(1 for t in tracks if t.get('private', False))
-                    maintenance_count = sum(1 for t in tracks if t.get('maintenance', False))
                     print(f"      • Published: {published_count}")
                     print(f"      • Private: {private_count}")
                     print(f"      • In Maintenance: {maintenance_count}")
@@ -375,6 +421,11 @@ runs:
                 else:
                     print("   ℹ️  No tracks found in this team")
                     set_output("TRACKS_JSON", "[]")
+                    set_output("TRACKS_JSON_AVAILABLE", "true")
+                    set_output("TOTAL_TRACKS", "0")
+                    set_output("TOTAL_PUBLISHED", "0")
+                    set_output("TOTAL_PRIVATE", "0")
+                    set_output("TOTAL_MAINTENANCE", "0")
             else:
                 print("   ❌ Error: Could not retrieve team tracks")
                 exit(1)

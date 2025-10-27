@@ -28,7 +28,14 @@ See the `outputs` configured in the [action.yml](action.yml) file.
 
 | Output | Description |
 |--------|-------------|
-| `tracks-json` | A JSON string containing track information |
+| `tracks-json` | A JSON string containing track information (only available if under 1MB size limit) |
+| `tracks-json-available` | Whether the tracks JSON is available in outputs (true/false) |
+| `total-tracks` | Total number of tracks found |
+| `total-published` | Total number of published tracks |
+| `total-private` | Total number of private tracks |
+| `total-maintenance` | Total number of tracks in maintenance mode |
+
+> **Note**: If the tracks JSON exceeds GitHub's 1MB output size limit, it will not be available in the `tracks-json` output. Check `tracks-json-available` to determine availability, and use the `team_tracks_details.json` artifact file instead.
 
 ## Example Usage
 
@@ -64,10 +71,24 @@ jobs:
           team-workspace: 'my-team'
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
-      - name: Print track information
+      - name: Print track counts
+        run: |
+          echo "Total tracks: ${{ steps.get-tracks.outputs.total-tracks }}"
+          echo "Published: ${{ steps.get-tracks.outputs.total-published }}"
+          echo "Private: ${{ steps.get-tracks.outputs.total-private }}"
+          echo "In Maintenance: ${{ steps.get-tracks.outputs.total-maintenance }}"
+
+      - name: Print track information (if available)
+        if: steps.get-tracks.outputs.tracks-json-available == 'true'
         run: |
           echo "Track information:"
           echo '${{ steps.get-tracks.outputs.tracks-json }}' | jq '.'
+
+      - name: Use artifact file (if JSON too large)
+        if: steps.get-tracks.outputs.tracks-json-available == 'false'
+        run: |
+          echo "Tracks JSON too large for output, using artifact file instead"
+          cat team_tracks_details.json | jq '.'
 ```
 
 ### Advanced Example
@@ -96,7 +117,19 @@ jobs:
           team-workspace: ${{ vars.INSTRUQT_TEAM_WORKSPACE }}
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
-      - name: Process track data
+      - name: Display track summary
+        run: |
+          echo "### Track Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Tracks**: ${{ steps.get-tracks.outputs.total-tracks }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Published**: ${{ steps.get-tracks.outputs.total-published }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Private**: ${{ steps.get-tracks.outputs.total-private }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **In Maintenance**: ${{ steps.get-tracks.outputs.total-maintenance }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **JSON Output Available**: ${{ steps.get-tracks.outputs.tracks-json-available }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Process track data from output
+        if: steps.get-tracks.outputs.tracks-json-available == 'true'
         run: |
           # Parse the JSON output and extract tracks by level
           echo '${{ steps.get-tracks.outputs.tracks-json }}' | jq -r '
@@ -112,9 +145,36 @@ jobs:
           #
           echo "Tracks by Level Report:"
           cat tracks-by-level-report.txt
+
+      - name: Process track data from file
+        if: steps.get-tracks.outputs.tracks-json-available == 'false'
+        run: |
+          # Use the JSON file when output is too large
+          cat team_tracks_details.json | jq -r '
+            group_by(.level) | 
+            map({
+              level: .[0].level,
+              count: length,
+              tracks: map(.title)
+            }) | 
+            .[] | 
+            "\(.level): \(.count) tracks - \(.tracks | join(", "))"
+          ' > tracks-by-level-report.txt
           #
+          echo "Tracks by Level Report (from file):"
+          cat tracks-by-level-report.txt
+
+      - name: Create detailed reports
+        run: |
+          # Determine source of track data
+          if [ "${{ steps.get-tracks.outputs.tracks-json-available }}" == "true" ]; then
+            TRACKS_DATA='${{ steps.get-tracks.outputs.tracks-json }}'
+          else
+            TRACKS_DATA=$(cat team_tracks_details.json)
+          fi
+          
           # Extract published vs private tracks
-          echo '${{ steps.get-tracks.outputs.tracks-json }}' | jq -r '
+          echo "$TRACKS_DATA" | jq -r '
             {
               published: [.[] | select(.published == true)],
               private: [.[] | select(.private == true)],
@@ -128,7 +188,7 @@ jobs:
           #
           # Create CSV export of tracks
           echo "Title,Slug,Level,Published,Private,Challenges,Tags" > tracks-export.csv
-          echo '${{ steps.get-tracks.outputs.tracks-json }}' | jq -r '
+          echo "$TRACKS_DATA" | jq -r '
             .[] |
             [.title, .slug, .level, .published, .private, .challenge_count, (.tags | join("; "))] |
             @csv
@@ -154,18 +214,31 @@ jobs:
             echo "# Instruqt Tracks Report"
             echo ""
             echo "## Team Summary"
-            total_tracks=$(echo '${{ steps.get-tracks.outputs.tracks-json }}' | jq '. | length')
-            echo "- **Total Tracks**: $total_tracks"
+            echo "- **Total Tracks**: ${{ steps.get-tracks.outputs.total-tracks }}"
+            echo "- **Published**: ${{ steps.get-tracks.outputs.total-published }}"
+            echo "- **Private**: ${{ steps.get-tracks.outputs.total-private }}"
+            echo "- **In Maintenance**: ${{ steps.get-tracks.outputs.total-maintenance }}"
+            echo ""
+            
+            # Determine source and add appropriate note
+            if [ "${{ steps.get-tracks.outputs.tracks-json-available }}" == "true" ]; then
+              TRACKS_DATA='${{ steps.get-tracks.outputs.tracks-json }}'
+              echo "_Data source: Action output_"
+            else
+              TRACKS_DATA=$(cat team_tracks_details.json)
+              echo "_Data source: Artifact file (output too large)_"
+            fi
+            
             echo ""
             echo "## Tracks by Level"
-            echo '${{ steps.get-tracks.outputs.tracks-json }}' | jq -r '
+            echo "$TRACKS_DATA" | jq -r '
               group_by(.level) | 
               map("- **\(.[0].level)**: \(length) tracks") |
               .[]
             '
             echo ""
-            echo "## Track Status"
-            echo '${{ steps.get-tracks.outputs.tracks-json }}' | jq -r '
+            echo "## Track Status Breakdown"
+            echo "$TRACKS_DATA" | jq -r '
               {
                 published: [.[] | select(.published == true)] | length,
                 private: [.[] | select(.private == true)] | length,
@@ -207,15 +280,21 @@ jobs:
           team-workspace: ${{ vars.INSTRUQT_TEAM_WORKSPACE }}
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
+      - name: Check maintenance tracks using output count
+        if: steps.get-tracks.outputs.total-maintenance > 0
+        run: |
+          echo "::warning::Found ${{ steps.get-tracks.outputs.total-maintenance }} tracks in maintenance mode"
+
       - name: Analyze track data
         id: analyze
         run: |
-          tracks_json='${{ steps.get-tracks.outputs.tracks-json }}'
-          #
-          # Count tracks in maintenance
-          maintenance_count=$(echo "$tracks_json" | jq '[.[] | select(.maintenance == true)] | length')
-          echo "maintenance_tracks=$maintenance_count" >> $GITHUB_OUTPUT
-          #
+          # Determine source of track data
+          if [ "${{ steps.get-tracks.outputs.tracks-json-available }}" == "true" ]; then
+            tracks_json='${{ steps.get-tracks.outputs.tracks-json }}'
+          else
+            tracks_json=$(cat team_tracks_details.json)
+          fi
+          
           # Count unpublished tracks
           unpublished_count=$(echo "$tracks_json" | jq '[.[] | select(.published == false)] | length')
           echo "unpublished_tracks=$unpublished_count" >> $GITHUB_OUTPUT
@@ -226,19 +305,31 @@ jobs:
         shell: bash
 
       - name: Create issue for maintenance tracks
-        if: steps.analyze.outputs.maintenance_tracks > 0
+        if: steps.get-tracks.outputs.total-maintenance > 0
         uses: actions/github-script@v7
         with:
           script: |
-            const maintenanceTracks = ${{ steps.get-tracks.outputs.tracks-json }}
-              .filter(track => track.maintenance === true)
-              .map(track => `- ${track.title} (${track.slug})`)
-              .join('\n');
+            let maintenanceTracks;
+            
+            if ('${{ steps.get-tracks.outputs.tracks-json-available }}' === 'true') {
+              const tracksData = ${{ steps.get-tracks.outputs.tracks-json }};
+              maintenanceTracks = tracksData
+                .filter(track => track.maintenance === true)
+                .map(track => `- ${track.title} (${track.slug})`)
+                .join('\n');
+            } else {
+              const fs = require('fs');
+              const tracksData = JSON.parse(fs.readFileSync('team_tracks_details.json', 'utf8'));
+              maintenanceTracks = tracksData
+                .filter(track => track.maintenance === true)
+                .map(track => `- ${track.title} (${track.slug})`)
+                .join('\n');
+            }
             
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Found ${{ steps.analyze.outputs.maintenance_tracks }} tracks in maintenance mode`,
+              title: `Found ${{ steps.get-tracks.outputs.total-maintenance }} tracks in maintenance mode`,
               body: `## Tracks in Maintenance\n\nThe following tracks are in maintenance mode:\n\n${maintenanceTracks}\n\n**Action Required**: Review these tracks and update or remove maintenance status.`,
               labels: ['instruqt', 'track-audit', 'maintenance']
             });
@@ -249,4 +340,28 @@ jobs:
           echo "::warning::High number of unpublished tracks detected: ${{ steps.analyze.outputs.unpublished_tracks }}"
           echo "Consider reviewing and publishing or archiving these tracks."
         shell: bash
+
+      - name: Alert on tracks without challenges
+        if: steps.analyze.outputs.tracks_no_challenges > 0
+        run: |
+          echo "::warning::Found ${{ steps.analyze.outputs.tracks_no_challenges }} tracks with no challenges"
+          echo "These tracks may be incomplete or require attention."
+        shell: bash
 ```
+
+## Output Size Considerations
+
+The action includes smart handling for large datasets:
+
+- **JSON Output**: Available via `tracks-json` output only if data is under 1MB
+- **Availability Flag**: Check `tracks-json-available` to determine if JSON is in outputs
+- **Artifact Files**: Always generated regardless of size:
+  - `team_tracks_list.txt` - Human-readable track list
+  - `team_tracks_details.json` - Complete JSON data
+- **Count Outputs**: Always available regardless of dataset size:
+  - `total-tracks`
+  - `total-published`
+  - `total-private`
+  - `total-maintenance`
+
+When processing large track datasets, use the conditional logic shown in the advanced examples to automatically fall back to artifact files when needed.
