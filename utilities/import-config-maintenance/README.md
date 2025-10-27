@@ -76,9 +76,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
+      - name: Install yq
+        id: install-yq
+        # https://github.com/rwaight/actions/tree/main/utilities/install-yq
+        uses: rwaight/actions/utilities/install-yq@main
+        with:
+            version: latest
+            verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
+
       - name: Maintain import configs
         id: maintain
+        # https://github.com/rwaight/actions/tree/main/utilities/import-config-maintenance
         uses: rwaight/actions/utilities/import-config-maintenance@main
       
       - name: Display results

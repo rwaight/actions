@@ -9,18 +9,20 @@ branding:
   # fork: https://github.com/rwaight/github-action-brandings
 
 inputs:
-  working-directory:
-    description: 'Working directory for the action (repository root)'
-    required: false
-    default: '.'
-  
   dry-run:
     description: 'Run in dry-run mode (no file modifications)'
     required: false
     default: 'false'
-  
   create-new-configs:
     description: 'Allow creation of new import-config.yml files (requires user input, set to false for automated runs)'
+    required: false
+    default: 'false'
+  working-directory:
+    description: 'Working directory for the action (repository root)'
+    required: false
+    default: '.'
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
     required: false
     default: 'false'
 
@@ -44,58 +46,83 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Verify repository is checked out
+
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "error in the action '${{ github.action }}' at file path: '${{ github.action_path }}' "
+        echo "::error file=utilities/install-yq/action.yml,title=⛔ Install yq error hint::This action supports Linux only"
+        exit 1
       shell: bash
+
+    - name: Verbose | Greet the triggering_actor
+      if: inputs.verbose=='true'
+      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true'
+      id: verbose-print-inputs
+      run: | 
+        echo "::group::starting the 'verbose-print-inputs' step... "
+        echo ""
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "The inputs are set to:  "
+        echo "  dry-run           :  '${{ inputs.dry-run }}' "
+        echo "  create-new-configs:  '${{ inputs.create-new-configs }}' "
+        echo "  working-directory :  '${{ inputs.working-directory }}' "
+        echo "  verbose           :  '${{ inputs.verbose }}' "
+        ##
+        echo ""
+        echo "finishing the 'verbose-print-inputs' step... "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Verify repository is checked out and the target_dirs file exists
+      id: verify-target-dirs-file
       run: |
         if [[ ! -f "target_dirs.conf" ]]; then
-          echo "❌ Error: target_dirs.conf not found. Please ensure the repository is checked out."
-          echo "This action requires the repository to be checked out first."
-          exit 1
+            echo "❌ Error: target_dirs.conf not found. Please ensure the repository is checked out."
+            echo "This action requires the repository to be checked out first."
+            exit 1
         fi
-    
-    - name: Install yq if not available
       shell: bash
-      run: |
-        if ! command -v yq &> /dev/null; then
-          echo "Installing yq..."
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-        fi
-        echo "yq version: $(yq --version)"
     
     - name: Maintain import configs
       id: maintain-configs
-      shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: |
         # Create the script from the embedded content
         cat > /tmp/maintain_import_configs.sh << 'SCRIPT_EOF'
         #!/bin/bash
-        
+        #
         # Define the error log file
         error_log="import_configs_errors.log"
         > "$error_log"  # Clear the log file at the start
-        
+        #
         # Print yq and jq versions for debugging
         echo "Running yq version: $(yq --version 2>&1)" >> "$error_log"
         echo "Running jq version: $(jq --version 2>&1)" >> "$error_log"
-        
+        #
         # Read target directories from the config file
         target_dirs=($(cat target_dirs.conf))
-        
+        #
         # Default exclusions array
         default_exclusions=("README-examples.md" "example-custom-notes.md")
-        
+        #
         # Default import config file
         default_config="import-config.yml"
-        
+        #
         # Array to track errors
         error_actions=()
-        
+        #
         # Counters for outputs
         actions_processed=0
         actions_updated=0
-        
+        #
         # Function to read the action.yml or action.yaml file
         function read_action_file() {
             local action_dir=$1
@@ -107,7 +134,7 @@ runs:
                 echo ""
             fi
         }
-        
+        #
         # Function to sanitize values (removes backticks to avoid parsing issues)
         function sanitize_value() {
             local value="$1"
@@ -130,7 +157,7 @@ runs:
             #
             echo "$sanitized_value"
         }
-        
+        #
         # Function to fetch the latest version from GitHub API
         function fetch_latest_version() {
             local repo_owner="$1"
@@ -147,7 +174,7 @@ runs:
             #
             echo "$latest_version"
         }
-        
+        #
         # Function to create or update import-config.yml for each action
         function create_or_update_import_config() {
             local group_dir=$1
@@ -156,10 +183,10 @@ runs:
             local group=$(basename "$group_dir")
             local name=$(basename "$action_dir")
             local import_config_file="${group_dir}/${action_dir}/${default_config}"
-        
+            #
             echo "Processing: Group = $group_dir, Action = $action_dir"
             ((actions_processed++))
-        
+            #
             # Determine the action file (either action.yml or action.yaml)
             action_file=$(read_action_file "${group_dir}/${action_dir}")
             if [[ -z "$action_file" ]]; then
@@ -167,66 +194,67 @@ runs:
                 error_actions+=("${group_dir}/${action_dir}")
                 return
             fi
-        
+            #
             # Extract the action file extension
             action_file_extension=$(basename "$action_file")
-            
+            #
             # Read required fields from action file while filtering out null values
             {
                 author=$(yq e '.author' "$action_file")
                 if [[ "$author" == "null" ]]; then unset author; fi
-                
+                #
                 description=$(yq e '.description' "$action_file")
                 if [[ "$description" == "null" ]]; then unset description; fi
-                
+                #
                 inputs=$(yq e '.inputs | select(. != null) | keys' "$action_file" | grep -v '^#' | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
                 if [[ "$inputs" == "null" ]]; then unset inputs; fi
-                
+                #
                 outputs=$(yq e '.outputs | select(. != null) | keys' "$action_file" | grep -v '^#' | sed 's/- /"/g; s/$/",/' | tr -d '\n' | sed 's/,$//')
                 if [[ "$outputs" == "null" ]]; then unset outputs; fi
-                
+                #
                 runs_using=$(yq e '.runs.using' "$action_file")
-                
+                #
                 runs_main=$(yq e '.runs.main' "$action_file")
                 if [[ "$runs_main" == "null" ]]; then unset runs_main; fi
-                
+                #
             } || {
                 echo "[ERROR] A general issue occurred while reading fields in $action_file" | tee -a "$error_log"
                 error_actions+=("${group_dir}/${action_dir}")
                 return
             }
-        
+            #
             # Check to see if the import-config.yml file exists
             if [[ -f $import_config_file ]]; then
                 echo "    Checking ${default_config} ..."
-                
+                #
                 # Read existing import-config.yml
                 import_config=$(yq eval '.' "$import_config_file")
-                
+                #
                 # Skip updates if dry-run mode
                 if [[ "$DRY_RUN" == "true" ]]; then
                     echo "    [DRY-RUN] Would update ${import_config_file}"
                     return
                 fi
-                
+                #
                 # Update author, description, specs.action_file, specs.inputs, and specs.outputs fields
                 if [[ -n $author ]]; then
                     yq e -i ".author = \"$author\"" "$import_config_file"
                 else
                     yq e -i ".author = \"placeholder\"" "$import_config_file"
                 fi
-                
+                #
                 if [[ -n $description ]]; then
                     yq e -i ".description = \"$description\"" "$import_config_file"
                 else
                     yq e -i ".description = \"placeholder\"" "$import_config_file"
                 fi
+                #
                 yq e -i ".specs.action_file = \"$action_file_extension\"" "$import_config_file"
                 yq e -i ".specs.inputs = [$inputs]" "$import_config_file"
                 yq -i '.specs.inputs style="flow"' "$import_config_file"
                 yq e -i ".specs.outputs = [$outputs]" "$import_config_file"
                 yq -i '.specs.outputs style="flow"' "$import_config_file"
-                
+                #
                 # Update runs field if using and main are present
                 if [[ -n $runs_using ]]; then
                     yq e -i ".specs.runs.using = \"$runs_using\"" "$import_config_file"
@@ -236,20 +264,20 @@ runs:
                         yq e -i "del(.specs.runs.main)" "$import_config_file"
                     fi
                 fi
-                
+                #
                 # Check for updates if imported
                 if [[ $(yq e '.imported' "$import_config_file") == "true" ]]; then
                     source_action_author=$(yq e '.source.author' "$import_config_file")
                     source_repo_name=$(yq e '.source.repo_name' "$import_config_file")
                     source_repo_url="https://github.com/${source_action_author}/${source_repo_name}"
                     current_version=$(yq e '.source.current_version' "$import_config_file")
-                    
+                    #
                     latest_version=$(fetch_latest_version "$source_action_author" "$source_repo_name")
                     update_available=false
                     if [[ $current_version != $latest_version ]]; then
                         update_available=true
                     fi
-                    
+                    #
                     # Compare the current version with the latest version
                     if [[ -n "$latest_version" && "$current_version" != "$latest_version" ]]; then
                         yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
@@ -258,20 +286,20 @@ runs:
                     else
                         yq e -i ".source.update_available = $update_available" "$import_config_file"
                     fi
-                    
+                    #
                     # Update the author field if it is set to 'placeholder'
                     if [[ $(yq e '.author' "$import_config_file") == "placeholder" ]]; then
                         yq e -i ".author = \"$source_action_author\"" "$import_config_file"
                     fi
                 fi
-                
+                #
                 # Check if local.update.exclusions exists, and add it if missing
                 exclusions_exist=$(yq e '.local.update.exclusions' "$import_config_file" 2>/dev/null)
                 if [[ "$exclusions_exist" == "null" || -z "$exclusions_exist" ]]; then
                     echo "    [INFO] Adding default exclusions to ${import_config_file}..."
                     yq e -i '.local.update.exclusions = []' "$import_config_file"
                 fi
-                
+                #
                 # Ensure default exclusions are present
                 for exclusion in "${default_exclusions[@]}"; do
                     exists=$(yq e ".local.update.exclusions | contains([\"$exclusion\"])" "$import_config_file")
@@ -279,7 +307,7 @@ runs:
                         yq e -i ".local.update.exclusions += [\"$exclusion\"]" "$import_config_file"
                     fi
                 done
-                
+                #
                 ((actions_updated++))
             else
                 # The import-config.yml file DOES NOT exist
@@ -287,16 +315,16 @@ runs:
                     echo "    [SKIP] No import-config.yml found and create-new-configs is false. Skipping ${group_dir}/${action_dir}"
                     return
                 fi
-                
+                #
                 echo "[ERROR] import-config.yml creation requires interactive input. Please run import_configs.sh manually." | tee -a "$error_log"
                 error_actions+=("${group_dir}/${action_dir}")
                 return
             fi
-            
+            #
             echo "    Processed import-config.yml for ${group_dir}/${action_dir}"
             echo ""
         }
-        
+        #
         # Main execution
         echo "======================================================================"
         echo "Import Config Maintenance"
@@ -307,7 +335,7 @@ runs:
         echo "Target directories: ${target_dirs[@]}"
         echo "======================================================================"
         echo ""
-        
+        #
         # Iterate through each group directory
         for group_dir in "${target_dirs[@]}"; do
             for action_subdir in "$group_dir"/*; do
@@ -317,7 +345,7 @@ runs:
                 fi
             done
         done
-        
+        #
         echo ""
         echo "======================================================================"
         echo "[INFO] Finished processing. Check $error_log for error details."
@@ -326,24 +354,25 @@ runs:
         echo "Actions updated: $actions_updated"
         echo "Errors found: ${#error_actions[@]}"
         echo "======================================================================"
-        
+        #
         # Set outputs for GitHub Actions
         echo "actions-processed=$actions_processed" >> $GITHUB_OUTPUT
         echo "actions-updated=$actions_updated" >> $GITHUB_OUTPUT
         echo "errors-found=${#error_actions[@]}" >> $GITHUB_OUTPUT
         echo "error-log-path=$(pwd)/$error_log" >> $GITHUB_OUTPUT
-        
+        #
         SCRIPT_EOF
-        
+        #
         # Make the script executable
         chmod +x /tmp/maintain_import_configs.sh
-        
+        #
         # Set environment variables for the script
         export DRY_RUN="${{ inputs.dry-run }}"
         export CREATE_NEW_CONFIGS="${{ inputs.create-new-configs }}"
-        
+        #
         # Run the script
         /tmp/maintain_import_configs.sh
-        
+        #
         # Clean up
         rm -f /tmp/maintain_import_configs.sh
+      shell: bash
