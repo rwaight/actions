@@ -1,0 +1,23 @@
+name: import-config-maintenance
+author: rwaight
+description: Scan actions and update/create import-config.yml files for all actions in the monorepo
+group: utilities
+imported: false
+
+local:
+  author: rwaight
+  modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+
+specs:
+  action_file: action.yml
+  inputs: [working-directory, dry-run, create-new-configs]
+  outputs: [actions-processed, actions-updated, errors-found, error-log-path]
+  runs:
+    using: composite
+
+tests:
+  _comment: reserved for future use

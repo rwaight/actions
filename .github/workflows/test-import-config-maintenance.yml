@@ -1,0 +1,65 @@
+name: Test Import Config Maintenance Action
+run-name: Testing import-config-maintenance action
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Run in dry-run mode (no changes)'
+        type: boolean
+        default: true
+
+jobs:
+  test-maintain-configs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Maintain import configs
+        id: maintain
+        uses: ./utilities/import-config-maintenance
+        with:
+          dry-run: ${{ inputs.dry-run }}
+      
+      - name: Display results
+        run: |
+          echo "## Import Config Maintenance Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Actions processed:** ${{ steps.maintain.outputs.actions-processed }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Actions updated:** ${{ steps.maintain.outputs.actions-updated }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Errors found:** ${{ steps.maintain.outputs.errors-found }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Error log:** \`${{ steps.maintain.outputs.error-log-path }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ inputs.dry-run }}" == "true" ]]; then
+            echo "**Mode:** Dry-run (no changes made)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Mode:** Live run (changes applied)" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Show error log if errors found
+        if: steps.maintain.outputs.errors-found > 0
+        run: |
+          echo "## Errors Found" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat import_configs_errors.log >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          
+          cat import_configs_errors.log
+      
+      - name: Upload error log
+        if: steps.maintain.outputs.errors-found > 0
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-config-errors
+          path: ${{ steps.maintain.outputs.error-log-path }}
+      
+      - name: Commit changes
+        if: steps.maintain.outputs.actions-updated > 0 && inputs.dry-run == false
+        uses: ./git/add-and-commit
+        with:
+          message: 'chore: update import-config.yml files [automated]'
+          add: '*/*/import-config.yml'

@@ -6,10 +6,14 @@ There are currently two scripts for the actions monorepo:
 
 The scripts update (and use) a `import-config.yml` file, which is stored for each individual action.
 
+**GitHub Actions Available:**
+- [`utilities/import-config-maintenance`](../utilities/import-config-maintenance) - Composite action for automated import config maintenance
+
 **Table of Contents**
 - [Import Config File Specifications](#import-config-file-specifications)
 - [Import Configs Script](#import-configs-script)
 - [Monorepo Updates Script](#monorepo-updates-script)
+- [GitHub Actions](#github-actions)
 
 ## Import Config File Specifications
 
@@ -187,4 +191,37 @@ This script automates the process of checking for updates in repositories and ap
 The script also has some _interactive features_:
 - Prompts the user for specifying specific actions to update.
 - Offers manual intervention for committing, pushing changes, and cleaning up temporary directories.
+
+---
+
+## GitHub Actions
+
+### Import Config Maintenance Action
+
+A composite GitHub Action version of the `import_configs.sh` script is available at [`utilities/import-config-maintenance`](../utilities/import-config-maintenance).
+
+**Key Differences from the Script:**
+- Runs non-interactively in GitHub Actions workflows
+- Reads `target_dirs.conf` automatically (no need to pass directories)
+- Cannot create new `import-config.yml` files (use the script for that)
+- Provides structured outputs for workflow automation
+- Supports dry-run mode for testing
+
+**Usage Example:**
+```yaml
+- name: Checkout repository
+  uses: actions/checkout@v4
+
+- name: Maintain import configs
+  id: maintain
+  uses: rwaight/actions/utilities/import-config-maintenance@main
+
+- name: Commit changes
+  if: steps.maintain.outputs.actions-updated > 0
+  uses: rwaight/actions/git/add-and-commit@main
+  with:
+    message: 'chore: update import-config.yml files'
+```
+
+See the [action's README](../utilities/import-config-maintenance/README.md) for full documentation.
 
