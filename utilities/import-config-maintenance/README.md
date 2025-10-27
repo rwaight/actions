@@ -192,6 +192,17 @@ This action requires the following tools:
 - The action respects the `target_dirs.conf` file in the repository root
 - Error details are logged to `import_configs_errors.log` in the working directory
 
+## Local Testing
+
+For local testing and development, you can extract the bash script from this action and run it manually. See the [Local Usage Guide](./LOCAL_USAGE.md) for detailed instructions on:
+
+- Extracting the script from `action.yml`
+- Setting up the required environment variables
+- Running the script locally
+- Testing changes before committing
+
+The `action.yml` file is the canonical source for the bash script.
+
 ## Related Actions
 
 - [`check-imported-updates`](../check-imported-updates) - Check for and apply updates to imported actions

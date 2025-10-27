@@ -14,7 +14,7 @@ local:
 
 specs:
   action_file: action.yml
-  inputs: [working-directory, dry-run, create-new-configs]
+  inputs: [dry-run, create-new-configs, working-directory, verbose]
   outputs: [actions-processed, actions-updated, errors-found, error-log-path]
   runs:
     using: composite

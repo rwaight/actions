@@ -1,0 +1,12 @@
+# Extracted script for local testing (should not be committed)
+maintain-import-configs.sh
+
+# Output files from local testing
+import_configs_errors.log
+github_output.txt
+
+# Environment setup script (optional)
+set-env.sh
+
+# Test directories config (if created for testing)
+test_dirs.conf
