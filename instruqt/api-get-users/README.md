@@ -28,7 +28,17 @@ See the `outputs` configured in the [action.yml](action.yml) file.
 
 | Output | Description |
 |--------|-------------|
-| `users-json` | A JSON string containing user information |
+| `users-json` | A JSON string containing user information (only available if under 1MB size limit) |
+| `users-json-available` | Whether the users JSON is available in outputs (true/false) |
+| `total-users` | Total number of users found |
+| `total-owners` | Total number of users with owner role |
+| `total-members` | Total number of users with member role |
+| `total-content-creators` | Total number of users with content_creator role |
+| `total-instructors` | Total number of users with instructor role |
+
+> **Note**: If the users JSON exceeds GitHub's 1MB output size limit, it will not be available in the `users-json` output. Check `users-json-available` to determine availability, and use the `team_users_details.json` artifact file instead.
+
+GitHub Actions has limits for individual step outputs as well as limits for the total size of all outputs in a workflow run (see [Usage limits documentation](https://docs.github.com/en/actions/learn-github-actions/usage-limits-billing-and-administration#usage-limits)). This action intelligently handles these constraints by checking the JSON data size before attempting to export it as an output. When the data exceeds the limit, the action sets `users-json-available` to `false` and directs users to the artifact files instead, ensuring reliable operation regardless of dataset size.
 
 ## Example Usage
 
@@ -61,13 +71,28 @@ jobs:
         uses: rwaight/actions/instruqt/api-get-users@main
         with:
           api-key: ${{ secrets.INSTRUQT_API_KEY }}
-          team-workspace: 'my-team'
+          team-workspace: ${{ vars.INSTRUQT_TEAM_WORKSPACE }}
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
-      - name: Print user information
+      - name: Print user counts
+        run: |
+          echo "Total users: ${{ steps.get-users.outputs.total-users }}"
+          echo "Owners: ${{ steps.get-users.outputs.total-owners }}"
+          echo "Members: ${{ steps.get-users.outputs.total-members }}"
+          echo "Content Creators: ${{ steps.get-users.outputs.total-content-creators }}"
+          echo "Instructors: ${{ steps.get-users.outputs.total-instructors }}"
+
+      - name: Print user information (if available)
+        if: steps.get-users.outputs.users-json-available == 'true'
         run: |
           echo "User information:"
           echo '${{ steps.get-users.outputs.users-json }}' | jq '.'
+
+      - name: Use artifact file (if JSON too large)
+        if: steps.get-users.outputs.users-json-available == 'false'
+        run: |
+          echo "Users JSON too large for output, using artifact file instead"
+          cat team_users_details.json | jq '.'
 ```
 
 ### Advanced Example
@@ -96,7 +121,20 @@ jobs:
           team-workspace: ${{ vars.INSTRUQT_TEAM_WORKSPACE }}
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
-      - name: Process user data
+      - name: Display user summary
+        run: |
+          echo "### User Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Users**: ${{ steps.get-users.outputs.total-users }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Owners**: ${{ steps.get-users.outputs.total-owners }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Members**: ${{ steps.get-users.outputs.total-members }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Content Creators**: ${{ steps.get-users.outputs.total-content-creators }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Instructors**: ${{ steps.get-users.outputs.total-instructors }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **JSON Output Available**: ${{ steps.get-users.outputs.users-json-available }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Process user data from output
+        if: steps.get-users.outputs.users-json-available == 'true'
         run: |
           # Parse the JSON output and extract user roles summary
           echo '${{ steps.get-users.outputs.users-json }}' | jq -r '
@@ -112,9 +150,36 @@ jobs:
           #
           echo "User Roles Report:"
           cat user-roles-report.txt
+
+      - name: Process user data from file
+        if: steps.get-users.outputs.users-json-available == 'false'
+        run: |
+          # Use the JSON file when output is too large
+          cat team_users_details.json | jq -r '
+            group_by(.role) | 
+            map({
+              role: .[0].role,
+              count: length,
+              users: map(.display_name)
+            }) | 
+            .[] | 
+            "\(.role): \(.count) users - \(.users | join(", "))"
+          ' > user-roles-report.txt
           #
+          echo "User Roles Report (from file):"
+          cat user-roles-report.txt
+
+      - name: Create detailed reports
+        run: |
+          # Determine source of user data
+          if [ "${{ steps.get-users.outputs.users-json-available }}" == "true" ]; then
+            USERS_DATA='${{ steps.get-users.outputs.users-json }}'
+          else
+            USERS_DATA=$(cat team_users_details.json)
+          fi
+          
           # Extract users by email domain
-          echo '${{ steps.get-users.outputs.users-json }}' | jq -r '
+          echo "$USERS_DATA" | jq -r '
             map(select(.email != "No Email")) |
             map(.email | split("@")[1]) |
             group_by(.) |
@@ -132,7 +197,7 @@ jobs:
           #
           # Create CSV export of users
           echo "Name,Email,Role,Scope,Anonymous,Avatar" > users-export.csv
-          echo '${{ steps.get-users.outputs.users-json }}' | jq -r '
+          echo "$USERS_DATA" | jq -r '
             .[] |
             [.display_name, .email, .role, .scope, .is_anonymous, .avatar] |
             @csv
@@ -158,18 +223,32 @@ jobs:
             echo "# Instruqt Users Report"
             echo ""
             echo "## Team Summary"
-            total_users=$(echo '${{ steps.get-users.outputs.users-json }}' | jq '. | length')
-            echo "- **Total Users**: $total_users"
+            echo "- **Total Users**: ${{ steps.get-users.outputs.total-users }}"
+            echo "- **Owners**: ${{ steps.get-users.outputs.total-owners }}"
+            echo "- **Members**: ${{ steps.get-users.outputs.total-members }}"
+            echo "- **Content Creators**: ${{ steps.get-users.outputs.total-content-creators }}"
+            echo "- **Instructors**: ${{ steps.get-users.outputs.total-instructors }}"
+            echo ""
+            
+            # Determine source and add appropriate note
+            if [ "${{ steps.get-users.outputs.users-json-available }}" == "true" ]; then
+              USERS_DATA='${{ steps.get-users.outputs.users-json }}'
+              echo "_Data source: Action output_"
+            else
+              USERS_DATA=$(cat team_users_details.json)
+              echo "_Data source: Artifact file (output too large)_"
+            fi
+            
             echo ""
             echo "## Users by Role"
-            echo '${{ steps.get-users.outputs.users-json }}' | jq -r '
+            echo "$USERS_DATA" | jq -r '
               group_by(.role) | 
               map("- **\(.[0].role)**: \(length) users") |
               .[]
             '
             echo ""
             echo "## Top Email Domains"
-            echo '${{ steps.get-users.outputs.users-json }}' | jq -r '
+            echo "$USERS_DATA" | jq -r '
               map(select(.email != "No Email")) |
               map(.email | split("@")[1]) |
               group_by(.) |
@@ -202,6 +281,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Audit Instruqt Users
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -213,18 +293,24 @@ jobs:
           team-workspace: ${{ vars.INSTRUQT_TEAM_WORKSPACE }}
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
+      - name: Check content creator count using output
+        if: steps.get-users.outputs.total-content-creators > 10
+        run: |
+          echo "::warning::High number of content creators detected: ${{ steps.get-users.outputs.total-content-creators }}"
+
       - name: Analyze user data
         id: analyze
         run: |
-          users_json='${{ steps.get-users.outputs.users-json }}'
-          #
+          # Determine source of user data
+          if [ "${{ steps.get-users.outputs.users-json-available }}" == "true" ]; then
+            users_json='${{ steps.get-users.outputs.users-json }}'
+          else
+            users_json=$(cat team_users_details.json)
+          fi
+          
           # Count anonymous users
           anonymous_count=$(echo "$users_json" | jq '[.[] | select(.is_anonymous == true)] | length')
           echo "anonymous_users=$anonymous_count" >> $GITHUB_OUTPUT
-          #
-          # Count content creators
-          creators_count=$(echo "$users_json" | jq '[.[] | select(.role == "content_creator")] | length')
-          echo "content_creators=$creators_count" >> $GITHUB_OUTPUT
           #
           # Check for users without email
           no_email_count=$(echo "$users_json" | jq '[.[] | select(.email == "No Email")] | length')
@@ -236,10 +322,22 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const anonymousUsers = ${{ steps.get-users.outputs.users-json }}
-              .filter(user => user.is_anonymous === true)
-              .map(user => `- ${user.display_name} (${user.email})`)
-              .join('\n');
+            let anonymousUsers;
+            
+            if ('${{ steps.get-users.outputs.users-json-available }}' === 'true') {
+              const usersData = ${{ steps.get-users.outputs.users-json }};
+              anonymousUsers = usersData
+                .filter(user => user.is_anonymous === true)
+                .map(user => `- ${user.display_name} (${user.email})`)
+                .join('\n');
+            } else {
+              const fs = require('fs');
+              const usersData = JSON.parse(fs.readFileSync('team_users_details.json', 'utf8'));
+              anonymousUsers = usersData
+                .filter(user => user.is_anonymous === true)
+                .map(user => `- ${user.display_name} (${user.email})`)
+                .join('\n');
+            }
             
             github.rest.issues.create({
               owner: context.repo.owner,
@@ -250,9 +348,27 @@ jobs:
             });
 
       - name: Notify about content creators
-        if: steps.analyze.outputs.content_creators > 10
+        if: steps.get-users.outputs.total-content-creators > 10
         run: |
-          echo "::warning::High number of content creators detected: ${{ steps.analyze.outputs.content_creators }}"
+          echo "::warning::High number of content creators detected: ${{ steps.get-users.outputs.total-content-creators }}"
           echo "Consider reviewing content creator permissions for security purposes."
         shell: bash
 ```
+
+## Output Size Considerations
+
+The action includes smart handling for large datasets:
+
+- **JSON Output**: Available via `users-json` output only if data is under 1MB
+- **Availability Flag**: Check `users-json-available` to determine if JSON is in outputs
+- **Artifact Files**: Always generated regardless of size:
+  - `team_users_list.txt` - Human-readable user list
+  - `team_users_details.json` - Complete JSON data
+- **Count Outputs**: Always available regardless of dataset size:
+  - `total-users`
+  - `total-owners`
+  - `total-members`
+  - `total-content-creators`
+  - `total-instructors`
+
+When processing large user datasets, use the conditional logic shown in the advanced examples to automatically fall back to artifact files when needed.
