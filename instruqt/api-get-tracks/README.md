@@ -37,6 +37,8 @@ See the `outputs` configured in the [action.yml](action.yml) file.
 
 > **Note**: If the tracks JSON exceeds GitHub's 1MB output size limit, it will not be available in the `tracks-json` output. Check `tracks-json-available` to determine availability, and use the `team_tracks_details.json` artifact file instead.
 
+GitHub Actions has limits for individual step outputs as well as limits for the total size of all outputs in a workflow run (see [Usage limits documentation](https://docs.github.com/en/actions/learn-github-actions/usage-limits-billing-and-administration#usage-limits)). This action intelligently handles these constraints by checking the JSON data size before attempting to export it as an output. When the data exceeds the limit, the action sets `tracks-json-available` to `false` and directs users to the artifact files instead, ensuring reliable operation regardless of dataset size.
+
 ## Example Usage
 
 Create a file named `.github/workflows/my-workflow.yml` with the following:
