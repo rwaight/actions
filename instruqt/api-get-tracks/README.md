@@ -20,6 +20,7 @@ See the `inputs` configured in the [action.yml](action.yml) file.
 |-------|-------------|----------|---------|
 | `api-key` | The API key to authenticate with the Instruqt API | true | - |
 | `team-workspace` | The team workspace slug to get tracks from | true | Auto-detected from API key |
+| `include-challenge-assignments` | Include challenge assignment text in the output | false | `false` |
 | `verbose` | Determine if the action should run verbose tasks | false | `false` |
 
 ### Outputs
@@ -65,12 +66,21 @@ jobs:
         # GitHub Action for checking out a repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Get Instruqt tracks
+      - name: Get Instruqt tracks (without assignments)
         id: get-tracks
         uses: rwaight/actions/instruqt/api-get-tracks@main
         with:
           api-key: ${{ secrets.INSTRUQT_API_KEY }}
-          team-workspace: 'my-team'
+          team-workspace: ${{ vars.INSTRUQT_TEAM_WORKSPACE }}
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
+
+      - name: Get Instruqt tracks (with assignments for documentation)
+        id: get-tracks-with-assignments
+        uses: rwaight/actions/instruqt/api-get-tracks@main
+        with:
+          api-key: ${{ secrets.INSTRUQT_API_KEY }}
+          team-workspace: ${{ vars.INSTRUQT_TEAM_WORKSPACE }}
+          include-challenge-assignments: 'true'
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
       - name: Print track counts
@@ -367,3 +377,5 @@ The action includes smart handling for large datasets:
   - `total-maintenance`
 
 When processing large track datasets, use the conditional logic shown in the advanced examples to automatically fall back to artifact files when needed.
+
+> **Note on Challenge Assignments**: By default, challenge assignment text is excluded from the output to reduce data size and improve performance. This is especially important for teams with many tracks and detailed assignments. Set `include-challenge-assignments: 'true'` if you need the full assignment text for documentation or analysis purposes.

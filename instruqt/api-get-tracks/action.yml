@@ -11,6 +11,10 @@ inputs:
     description: >-
       The team workspace slug to get tracks from. If not provided, defaults to the team associated with the API key.
     required: true
+  include-challenge-assignments:
+    description: 'Include challenge assignment text in the output. Defaults to false to reduce data size.'
+    required: false
+    default: 'false'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false.'
     required: false
@@ -72,6 +76,7 @@ runs:
       env:
         INSTRUQT_TOKEN: ${{ inputs.api-key }}
         TEAM_WORKSPACE: ${{ inputs.team-workspace }}
+        INCLUDE_CHALLENGE_ASSIGNMENTS: ${{ inputs.include-challenge-assignments }}
         VERBOSE: ${{ runner.debug == '1' && 'true' || 'false' }}
         # variables for pinned python package versions
         REQUESTS_VERSION: "2.25.0"
@@ -164,19 +169,33 @@ runs:
             """
             return query_instruqt(query)
         #
-        def get_team_tracks(team_slug):
+        def get_team_tracks(team_slug, include_assignments=False):
             """
             Get all tracks in a team
             
             Args:
                 team_slug: Team slug (e.g., 'my-team')
+                include_assignments: Whether to include challenge assignment text (default: False)
             
             Returns:
                 dict: API response with list of team tracks
             """
-            query = """
-            query GetTeamTracks($teamSlug: String!) {
-                tracks(teamSlug: $teamSlug) {
+            # Build the challenges field based on whether assignments should be included
+            challenges_fields = """
+                        id
+                        slug
+                        title
+                        type
+            """
+            #
+            if include_assignments:
+                challenges_fields += """
+                        assignment
+            """
+            #
+            query = f"""
+            query GetTeamTracks($teamSlug: String!) {{
+                tracks(teamSlug: $teamSlug) {{
                     id
                     slug
                     title
@@ -189,15 +208,11 @@ runs:
                     published
                     private
                     maintenance
-                    challenges {
-                        id
-                        slug
-                        title
-                        type
-                        assignment
-                    }
-                }
-            }
+                    challenges {{
+                        {challenges_fields}
+                    }}
+                }}
+            }}
             """
             #
             return query_instruqt(query, {"teamSlug": team_slug})
@@ -228,6 +243,7 @@ runs:
         if __name__ == "__main__":
             # Get parameters from environment variables set by the action
             team_slug = os.getenv('TEAM_WORKSPACE')
+            include_assignments = os.getenv('INCLUDE_CHALLENGE_ASSIGNMENTS', 'false').lower() == 'true'
             verbose = os.getenv('VERBOSE', 'false').lower() == 'true'
             #
             # If TEAM_WORKSPACE is not set, get the team associated with the API key
@@ -252,6 +268,7 @@ runs:
             print("Instruqt API Client - Get Tracks")
             print("=" * 70)
             print(f"Team Workspace: {team_slug}")
+            print(f"Include Challenge Assignments: {include_assignments}")
             print()
             #
             # Test 1: Get team info
@@ -273,7 +290,7 @@ runs:
             #
             # Test 2: Get team tracks
             print("2. Fetching tracks for team:", team_slug)
-            tracks_result = get_team_tracks(team_slug)
+            tracks_result = get_team_tracks(team_slug, include_assignments)
             #
             if "errors" in tracks_result:
                 print("   ❌ Error:", json.dumps(tracks_result["errors"], indent=2))
@@ -345,8 +362,20 @@ runs:
                             "icon": track.get("icon", ""),
                             "owner": track.get("owner", ""),
                             "challenge_count": len(challenges),
-                            "challenges": challenges
+                            "challenges": []
                         }
+                        #
+                        # Build challenge data (conditionally include assignment)
+                        for challenge in challenges:
+                            challenge_data = {
+                                "id": challenge.get("id"),
+                                "slug": challenge.get("slug"),
+                                "title": challenge.get("title"),
+                                "type": challenge.get("type")
+                            }
+                            if include_assignments and "assignment" in challenge:
+                                challenge_data["assignment"] = challenge.get("assignment")
+                            track_data["challenges"].append(challenge_data)
                         #
                         all_track_details.append(track_data)
                         #
