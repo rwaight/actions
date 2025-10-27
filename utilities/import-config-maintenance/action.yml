@@ -83,20 +83,29 @@ runs:
 
     - name: Verify repository is checked out and the target_dirs file exists
       id: verify-target-dirs-file
+      env:
+        FILE_TARGET_DIRS: target_dirs.conf
       run: |
-        if [[ ! -f "target_dirs.conf" ]]; then
-            echo "❌ Error: target_dirs.conf not found. Please ensure the repository is checked out."
+        if [[ ! -f "${FILE_TARGET_DIRS}" ]]; then
+            echo "❌ Error: ${FILE_TARGET_DIRS} not found. Please ensure the repository is checked out."
             echo "This action requires the repository to be checked out first."
             exit 1
         fi
       shell: bash
-    
+
     - name: Maintain import configs
       id: maintain-configs
       working-directory: ${{ inputs.working-directory }}
+      env:
+        DRY_RUN: ${{ inputs.dry-run }}
+        CREATE_NEW_CONFIGS: ${{ inputs.create-new-configs }}
+        #
+        FILE_ERROR_LOG: import_configs_errors.log
+        FILE_TARGET_DIRS: target_dirs.conf
+        FILE_DEFAULT_CONFIG: import-config.yml
       run: |
         # Define the error log file
-        error_log="import_configs_errors.log"
+        error_log="${FILE_ERROR_LOG}"
         > "$error_log"  # Clear the log file at the start
         #
         # Print yq and jq versions for debugging
@@ -104,13 +113,13 @@ runs:
         echo "Running jq version: $(jq --version 2>&1)" >> "$error_log"
         #
         # Read target directories from the config file
-        target_dirs=($(cat target_dirs.conf))
+        target_dirs=($(cat "${FILE_TARGET_DIRS}"))
         #
         # Default exclusions array
         default_exclusions=("README-examples.md" "example-custom-notes.md")
         #
         # Default import config file
-        default_config="import-config.yml"
+        default_config="${FILE_DEFAULT_CONFIG}"
         #
         # Array to track errors
         error_actions=()
@@ -312,16 +321,16 @@ runs:
             else
                 # The import-config.yml file DOES NOT exist
                 if [[ "$CREATE_NEW_CONFIGS" != "true" ]]; then
-                    echo "    [SKIP] No import-config.yml found and create-new-configs is false. Skipping ${group_dir}/${action_dir}"
+                    echo "    [SKIP] No ${FILE_DEFAULT_CONFIG} found and create-new-configs is false. Skipping ${group_dir}/${action_dir}"
                     return
                 fi
                 #
-                echo "[ERROR] import-config.yml creation requires interactive input. Please run import_configs.sh manually." | tee -a "$error_log"
+                echo "[ERROR] ${FILE_DEFAULT_CONFIG} creation requires interactive input. Please run import_configs.sh manually." | tee -a "$error_log"
                 error_actions+=("${group_dir}/${action_dir}")
                 return
             fi
             #
-            echo "    Processed import-config.yml for ${group_dir}/${action_dir}"
+            echo "    Processed ${FILE_DEFAULT_CONFIG} for ${group_dir}/${action_dir}"
             echo ""
         }
         #
