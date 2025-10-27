@@ -95,10 +95,6 @@ runs:
       id: maintain-configs
       working-directory: ${{ inputs.working-directory }}
       run: |
-        # Create the script from the embedded content
-        cat > /tmp/maintain_import_configs.sh << 'SCRIPT_EOF'
-        #!/bin/bash
-        #
         # Define the error log file
         error_log="import_configs_errors.log"
         > "$error_log"  # Clear the log file at the start
@@ -122,6 +118,10 @@ runs:
         # Counters for outputs
         actions_processed=0
         actions_updated=0
+        #
+        # Set environment variables from inputs
+        DRY_RUN="${{ inputs.dry-run }}"
+        CREATE_NEW_CONFIGS="${{ inputs.create-new-configs }}"
         #
         # Function to read the action.yml or action.yaml file
         function read_action_file() {
@@ -360,19 +360,4 @@ runs:
         echo "actions-updated=$actions_updated" >> $GITHUB_OUTPUT
         echo "errors-found=${#error_actions[@]}" >> $GITHUB_OUTPUT
         echo "error-log-path=$(pwd)/$error_log" >> $GITHUB_OUTPUT
-        #
-        SCRIPT_EOF
-        #
-        # Make the script executable
-        chmod +x /tmp/maintain_import_configs.sh
-        #
-        # Set environment variables for the script
-        export DRY_RUN="${{ inputs.dry-run }}"
-        export CREATE_NEW_CONFIGS="${{ inputs.create-new-configs }}"
-        #
-        # Run the script
-        /tmp/maintain_import_configs.sh
-        #
-        # Clean up
-        rm -f /tmp/maintain_import_configs.sh
       shell: bash
