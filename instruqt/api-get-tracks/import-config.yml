@@ -19,8 +19,8 @@ source:
   update_available: false
 specs:
   action_file: action.yml
-  inputs: [api-key, team-workspace, verbose]
-  outputs: [tracks-json]
+  inputs: [api-key, team-workspace, include-challenge-assignments, verbose]
+  outputs: [tracks-json, tracks-json-available, total-tracks, total-published, total-private, total-maintenance]
   runs:
     using: composite
 tests:

@@ -11,6 +11,10 @@ inputs:
     description: >-
       The team workspace slug to get tracks from. If not provided, defaults to the team associated with the API key.
     required: true
+  include-challenge-assignments:
+    description: 'Include challenge assignment text in the output. Defaults to false to reduce data size.'
+    required: false
+    default: 'false'
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false.'
     required: false
@@ -18,8 +22,23 @@ inputs:
 
 outputs:
   tracks-json:
-    description: "a JSON string containing track information"
+    description: "a JSON string containing track information (only available if under size limit)"
     value: ${{ steps.run-get-tracks-api.outputs.TRACKS_JSON }}
+  tracks-json-available:
+    description: "whether the tracks JSON is available in outputs (true/false)"
+    value: ${{ steps.run-get-tracks-api.outputs.TRACKS_JSON_AVAILABLE }}
+  total-tracks:
+    description: "total number of tracks found"
+    value: ${{ steps.run-get-tracks-api.outputs.TOTAL_TRACKS }}
+  total-published:
+    description: "total number of published tracks"
+    value: ${{ steps.run-get-tracks-api.outputs.TOTAL_PUBLISHED }}
+  total-private:
+    description: "total number of private tracks"
+    value: ${{ steps.run-get-tracks-api.outputs.TOTAL_PRIVATE }}
+  total-maintenance:
+    description: "total number of tracks in maintenance mode"
+    value: ${{ steps.run-get-tracks-api.outputs.TOTAL_MAINTENANCE }}
 
 runs:
   using: composite
@@ -57,6 +76,7 @@ runs:
       env:
         INSTRUQT_TOKEN: ${{ inputs.api-key }}
         TEAM_WORKSPACE: ${{ inputs.team-workspace }}
+        INCLUDE_CHALLENGE_ASSIGNMENTS: ${{ inputs.include-challenge-assignments }}
         VERBOSE: ${{ runner.debug == '1' && 'true' || 'false' }}
         # variables for pinned python package versions
         REQUESTS_VERSION: "2.25.0"
@@ -149,19 +169,33 @@ runs:
             """
             return query_instruqt(query)
         #
-        def get_team_tracks(team_slug):
+        def get_team_tracks(team_slug, include_assignments=False):
             """
             Get all tracks in a team
             
             Args:
                 team_slug: Team slug (e.g., 'my-team')
+                include_assignments: Whether to include challenge assignment text (default: False)
             
             Returns:
                 dict: API response with list of team tracks
             """
-            query = """
-            query GetTeamTracks($teamSlug: String!) {
-                tracks(teamSlug: $teamSlug) {
+            # Build the challenges field based on whether assignments should be included
+            challenges_fields = """
+                        id
+                        slug
+                        title
+                        type
+            """
+            #
+            if include_assignments:
+                challenges_fields += """
+                        assignment
+            """
+            #
+            query = f"""
+            query GetTeamTracks($teamSlug: String!) {{
+                tracks(teamSlug: $teamSlug) {{
                     id
                     slug
                     title
@@ -174,15 +208,11 @@ runs:
                     published
                     private
                     maintenance
-                    challenges {
-                        id
-                        slug
-                        title
-                        type
-                        assignment
-                    }
-                }
-            }
+                    challenges {{
+                        {challenges_fields}
+                    }}
+                }}
+            }}
             """
             #
             return query_instruqt(query, {"teamSlug": team_slug})
@@ -213,6 +243,7 @@ runs:
         if __name__ == "__main__":
             # Get parameters from environment variables set by the action
             team_slug = os.getenv('TEAM_WORKSPACE')
+            include_assignments = os.getenv('INCLUDE_CHALLENGE_ASSIGNMENTS', 'false').lower() == 'true'
             verbose = os.getenv('VERBOSE', 'false').lower() == 'true'
             #
             # If TEAM_WORKSPACE is not set, get the team associated with the API key
@@ -237,6 +268,7 @@ runs:
             print("Instruqt API Client - Get Tracks")
             print("=" * 70)
             print(f"Team Workspace: {team_slug}")
+            print(f"Include Challenge Assignments: {include_assignments}")
             print()
             #
             # Test 1: Get team info
@@ -258,14 +290,18 @@ runs:
             #
             # Test 2: Get team tracks
             print("2. Fetching tracks for team:", team_slug)
-            tracks_result = get_team_tracks(team_slug)
+            tracks_result = get_team_tracks(team_slug, include_assignments)
             #
             if "errors" in tracks_result:
                 print("   ❌ Error:", json.dumps(tracks_result["errors"], indent=2))
                 exit(1)
             elif "data" in tracks_result and "tracks" in tracks_result["data"]:
                 tracks = tracks_result["data"]["tracks"]
-                print(f"   ✅ Found {len(tracks)} track(s)")
+                total_tracks = len(tracks)
+                print(f"   ✅ Found {total_tracks} track(s)")
+                #
+                # Set total tracks count to output
+                set_output("TOTAL_TRACKS", str(total_tracks))
                 #
                 if verbose:
                     print()
@@ -274,6 +310,11 @@ runs:
                     if verbose:
                         print("   Team tracks:")
                     all_track_details = []
+                    #
+                    # Initialize counters for track status
+                    published_count = 0
+                    private_count = 0
+                    maintenance_count = 0
                     #
                     for idx, track in enumerate(tracks, 1):
                         track_id = track.get('id', 'Unknown')
@@ -286,6 +327,14 @@ runs:
                         maintenance = track.get('maintenance', False)
                         tags = track.get('tags', [])
                         challenges = track.get('challenges', [])
+                        #
+                        # Count track statuses
+                        if published:
+                            published_count += 1
+                        if private:
+                            private_count += 1
+                        if maintenance:
+                            maintenance_count += 1
                         #
                         # Only print individual track details if verbose mode is enabled
                         if verbose:
@@ -313,13 +362,30 @@ runs:
                             "icon": track.get("icon", ""),
                             "owner": track.get("owner", ""),
                             "challenge_count": len(challenges),
-                            "challenges": challenges
+                            "challenges": []
                         }
+                        #
+                        # Build challenge data (conditionally include assignment)
+                        for challenge in challenges:
+                            challenge_data = {
+                                "id": challenge.get("id"),
+                                "slug": challenge.get("slug"),
+                                "title": challenge.get("title"),
+                                "type": challenge.get("type")
+                            }
+                            if include_assignments and "assignment" in challenge:
+                                challenge_data["assignment"] = challenge.get("assignment")
+                            track_data["challenges"].append(challenge_data)
                         #
                         all_track_details.append(track_data)
                         #
                         if verbose:
                             print()
+                    #
+                    # Set status counts to output
+                    set_output("TOTAL_PUBLISHED", str(published_count))
+                    set_output("TOTAL_PRIVATE", str(private_count))
+                    set_output("TOTAL_MAINTENANCE", str(maintenance_count))
                     #
                     # Save to file
                     with open("team_tracks_list.txt", "w") as f:
@@ -346,8 +412,20 @@ runs:
                     with open(output_file, "w") as f:
                         json.dump(all_track_details, f, indent=2)
                     #
-                    # Export to environment variable for GitHub Actions
-                    set_multiline_output("TRACKS_JSON", json.dumps(all_track_details))
+                    # Conditionally export to environment variable for GitHub Actions based on size
+                    tracks_json_str = json.dumps(all_track_details)
+                    tracks_json_size = len(tracks_json_str)
+                    size_limit_mb = 1  # GitHub Actions output size limit is 1MB
+                    size_limit_bytes = size_limit_mb * 1024 * 1024
+                    #
+                    if tracks_json_size < size_limit_bytes:
+                        set_multiline_output("TRACKS_JSON", tracks_json_str)
+                        set_output("TRACKS_JSON_AVAILABLE", "true")
+                        print(f"   ✅ Tracks JSON exported to output ({tracks_json_size:,} bytes)")
+                    else:
+                        set_output("TRACKS_JSON_AVAILABLE", "false")
+                        print(f"   ⚠️  Tracks JSON too large for output ({tracks_json_size:,} bytes > {size_limit_bytes:,} bytes)")
+                        print(f"   ℹ️  Use the JSON file artifact instead: {output_file}")
                     #
                     print(f"   💾 Track list saved to: team_tracks_list.txt")
                     print(f"   💾 Full details saved to: {output_file}")
@@ -355,9 +433,6 @@ runs:
                     # Print summary by status
                     print()
                     print("   Summary by status:")
-                    published_count = sum(1 for t in tracks if t.get('published', False))
-                    private_count = sum(1 for t in tracks if t.get('private', False))
-                    maintenance_count = sum(1 for t in tracks if t.get('maintenance', False))
                     print(f"      • Published: {published_count}")
                     print(f"      • Private: {private_count}")
                     print(f"      • In Maintenance: {maintenance_count}")
@@ -375,6 +450,11 @@ runs:
                 else:
                     print("   ℹ️  No tracks found in this team")
                     set_output("TRACKS_JSON", "[]")
+                    set_output("TRACKS_JSON_AVAILABLE", "true")
+                    set_output("TOTAL_TRACKS", "0")
+                    set_output("TOTAL_PUBLISHED", "0")
+                    set_output("TOTAL_PRIVATE", "0")
+                    set_output("TOTAL_MAINTENANCE", "0")
             else:
                 print("   ❌ Error: Could not retrieve team tracks")
                 exit(1)

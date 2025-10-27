@@ -25,11 +25,16 @@ The script currently collects the following fields:
 
 ### From `Challenge` (nested in track)
 
+**Always Collected:**
 - **id** (ID): Unique challenge identifier
 - **slug** (String): URL-friendly challenge identifier  
 - **title** (String): Challenge title
 - **type** (String): Type of challenge
-- **assignment** (String): Challenge assignment text
+
+**Conditionally Collected** (when `include-challenge-assignments: 'true'`):
+- **assignment** (String): Challenge assignment text (can be lengthy)
+
+> **Note**: Assignment text is excluded by default to reduce output size and improve performance. Enable it using the `include-challenge-assignments` input when needed.
 
 ## 📊 Output Structure
 

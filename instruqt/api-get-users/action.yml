@@ -18,8 +18,26 @@ inputs:
 
 outputs:
   users-json:
-    description: "a JSON string containing user information"
+    description: "a JSON string containing user information (only available if under size limit)"
     value: ${{ steps.run-get-users-api.outputs.USERS_JSON }}
+  users-json-available:
+    description: "whether the users JSON is available in outputs (true/false)"
+    value: ${{ steps.run-get-users-api.outputs.USERS_JSON_AVAILABLE }}
+  total-users:
+    description: "total number of users found"
+    value: ${{ steps.run-get-users-api.outputs.TOTAL_USERS }}
+  total-owners:
+    description: "total number of users with owner role"
+    value: ${{ steps.run-get-users-api.outputs.TOTAL_OWNERS }}
+  total-members:
+    description: "total number of users with member role"
+    value: ${{ steps.run-get-users-api.outputs.TOTAL_MEMBERS }}
+  total-content-creators:
+    description: "total number of users with content_creator role"
+    value: ${{ steps.run-get-users-api.outputs.TOTAL_CONTENT_CREATORS }}
+  total-instructors:
+    description: "total number of users with instructor role"
+    value: ${{ steps.run-get-users-api.outputs.TOTAL_INSTRUCTORS }}
 
 runs:
   using: composite
@@ -307,7 +325,11 @@ runs:
             elif "data" in users_result and users_result["data"]["team"]:
                 team_data = users_result["data"]["team"]
                 users = team_data.get("users", [])
-                print(f"   ✅ Found {len(users)} user(s)")
+                total_users = len(users)
+                print(f"   ✅ Found {total_users} user(s)")
+                #
+                # Set total users count to output
+                set_output("TOTAL_USERS", str(total_users))
                 #
                 if verbose:
                     print()
@@ -317,6 +339,12 @@ runs:
                         print("   Team users:")
                     all_user_details = []
                     #
+                    # Initialize counters for user roles
+                    owner_count = 0
+                    member_count = 0
+                    content_creator_count = 0
+                    instructor_count = 0
+                    #
                     for idx, user_edge in enumerate(users, 1):
                         user = user_edge.get('node', {})
                         profile = user.get('profile', {})
@@ -324,6 +352,16 @@ runs:
                         scope = user_edge.get('scope', 'Unknown')
                         is_anonymous = user.get('is_anonymous', False)
                         teams = user.get('teams', [])
+                        #
+                        # Count user roles
+                        if role == 'owner':
+                            owner_count += 1
+                        elif role == 'member':
+                            member_count += 1
+                        elif role == 'content_creator':
+                            content_creator_count += 1
+                        elif role == 'instructor':
+                            instructor_count += 1
                         #
                         display_name = profile.get('display_name', 'No Name')
                         email = profile.get('email', 'No Email')
@@ -367,6 +405,12 @@ runs:
                         if verbose:
                             print()
                     #
+                    # Set role counts to output
+                    set_output("TOTAL_OWNERS", str(owner_count))
+                    set_output("TOTAL_MEMBERS", str(member_count))
+                    set_output("TOTAL_CONTENT_CREATORS", str(content_creator_count))
+                    set_output("TOTAL_INSTRUCTORS", str(instructor_count))
+                    #
                     # Save to file
                     with open("team_users_list.txt", "w") as f:
                         f.write(f"Team Users for {team_data['name']} ({team_data['slug']})\n")
@@ -400,8 +444,20 @@ runs:
                     with open(output_file, "w") as f:
                         json.dump(all_user_details, f, indent=2)
                     #
-                    # Export to environment variable for GitHub Actions
-                    set_multiline_output("USERS_JSON", json.dumps(all_user_details))
+                    # Conditionally export to environment variable for GitHub Actions based on size
+                    users_json_str = json.dumps(all_user_details)
+                    users_json_size = len(users_json_str)
+                    size_limit_mb = 1  # GitHub Actions output size limit is 1MB
+                    size_limit_bytes = size_limit_mb * 1024 * 1024
+                    #
+                    if users_json_size < size_limit_bytes:
+                        set_multiline_output("USERS_JSON", users_json_str)
+                        set_output("USERS_JSON_AVAILABLE", "true")
+                        print(f"   ✅ Users JSON exported to output ({users_json_size:,} bytes)")
+                    else:
+                        set_output("USERS_JSON_AVAILABLE", "false")
+                        print(f"   ⚠️  Users JSON too large for output ({users_json_size:,} bytes > {size_limit_bytes:,} bytes)")
+                        print(f"   ℹ️  Use the JSON file artifact instead: {output_file}")
                     #
                     print(f"   💾 User list saved to: team_users_list.txt")
                     print(f"   💾 Full details saved to: {output_file}")
@@ -409,16 +465,19 @@ runs:
                     # Print summary by role
                     print()
                     print("   Summary by role:")
-                    roles = {}
-                    for user_edge in users:
-                        role = user_edge.get('role', 'Unknown')
-                        roles[role] = roles.get(role, 0) + 1
-                    #
-                    for role, count in sorted(roles.items()):
-                        print(f"      • {role}: {count}")
+                    print(f"      • owner: {owner_count}")
+                    print(f"      • member: {member_count}")
+                    print(f"      • content_creator: {content_creator_count}")
+                    print(f"      • instructor: {instructor_count}")
                 else:
                     print("   ℹ️  No users found in this team")
                     set_output("USERS_JSON", "[]")
+                    set_output("USERS_JSON_AVAILABLE", "true")
+                    set_output("TOTAL_USERS", "0")
+                    set_output("TOTAL_OWNERS", "0")
+                    set_output("TOTAL_MEMBERS", "0")
+                    set_output("TOTAL_CONTENT_CREATORS", "0")
+                    set_output("TOTAL_INSTRUCTORS", "0")
             else:
                 print("   ❌ Error: Could not retrieve team users")
                 exit(1)

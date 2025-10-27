@@ -1,2 +1,5 @@
 # The canonical source of the Python script is in the `action.yml` file within the `run-get-users-api` step.
 api-get-users.py
+
+team_users_details.json
+team_users_list.txt

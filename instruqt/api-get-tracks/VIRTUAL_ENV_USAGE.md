@@ -171,6 +171,9 @@ export INSTRUQT_TOKEN="your-api-token-here"
 # Specify a team workspace (if not set, auto-detects from API key)
 export TEAM_WORKSPACE="your-team-slug"
 
+# Include challenge assignment text (default: false)
+export INCLUDE_CHALLENGE_ASSIGNMENTS="true"
+
 # Enable verbose output to print the full track list
 export VERBOSE="true"
 
