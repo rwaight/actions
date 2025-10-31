@@ -79,7 +79,7 @@ jobs:
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) )
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         with:
           # required
           app-id: ${{ secrets.GH_APP_ID }}
@@ -124,7 +124,7 @@ jobs:
         ## disable (github.event_name=='push' && github.ref_name=='main') until the 'export-label-config' action is fixed
         ##  (github.event_name=='repository_dispatch' && github.event.action=='export-labels') ||
         ##  (github.event_name=='push' && github.ref_name=='main')
-        uses: rwaight/actions/github/export-label-config@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/github/export-label-config@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         #uses: rwaight/actions/github/export-label-config@main
         with:
           # This is needed if you're dealing with private repos.
@@ -142,7 +142,7 @@ jobs:
           (github.event_name=='workflow_dispatch' && inputs.sync_labels==true) ||
           (github.event_name=='repository_dispatch' && github.event.action=='sync-labels') || 
           (github.event_name=='push' && github.ref_name=='main')
-        uses: rwaight/actions/github/label-sync@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/github/label-sync@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         #uses: rwaight/actions/github/label-sync@main
         with:
           config-file: |
