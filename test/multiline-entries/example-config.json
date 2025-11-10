@@ -1,0 +1,17 @@
+{
+  "_comment": "Example configuration showing how to define entries with prefix support",
+  "project_name": "example-project",
+  "project_version": "1.0.0",
+  "config": {
+    "_comment": "Define your entries here. Each entry should follow the format required by your target action.",
+    "prefix": "path/to/common/base/",
+    "entries": [
+      "service1/resource key1 | SERVICE1_OUTPUT",
+      "service2/resource key2 | SERVICE2_OUTPUT",
+      "service3/resource key3 | SERVICE3_OUTPUT",
+      "api/endpoint key | API_KEY_OUTPUT",
+      "database/connection string | DB_CONNECTION"
+    ],
+    "_comment_prefix": "If your entries share a common prefix, define it here to avoid repetition in each entry"
+  }
+}

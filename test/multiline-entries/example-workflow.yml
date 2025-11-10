@@ -1,0 +1,249 @@
+name: Example - Dynamic Entries Composite Action
+
+on:
+  workflow_dispatch:
+    inputs:
+      config-file:
+        description: 'Path to configuration file'
+        default: './example-config.json'
+        required: false
+        type: string
+      verbose:
+        description: 'Enable verbose output'
+        default: 'true'
+        required: false
+        type: string
+  push:
+    branches:
+      - 'main'
+    # ignore changes to .md files
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  # Example 1: Basic usage with default paths
+  example-basic:
+    runs-on: ubuntu-latest
+    name: Basic Example
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create example configuration file
+        run: |
+          cat > example-config.json << 'EOF'
+          {
+            "project_name": "example-project",
+            "version": "1.0.0",
+            "config": {
+              "prefix": "path/to/common/base/",
+              "entries": [
+                "service1/resource key1 | SERVICE1_VAR",
+                "service2/resource key2 | SERVICE2_VAR",
+                "service3/resource key3 | SERVICE3_VAR",
+                "api/endpoint key | API_KEY"
+              ]
+            }
+          }
+          EOF
+          cat example-config.json
+
+      - name: Load entries from configuration
+        id: load-entries
+        uses: rwaight/actions/test/multiline-entries@main
+        with:
+          config-file: './example-config.json'
+          entries-path: '.config.entries'
+          prefix-path: '.config.prefix'
+          verbose: ${{ inputs.verbose || 'true' }}
+
+      - name: Display the formatted entries
+        run: |
+          echo "=== Formatted Entries ==="
+          echo "${{ steps.load-entries.outputs.entries }}"
+          echo ""
+          echo "=== Metadata ==="
+          echo "Entry count: ${{ steps.load-entries.outputs.entry-count }}"
+          echo "Has prefix: ${{ steps.load-entries.outputs.has-prefix }}"
+
+      - name: Fail if no entries were returned
+        if: ${{ ! steps.load-entries.outputs.entries }}
+        run: |
+          echo "::error title=⛔ error in the 'load-entries' step::No entries output provided"
+          exit 1
+
+  # Example 2: Without prefix
+  example-no-prefix:
+    runs-on: ubuntu-latest
+    name: Example Without Prefix
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create configuration without prefix
+        run: |
+          cat > no-prefix-config.json << 'EOF'
+          {
+            "config": {
+              "entries": [
+                "full/path/to/service1 key1 | VAR1",
+                "different/path/to/service2 key2 | VAR2",
+                "another/base/path/service3 key3 | VAR3"
+              ]
+            }
+          }
+          EOF
+
+      - name: Load entries without prefix
+        id: load-no-prefix
+        uses: rwaight/actions/test/multiline-entries@main
+        with:
+          config-file: './no-prefix-config.json'
+          entries-path: '.config.entries'
+          prefix-path: '.config.prefix'
+          verbose: true
+
+      - name: Verify no prefix was used
+        run: |
+          echo "Has prefix: ${{ steps.load-no-prefix.outputs.has-prefix }}"
+          if [[ "${{ steps.load-no-prefix.outputs.has-prefix }}" != "false" ]]; then
+            echo "::error::Expected has-prefix to be false"
+            exit 1
+          fi
+          echo "✓ Correctly processed entries without prefix"
+
+  # Example 3: Custom JSON paths
+  example-custom-paths:
+    runs-on: ubuntu-latest
+    name: Example with Custom Paths
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create configuration with custom structure
+        run: |
+          cat > custom-config.json << 'EOF'
+          {
+            "application": {
+              "settings": {
+                "common_base": "custom/base/path/",
+                "items": [
+                  "item1 key | ITEM1",
+                  "item2 key | ITEM2",
+                  "item3 key | ITEM3"
+                ]
+              }
+            }
+          }
+          EOF
+
+      - name: Load entries with custom paths
+        id: load-custom
+        uses: rwaight/actions/test/multiline-entries@main
+        with:
+          config-file: './custom-config.json'
+          entries-path: '.application.settings.items'
+          prefix-path: '.application.settings.common_base'
+          verbose: true
+
+      - name: Display custom path results
+        run: |
+          echo "Entries from custom paths:"
+          echo "${{ steps.load-custom.outputs.entries }}"
+
+  # Example 4: Simulated use with an action requiring formatted input
+  example-with-downstream-action:
+    runs-on: ubuntu-latest
+    name: Use with Downstream Action
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create configuration
+        run: |
+          cat > downstream-config.json << 'EOF'
+          {
+            "config": {
+              "prefix": "resource/location/",
+              "entries": [
+                "app/db username | DB_USER",
+                "app/db password | DB_PASS",
+                "app/api key | API_KEY"
+              ]
+            }
+          }
+          EOF
+
+      - name: Load entries
+        id: load-for-action
+        uses: rwaight/actions/test/multiline-entries@main
+        with:
+          config-file: './downstream-config.json'
+          verbose: false
+
+      - name: Simulate using entries with another action
+        run: |
+          echo "This step would pass the entries to another action:"
+          echo "  uses: some-action/example@v1"
+          echo "  with:"
+          echo "    formatted_input: \${{ steps.load-for-action.outputs.entries }}"
+          echo ""
+          echo "The formatted input would be:"
+          echo "${{ steps.load-for-action.outputs.entries }}"
+
+  # Example 5: Error handling test
+  example-error-handling:
+    runs-on: ubuntu-latest
+    name: Error Handling Example
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create valid configuration
+        run: |
+          cat > valid-config.json << 'EOF'
+          {
+            "config": {
+              "entries": ["entry1", "entry2"]
+            }
+          }
+          EOF
+
+      - name: Test with valid configuration
+        id: test-valid
+        uses: rwaight/actions/test/multiline-entries@main
+        with:
+          config-file: './valid-config.json'
+
+      - name: Verify success
+        run: echo "✓ Successfully processed valid configuration"
+
+      - name: Test with non-existent file (expected to fail)
+        id: test-missing-file
+        continue-on-error: true
+        uses: rwaight/actions/test/multiline-entries@main
+        with:
+          config-file: './non-existent-file.json'
+
+      - name: Verify failure was caught
+        if: steps.test-missing-file.outcome == 'failure'
+        run: echo "✓ Correctly failed when configuration file was not found"
+
+      - name: Test with invalid entries path (expected to fail)
+        id: test-invalid-path
+        continue-on-error: true
+        uses: rwaight/actions/test/multiline-entries@main
+        with:
+          config-file: './valid-config.json'
+          entries-path: '.nonexistent.path'
+
+      - name: Verify invalid path failure
+        if: steps.test-invalid-path.outcome == 'failure'
+        run: echo "✓ Correctly failed when entries path was not found"
+
+      - name: Summary
+        run: |
+          echo "=== Error Handling Test Summary ==="
+          echo "Valid config: ${{ steps.test-valid.outcome }}"
+          echo "Missing file: ${{ steps.test-missing-file.outcome }}"
+          echo "Invalid path: ${{ steps.test-invalid-path.outcome }}"
