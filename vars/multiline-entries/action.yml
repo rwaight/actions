@@ -1,0 +1,188 @@
+name: 'Dynamic Multiline Entries'
+description: 'Read JSON configuration and build multiline formatted entries with optional prefix support.'
+# Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+author: 'rwaight'
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+inputs:
+  config-file:
+    description: 'Path to the JSON configuration file containing entries.'
+    required: true
+    default: './project-config.json'
+  entries-path:
+    description: 'JSON path to the entries array (e.g., .config.entries or .entries).'
+    required: false
+    default: '.config.entries'
+  prefix-path:
+    description: 'JSON path to the optional prefix (e.g., .config.prefix).'
+    required: false
+    default: '.config.prefix'
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
+outputs:
+  entries:
+    description: "The formatted multiline entries output from this action."
+    value: ${{ steps.build-entries.outputs.entries }}
+  has-prefix:
+    description: "Boolean indicating if a prefix was found and applied."
+    value: ${{ steps.build-entries.outputs.has-prefix }}
+  entry-count:
+    description: "The number of entries processed."
+    value: ${{ steps.build-entries.outputs.entry-count }}
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
+runs:
+  using: "composite"
+  steps:
+
+    - name: Validate that the runner OS is Linux
+      id: validate-runner-os
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "::group::starting step 'validate-runner-os' "
+        echo "::error title=⛔ error hint::This action supports Linux only"
+        exit 1
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Greet the triggering_actor
+      id: greet-triggering-actor
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      run: |
+        echo "::group::starting step 'greet-triggering-actor' "
+        echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      id: verbose-print-inputs
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      run: |
+        echo "::group::starting step 'verbose-print-inputs' "
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "config-file is set to ${{ inputs.config-file }} "
+        echo "entries-path is set to ${{ inputs.entries-path }} "
+        echo "prefix-path is set to ${{ inputs.prefix-path }} "
+        echo "verbose is set to ${{ inputs.verbose }} "
+        echo ""
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Validate that the configuration file exists
+      id: validate-config
+      run: |
+        echo "::group::starting step 'validate-config' "
+        CONFIG_FILE="${{ inputs.config-file }}"
+        if [[ ! -f "$CONFIG_FILE" ]]; then
+            echo "::error title=⛔ configuration file not found::The file '$CONFIG_FILE' does not exist"
+            exit 1
+        fi
+        echo "✓ Configuration file found: $CONFIG_FILE"
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Build formatted entries from configuration
+      id: build-entries
+      run: |
+        echo "::group::starting step 'build-entries' "
+        ## Build the formatted multiline entries
+        ## the double number signs below are for line spacing and readability only
+        ##
+        CONFIG_FILE="${{ inputs.config-file }}"
+        ENTRIES_PATH="${{ inputs.entries-path }}"
+        PREFIX_PATH="${{ inputs.prefix-path }}"
+        ##
+        echo "Reading configuration from: $CONFIG_FILE"
+        echo "Entries path: $ENTRIES_PATH"
+        echo "Prefix path: $PREFIX_PATH"
+        echo ""
+        ##
+        ## Check if the entries path exists in the config file
+        if jq -e "${ENTRIES_PATH}" "$CONFIG_FILE" > /dev/null 2>&1; then
+            echo "✓ Found entries at ${ENTRIES_PATH}"
+            ##
+            ## Check if a prefix is defined
+            PREFIX=""
+            HAS_PREFIX="false"
+            if jq -e "${PREFIX_PATH}" "$CONFIG_FILE" > /dev/null 2>&1; then
+                PREFIX=$(jq -r "${PREFIX_PATH}" "$CONFIG_FILE")
+                if [[ -n "$PREFIX" && "$PREFIX" != "null" ]]; then
+                    echo "✓ Using prefix: $PREFIX"
+                    HAS_PREFIX="true"
+                else
+                    echo "ℹ No prefix defined or prefix is null"
+                fi
+            else
+                echo "ℹ No prefix path found in configuration"
+            fi
+            ##
+            ## Read the config file and extract the entries array
+            ## If prefix exists, prepend it to each entry
+            if [[ -n "$PREFIX" && "$PREFIX" != "null" ]]; then
+                FORMATTED_ENTRIES=$(jq -r "${ENTRIES_PATH} | map(\"${PREFIX}\" + .) | join(\" ;\\n\")" "$CONFIG_FILE")
+                ## Prepend the prefix to each entry path
+            else
+                FORMATTED_ENTRIES=$(jq -r "${ENTRIES_PATH} | join(\" ;\\n\")" "$CONFIG_FILE")
+                ## No prefix, use entries as-is
+            fi
+            ##
+            ## Ensure it ends with a semicolon
+            if [[ ! "$FORMATTED_ENTRIES" =~ \;[[:space:]]*$ ]]; then
+                FORMATTED_ENTRIES="${FORMATTED_ENTRIES} ;"
+            fi
+            ##
+            ## Count the entries
+            ENTRY_COUNT=$(jq -r "${ENTRIES_PATH} | length" "$CONFIG_FILE")
+            echo "✓ Processed ${ENTRY_COUNT} entries"
+            ##
+        else
+            echo "::error title=⛔ entries not found::Entries not found at ${ENTRIES_PATH} in $CONFIG_FILE"
+            exit 1
+        fi
+        ##
+        ## Store in outputs using multiline heredoc
+        echo "entries<<EOF" >> "$GITHUB_OUTPUT"
+        echo "$FORMATTED_ENTRIES" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
+        ##
+        ## Store additional metadata
+        echo "has-prefix=${HAS_PREFIX}" >> "$GITHUB_OUTPUT"
+        echo "entry-count=${ENTRY_COUNT}" >> "$GITHUB_OUTPUT"
+        ##
+        echo ""
+        echo "✓ Entries formatted successfully"
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Verbose | Display formatted entries
+      id: verbose-display-entries
+      if: inputs.verbose=='true'
+      run: |
+        echo "::group::starting step 'verbose-display-entries' "
+        ## Display the formatted entries if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "Formatted entries output:"
+        echo "---"
+        echo "${{ steps.build-entries.outputs.entries }}"
+        echo "---"
+        echo ""
+        echo "Has prefix: ${{ steps.build-entries.outputs.has-prefix }}"
+        echo "Entry count: ${{ steps.build-entries.outputs.entry-count }}"
+        echo ""
+        echo "::endgroup::"
+      shell: bash
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'file-text'
+  color: 'blue'

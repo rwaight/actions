@@ -1,0 +1,21 @@
+name: multiline-entries
+author: rwaight
+description: Read JSON configuration and build multiline formatted entries with optional prefix support.
+group: vars
+imported: false
+local:
+  author: rwaight
+  modifications: true
+  update:
+    exclusions:
+      - GUIDE.md
+      - example-config.json
+      - example-workflow.yml
+specs:
+  action_file: action.yml
+  inputs: [config-file, entries-path, prefix-path, verbose]
+  outputs: [entries, has-prefix, entry-count]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use
