@@ -52,7 +52,7 @@ runs:
 
     - name: Greet the triggering_actor
       id: greet-triggering-actor
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       run: |
         echo "::group::starting step 'greet-triggering-actor' "
         echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
@@ -61,7 +61,7 @@ runs:
 
     - name: Verbose | Print the inputs
       id: verbose-print-inputs
-      if: inputs.verbose=='true'
+      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
       run: |
         echo "::group::starting step 'verbose-print-inputs' "
         ## Print the inputs if inputs.verbose=='true'
