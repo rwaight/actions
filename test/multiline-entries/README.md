@@ -99,7 +99,7 @@ jobs:
           config-file: './project-config.json'
           entries-path: '.config.entries'
           prefix-path: '.config.prefix'
-          verbose: true
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
       - name: Display the formatted entries
         run: |
@@ -137,6 +137,7 @@ jobs:
           config-file: './vault-config.json'
           entries-path: '.vault.entries'
           prefix-path: '.vault.prefix'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
       - name: Import from Vault
         uses: hashicorp/vault-action@v3
@@ -160,7 +161,7 @@ jobs:
     config-file: './my-config.json'
     entries-path: '.custom.path.to.items'
     prefix-path: '.custom.path.to.base'
-    verbose: false
+    verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 ```
 
 ## Output Format

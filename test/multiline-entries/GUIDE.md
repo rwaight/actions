@@ -50,6 +50,7 @@ Create a file named `project-config.json`:
     config-file: './project-config.json'
     entries-path: '.config.entries'
     prefix-path: '.config.prefix'
+    verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
 - name: Use the entries
   run: echo "${{ steps.load-entries.outputs.entries }}"
@@ -226,6 +227,7 @@ jobs:
           config-file: './vault-config.json'
           entries-path: '.vault.entries'
           prefix-path: '.vault.prefix'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
       
       - name: Import from Vault
         uses: hashicorp/vault-action@v3
@@ -264,7 +266,7 @@ jobs:
         uses: rwaight/actions/test/multiline-entries@main
         with:
           config-file: ${{ inputs.CONFIG_FILE }}
-          verbose: 'true'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
       
       - name: Run build
         run: |
@@ -307,18 +309,21 @@ jobs:
         uses: rwaight/actions/test/multiline-entries@main
         with:
           config-file: './configs/dev.json'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
       
       - name: Load staging config
         id: staging
         uses: rwaight/actions/test/multiline-entries@main
         with:
           config-file: './configs/staging.json'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
       
       - name: Load production config
         id: prod
         uses: rwaight/actions/test/multiline-entries@main
         with:
           config-file: './configs/prod.json'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
       
       - name: Display all configurations
         run: |
@@ -472,6 +477,7 @@ with:
     config-file: ${{ inputs.config_file }}
     entries-path: ${{ inputs.entries_path }}
     prefix-path: ${{ inputs.prefix_path }}
+    verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 ```
 
 ### Conditional Processing
@@ -482,6 +488,7 @@ with:
   uses: rwaight/actions/test/multiline-entries@main
   with:
     config-file: './config.json'
+    verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
 - name: Process if prefix was used
   if: steps.load.outputs.has-prefix == 'true'
@@ -561,6 +568,7 @@ jq -r ".config.entries | map(\"${PREFIX}\" + .) | join(\" ;\n\")" your-config.js
      uses: rwaight/actions/test/multiline-entries@main
      with:
        config-file: './config.json'
+       verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
    
    - uses: some-action@v1
      with:
