@@ -234,7 +234,9 @@ jobs:
           method: approle
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
-          secrets: ${{ steps.vault-config.outputs.entries }}
+          secrets: |
+            ${{ steps.load-vault-entries.outputs.entries }}
+        id: vault-import
 ```
 
 ### Example 2: Reusable Workflow
