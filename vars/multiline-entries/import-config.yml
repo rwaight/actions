@@ -1,7 +1,7 @@
 name: multiline-entries
 author: rwaight
 description: Read JSON configuration and build multiline formatted entries with optional prefix support.
-group: test
+group: vars
 imported: false
 local:
   author: rwaight

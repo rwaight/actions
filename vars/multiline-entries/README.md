@@ -94,7 +94,7 @@ jobs:
 
       - name: Load entries from configuration
         id: load-entries
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './project-config.json'
           entries-path: '.config.entries'
@@ -132,7 +132,7 @@ jobs:
 
       - name: Load vault entries from configuration
         id: load-vault-entries
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './vault-config.json'
           entries-path: '.vault.entries'
@@ -156,7 +156,7 @@ jobs:
 ```yaml
 - name: Load entries with custom paths
   id: load-custom
-  uses: rwaight/actions/test/multiline-entries@main
+  uses: rwaight/actions/vars/multiline-entries@main
   with:
     config-file: './my-config.json'
     entries-path: '.custom.path.to.items'

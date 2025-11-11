@@ -50,7 +50,7 @@ jobs:
 
       - name: Load entries from configuration
         id: load-entries
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './example-config.json'
           entries-path: '.config.entries'
@@ -96,7 +96,7 @@ jobs:
 
       - name: Load entries without prefix
         id: load-no-prefix
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './no-prefix-config.json'
           entries-path: '.config.entries'
@@ -139,7 +139,7 @@ jobs:
 
       - name: Load entries with custom paths
         id: load-custom
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './custom-config.json'
           entries-path: '.application.settings.items'
@@ -176,7 +176,7 @@ jobs:
 
       - name: Load entries
         id: load-for-action
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './downstream-config.json'
           verbose: false
@@ -211,7 +211,7 @@ jobs:
 
       - name: Test with valid configuration
         id: test-valid
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './valid-config.json'
 
@@ -221,7 +221,7 @@ jobs:
       - name: Test with non-existent file (expected to fail)
         id: test-missing-file
         continue-on-error: true
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './non-existent-file.json'
 
@@ -232,7 +232,7 @@ jobs:
       - name: Test with invalid entries path (expected to fail)
         id: test-invalid-path
         continue-on-error: true
-        uses: rwaight/actions/test/multiline-entries@main
+        uses: rwaight/actions/vars/multiline-entries@main
         with:
           config-file: './valid-config.json'
           entries-path: '.nonexistent.path'
