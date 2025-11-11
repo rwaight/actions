@@ -145,7 +145,9 @@ jobs:
           method: approle
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
-          secrets: ${{ steps.load-vault-entries.outputs.entries }}
+          secrets: |
+            ${{ steps.load-vault-entries.outputs.entries }}
+        id: vault-import
 ```
 
 ### Custom JSON Paths
