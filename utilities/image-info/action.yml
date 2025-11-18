@@ -1,0 +1,444 @@
+name: 'Get Cloud Image Information'
+description: 'Retrieve information about cloud images, including their status, age, and recommended actions.'
+# Ref: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+author: 'rwaight'
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#inputs
+inputs:
+  cloud-provider:
+    description: 'The cloud provider to query (gcp or aws). Cloud authentication must be completed before calling this action.'
+    required: true
+  query-location:
+    description: 'GCP project ID or AWS region to query. For GCP, this is the project ID. For AWS, this is the region (e.g., us-east-1).'
+    required: true
+  source-image:
+    description: 'Specific source image name to search for. Takes precedence over source-image-family if both are provided.'
+    required: false
+    default: ''
+  source-image-family:
+    description: 'Source image family to search for. Returns the latest non-deprecated image from the family.'
+    required: false
+    default: ''
+  image-location:
+    description: >-
+      'Location where the source image resides. If not specified, uses query-location value.
+      For GCP: project ID(s) - supports comma-separated list. 
+      For AWS: AMI owner ID.'
+    required: false
+    default: ''
+  image-name-prefix:
+    description: 'Prefix pattern to prepend to the image name output (e.g., "projects/my-project/global/images/").'
+    required: false
+    default: ''
+  image-name-suffix:
+    description: 'Suffix pattern to append to the image name output (e.g., "-verified").'
+    required: false
+    default: ''
+  verbose:
+    description: 'Determine if the action should run verbose tasks, defaults to false.'
+    required: false
+    default: 'false'
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions
+outputs:
+  image-found:
+    description: "Whether a matching image was found (true/false)."
+    value: ${{ steps.query-image.outputs.IMAGE_FOUND }}
+  image-id:
+    description: "The image ID (GCP: full image name, AWS: AMI ID)."
+    value: ${{ steps.query-image.outputs.IMAGE_ID }}
+  image-name:
+    description: "The image name."
+    value: ${{ steps.query-image.outputs.IMAGE_NAME }}
+  image-self-link:
+    description: "The self-link URL to the image (GCP only)."
+    value: ${{ steps.query-image.outputs.IMAGE_SELF_LINK }}
+  image-project:
+    description: "The project ID where the image was found (GCP only)."
+    value: ${{ steps.query-image.outputs.IMAGE_PROJECT }}
+  image-family:
+    description: "The image family."
+    value: ${{ steps.query-image.outputs.IMAGE_FAMILY }}
+  image-creation-timestamp:
+    description: "When the image was created."
+    value: ${{ steps.query-image.outputs.IMAGE_CREATION_TIMESTAMP }}
+  image-description:
+    description: "The image description."
+    value: ${{ steps.query-image.outputs.IMAGE_DESCRIPTION }}
+
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
+runs:
+  using: "composite"
+  steps:
+    - name: Validate that the runner OS is Linux
+      if: ${{ runner.os != 'Linux' }}
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
+      run: |
+        echo "::error title=⛔ error hint::This action supports Linux only"
+        exit 1
+      shell: bash
+
+    - name: Validate cloud provider
+      id: validate-cloud-provider
+      run: |
+        echo "::group::starting the 'validate-cloud-provider' step... "
+        echo ""
+        ## Validate the cloud provider input
+        ##
+        CLOUD_PROVIDER="${{ inputs.cloud-provider }}"
+        if [[ "$CLOUD_PROVIDER" != "gcp" && "$CLOUD_PROVIDER" != "aws" ]]; then
+          echo "::error title=⛔ invalid cloud provider::Cloud provider must be 'gcp' or 'aws', got '${CLOUD_PROVIDER}'"
+          exit 1
+        fi
+        echo "✓ Cloud provider validated: ${CLOUD_PROVIDER}"
+        echo "CLOUD_PROVIDER=${CLOUD_PROVIDER}" >> $GITHUB_ENV
+        ##
+        echo ""
+        echo "finishing the 'validate-cloud-provider' step... "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Validate required inputs
+      id: validate-inputs
+      run: |
+        echo "::group::starting the 'validate-inputs' step... "
+        echo ""
+        ## Validate required inputs based on cloud provider
+        ##
+        CLOUD_PROVIDER="${{ inputs.cloud-provider }}"
+        
+        if [[ "$CLOUD_PROVIDER" == "gcp" ]]; then
+          # GCP validations
+          if [[ -z "${{ inputs.query-location }}" ]]; then
+            echo "::error title=⛔ missing query-location::query-location (GCP project ID) is required for GCP"
+            exit 1
+          fi
+          
+          if [[ -z "${{ inputs.source-image }}" && -z "${{ inputs.source-image-family }}" ]]; then
+            echo "::error title=⛔ missing source image::Either source-image or source-image-family must be provided for GCP"
+            exit 1
+          fi
+          
+          echo "✓ GCP inputs validated"
+        elif [[ "$CLOUD_PROVIDER" == "aws" ]]; then
+          # AWS validations
+          if [[ -z "${{ inputs.query-location }}" ]]; then
+            echo "::error title=⛔ missing query-location::query-location (AWS region) is required for AWS"
+            exit 1
+          fi
+          
+          if [[ -z "${{ inputs.source-image }}" && -z "${{ inputs.source-image-family }}" ]]; then
+            echo "::error title=⛔ missing source image::Either source-image or source-image-family must be provided for AWS"
+            exit 1
+          fi
+          
+          echo "✓ AWS inputs validated"
+        fi
+        ##
+        echo ""
+        echo "finishing the 'validate-inputs' step... "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Verbose | Print the inputs
+      if: inputs.verbose=='true'
+      id: verbose-print-inputs
+      run: |
+        echo "::group::starting the 'verbose-print-inputs' step... "
+        echo ""
+        ## Print the inputs if inputs.verbose=='true'
+        ## the double number signs below are for line spacing and readability only
+        ##
+        echo "=== Get Cloud Image Info Action Inputs ==="
+        echo "cloud-provider      : ${{ inputs.cloud-provider }} "
+        echo "query-location      : ${{ inputs.query-location }} "
+        echo "source-image        : ${{ inputs.source-image }} "
+        echo "source-image-family : ${{ inputs.source-image-family }} "
+        echo "image-location      : ${{ inputs.image-location }} "
+        echo "image-name-prefix   : ${{ inputs.image-name-prefix }} "
+        echo "image-name-suffix   : ${{ inputs.image-name-suffix }} "
+        echo "verbose             : ${{ inputs.verbose }} "
+        echo ""
+        ##
+        echo ""
+        echo "finishing the 'verbose-print-inputs' step... "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Query GCP for image information
+      id: query-gcp-image
+      if: inputs.cloud-provider == 'gcp'
+      run: |
+        echo "::group::starting the 'query-gcp-image' step... "
+        echo ""
+        echo "Querying GCP for image information"
+        ##
+        PROJECT_ID="${{ inputs.query-location }}"
+        SOURCE_IMAGE="${{ inputs.source-image }}"
+        SOURCE_IMAGE_FAMILY="${{ inputs.source-image-family }}"
+        SOURCE_IMAGE_PROJECT="${{ inputs.image-location }}"
+        IMAGE_NAME_PREFIX="${{ inputs.image-name-prefix }}"
+        IMAGE_NAME_SUFFIX="${{ inputs.image-name-suffix }}"
+        VERBOSE="${{ inputs.verbose }}"
+        
+        IMAGE_FOUND="false"
+        IMAGE_ID=""
+        IMAGE_NAME=""
+        IMAGE_SELF_LINK=""
+        IMAGE_PROJECT=""
+        IMAGE_FAMILY=""
+        IMAGE_CREATION_TIMESTAMP=""
+        IMAGE_DESCRIPTION=""
+        
+        # Determine which projects to search
+        if [[ -n "$SOURCE_IMAGE_PROJECT" && "$SOURCE_IMAGE_PROJECT" != "" ]]; then
+          # User specified project(s) to search
+          IFS=',' read -ra PROJECTS <<< "$SOURCE_IMAGE_PROJECT"
+          if [[ "$VERBOSE" == "true" ]]; then
+            echo "Searching in specified projects: ${PROJECTS[*]}"
+          fi
+        else
+          # Search in the current project
+          PROJECTS=("$PROJECT_ID")
+          if [[ "$VERBOSE" == "true" ]]; then
+            echo "Searching in image-location (defaulting to query-location): $PROJECT_ID"
+          fi
+        fi
+        
+        # Determine search method: specific image or family
+        if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
+          echo "Searching for specific image: $SOURCE_IMAGE"
+          SEARCH_TYPE="image"
+          SEARCH_VALUE="$SOURCE_IMAGE"
+        elif [[ -n "$SOURCE_IMAGE_FAMILY" && "$SOURCE_IMAGE_FAMILY" != "" ]]; then
+          echo "Searching for image family: $SOURCE_IMAGE_FAMILY"
+          SEARCH_TYPE="family"
+          SEARCH_VALUE="$SOURCE_IMAGE_FAMILY"
+        else
+          echo "::error title=⛔ no search criteria::Neither source-image nor source-image-family was provided"
+          exit 1
+        fi
+        
+        # Search for the image across specified projects
+        for proj in "${PROJECTS[@]}"; do
+          proj=$(echo "$proj" | xargs) # trim whitespace
+          
+          if [[ "$VERBOSE" == "true" ]]; then
+            echo "Searching in project: $proj"
+          fi
+          
+          if [[ "$SEARCH_TYPE" == "image" ]]; then
+            # Search for specific image by name
+            if gcloud compute images describe "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
+              IMAGE_FOUND="true"
+              IMAGE_PROJECT="$proj"
+              break
+            fi
+          else
+            # Search for latest image in family
+            # Use gcloud to get the latest image from family
+            if gcloud compute images describe-from-family "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
+              IMAGE_FOUND="true"
+              IMAGE_PROJECT="$proj"
+              break
+            fi
+          fi
+        done
+        
+        if [[ "$IMAGE_FOUND" == "true" ]]; then
+          echo "✓ Image found in project: $IMAGE_PROJECT"
+          
+          # Extract image information from JSON
+          IMAGE_NAME=$(jq -r '.name' /tmp/image_info.json)
+          IMAGE_ID="$IMAGE_NAME"
+          IMAGE_SELF_LINK=$(jq -r '.selfLink' /tmp/image_info.json)
+          IMAGE_FAMILY=$(jq -r '.family // empty' /tmp/image_info.json)
+          IMAGE_CREATION_TIMESTAMP=$(jq -r '.creationTimestamp' /tmp/image_info.json)
+          IMAGE_DESCRIPTION=$(jq -r '.description // empty' /tmp/image_info.json)
+          
+          # Apply prefix and suffix if provided
+          if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
+            IMAGE_NAME="${IMAGE_NAME_PREFIX}${IMAGE_NAME}"
+            IMAGE_ID="${IMAGE_NAME_PREFIX}${IMAGE_ID}"
+            if [[ "$VERBOSE" == "true" ]]; then
+              echo "Applied prefix: $IMAGE_NAME_PREFIX"
+            fi
+          fi
+          
+          if [[ -n "$IMAGE_NAME_SUFFIX" ]]; then
+            IMAGE_NAME="${IMAGE_NAME}${IMAGE_NAME_SUFFIX}"
+            IMAGE_ID="${IMAGE_ID}${IMAGE_NAME_SUFFIX}"
+            if [[ "$VERBOSE" == "true" ]]; then
+              echo "Applied suffix: $IMAGE_NAME_SUFFIX"
+            fi
+          fi
+          
+          echo "  Image Name              : $IMAGE_NAME"
+          echo "  Image Self Link         : $IMAGE_SELF_LINK"
+          echo "  Image Project           : $IMAGE_PROJECT"
+          echo "  Image Family            : $IMAGE_FAMILY"
+          echo "  Creation Timestamp      : $IMAGE_CREATION_TIMESTAMP"
+          
+          if [[ "$VERBOSE" == "true" ]]; then
+            echo ""
+            echo "Full image information:"
+            cat /tmp/image_info.json | jq '.'
+          fi
+        else
+          echo "::warning title=Image not found::No image found matching criteria"
+          if [[ "$SEARCH_TYPE" == "image" ]]; then
+            echo "Searched for image: $SEARCH_VALUE"
+          else
+            echo "Searched for family: $SEARCH_VALUE"
+          fi
+          echo "In projects: ${PROJECTS[*]}"
+        fi
+        
+        # Set outputs
+        echo "IMAGE_FOUND=${IMAGE_FOUND}" >> $GITHUB_ENV
+        echo "IMAGE_ID=${IMAGE_ID}" >> $GITHUB_ENV
+        echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
+        echo "IMAGE_SELF_LINK=${IMAGE_SELF_LINK}" >> $GITHUB_ENV
+        echo "IMAGE_PROJECT=${IMAGE_PROJECT}" >> $GITHUB_ENV
+        echo "IMAGE_FAMILY=${IMAGE_FAMILY}" >> $GITHUB_ENV
+        echo "IMAGE_CREATION_TIMESTAMP=${IMAGE_CREATION_TIMESTAMP}" >> $GITHUB_ENV
+        echo "IMAGE_DESCRIPTION=${IMAGE_DESCRIPTION}" >> $GITHUB_ENV
+        ##
+        echo ""
+        echo "finishing the 'query-gcp-image' step... "
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Query AWS for image information
+      id: query-aws-image
+      if: inputs.cloud-provider == 'aws'
+      run: |
+        echo "::group::starting the 'query-aws-image' step... "
+        echo ""
+        echo "Querying AWS for image information"
+        ##
+        AWS_REGION="${{ inputs.query-location }}"
+        SOURCE_IMAGE="${{ inputs.source-image }}"
+        SOURCE_IMAGE_FAMILY="${{ inputs.source-image-family }}"
+        AWS_OWNER_ID="${{ inputs.image-location }}"
+        IMAGE_NAME_PREFIX="${{ inputs.image-name-prefix }}"
+        IMAGE_NAME_SUFFIX="${{ inputs.image-name-suffix }}"
+        VERBOSE="${{ inputs.verbose }}"
+        
+        echo "::warning title=AWS Support::AWS image query is a placeholder and needs to be implemented."
+        echo ""
+        echo "Would query AWS for image information..."
+        echo "  Region         : $AWS_REGION"
+        echo "  Source Image   : $SOURCE_IMAGE"
+        echo "  Image Family   : $SOURCE_IMAGE_FAMILY"
+        echo "  Owner ID       : $AWS_OWNER_ID"
+        echo "  Name Prefix    : $IMAGE_NAME_PREFIX"
+        echo "  Name Suffix    : $IMAGE_NAME_SUFFIX"
+        echo ""
+        echo "To implement, use AWS CLI commands like:"
+        if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
+          echo "  aws ec2 describe-images --region $AWS_REGION --image-ids $SOURCE_IMAGE"
+        else
+          echo "  aws ec2 describe-images --region $AWS_REGION --filters \"Name=name,Values=*${SOURCE_IMAGE_FAMILY}*\""
+        fi
+        echo ""
+        
+        # Placeholder for AWS implementation
+        # Uncomment and modify when AWS support is needed:
+        # if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
+        #   # Query for specific AMI ID
+        #   aws ec2 describe-images --region "$AWS_REGION" --image-ids "$SOURCE_IMAGE" --output json > /tmp/ami_info.json
+        # else
+        #   # Query for AMI by name pattern
+        #   FILTERS="Name=name,Values=*${SOURCE_IMAGE_FAMILY}*"
+        #   if [[ -n "$AWS_OWNER_ID" ]]; then
+        #     FILTERS="$FILTERS Name=owner-id,Values=$AWS_OWNER_ID"
+        #   fi
+        #   aws ec2 describe-images --region "$AWS_REGION" --filters "$FILTERS" \
+        #     --query 'sort_by(Images, &CreationDate)[-1]' --output json > /tmp/ami_info.json
+        # fi
+        # 
+        # IMAGE_ID=$(jq -r '.ImageId' /tmp/ami_info.json)
+        # IMAGE_NAME=$(jq -r '.Name' /tmp/ami_info.json)
+        # IMAGE_CREATION_TIMESTAMP=$(jq -r '.CreationDate' /tmp/ami_info.json)
+        # IMAGE_DESCRIPTION=$(jq -r '.Description // empty' /tmp/ami_info.json)
+        #
+        # # Apply prefix and suffix if provided
+        # if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
+        #   IMAGE_NAME="${IMAGE_NAME_PREFIX}${IMAGE_NAME}"
+        #   IMAGE_ID="${IMAGE_NAME_PREFIX}${IMAGE_ID}"
+        # fi
+        # if [[ -n "$IMAGE_NAME_SUFFIX" ]]; then
+        #   IMAGE_NAME="${IMAGE_NAME}${IMAGE_NAME_SUFFIX}"
+        #   IMAGE_ID="${IMAGE_ID}${IMAGE_NAME_SUFFIX}"
+        # fi
+        
+        # For now, mark as not implemented
+        echo "::error title=⛔ AWS not implemented::AWS image query is not yet implemented"
+        IMAGE_FOUND="false"
+        
+        # Set outputs
+        echo "IMAGE_FOUND=${IMAGE_FOUND}" >> $GITHUB_ENV
+        echo "IMAGE_ID=" >> $GITHUB_ENV
+        echo "IMAGE_NAME=" >> $GITHUB_ENV
+        echo "IMAGE_SELF_LINK=" >> $GITHUB_ENV
+        echo "IMAGE_PROJECT=" >> $GITHUB_ENV
+        echo "IMAGE_FAMILY=" >> $GITHUB_ENV
+        echo "IMAGE_CREATION_TIMESTAMP=" >> $GITHUB_ENV
+        echo "IMAGE_DESCRIPTION=" >> $GITHUB_ENV
+        ##
+        echo ""
+        echo "finishing the 'query-aws-image' step... "
+        echo "::endgroup::"
+      shell: bash
+
+    # Output variables for the action
+    - name: Output variables from this action
+      id: query-image
+      run: |
+        echo "::group::starting the 'query-image' step... "
+        echo ""
+        ## Set output variables
+        ##
+        IMAGE_FOUND="${{ env.IMAGE_FOUND }}"
+        IMAGE_ID="${{ env.IMAGE_ID }}"
+        IMAGE_NAME="${{ env.IMAGE_NAME }}"
+        IMAGE_SELF_LINK="${{ env.IMAGE_SELF_LINK }}"
+        IMAGE_PROJECT="${{ env.IMAGE_PROJECT }}"
+        IMAGE_FAMILY="${{ env.IMAGE_FAMILY }}"
+        IMAGE_CREATION_TIMESTAMP="${{ env.IMAGE_CREATION_TIMESTAMP }}"
+        IMAGE_DESCRIPTION="${{ env.IMAGE_DESCRIPTION }}"
+        
+        echo "IMAGE_FOUND=${IMAGE_FOUND}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_ID=${IMAGE_ID}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_NAME=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_SELF_LINK=${IMAGE_SELF_LINK}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_PROJECT=${IMAGE_PROJECT}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_FAMILY=${IMAGE_FAMILY}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_CREATION_TIMESTAMP=${IMAGE_CREATION_TIMESTAMP}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_DESCRIPTION=${IMAGE_DESCRIPTION}" >> "$GITHUB_OUTPUT"
+        
+        if [[ "${{ inputs.verbose }}" == "true" ]]; then
+          echo ""
+          echo "=== Action Outputs ==="
+          echo "IMAGE_FOUND              : ${IMAGE_FOUND}"
+          echo "IMAGE_ID                 : ${IMAGE_ID}"
+          echo "IMAGE_NAME               : ${IMAGE_NAME}"
+          echo "IMAGE_SELF_LINK          : ${IMAGE_SELF_LINK}"
+          echo "IMAGE_PROJECT            : ${IMAGE_PROJECT}"
+          echo "IMAGE_FAMILY             : ${IMAGE_FAMILY}"
+          echo "IMAGE_CREATION_TIMESTAMP : ${IMAGE_CREATION_TIMESTAMP}"
+          echo "IMAGE_DESCRIPTION        : ${IMAGE_DESCRIPTION}"
+        fi
+        ##
+        echo ""
+        echo "finishing the 'query-image' step... "
+        echo "::endgroup::"
+      shell: bash
+
+
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'search'
+  color: 'blue'
