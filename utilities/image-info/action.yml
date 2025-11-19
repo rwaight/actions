@@ -70,6 +70,7 @@ outputs:
 runs:
   using: "composite"
   steps:
+
     - name: Validate that the runner OS is Linux
       if: ${{ runner.os != 'Linux' }}
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-error-message
@@ -87,8 +88,8 @@ runs:
         ##
         CLOUD_PROVIDER="${{ inputs.cloud-provider }}"
         if [[ "$CLOUD_PROVIDER" != "gcp" && "$CLOUD_PROVIDER" != "aws" ]]; then
-          echo "::error title=⛔ invalid cloud provider::Cloud provider must be 'gcp' or 'aws', got '${CLOUD_PROVIDER}'"
-          exit 1
+            echo "::error title=⛔ invalid cloud provider::Cloud provider must be 'gcp' or 'aws', got '${CLOUD_PROVIDER}'"
+            exit 1
         fi
         echo "✓ Cloud provider validated: ${CLOUD_PROVIDER}"
         echo "CLOUD_PROVIDER=${CLOUD_PROVIDER}" >> $GITHUB_ENV
@@ -106,33 +107,33 @@ runs:
         ## Validate required inputs based on cloud provider
         ##
         CLOUD_PROVIDER="${{ inputs.cloud-provider }}"
-        
+        ##
         if [[ "$CLOUD_PROVIDER" == "gcp" ]]; then
-          # GCP validations
-          if [[ -z "${{ inputs.query-location }}" ]]; then
-            echo "::error title=⛔ missing query-location::query-location (GCP project ID) is required for GCP"
-            exit 1
-          fi
-          
-          if [[ -z "${{ inputs.source-image }}" && -z "${{ inputs.source-image-family }}" ]]; then
-            echo "::error title=⛔ missing source image::Either source-image or source-image-family must be provided for GCP"
-            exit 1
-          fi
-          
-          echo "✓ GCP inputs validated"
+            # GCP validations
+            if [[ -z "${{ inputs.query-location }}" ]]; then
+                echo "::error title=⛔ missing query-location::query-location (GCP project ID) is required for GCP"
+                exit 1
+            fi
+            ##
+            if [[ -z "${{ inputs.source-image }}" && -z "${{ inputs.source-image-family }}" ]]; then
+                echo "::error title=⛔ missing source image::Either source-image or source-image-family must be provided for GCP"
+                exit 1
+            fi
+            ##
+            echo "✓ GCP inputs validated"
         elif [[ "$CLOUD_PROVIDER" == "aws" ]]; then
-          # AWS validations
-          if [[ -z "${{ inputs.query-location }}" ]]; then
-            echo "::error title=⛔ missing query-location::query-location (AWS region) is required for AWS"
-            exit 1
-          fi
-          
-          if [[ -z "${{ inputs.source-image }}" && -z "${{ inputs.source-image-family }}" ]]; then
-            echo "::error title=⛔ missing source image::Either source-image or source-image-family must be provided for AWS"
-            exit 1
-          fi
-          
-          echo "✓ AWS inputs validated"
+            # AWS validations
+            if [[ -z "${{ inputs.query-location }}" ]]; then
+                echo "::error title=⛔ missing query-location::query-location (AWS region) is required for AWS"
+                exit 1
+            fi
+            ##
+            if [[ -z "${{ inputs.source-image }}" && -z "${{ inputs.source-image-family }}" ]]; then
+                echo "::error title=⛔ missing source image::Either source-image or source-image-family must be provided for AWS"
+                exit 1
+            fi
+            ##
+            echo "✓ AWS inputs validated"
         fi
         ##
         echo ""
