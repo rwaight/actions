@@ -181,7 +181,7 @@ runs:
         IMAGE_NAME_PREFIX="${{ inputs.image-name-prefix }}"
         IMAGE_NAME_SUFFIX="${{ inputs.image-name-suffix }}"
         VERBOSE="${{ inputs.verbose }}"
-        
+        ##
         IMAGE_FOUND="false"
         IMAGE_ID=""
         IMAGE_NAME=""
@@ -190,111 +190,111 @@ runs:
         IMAGE_FAMILY=""
         IMAGE_CREATION_TIMESTAMP=""
         IMAGE_DESCRIPTION=""
-        
+        ##
         # Determine which projects to search
         if [[ -n "$SOURCE_IMAGE_PROJECT" && "$SOURCE_IMAGE_PROJECT" != "" ]]; then
-          # User specified project(s) to search
-          IFS=',' read -ra PROJECTS <<< "$SOURCE_IMAGE_PROJECT"
-          if [[ "$VERBOSE" == "true" ]]; then
-            echo "Searching in specified projects: ${PROJECTS[*]}"
-          fi
+            # User specified project(s) to search
+            IFS=',' read -ra PROJECTS <<< "$SOURCE_IMAGE_PROJECT"
+            if [[ "$VERBOSE" == "true" ]]; then
+                echo "Searching in specified projects: ${PROJECTS[*]}"
+            fi
         else
-          # Search in the current project
-          PROJECTS=("$PROJECT_ID")
-          if [[ "$VERBOSE" == "true" ]]; then
-            echo "Searching in image-location (defaulting to query-location): $PROJECT_ID"
-          fi
+            # Search in the current project
+            PROJECTS=("$PROJECT_ID")
+            if [[ "$VERBOSE" == "true" ]]; then
+                echo "Searching in image-location (defaulting to query-location): $PROJECT_ID"
+            fi
         fi
-        
+        ##
         # Determine search method: specific image or family
         if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
-          echo "Searching for specific image: $SOURCE_IMAGE"
-          SEARCH_TYPE="image"
-          SEARCH_VALUE="$SOURCE_IMAGE"
+            echo "Searching for specific image: $SOURCE_IMAGE"
+            SEARCH_TYPE="image"
+            SEARCH_VALUE="$SOURCE_IMAGE"
         elif [[ -n "$SOURCE_IMAGE_FAMILY" && "$SOURCE_IMAGE_FAMILY" != "" ]]; then
-          echo "Searching for image family: $SOURCE_IMAGE_FAMILY"
-          SEARCH_TYPE="family"
-          SEARCH_VALUE="$SOURCE_IMAGE_FAMILY"
+            echo "Searching for image family: $SOURCE_IMAGE_FAMILY"
+            SEARCH_TYPE="family"
+            SEARCH_VALUE="$SOURCE_IMAGE_FAMILY"
         else
-          echo "::error title=⛔ no search criteria::Neither source-image nor source-image-family was provided"
-          exit 1
+            echo "::error title=⛔ no search criteria::Neither source-image nor source-image-family was provided"
+            exit 1
         fi
-        
+        ##
         # Search for the image across specified projects
         for proj in "${PROJECTS[@]}"; do
-          proj=$(echo "$proj" | xargs) # trim whitespace
-          
-          if [[ "$VERBOSE" == "true" ]]; then
-            echo "Searching in project: $proj"
-          fi
-          
-          if [[ "$SEARCH_TYPE" == "image" ]]; then
-            # Search for specific image by name
-            if gcloud compute images describe "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
-              IMAGE_FOUND="true"
-              IMAGE_PROJECT="$proj"
-              break
+            proj=$(echo "$proj" | xargs) # trim whitespace
+            ##
+            if [[ "$VERBOSE" == "true" ]]; then
+                echo "Searching in project: $proj"
             fi
-          else
-            # Search for latest image in family
-            # Use gcloud to get the latest image from family
-            if gcloud compute images describe-from-family "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
-              IMAGE_FOUND="true"
-              IMAGE_PROJECT="$proj"
-              break
+            ##
+            if [[ "$SEARCH_TYPE" == "image" ]]; then
+                # Search for specific image by name
+                if gcloud compute images describe "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
+                    IMAGE_FOUND="true"
+                    IMAGE_PROJECT="$proj"
+                    break
+                fi
+            else
+                # Search for latest image in family
+                # Use gcloud to get the latest image from family
+                if gcloud compute images describe-from-family "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
+                    IMAGE_FOUND="true"
+                    IMAGE_PROJECT="$proj"
+                    break
+                fi
             fi
-          fi
         done
-        
+        ##
         if [[ "$IMAGE_FOUND" == "true" ]]; then
-          echo "✓ Image found in project: $IMAGE_PROJECT"
-          
-          # Extract image information from JSON
-          IMAGE_NAME=$(jq -r '.name' /tmp/image_info.json)
-          IMAGE_ID="$IMAGE_NAME"
-          IMAGE_SELF_LINK=$(jq -r '.selfLink' /tmp/image_info.json)
-          IMAGE_FAMILY=$(jq -r '.family // empty' /tmp/image_info.json)
-          IMAGE_CREATION_TIMESTAMP=$(jq -r '.creationTimestamp' /tmp/image_info.json)
-          IMAGE_DESCRIPTION=$(jq -r '.description // empty' /tmp/image_info.json)
-          
-          # Apply prefix and suffix if provided
-          if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
-            IMAGE_NAME="${IMAGE_NAME_PREFIX}${IMAGE_NAME}"
-            IMAGE_ID="${IMAGE_NAME_PREFIX}${IMAGE_ID}"
-            if [[ "$VERBOSE" == "true" ]]; then
-              echo "Applied prefix: $IMAGE_NAME_PREFIX"
+            echo "✓ Image found in project: $IMAGE_PROJECT"
+            ##
+            # Extract image information from JSON
+            IMAGE_NAME=$(jq -r '.name' /tmp/image_info.json)
+            IMAGE_ID="$IMAGE_NAME"
+            IMAGE_SELF_LINK=$(jq -r '.selfLink' /tmp/image_info.json)
+            IMAGE_FAMILY=$(jq -r '.family // empty' /tmp/image_info.json)
+            IMAGE_CREATION_TIMESTAMP=$(jq -r '.creationTimestamp' /tmp/image_info.json)
+            IMAGE_DESCRIPTION=$(jq -r '.description // empty' /tmp/image_info.json)
+            ##
+            # Apply prefix and suffix if provided
+            if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
+                IMAGE_NAME="${IMAGE_NAME_PREFIX}${IMAGE_NAME}"
+                IMAGE_ID="${IMAGE_NAME_PREFIX}${IMAGE_ID}"
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "Applied prefix: $IMAGE_NAME_PREFIX"
+                fi
             fi
-          fi
-          
-          if [[ -n "$IMAGE_NAME_SUFFIX" ]]; then
-            IMAGE_NAME="${IMAGE_NAME}${IMAGE_NAME_SUFFIX}"
-            IMAGE_ID="${IMAGE_ID}${IMAGE_NAME_SUFFIX}"
-            if [[ "$VERBOSE" == "true" ]]; then
-              echo "Applied suffix: $IMAGE_NAME_SUFFIX"
+            ##
+            if [[ -n "$IMAGE_NAME_SUFFIX" ]]; then
+                IMAGE_NAME="${IMAGE_NAME}${IMAGE_NAME_SUFFIX}"
+                IMAGE_ID="${IMAGE_ID}${IMAGE_NAME_SUFFIX}"
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "Applied suffix: $IMAGE_NAME_SUFFIX"
+                fi
             fi
-          fi
-          
-          echo "  Image Name              : $IMAGE_NAME"
-          echo "  Image Self Link         : $IMAGE_SELF_LINK"
-          echo "  Image Project           : $IMAGE_PROJECT"
-          echo "  Image Family            : $IMAGE_FAMILY"
-          echo "  Creation Timestamp      : $IMAGE_CREATION_TIMESTAMP"
-          
-          if [[ "$VERBOSE" == "true" ]]; then
-            echo ""
-            echo "Full image information:"
-            cat /tmp/image_info.json | jq '.'
-          fi
+            ##
+            echo "  Image Name              : $IMAGE_NAME"
+            echo "  Image Self Link         : $IMAGE_SELF_LINK"
+            echo "  Image Project           : $IMAGE_PROJECT"
+            echo "  Image Family            : $IMAGE_FAMILY"
+            echo "  Creation Timestamp      : $IMAGE_CREATION_TIMESTAMP"
+            ##
+            if [[ "$VERBOSE" == "true" ]]; then
+                echo ""
+                echo "Full image information:"
+                cat /tmp/image_info.json | jq '.'
+            fi
         else
-          echo "::warning title=Image not found::No image found matching criteria"
-          if [[ "$SEARCH_TYPE" == "image" ]]; then
-            echo "Searched for image: $SEARCH_VALUE"
-          else
-            echo "Searched for family: $SEARCH_VALUE"
-          fi
-          echo "In projects: ${PROJECTS[*]}"
+            echo "::warning title=Image not found::No image found matching criteria"
+            if [[ "$SEARCH_TYPE" == "image" ]]; then
+                echo "Searched for image: $SEARCH_VALUE"
+            else
+                echo "Searched for family: $SEARCH_VALUE"
+            fi
+            echo "In projects: ${PROJECTS[*]}"
         fi
-        
+        ##
         # Set outputs
         echo "IMAGE_FOUND=${IMAGE_FOUND}" >> $GITHUB_ENV
         echo "IMAGE_ID=${IMAGE_ID}" >> $GITHUB_ENV
