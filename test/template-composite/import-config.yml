@@ -1,10 +1,21 @@
 name: template-composite
-description: placeholder
+description: A template for building composite actions.
 group: test
 imported: false
 local:
   author: rwaight
   modifications: true
+  update:
+    exclusions:
+      - README-examples.md
+      - example-custom-notes.md
+source:
+  action_name: test-template-composite
+  author: rwaight
+  latest_version: "null"
+  update_available: false
+  repo_name: actions
+  repo_url: https://github.com/rwaight/actions
 specs:
   action_file: action.yml
   inputs: [gh-token, my-example-input1, verbose]
