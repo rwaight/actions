@@ -166,9 +166,6 @@ Add full paths or tags to image names:
 
 Capture source image details:
 ```yaml
-### 4. Build Metadata Collection
-Capture source image details:
-```yaml
 - name: Get image info
   id: image
   uses: rwaight/actions/utilities/image-info@main
@@ -186,6 +183,7 @@ Capture source image details:
       "family": "${{ steps.image.outputs.image-family }}"
     }
     EOF
+  shell: bash
 ```
 
 ### 5. Conditional Logic
