@@ -39,7 +39,7 @@ runs:
       shell: bash
 
     - name: Greet the triggering_actor
-      if: inputs.verbose=='true' || ${{ runner.debug == '1' }}
+      if: inputs.verbose=='true' || runner.debug == '1'
       run: | 
         echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
       shell: bash
