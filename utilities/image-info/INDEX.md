@@ -10,7 +10,7 @@ This directory contains a comprehensive GitHub composite action for querying clo
 | **README.md** | Complete documentation with examples and integration guides |
 | **QUICK-REFERENCE.md** | Quick copy-paste patterns for common use cases |
 | **example-workflow.yml** | Full working examples with 5 test scenarios |
-| **import-config.md** | Action metadata and configuration reference |
+| **import-config.yml** | Action metadata and configuration reference |
 | **INDEX.md** | This navigation guide |
 
 ## 🎯 Purpose
