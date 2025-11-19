@@ -357,10 +357,21 @@ runs:
               --query 'sort_by(Images, &CreationDate)[-1]' --output json > /tmp/ami_info.json
         fi
         ##
-        IMAGE_ID=$(jq -r '.ImageId' /tmp/ami_info.json)
-        IMAGE_NAME=$(jq -r '.Name' /tmp/ami_info.json)
-        IMAGE_CREATION_TIMESTAMP=$(jq -r '.CreationDate' /tmp/ami_info.json)
-        IMAGE_DESCRIPTION=$(jq -r '.Description // empty' /tmp/ami_info.json)
+        if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
+            echo "result is an array of images"
+            # When querying by image ID, the response is wrapped in an Images array
+            IMAGE_ID=$(jq -r '.Images[0].ImageId' /tmp/ami_info.json)
+            IMAGE_NAME=$(jq -r '.Images[0].Name' /tmp/ami_info.json)
+            IMAGE_CREATION_TIMESTAMP=$(jq -r '.Images[0].CreationDate' /tmp/ami_info.json)
+            IMAGE_DESCRIPTION=$(jq -r '.Images[0].Description // empty' /tmp/ami_info.json)
+        else
+            echo "result is a single image object"
+            # When querying by filter with --query, the result is a single image object
+            IMAGE_ID=$(jq -r '.ImageId' /tmp/ami_info.json)
+            IMAGE_NAME=$(jq -r '.Name' /tmp/ami_info.json)
+            IMAGE_CREATION_TIMESTAMP=$(jq -r '.CreationDate' /tmp/ami_info.json)
+            IMAGE_DESCRIPTION=$(jq -r '.Description // empty' /tmp/ami_info.json)
+        fi
         ##
         # Apply prefix and suffix if provided
         if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
