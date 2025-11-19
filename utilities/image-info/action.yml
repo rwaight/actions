@@ -325,7 +325,7 @@ runs:
         IMAGE_NAME_PREFIX="${{ inputs.image-name-prefix }}"
         IMAGE_NAME_SUFFIX="${{ inputs.image-name-suffix }}"
         VERBOSE="${{ inputs.verbose }}"
-        
+        ##
         echo "::warning title=AWS Support::AWS image query is a placeholder and needs to be implemented."
         echo ""
         echo "Would query AWS for image information..."
@@ -338,46 +338,45 @@ runs:
         echo ""
         echo "To implement, use AWS CLI commands like:"
         if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
-          echo "  aws ec2 describe-images --region $AWS_REGION --image-ids $SOURCE_IMAGE"
+            echo "  aws ec2 describe-images --region $AWS_REGION --image-ids $SOURCE_IMAGE"
         else
-          echo "  aws ec2 describe-images --region $AWS_REGION --filters \"Name=name,Values=*${SOURCE_IMAGE_FAMILY}*\""
+            echo "  aws ec2 describe-images --region $AWS_REGION --filters \"Name=name,Values=*${SOURCE_IMAGE_FAMILY}*\""
         fi
         echo ""
-        
-        # Placeholder for AWS implementation
-        # Uncomment and modify when AWS support is needed:
-        # if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
-        #   # Query for specific AMI ID
-        #   aws ec2 describe-images --region "$AWS_REGION" --image-ids "$SOURCE_IMAGE" --output json > /tmp/ami_info.json
-        # else
-        #   # Query for AMI by name pattern
-        #   FILTERS="Name=name,Values=*${SOURCE_IMAGE_FAMILY}*"
-        #   if [[ -n "$AWS_OWNER_ID" ]]; then
-        #     FILTERS="$FILTERS Name=owner-id,Values=$AWS_OWNER_ID"
-        #   fi
-        #   aws ec2 describe-images --region "$AWS_REGION" --filters "$FILTERS" \
-        #     --query 'sort_by(Images, &CreationDate)[-1]' --output json > /tmp/ami_info.json
-        # fi
-        # 
-        # IMAGE_ID=$(jq -r '.ImageId' /tmp/ami_info.json)
-        # IMAGE_NAME=$(jq -r '.Name' /tmp/ami_info.json)
-        # IMAGE_CREATION_TIMESTAMP=$(jq -r '.CreationDate' /tmp/ami_info.json)
-        # IMAGE_DESCRIPTION=$(jq -r '.Description // empty' /tmp/ami_info.json)
-        #
-        # # Apply prefix and suffix if provided
-        # if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
-        #   IMAGE_NAME="${IMAGE_NAME_PREFIX}${IMAGE_NAME}"
-        #   IMAGE_ID="${IMAGE_NAME_PREFIX}${IMAGE_ID}"
-        # fi
-        # if [[ -n "$IMAGE_NAME_SUFFIX" ]]; then
-        #   IMAGE_NAME="${IMAGE_NAME}${IMAGE_NAME_SUFFIX}"
-        #   IMAGE_ID="${IMAGE_ID}${IMAGE_NAME_SUFFIX}"
-        # fi
-        
+        ##
+        if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
+            aws ec2 describe-images --region "$AWS_REGION" --image-ids "$SOURCE_IMAGE" --output json > /tmp/ami_info.json
+            # Query for specific AMI ID
+        else
+            FILTERS="Name=name,Values=*${SOURCE_IMAGE_FAMILY}*"
+            # Query for AMI by name pattern
+            if [[ -n "$AWS_OWNER_ID" ]]; then
+              FILTERS="$FILTERS Name=owner-id,Values=$AWS_OWNER_ID"
+            fi
+            aws ec2 describe-images --region "$AWS_REGION" --filters "$FILTERS" \
+              --query 'sort_by(Images, &CreationDate)[-1]' --output json > /tmp/ami_info.json
+        fi
+        ##
+        IMAGE_ID=$(jq -r '.ImageId' /tmp/ami_info.json)
+        IMAGE_NAME=$(jq -r '.Name' /tmp/ami_info.json)
+        IMAGE_CREATION_TIMESTAMP=$(jq -r '.CreationDate' /tmp/ami_info.json)
+        IMAGE_DESCRIPTION=$(jq -r '.Description // empty' /tmp/ami_info.json)
+        ##
+        # Apply prefix and suffix if provided
+        if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
+            IMAGE_NAME="${IMAGE_NAME_PREFIX}${IMAGE_NAME}"
+            IMAGE_ID="${IMAGE_NAME_PREFIX}${IMAGE_ID}"
+        fi
+        ##
+        if [[ -n "$IMAGE_NAME_SUFFIX" ]]; then
+            IMAGE_NAME="${IMAGE_NAME}${IMAGE_NAME_SUFFIX}"
+            IMAGE_ID="${IMAGE_ID}${IMAGE_NAME_SUFFIX}"
+        fi
+        ##
         # For now, mark as not implemented
-        echo "::error title=⛔ AWS not implemented::AWS image query is not yet implemented"
+        echo "::error title=⛔ AWS not implemented::AWS image query is not yet fully implemented"
         IMAGE_FOUND="false"
-        
+        ##
         # Set outputs
         echo "IMAGE_FOUND=${IMAGE_FOUND}" >> $GITHUB_ENV
         echo "IMAGE_ID=" >> $GITHUB_ENV
