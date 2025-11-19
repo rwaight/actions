@@ -43,6 +43,7 @@ When using Packer with `source_image_family`, you might want to know **which spe
 ### The Solution
 
 This action queries the cloud provider's API using the same logic Packer would use:
+
 1. Search for images by exact name OR by family
 2. When using family, get the latest non-deprecated image
 3. Return all relevant image information
@@ -63,7 +64,8 @@ This action queries the cloud provider's API using the same logic Packer would u
 | `image-name-suffix` | Suffix pattern to append to image name output | No | `''` |
 | `verbose` | Enable verbose logging | No | `false` |
 
-**Input Consolidation Notes:**
+**Input Consolidation Notes**:
+
 - `query-location`: For GCP, this is your project ID. For AWS, this is the region (e.g., `us-east-1`)
 - `image-location`: For GCP, this is the project ID(s) where images are stored (can search multiple). For AWS, this is the AMI owner ID
 
@@ -243,11 +245,7 @@ jobs:
           packer init ./packer/
           packer build ./packer/gcp-build.pkr.hcl
 ```
-          PKR_VAR_source_image_project_id: ${{ steps.source-image.outputs.image-project }}
-        run: |
-          packer init ./packer/
-          packer build ./packer/gcp-build.pkr.hcl
-```
+
 
 ### Conditional Logic Based on Image
 
@@ -386,6 +384,7 @@ jobs:
 ### Project Search Order
 
 When `image-location` contains multiple projects (comma-separated):
+
 - Projects are searched in the order specified
 - Returns the first matching image found
 - Useful for fallback scenarios
@@ -425,7 +424,7 @@ The prefix/suffix is applied to both `image-name` and `image-id` outputs.
 ### Common GCP Image Families
 
 | Family | Provider Project | Description |
-|--------|-----------------|-------------|
+|--------|------------------|-------------|
 | `rocky-linux-8` | `rocky-linux-cloud` | Rocky Linux 8 |
 | `rocky-linux-9` | `rocky-linux-cloud` | Rocky Linux 9 |
 | `ubuntu-2204-lts` | `ubuntu-os-cloud` | Ubuntu 22.04 LTS |
@@ -458,18 +457,22 @@ The action includes comprehensive error handling:
 ## Troubleshooting
 
 ### Error: "This action supports Linux only"
+
 - **Cause**: You're running on a Windows or macOS runner
 - **Solution**: Use `runs-on: ubuntu-latest` in your workflow
 
 ### Error: "Cloud provider must be 'gcp' or 'aws'"
+
 - **Cause**: Invalid value for `cloud-provider` input
 - **Solution**: Set `cloud-provider` to either `gcp` or `aws`
 
 ### Error: "query-location is required for GCP/AWS"
+
 - **Cause**: Missing `query-location` input
 - **Solution**: For GCP, provide the project ID. For AWS, provide the region (e.g., `us-east-1`)
 
 ### Warning: "Image not found"
+
 - **Cause**: No image matches the search criteria
 - **Solution**: 
   1. Verify the image name or family is correct
@@ -478,12 +481,13 @@ The action includes comprehensive error handling:
   4. Enable verbose mode to see search details
 
 ### Image found but wrong version
+
 - **Cause**: Multiple images in family, got a different one than expected
 - **Solution**: Use `source-image` with the exact image name instead of `source-image-family`
 
-## Integration with reuse-build.yml
+## Integration with GitHub build workflows
 
-This action can be added to `reuse-build.yml` before the Packer steps:
+This action can be added to GitHub build workflows before running Packer:
 
 ```yaml
 - name: Get source image information
@@ -525,7 +529,7 @@ This action follows the license of the parent repository.
 - [google-github-actions/auth](https://github.com/google-github-actions/auth) - Authenticate to Google Cloud
 - [hashicorp/setup-packer](https://github.com/hashicorp/setup-packer) - Setup Packer
 - [aws-actions/configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) - Configure AWS credentials
-- [rwaight/actions](https://github.com/rwaight/actions) - Other related rwaight actions
+- [rwaight/actions](https://github.com/rwaight/actions) - Monorepo of GitHub Actions
 
 ## References
 

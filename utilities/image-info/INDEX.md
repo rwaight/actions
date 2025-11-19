@@ -50,22 +50,26 @@ Packer doesn't have a good way to get source image information **before** it run
 ## 📖 Documentation Guide
 
 ### For First-Time Users
+
 1. **Start with README.md** - Complete overview with examples
 2. **Check QUICK-REFERENCE.md** - Copy-paste common patterns
 3. **Review example-workflow.yml** - See it in action
 
 ### For Integration
+
 1. **Use QUICK-REFERENCE.md** - Find your use case pattern
 2. **Check "Packer Integration" section in README.md** - See full integration examples
 3. **Refer to example-workflow.yml** - Study the packer-integration job
 
 ### For Configuration
+
 1. **See import-config.md** - All inputs and outputs documented
 2. **Check README.md "Inputs" section** - Detailed parameter descriptions
 
 ## 🔑 Key Features
 
 ### GCP Support (Fully Implemented)
+
 - Query by specific image name OR image family
 - Search across multiple projects (comma-separated list)
 - Returns latest non-deprecated image from family
@@ -74,21 +78,25 @@ Packer doesn't have a good way to get source image information **before** it run
 - Verbose mode shows full image details
 
 ### Consolidated Inputs
+
 - `query-location`: GCP project ID or AWS region (single input for both)
 - `image-location`: GCP project ID(s) or AWS owner ID (single input for both)
 - Simplified cross-cloud configuration
 
 ### Prefix/Suffix Patterns
+
 - **Prefix**: Add full paths (e.g., `projects/my-project/global/images/`)
 - **Suffix**: Add tags or versions (e.g., `-verified`, `:latest`)
 - **Both**: Create custom formats (e.g., `gcr.io/project/image:tag`)
 
 ### AWS Support (Placeholder)
+
 - Input validation complete
 - Example commands documented
 - Ready for implementation (returns "not implemented" error)
 
 ### Error Handling
+
 - Graceful failure (returns `image-found: false` instead of failing workflow)
 - Comprehensive input validation
 - Clear error messages with GitHub annotations
@@ -110,6 +118,7 @@ Packer doesn't have a good way to get source image information **before** it run
 ## 💡 Common Use Cases
 
 ### 1. Pre-Build Validation
+
 Verify source image exists before starting Packer:
 ```yaml
 - name: Get source image
@@ -128,6 +137,7 @@ Verify source image exists before starting Packer:
 ```
 
 ### 2. Multi-Project Search
+
 Search across multiple GCP projects:
 ```yaml
 - uses: rwaight/actions/utilities/image-info@main
@@ -139,6 +149,7 @@ Search across multiple GCP projects:
 ```
 
 ### 3. Prefix/Suffix Patterns
+
 Add full paths or tags to image names:
 ```yaml
 - uses: rwaight/actions/utilities/image-info@main
@@ -152,6 +163,7 @@ Add full paths or tags to image names:
 ```
 
 ### 4. Build Metadata Collection
+
 Capture source image details:
 ```yaml
 ### 4. Build Metadata Collection
@@ -177,9 +189,7 @@ Capture source image details:
 ```
 
 ### 5. Conditional Logic
-```
 
-### 5. Conditional Logic
 Make workflow decisions based on image info:
 ```yaml
 - name: Get image info
@@ -222,9 +232,9 @@ Make workflow decisions based on image info:
 - [hashicorp/setup-packer](https://github.com/hashicorp/setup-packer) - Setup Packer for builds
 
 
-## 🔗 Integration with reuse-build.yml
+## 🔗 Integration with GitHub build workflows
 
-This action can be added to the `reuse-build.yml` workflow:
+This action can be added to GitHub build workflows:
 
 ```yaml
 # After GCP authentication, before Packer steps
@@ -254,27 +264,30 @@ This action can be added to the `reuse-build.yml` workflow:
 ## 🐛 Troubleshooting
 
 ### Image Not Found
+
 - Enable `verbose: 'true'` to see search details
 - Verify project IDs are correct
 - Check GCP authentication has access to the projects
 - Try querying manually: `gcloud compute images describe-from-family FAMILY --project=PROJECT`
 
 ### Authentication Errors
+
 - Ensure `google-github-actions/auth` runs BEFORE this action
 - Verify service account has `compute.images.get` permission
 - Check project ID is correct
 
 ### Wrong Image Returned
+
 - If using `source-image-family`, you get the latest non-deprecated image
 - Use `source-image` with exact name if you need a specific version
 - Enable verbose mode to see which image was selected
 
 ## 📝 Version Information
 
-- **Created**: 2024
+- **Created**: 2025
 - **Status**: Production Ready (GCP), Placeholder (AWS)
 - **Template**: Based on rwaight/actions/test/template-composite
-- **Line Count**: ~400 lines in action.yml
+- **Line Count**: ~440 lines in action.yml
 
 ## 🎓 Learn More
 
@@ -285,12 +298,12 @@ This action can be added to the `reuse-build.yml` workflow:
 ## 📦 Package Structure
 
 ```
-docs/image-info/
+utilities/image-info/
 ├── action.yml              # Core action implementation
 ├── README.md               # Complete documentation
 ├── QUICK-REFERENCE.md      # Quick patterns
 ├── example-workflow.yml    # Working examples
-├── import-config.md        # Metadata reference
+├── import-config.yml       # Metadata reference
 └── INDEX.md                # This file
 ```
 

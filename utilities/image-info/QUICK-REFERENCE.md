@@ -363,6 +363,7 @@ image-location: 'windows-cloud'
       "image_self_link": "${{ steps.image-info.outputs.image-self-link }}"
     }
     EOF
+  shell: bash
 
 - name: Upload debug info
   uses: actions/upload-artifact@v4
@@ -506,6 +507,7 @@ steps:
       }
     }
     EOF
+  shell: bash
 
 - name: Upload metadata
   uses: actions/upload-artifact@v4
@@ -538,6 +540,7 @@ steps:
     | Created | ${{ steps.image-info.outputs.image-creation-timestamp }} |
     | Self Link | ${{ steps.image-info.outputs.image-self-link }} |
     EOF
+  shell: bash
 ```
 
 ## Troubleshooting
@@ -568,6 +571,7 @@ steps:
       --project=${{ secrets.GCP_PROJECT_ID }} \
       --filter="family:rocky-linux-8" \
       --limit=5
+  shell: bash
 ```
 
 ### Compare with Manual gcloud Command
