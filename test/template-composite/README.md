@@ -47,7 +47,7 @@ jobs:
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
           my-example-input1: 'hello'
-          verbose: true
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
       - name: Report the output from the run-template-composite step
         if: ${{ steps.run-template-composite.outputs.action-output1 }}
@@ -61,5 +61,5 @@ jobs:
         run: |
           echo "::error title=⛔ error in the 'run-template-composite' step hint::No output provided"
           exit 1
-
+        shell: bash
 ```
