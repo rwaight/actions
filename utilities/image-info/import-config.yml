@@ -1,0 +1,28 @@
+name: Get Cloud Image Information
+author: rwaight
+description: Retrieve information about cloud images, including their status, age, and recommended actions.
+group: utilities
+imported: false
+local:
+  author: rwaight
+  modifications: true
+  update:
+    exclusions:
+      - example-workflow.yml
+      - INDEX.md
+      - QUICK-REFERENCE.md
+source:
+  action_name: utilities-image-info
+  author: rwaight
+  latest_version: "null"
+  update_available: false
+  repo_name: actions
+  repo_url: https://github.com/rwaight/actions
+specs:
+  action_file: action.yml
+  inputs: [cloud-provider, query-location, source-image, source-image-family, image-location, image-name-prefix, image-name-suffix, verbose]
+  outputs: [image-found, image-id, image-name, image-project, image-family, image-creation-timestamp, image-description, image-self-link]
+  runs:
+    using: composite
+tests:
+  _comment: reserved for future use

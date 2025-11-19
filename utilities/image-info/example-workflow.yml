@@ -1,0 +1,607 @@
+name: Example - Get Cloud Image Info
+
+# This workflow demonstrates various use cases for the get-image-info action
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_scenario:
+        description: 'Test scenario to run'
+        required: true
+        type: choice
+        default: 'query-by-family'
+        options:
+          - query-by-family
+          - query-by-name
+          - multi-project-search
+          - prefix-suffix-patterns
+          - packer-integration
+          - all-scenarios
+
+env:
+  GCP_PROJECT_ID: 'my-gcp-project'  # Replace with your GCP project ID
+
+jobs:
+  query-by-family:
+    name: Query by Image Family
+    runs-on: ubuntu-latest
+    if: inputs.test_scenario == 'query-by-family' || inputs.test_scenario == 'all-scenarios'
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Query Rocky Linux 8 family
+        id: rocky8
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
+
+      - name: Display Rocky Linux 8 info
+        run: |
+          echo "Image Found: ${{ steps.rocky8.outputs.image-found }}"
+          if [[ "${{ steps.rocky8.outputs.image-found }}" == "true" ]]; then
+              echo "Image Name: ${{ steps.rocky8.outputs.image-name }}"
+              echo "Image Project: ${{ steps.rocky8.outputs.image-project }}"
+              echo "Image Family: ${{ steps.rocky8.outputs.image-family }}"
+              echo "Created: ${{ steps.rocky8.outputs.image-creation-timestamp }}"
+              echo "Description: ${{ steps.rocky8.outputs.image-description }}"
+              echo "Self Link: ${{ steps.rocky8.outputs.image-self-link }}"
+          fi
+        shell: bash
+
+      - name: Query Ubuntu 22.04 family
+        id: ubuntu2204
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'ubuntu-2204-lts'
+          image-location: 'ubuntu-os-cloud'
+
+      - name: Display Ubuntu 22.04 info
+        run: |
+          echo "::notice title=Ubuntu 22.04::Using image ${{ steps.ubuntu2204.outputs.image-name }}"
+
+      - name: Add to job summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<'EOF'
+          ## Query by Family Results
+          
+          ### Rocky Linux 8
+          | Property | Value |
+          |----------|-------|
+          | Found | ${{ steps.rocky8.outputs.image-found }} |
+          | Name | `${{ steps.rocky8.outputs.image-name }}` |
+          | Project | `${{ steps.rocky8.outputs.image-project }}` |
+          | Family | `${{ steps.rocky8.outputs.image-family }}` |
+          | Created | ${{ steps.rocky8.outputs.image-creation-timestamp }} |
+          
+          ### Ubuntu 22.04 LTS
+          | Property | Value |
+          |----------|-------|
+          | Found | ${{ steps.ubuntu2204.outputs.image-found }} |
+          | Name | `${{ steps.ubuntu2204.outputs.image-name }}` |
+          | Project | `${{ steps.ubuntu2204.outputs.image-project }}` |
+          | Family | `${{ steps.ubuntu2204.outputs.image-family }}` |
+          | Created | ${{ steps.ubuntu2204.outputs.image-creation-timestamp }} |
+          EOF
+        shell: bash
+
+  query-by-name:
+    name: Query by Specific Image Name
+    runs-on: ubuntu-latest
+    if: inputs.test_scenario == 'query-by-name' || inputs.test_scenario == 'all-scenarios'
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      # First get the latest from family to know what to search for
+      - name: Get latest Rocky Linux 8 image
+        id: get-latest
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+
+      # Now query for that specific image by name
+      - name: Query for specific image
+        id: query-specific
+        if: steps.get-latest.outputs.image-found == 'true'
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image: ${{ steps.get-latest.outputs.image-name }}
+          image-location: 'rocky-linux-cloud'
+          verbose: 'true'
+
+      - name: Verify both queries return same image
+        if: steps.get-latest.outputs.image-found == 'true'
+        run: |
+          FAMILY_IMAGE="${{ steps.get-latest.outputs.image-name }}"
+          SPECIFIC_IMAGE="${{ steps.query-specific.outputs.image-name }}"
+          
+          if [[ "$FAMILY_IMAGE" == "$SPECIFIC_IMAGE" ]]; then
+              echo "✅ SUCCESS: Both queries returned the same image: $FAMILY_IMAGE"
+          else
+              echo "::error::MISMATCH: Family=$FAMILY_IMAGE, Specific=$SPECIFIC_IMAGE"
+              exit 1
+          fi
+        shell: bash
+
+      - name: Display image details
+        if: steps.query-specific.outputs.image-found == 'true'
+        run: |
+          echo "Image Name: ${{ steps.query-specific.outputs.image-name }}"
+          echo "Image ID: ${{ steps.query-specific.outputs.image-id }}"
+          echo "Self Link: ${{ steps.query-specific.outputs.image-self-link }}"
+          echo "Creation Date: ${{ steps.query-specific.outputs.image-creation-timestamp }}"
+        shell: bash
+
+  multi-project-search:
+    name: Multi-Project Search
+    runs-on: ubuntu-latest
+    if: inputs.test_scenario == 'multi-project-search' || inputs.test_scenario == 'all-scenarios'
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Search across multiple projects
+        id: multi-search
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          # Search custom project first, then fallback to public
+          image-location: '${{ env.GCP_PROJECT_ID }},rocky-linux-cloud'
+          verbose: 'true'
+
+      - name: Display which project had the image
+        if: steps.multi-search.outputs.image-found == 'true'
+        run: |
+          FOUND_PROJECT="${{ steps.multi-search.outputs.image-project }}"
+          
+          if [[ "$FOUND_PROJECT" == "${{ env.GCP_PROJECT_ID }}" ]]; then
+              echo "::notice::Found custom image in project $FOUND_PROJECT"
+          elif [[ "$FOUND_PROJECT" == "rocky-linux-cloud" ]]; then
+              echo "::notice::Using public image from $FOUND_PROJECT"
+          else
+              echo "::warning::Image found in unexpected project: $FOUND_PROJECT"
+          fi
+          
+          echo "Image: ${{ steps.multi-search.outputs.image-name }}"
+        shell: bash
+
+      - name: Test fallback behavior
+        id: fallback-test
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'debian-11'
+          # Search projects that likely don't have it, then the correct one
+          image-location: 'rocky-linux-cloud,ubuntu-os-cloud,debian-cloud'
+          verbose: 'true'
+
+      - name: Verify fallback worked
+        if: steps.fallback-test.outputs.image-found == 'true'
+        run: |
+          FOUND_PROJECT="${{ steps.fallback-test.outputs.image-project }}"
+          
+          if [[ "$FOUND_PROJECT" == "debian-cloud" ]]; then
+              echo "✅ Fallback worked correctly - found in debian-cloud"
+          else
+              echo "::warning::Unexpected project: $FOUND_PROJECT"
+          fi
+        shell: bash
+
+  prefix-suffix-patterns:
+    name: Prefix/Suffix Pattern Examples
+    runs-on: ubuntu-latest
+    if: inputs.test_scenario == 'prefix-suffix-patterns' || inputs.test_scenario == 'all-scenarios'
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      # Example 1: Full GCP image path with prefix
+      - name: Query with full path prefix
+        id: with-prefix
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+          image-name-prefix: 'projects/rocky-linux-cloud/global/images/'
+
+      - name: Display prefixed image name
+        if: steps.with-prefix.outputs.image-found == 'true'
+        run: |
+          echo "Image name with prefix:"
+          echo "${{ steps.with-prefix.outputs.image-name }}"
+          echo ""
+          echo "This can be used directly in Packer or for full resource paths"
+
+      # Example 2: Version suffix
+      - name: Query with version suffix
+        id: with-suffix
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+          image-name-suffix: '-verified'
+
+      - name: Display suffixed image name
+        if: steps.with-suffix.outputs.image-found == 'true'
+        run: |
+          echo "Image name with suffix:"
+          echo "${{ steps.with-suffix.outputs.image-name }}"
+          echo ""
+          echo "This can be used for tagging or versioning"
+
+      # Example 3: Both prefix and suffix (e.g., container image format)
+      - name: Query with both prefix and suffix
+        id: with-both
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'ubuntu-2204-lts'
+          image-location: 'ubuntu-os-cloud'
+          image-name-prefix: 'gcr.io/my-project/'
+          image-name-suffix: ':latest'
+
+      - name: Display image name with both
+        if: steps.with-both.outputs.image-found == 'true'
+        run: |
+          echo "Image name with prefix and suffix:"
+          echo "${{ steps.with-both.outputs.image-name }}"
+          echo ""
+          echo "This format works well for container registry paths"
+
+      # Example 4: Compare with and without patterns
+      - name: Query without patterns for comparison
+        id: without-patterns
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+
+      - name: Compare results
+        if: steps.with-prefix.outputs.image-found == 'true' && steps.without-patterns.outputs.image-found == 'true'
+        run: |
+          echo "=== Comparison ==="
+          echo "Without patterns : ${{ steps.without-patterns.outputs.image-name }}"
+          echo "With prefix only : ${{ steps.with-prefix.outputs.image-name }}"
+          echo "With suffix only : ${{ steps.with-suffix.outputs.image-name }}"
+          echo "With both        : ${{ steps.with-both.outputs.image-name }}"
+
+      - name: Add to job summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<'EOF'
+          ## Prefix/Suffix Pattern Results
+          
+          | Pattern | Result |
+          |---------|--------|
+          | No pattern | `${{ steps.without-patterns.outputs.image-name }}` |
+          | Prefix only | `${{ steps.with-prefix.outputs.image-name }}` |
+          | Suffix only | `${{ steps.with-suffix.outputs.image-name }}` |
+          | Both | `${{ steps.with-both.outputs.image-name }}` |
+          
+          ### Use Cases
+          - **Prefix**: Full resource paths, project-qualified names
+          - **Suffix**: Version tags, verification markers
+          - **Both**: Container registry format (gcr.io/project/image:tag)
+          EOF
+        shell: bash
+
+  packer-integration:
+    name: Packer Integration Example
+    runs-on: ubuntu-latest
+    if: inputs.test_scenario == 'packer-integration' || inputs.test_scenario == 'all-scenarios'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      # Step 1: Query for source image
+      - name: Get source image information
+        id: source-image
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+          verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
+
+      # Step 2: Verify image exists
+      - name: Verify source image found
+        if: steps.source-image.outputs.image-found == 'false'
+        run: |
+          echo "::error title=Source Image Not Found::Cannot proceed with Packer build"
+          exit 1
+
+      # Step 3: Log source image details
+      - name: Log source image information
+        run: |
+          echo "::group::Source Image Details"
+          echo "Using source image for Packer build:"
+          echo "  Name: ${{ steps.source-image.outputs.image-name }}"
+          echo "  Project: ${{ steps.source-image.outputs.image-project }}"
+          echo "  Family: ${{ steps.source-image.outputs.image-family }}"
+          echo "  Created: ${{ steps.source-image.outputs.image-creation-timestamp }}"
+          echo "  Description: ${{ steps.source-image.outputs.image-description }}"
+          echo "::endgroup::"
+          
+          echo "::notice title=Source Image::Using ${{ steps.source-image.outputs.image-name }} from ${{ steps.source-image.outputs.image-project }}"
+
+      # Step 4: Create build metadata
+      - name: Create build metadata file
+        run: |
+          mkdir -p build-output
+          cat > build-output/source-image-metadata.json <<EOF
+          {
+            "source_image": {
+              "name": "${{ steps.source-image.outputs.image-name }}",
+              "id": "${{ steps.source-image.outputs.image-id }}",
+              "project": "${{ steps.source-image.outputs.image-project }}",
+              "family": "${{ steps.source-image.outputs.image-family }}",
+              "self_link": "${{ steps.source-image.outputs.image-self-link }}",
+              "created": "${{ steps.source-image.outputs.image-creation-timestamp }}",
+              "description": "${{ steps.source-image.outputs.image-description }}"
+            },
+            "build_metadata": {
+              "workflow_run_id": "${{ github.run_id }}",
+              "workflow_run_number": "${{ github.run_number }}",
+              "triggered_by": "${{ github.actor }}",
+              "repository": "${{ github.repository }}",
+              "ref": "${{ github.ref }}",
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            }
+          }
+          EOF
+          
+          echo "Build metadata:"
+          cat build-output/source-image-metadata.json
+        shell: bash
+
+      # Step 5: Setup Packer (would run actual build in real workflow)
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v3
+
+      # Step 6: Simulate Packer with environment variables
+      - name: Simulate Packer build (dry-run)
+        env:
+          PKR_VAR_project_id: ${{ env.GCP_PROJECT_ID }}
+          PKR_VAR_source_image: ${{ steps.source-image.outputs.image-name }}
+          PKR_VAR_source_image_project_id: ${{ steps.source-image.outputs.image-project }}
+          PKR_VAR_source_image_family: ${{ steps.source-image.outputs.image-family }}
+        run: |
+          echo "::group::Packer Variables"
+          echo "Would pass these variables to Packer:"
+          echo "  PKR_VAR_project_id: $PKR_VAR_project_id"
+          echo "  PKR_VAR_source_image: $PKR_VAR_source_image"
+          echo "  PKR_VAR_source_image_project_id: $PKR_VAR_source_image_project_id"
+          echo "  PKR_VAR_source_image_family: $PKR_VAR_source_image_family"
+          echo "::endgroup::"
+          
+          # In a real workflow, you would run:
+          # packer init ./packer/
+          # packer build ./packer/gcp-build.pkr.hcl
+          
+          echo "::notice::Packer build simulation complete"
+        shell: bash
+
+      # Step 7: Upload metadata as artifact
+      - name: Upload build metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: packer-build-metadata
+          path: build-output/source-image-metadata.json
+
+      # Step 8: Add to job summary
+      - name: Add build summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<'EOF'
+          ## Packer Build Summary
+          
+          ### Source Image
+          | Property | Value |
+          |----------|-------|
+          | Name | `${{ steps.source-image.outputs.image-name }}` |
+          | Project | `${{ steps.source-image.outputs.image-project }}` |
+          | Family | `${{ steps.source-image.outputs.image-family }}` |
+          | Created | ${{ steps.source-image.outputs.image-creation-timestamp }} |
+          | Self Link | ${{ steps.source-image.outputs.image-self-link }} |
+          
+          ### Build Info
+          - **Run ID**: ${{ github.run_id }}
+          - **Triggered By**: ${{ github.actor }}
+          - **Repository**: ${{ github.repository }}
+          
+          ✅ Source image verified and metadata captured
+          EOF
+        shell: bash
+
+  error-handling:
+    name: Error Handling Examples
+    runs-on: ubuntu-latest
+    if: inputs.test_scenario == 'all-scenarios'
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      # Test 1: Image not found (graceful handling)
+      - name: Test graceful failure
+        id: not-found
+        continue-on-error: true
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'this-image-family-does-not-exist'
+          image-location: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Handle missing image
+        if: steps.not-found.outputs.image-found != 'true'
+        run: |
+          echo "::warning::Image not found, but workflow continues"
+          echo "Would use default image or skip build"
+
+      # Test 2: Fallback to alternative
+      - name: Try primary image
+        id: primary
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'my-custom-image'
+          image-location: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Fallback to public image
+        id: fallback
+        if: steps.primary.outputs.image-found != 'true'
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+
+      - name: Determine final image
+        run: |
+          if [[ "${{ steps.primary.outputs.image-found }}" == "true" ]]; then
+              echo "Using primary image: ${{ steps.primary.outputs.image-name }}"
+          elif [[ "${{ steps.fallback.outputs.image-found }}" == "true" ]]; then
+              echo "Using fallback image: ${{ steps.fallback.outputs.image-name }}"
+          else
+              echo "::error::No suitable image found"
+              exit 1
+          fi
+
+      # Test 3: Required image check
+      - name: Get required image
+        id: required
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+
+      - name: Fail if required image not found
+        if: steps.required.outputs.image-found != 'true'
+        run: |
+          echo "::error title=Required Image Missing::This image is required for the build to proceed"
+          exit 1
+
+  conditional-logic:
+    name: Conditional Logic Examples
+    runs-on: ubuntu-latest
+    if: inputs.test_scenario == 'all-scenarios'
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      # Example 1: Check image age
+      - name: Get image info
+        id: image-info
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+
+      - name: Calculate image age
+        id: check-age
+        if: steps.image-info.outputs.image-found == 'true'
+        run: |
+          CREATION_DATE="${{ steps.image-info.outputs.image-creation-timestamp }}"
+          CURRENT_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          
+          # Convert to epoch
+          CREATION_EPOCH=$(date -d "$CREATION_DATE" +%s)
+          CURRENT_EPOCH=$(date -d "$CURRENT_DATE" +%s)
+          
+          # Calculate age in days
+          AGE_DAYS=$(( ($CURRENT_EPOCH - $CREATION_EPOCH) / 86400 ))
+          
+          echo "Image age: $AGE_DAYS days"
+          echo "age-days=$AGE_DAYS" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Determine if rebuild needed
+        if: steps.check-age.outputs.age-days != ''
+        run: |
+          AGE=${{ steps.check-age.outputs.age-days }}
+          
+          if [[ $AGE -lt 7 ]]; then
+              echo "::notice::Image is $AGE days old - recent, may skip rebuild"
+          elif [[ $AGE -lt 30 ]]; then
+              echo "::notice::Image is $AGE days old - consider rebuilding"
+          else
+              echo "::warning::Image is $AGE days old - rebuild recommended"
+          fi
+        shell: bash
+
+      # Example 2: Compare images from different families
+      - name: Get Rocky Linux 8 info
+        id: rocky8
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-8'
+          image-location: 'rocky-linux-cloud'
+
+      - name: Get Rocky Linux 9 info
+        id: rocky9
+        uses: rwaight/actions/utilities/image-info@main
+        with:
+          cloud-provider: 'gcp'
+          query-location: ${{ env.GCP_PROJECT_ID }}
+          source-image-family: 'rocky-linux-9'
+          image-location: 'rocky-linux-cloud'
+
+      - name: Compare image dates
+        if: steps.rocky8.outputs.image-found == 'true' && steps.rocky9.outputs.image-found == 'true'
+        run: |
+          echo "Rocky Linux 8: ${{ steps.rocky8.outputs.image-name }} (created ${{ steps.rocky8.outputs.image-creation-timestamp }})"
+          echo "Rocky Linux 9: ${{ steps.rocky9.outputs.image-name }} (created ${{ steps.rocky9.outputs.image-creation-timestamp }})"
+          
+          # Could use this to determine which to build from
+          ROCKY8_EPOCH=$(date -d "${{ steps.rocky8.outputs.image-creation-timestamp }}" +%s)
+          ROCKY9_EPOCH=$(date -d "${{ steps.rocky9.outputs.image-creation-timestamp }}" +%s)
+          
+          if [[ $ROCKY9_EPOCH -gt $ROCKY8_EPOCH ]]; then
+              echo "::notice::Rocky Linux 9 is newer - recommend using it for new builds"
+          fi
+        shell: bash
