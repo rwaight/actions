@@ -11,8 +11,8 @@ inputs:
     default: ${{ github.token }}
   my-example-input1:
     description: >-
-      'An example input that you can use. 
-      Replace this with your own input description.'
+      An example input that you can use. 
+      Replace this with your own input description.
     required: true
   verbose:
     description: 'Determine if the action should run verbose tasks, defaults to false.'
