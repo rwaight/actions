@@ -19,8 +19,9 @@ runs:
       shell: bash
 
     - name: Greet the triggering_actor
-      if: inputs.verbose=='true'
-      run: echo Hello ${{ github.triggering_actor }}, the verbose variable is set to true.
+      if: inputs.verbose=='true' || runner.debug == '1'
+      run: |
+        echo "Hello ${{ github.triggering_actor }}, the verbose variable is set to true."
       shell: bash
 
     - name: GitHub Runner Debug Mode
@@ -42,7 +43,7 @@ runs:
         GH_VAR_RUNNER_ARCH1: ${{ runner.arch }}
         GH_VAR_RUNNER_ARCH2: ${{ env.RUNNER_ARCH }}
       run: |
-        echo "::group::starting the 'print-runner-context' step... "
+        echo "::group::starting the 'runner-debug-mode' step... "
         echo ""
         echo "NOTE: The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context "
         echo ""
@@ -68,10 +69,100 @@ runs:
         echo "    GH_VAR_RUNNER_ARCH1:  ${GH_VAR_RUNNER_ARCH1} "
         echo "    GH_VAR_RUNNER_ARCH2:  ${GH_VAR_RUNNER_ARCH2} "
         echo ""
-        echo "finishing the 'print-runner-context' step... "
+        echo "finishing the 'runner-debug-mode' step... "
         ##
         echo "::endgroup::"
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
+      shell: bash
+
+    - name: Dump GitHub context
+      id: print-github-context
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#example-printing-context-information-to-the-log
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: |
+        echo "::group::starting the 'print-github-context' step... "
+        echo ""
+        echo "$GITHUB_CONTEXT"
+        echo ""
+        echo "finishing the 'print-github-context' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Dump job context
+      id: print-job-context
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#example-printing-context-information-to-the-log
+      env:
+        JOB_CONTEXT: ${{ toJson(job) }}
+      run: |
+        echo "::group::starting the 'print-job-context' step... "
+        echo ""
+        echo "$JOB_CONTEXT"
+        echo ""
+        echo "finishing the 'print-job-context' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Dump steps context
+      id: print-steps-context
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#example-printing-context-information-to-the-log
+      env:
+        STEPS_CONTEXT: ${{ toJson(steps) }}
+      run: |
+        echo "::group::starting the 'print-steps-context' step... "
+        echo ""
+        echo "$STEPS_CONTEXT"
+        echo ""
+        echo "finishing the 'print-steps-context' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Dump runner context
+      id: print-runner-context
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#example-printing-context-information-to-the-log
+      env:
+        RUNNER_CONTEXT: ${{ toJson(runner) }}
+      run: |
+        echo "::group::starting the 'print-runner-context' step... "
+        echo ""
+        echo "$RUNNER_CONTEXT"
+        echo ""
+        echo "finishing the 'print-runner-context' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Dump strategy context
+      id: print-strategy-context
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#example-printing-context-information-to-the-log
+      env:
+        STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+      run: |
+        echo "::group::starting the 'print-strategy-context' step... "
+        echo ""
+        echo "$STRATEGY_CONTEXT"
+        echo ""
+        echo "finishing the 'print-strategy-context' step... "
+        ##
+        echo "::endgroup::"
+      shell: bash
+
+    - name: Dump matrix context
+      id: print-matrix-context
+      # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#example-printing-context-information-to-the-log
+      env:
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      run: |
+        echo "::group::starting the 'print-matrix-context' step... "
+        echo ""
+        echo "$MATRIX_CONTEXT"
+        echo ""
+        echo "finishing the 'print-matrix-context' step... "
+        ##
+        echo "::endgroup::"
       shell: bash
 
 branding:
