@@ -25,7 +25,11 @@ on:
 env:
   VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
   # the bot name without the '[bot]' suffix
-  GH_LOCAL_BOT_NAME: 'rw-actions-bot'
+  GH_LOCAL_PRIMARY:   ${{ vars.GH_LOCAL_PRIMARY }}          # the GitHub account to use first, either 'user' or 'bot'
+  GH_LOCAL_BOT_NAME:  ${{ vars.GH_LOCAL_BOT_NAME || 'rw-actions-bot' }}         # the bot (GitHub app) name without the '[bot]' suffix
+  GH_LOCAL_BOT_UID:   ${{ vars.GH_LOCAL_BOT_UID }}          # the bot (GitHub app) UID
+  GH_LOCAL_USER_NAME: ${{ vars.GH_LOCAL_USER_NAME }}        # the GitHub machine account user name
+  GH_LOCAL_USER_UID:  ${{ vars.GH_LOCAL_USER_UID }}         # the GitHub machine account user ID
   # the owner of the repo, used in conditionals below
   GH_OWNER: rwaight
 
@@ -253,7 +257,7 @@ jobs:
       - name: Checkout files from commit tree
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         id: checkout
         # Skip running on forks or Dependabot since neither has access to secrets
         if: steps.app-token.outcome != 'skipped'
@@ -275,7 +279,7 @@ jobs:
       - name: Checkout files from commit tree for dependabot
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         id: checkout-dependabot
         # Run for Dependabot with the default token
         if: |
@@ -305,7 +309,7 @@ jobs:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/github/check-semver-labels@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/github/check-semver-labels@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         id: check-version-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
@@ -318,7 +322,7 @@ jobs:
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/github/label-checker@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         id: check-type-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
@@ -392,7 +396,7 @@ jobs:
           echo "The 'write-results' step has finished. "
 
       - name: Look for a comment
-        uses: rwaight/actions/chatops/find-comment@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/chatops/find-comment@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
@@ -409,7 +413,7 @@ jobs:
 
       - name: Generate comment template
         id: comment-template
-        uses: rwaight/actions/utilities/render-template@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/utilities/render-template@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
@@ -435,7 +439,7 @@ jobs:
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/chatops/create-or-update-comment@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/chatops/create-or-update-comment@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
