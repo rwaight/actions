@@ -43,7 +43,7 @@ runs:
         GH_VAR_RUNNER_ARCH1: ${{ runner.arch }}
         GH_VAR_RUNNER_ARCH2: ${{ env.RUNNER_ARCH }}
       run: |
-        echo "::group::starting the 'print-runner-context' step... "
+        echo "::group::starting the 'runner-debug-mode' step... "
         echo ""
         echo "NOTE: The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context "
         echo ""
@@ -69,7 +69,7 @@ runs:
         echo "    GH_VAR_RUNNER_ARCH1:  ${GH_VAR_RUNNER_ARCH1} "
         echo "    GH_VAR_RUNNER_ARCH2:  ${GH_VAR_RUNNER_ARCH2} "
         echo ""
-        echo "finishing the 'print-runner-context' step... "
+        echo "finishing the 'runner-debug-mode' step... "
         ##
         echo "::endgroup::"
       ## The 'runner.*' and 'RUNNER_*' variables are not available in the WORKFLOW env context or the top-level JOB context, but are available in the STEP env context
