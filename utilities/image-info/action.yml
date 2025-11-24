@@ -26,6 +26,13 @@ inputs:
       For AWS: AMI owner ID.'
     required: false
     default: ''
+  filter-labels:
+    description: >-
+      'Filter images by labels/tags. Format: "key1=value1,key2=value2". 
+      For GCP: uses labels. For AWS: uses tags. 
+      When combined with source-image or source-image-family, only images matching ALL criteria are returned.'
+    required: false
+    default: ''
   image-name-prefix:
     description: 'Prefix pattern to prepend to the image name output (e.g., "projects/my-project/global/images/").'
     required: false
@@ -65,6 +72,9 @@ outputs:
   image-description:
     description: "The image description."
     value: ${{ steps.query-image.outputs.IMAGE_DESCRIPTION }}
+  image-labels:
+    description: "The image labels/tags as JSON (GCP: labels, AWS: tags)."
+    value: ${{ steps.query-image.outputs.IMAGE_LABELS }}
 
 # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions
 runs:
@@ -156,6 +166,7 @@ runs:
         echo "source-image        : ${{ inputs.source-image }} "
         echo "source-image-family : ${{ inputs.source-image-family }} "
         echo "image-location      : ${{ inputs.image-location }} "
+        echo "filter-labels       : ${{ inputs.filter-labels }} "
         echo "image-name-prefix   : ${{ inputs.image-name-prefix }} "
         echo "image-name-suffix   : ${{ inputs.image-name-suffix }} "
         echo "verbose             : ${{ inputs.verbose }} "
@@ -178,6 +189,7 @@ runs:
         SOURCE_IMAGE="${{ inputs.source-image }}"
         SOURCE_IMAGE_FAMILY="${{ inputs.source-image-family }}"
         SOURCE_IMAGE_PROJECT="${{ inputs.image-location }}"
+        FILTER_LABELS="${{ inputs.filter-labels }}"
         IMAGE_NAME_PREFIX="${{ inputs.image-name-prefix }}"
         IMAGE_NAME_SUFFIX="${{ inputs.image-name-suffix }}"
         VERBOSE="${{ inputs.verbose }}"
@@ -190,6 +202,7 @@ runs:
         IMAGE_FAMILY=""
         IMAGE_CREATION_TIMESTAMP=""
         IMAGE_DESCRIPTION=""
+        IMAGE_LABELS=""
         ##
         # Determine which projects to search
         if [[ -n "$SOURCE_IMAGE_PROJECT" && "$SOURCE_IMAGE_PROJECT" != "" ]]; then
@@ -206,6 +219,22 @@ runs:
             fi
         fi
         ##
+        # Parse filter labels if provided
+        declare -A LABEL_FILTERS
+        if [[ -n "$FILTER_LABELS" && "$FILTER_LABELS" != "" ]]; then
+            echo "Parsing label filters: $FILTER_LABELS"
+            IFS=',' read -ra LABEL_PAIRS <<< "$FILTER_LABELS"
+            for pair in "${LABEL_PAIRS[@]}"; do
+                IFS='=' read -r key value <<< "$pair"
+                key=$(echo "$key" | xargs)
+                value=$(echo "$value" | xargs)
+                LABEL_FILTERS["$key"]="$value"
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "  Label filter: $key = $value"
+                fi
+            done
+        fi
+        ##
         # Determine search method: specific image or family
         if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
             echo "Searching for specific image: $SOURCE_IMAGE"
@@ -215,10 +244,38 @@ runs:
             echo "Searching for image family: $SOURCE_IMAGE_FAMILY"
             SEARCH_TYPE="family"
             SEARCH_VALUE="$SOURCE_IMAGE_FAMILY"
+        elif [[ ${#LABEL_FILTERS[@]} -gt 0 ]]; then
+            echo "Searching by labels only"
+            SEARCH_TYPE="labels"
+            SEARCH_VALUE=""
         else
-            echo "::error title=⛔ no search criteria::Neither source-image nor source-image-family was provided"
+            echo "::error title=⛔ no search criteria::Must provide source-image, source-image-family, or filter-labels"
             exit 1
         fi
+        ##
+        # Function to check if image matches label filters
+        check_labels() {
+            local image_json="$1"
+            local labels=$(echo "$image_json" | jq -r '.labels // {}')
+            ##
+            if [[ ${#LABEL_FILTERS[@]} -eq 0 ]]; then
+                return 0  # No label filters, match
+            fi
+            ##
+            for key in "${!LABEL_FILTERS[@]}"; do
+                expected_value="${LABEL_FILTERS[$key]}"
+                actual_value=$(echo "$labels" | jq -r --arg k "$key" '.[$k] // empty')
+                ##
+                if [[ "$actual_value" != "$expected_value" ]]; then
+                    if [[ "$VERBOSE" == "true" ]]; then
+                        echo "  Label mismatch: $key (expected: $expected_value, got: $actual_value)"
+                    fi
+                    return 1  # Label mismatch
+                fi
+            done
+            ##
+            return 0  # All labels match
+        }
         ##
         # Search for the image across specified projects
         for proj in "${PROJECTS[@]}"; do
@@ -231,18 +288,44 @@ runs:
             if [[ "$SEARCH_TYPE" == "image" ]]; then
                 # Search for specific image by name
                 if gcloud compute images describe "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
-                    IMAGE_FOUND="true"
-                    IMAGE_PROJECT="$proj"
-                    break
+                    if check_labels "$(cat /tmp/image_info.json)"; then
+                        IMAGE_FOUND="true"
+                        IMAGE_PROJECT="$proj"
+                        break
+                    elif [[ "$VERBOSE" == "true" ]]; then
+                        echo "  Image found but labels don't match filters"
+                    fi
+                fi
+            elif [[ "$SEARCH_TYPE" == "family" ]]; then
+                # Search for latest image in family
+                if gcloud compute images describe-from-family "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
+                    if check_labels "$(cat /tmp/image_info.json)"; then
+                        IMAGE_FOUND="true"
+                        IMAGE_PROJECT="$proj"
+                        break
+                    elif [[ "$VERBOSE" == "true" ]]; then
+                        echo "  Image found but labels don't match filters"
+                    fi
                 fi
             else
-                # Search for latest image in family
-                # Use gcloud to get the latest image from family
-                if gcloud compute images describe-from-family "$SEARCH_VALUE" --project="$proj" --format=json > /tmp/image_info.json 2>/dev/null; then
-                    IMAGE_FOUND="true"
-                    IMAGE_PROJECT="$proj"
-                    break
+                # Search by labels only - list all images and filter
+                gcloud compute images list --project="$proj" --format=json > /tmp/images_list.json 2>/dev/null
+                ##
+                # Find the most recent image matching label filters
+                IMAGE_COUNT=$(jq 'length' /tmp/images_list.json)
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "  Found $IMAGE_COUNT images in project, checking labels..."
                 fi
+                ##
+                for ((i=0; i<IMAGE_COUNT; i++)); do
+                    IMAGE_JSON=$(jq ".[$i]" /tmp/images_list.json)
+                    if check_labels "$IMAGE_JSON"; then
+                        echo "$IMAGE_JSON" > /tmp/image_info.json
+                        IMAGE_FOUND="true"
+                        IMAGE_PROJECT="$proj"
+                        break 2  # Break out of both loops
+                    fi
+                done
             fi
         done
         ##
@@ -256,6 +339,7 @@ runs:
             IMAGE_FAMILY=$(jq -r '.family // empty' /tmp/image_info.json)
             IMAGE_CREATION_TIMESTAMP=$(jq -r '.creationTimestamp' /tmp/image_info.json)
             IMAGE_DESCRIPTION=$(jq -r '.description // empty' /tmp/image_info.json)
+            IMAGE_LABELS=$(jq -c '.labels // {}' /tmp/image_info.json)
             ##
             # Apply prefix and suffix if provided
             if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
@@ -279,6 +363,7 @@ runs:
             echo "  Image Project           : $IMAGE_PROJECT"
             echo "  Image Family            : $IMAGE_FAMILY"
             echo "  Creation Timestamp      : $IMAGE_CREATION_TIMESTAMP"
+            echo "  Image Labels            : $IMAGE_LABELS"
             ##
             if [[ "$VERBOSE" == "true" ]]; then
                 echo ""
@@ -289,10 +374,15 @@ runs:
             echo "::warning title=Image not found::No image found matching criteria"
             if [[ "$SEARCH_TYPE" == "image" ]]; then
                 echo "Searched for image: $SEARCH_VALUE"
-            else
+            elif [[ "$SEARCH_TYPE" == "family" ]]; then
                 echo "Searched for family: $SEARCH_VALUE"
+            else
+                echo "Searched by labels only"
             fi
             echo "In projects: ${PROJECTS[*]}"
+            if [[ ${#LABEL_FILTERS[@]} -gt 0 ]]; then
+                echo "With label filters: $FILTER_LABELS"
+            fi
         fi
         ##
         # Set outputs
@@ -304,6 +394,7 @@ runs:
         echo "IMAGE_FAMILY=${IMAGE_FAMILY}" >> $GITHUB_ENV
         echo "IMAGE_CREATION_TIMESTAMP=${IMAGE_CREATION_TIMESTAMP}" >> $GITHUB_ENV
         echo "IMAGE_DESCRIPTION=${IMAGE_DESCRIPTION}" >> $GITHUB_ENV
+        echo "IMAGE_LABELS=${IMAGE_LABELS}" >> $GITHUB_ENV
         ##
         echo ""
         echo "finishing the 'query-gcp-image' step... "
@@ -322,81 +413,128 @@ runs:
         SOURCE_IMAGE="${{ inputs.source-image }}"
         SOURCE_IMAGE_FAMILY="${{ inputs.source-image-family }}"
         AWS_OWNER_ID="${{ inputs.image-location }}"
+        FILTER_LABELS="${{ inputs.filter-labels }}"
         IMAGE_NAME_PREFIX="${{ inputs.image-name-prefix }}"
         IMAGE_NAME_SUFFIX="${{ inputs.image-name-suffix }}"
         VERBOSE="${{ inputs.verbose }}"
         ##
-        echo "::warning title=AWS Support::AWS image query is a placeholder and needs to be implemented."
-        echo ""
-        echo "Would query AWS for image information..."
-        echo "  Region         : $AWS_REGION"
-        echo "  Source Image   : $SOURCE_IMAGE"
-        echo "  Image Family   : $SOURCE_IMAGE_FAMILY"
-        echo "  Owner ID       : $AWS_OWNER_ID"
-        echo "  Name Prefix    : $IMAGE_NAME_PREFIX"
-        echo "  Name Suffix    : $IMAGE_NAME_SUFFIX"
-        echo ""
-        echo "To implement, use AWS CLI commands like:"
-        if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
-            echo "  aws ec2 describe-images --region $AWS_REGION --image-ids $SOURCE_IMAGE"
-        else
-            echo "  aws ec2 describe-images --region $AWS_REGION --filters \"Name=name,Values=*${SOURCE_IMAGE_FAMILY}*\""
-        fi
-        echo ""
-        ##
-        if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
-            aws ec2 describe-images --region "$AWS_REGION" --image-ids "$SOURCE_IMAGE" --output json > /tmp/ami_info.json
-            # Query for specific AMI ID
-        else
-            FILTERS="Name=name,Values=*${SOURCE_IMAGE_FAMILY}*"
-            # Query for AMI by name pattern
-            if [[ -n "$AWS_OWNER_ID" ]]; then
-              FILTERS="$FILTERS Name=owner-id,Values=$AWS_OWNER_ID"
-            fi
-            aws ec2 describe-images --region "$AWS_REGION" --filters "$FILTERS" \
-              --query 'sort_by(Images, &CreationDate)[-1]' --output json > /tmp/ami_info.json
-        fi
-        ##
-        if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
-            echo "result is an array of images"
-            # When querying by image ID, the response is wrapped in an Images array
-            IMAGE_ID=$(jq -r '.Images[0].ImageId' /tmp/ami_info.json)
-            IMAGE_NAME=$(jq -r '.Images[0].Name' /tmp/ami_info.json)
-            IMAGE_CREATION_TIMESTAMP=$(jq -r '.Images[0].CreationDate' /tmp/ami_info.json)
-            IMAGE_DESCRIPTION=$(jq -r '.Images[0].Description // empty' /tmp/ami_info.json)
-        else
-            echo "result is a single image object"
-            # When querying by filter with --query, the result is a single image object
-            IMAGE_ID=$(jq -r '.ImageId' /tmp/ami_info.json)
-            IMAGE_NAME=$(jq -r '.Name' /tmp/ami_info.json)
-            IMAGE_CREATION_TIMESTAMP=$(jq -r '.CreationDate' /tmp/ami_info.json)
-            IMAGE_DESCRIPTION=$(jq -r '.Description // empty' /tmp/ami_info.json)
-        fi
-        ##
-        # Apply prefix and suffix if provided
-        if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
-            IMAGE_NAME="${IMAGE_NAME_PREFIX}${IMAGE_NAME}"
-            IMAGE_ID="${IMAGE_NAME_PREFIX}${IMAGE_ID}"
-        fi
-        ##
-        if [[ -n "$IMAGE_NAME_SUFFIX" ]]; then
-            IMAGE_NAME="${IMAGE_NAME}${IMAGE_NAME_SUFFIX}"
-            IMAGE_ID="${IMAGE_ID}${IMAGE_NAME_SUFFIX}"
-        fi
-        ##
-        # For now, mark as not implemented
-        echo "::error file=utilities/image-info/action.yml,title=⛔ AWS not implemented::AWS image query is not yet fully implemented"
         IMAGE_FOUND="false"
+        IMAGE_ID=""
+        IMAGE_NAME=""
+        IMAGE_CREATION_TIMESTAMP=""
+        IMAGE_DESCRIPTION=""
+        IMAGE_LABELS=""
+        ##
+        # Build AWS CLI filters
+        FILTERS=""
+        ##
+        if [[ -n "$SOURCE_IMAGE" && "$SOURCE_IMAGE" != "" ]]; then
+            # Query for specific AMI ID
+            aws ec2 describe-images --region "$AWS_REGION" --image-ids "$SOURCE_IMAGE" --output json > /tmp/ami_info.json
+            ##
+            # Extract first image from Images array
+            jq '.Images[0]' /tmp/ami_info.json > /tmp/ami_single.json
+        else
+            # Build filters for name pattern and/or tags
+            if [[ -n "$SOURCE_IMAGE_FAMILY" && "$SOURCE_IMAGE_FAMILY" != "" ]]; then
+                FILTERS="Name=name,Values=*${SOURCE_IMAGE_FAMILY}*"
+            fi
+            ##
+            if [[ -n "$AWS_OWNER_ID" && "$AWS_OWNER_ID" != "" ]]; then
+                if [[ -n "$FILTERS" ]]; then
+                    FILTERS="$FILTERS Name=owner-id,Values=$AWS_OWNER_ID"
+                else
+                    FILTERS="Name=owner-id,Values=$AWS_OWNER_ID"
+                fi
+            fi
+            ##
+            # Add tag filters if provided
+            if [[ -n "$FILTER_LABELS" && "$FILTER_LABELS" != "" ]]; then
+                echo "Parsing tag filters: $FILTER_LABELS"
+                IFS=',' read -ra TAG_PAIRS <<< "$FILTER_LABELS"
+                for pair in "${TAG_PAIRS[@]}"; do
+                    IFS='=' read -r key value <<< "$pair"
+                    key=$(echo "$key" | xargs)
+                    value=$(echo "$value" | xargs)
+                    ##
+                    if [[ -n "$FILTERS" ]]; then
+                        FILTERS="$FILTERS Name=tag:${key},Values=${value}"
+                    else
+                        FILTERS="Name=tag:${key},Values=${value}"
+                    fi
+                    ##
+                    if [[ "$VERBOSE" == "true" ]]; then
+                        echo "  Tag filter: $key = $value"
+                    fi
+                done
+            fi
+            ##
+            if [[ -z "$FILTERS" ]]; then
+                echo "::error title=⛔ no search criteria::Must provide source-image, source-image-family, or filter-labels for AWS"
+                exit 1
+            fi
+            ##
+            # Query with filters and get most recent image
+            aws ec2 describe-images --region "$AWS_REGION" --filters $FILTERS \
+              --query 'sort_by(Images, &CreationDate)[-1]' --output json > /tmp/ami_single.json
+        fi
+        ##
+        # Check if image was found
+        if [[ -s /tmp/ami_single.json ]] && [[ "$(jq -r '.ImageId' /tmp/ami_single.json)" != "null" ]]; then
+            IMAGE_FOUND="true"
+            IMAGE_ID=$(jq -r '.ImageId' /tmp/ami_single.json)
+            IMAGE_NAME=$(jq -r '.Name' /tmp/ami_single.json)
+            IMAGE_CREATION_TIMESTAMP=$(jq -r '.CreationDate' /tmp/ami_single.json)
+            IMAGE_DESCRIPTION=$(jq -r '.Description // empty' /tmp/ami_single.json)
+            IMAGE_LABELS=$(jq -c '.Tags // []' /tmp/ami_single.json)
+            ##
+            echo "✓ AMI found"
+            echo "  Image ID                : $IMAGE_ID"
+            echo "  Image Name              : $IMAGE_NAME"
+            echo "  Creation Timestamp      : $IMAGE_CREATION_TIMESTAMP"
+            echo "  Image Tags              : $IMAGE_LABELS"
+            ##
+            # Apply prefix and suffix if provided
+            if [[ -n "$IMAGE_NAME_PREFIX" ]]; then
+                IMAGE_NAME="${IMAGE_NAME_PREFIX}${IMAGE_NAME}"
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "Applied prefix: $IMAGE_NAME_PREFIX"
+                fi
+            fi
+            ##
+            if [[ -n "$IMAGE_NAME_SUFFIX" ]]; then
+                IMAGE_NAME="${IMAGE_NAME}${IMAGE_NAME_SUFFIX}"
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "Applied suffix: $IMAGE_NAME_SUFFIX"
+                fi
+            fi
+            ##
+            if [[ "$VERBOSE" == "true" ]]; then
+                echo ""
+                echo "Full AMI information:"
+                cat /tmp/ami_single.json | jq '.'
+            fi
+        else
+            echo "::warning title=AMI not found::No AMI found matching criteria"
+            echo "Region: $AWS_REGION"
+            if [[ -n "$SOURCE_IMAGE" ]]; then
+                echo "AMI ID: $SOURCE_IMAGE"
+            fi
+            if [[ -n "$FILTERS" ]]; then
+                echo "Filters: $FILTERS"
+            fi
+        fi
         ##
         # Set outputs
         echo "IMAGE_FOUND=${IMAGE_FOUND}" >> $GITHUB_ENV
-        echo "IMAGE_ID=" >> $GITHUB_ENV
-        echo "IMAGE_NAME=" >> $GITHUB_ENV
+        echo "IMAGE_ID=${IMAGE_ID}" >> $GITHUB_ENV
+        echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
         echo "IMAGE_SELF_LINK=" >> $GITHUB_ENV
         echo "IMAGE_PROJECT=" >> $GITHUB_ENV
         echo "IMAGE_FAMILY=" >> $GITHUB_ENV
-        echo "IMAGE_CREATION_TIMESTAMP=" >> $GITHUB_ENV
-        echo "IMAGE_DESCRIPTION=" >> $GITHUB_ENV
+        echo "IMAGE_CREATION_TIMESTAMP=${IMAGE_CREATION_TIMESTAMP}" >> $GITHUB_ENV
+        echo "IMAGE_DESCRIPTION=${IMAGE_DESCRIPTION}" >> $GITHUB_ENV
+        echo "IMAGE_LABELS=${IMAGE_LABELS}" >> $GITHUB_ENV
         ##
         echo ""
         echo "finishing the 'query-aws-image' step... "
@@ -419,6 +557,7 @@ runs:
         IMAGE_FAMILY="${{ env.IMAGE_FAMILY }}"
         IMAGE_CREATION_TIMESTAMP="${{ env.IMAGE_CREATION_TIMESTAMP }}"
         IMAGE_DESCRIPTION="${{ env.IMAGE_DESCRIPTION }}"
+        IMAGE_LABELS="${{ env.IMAGE_LABELS }}"
         ##
         echo "IMAGE_FOUND=${IMAGE_FOUND}" >> "$GITHUB_OUTPUT"
         echo "IMAGE_ID=${IMAGE_ID}" >> "$GITHUB_OUTPUT"
@@ -428,6 +567,7 @@ runs:
         echo "IMAGE_FAMILY=${IMAGE_FAMILY}" >> "$GITHUB_OUTPUT"
         echo "IMAGE_CREATION_TIMESTAMP=${IMAGE_CREATION_TIMESTAMP}" >> "$GITHUB_OUTPUT"
         echo "IMAGE_DESCRIPTION=${IMAGE_DESCRIPTION}" >> "$GITHUB_OUTPUT"
+        echo "IMAGE_LABELS=${IMAGE_LABELS}" >> "$GITHUB_OUTPUT"
         ##
         if [[ "${{ inputs.verbose }}" == "true" ]]; then
             echo ""
@@ -440,6 +580,7 @@ runs:
             echo "IMAGE_FAMILY             : ${IMAGE_FAMILY}"
             echo "IMAGE_CREATION_TIMESTAMP : ${IMAGE_CREATION_TIMESTAMP}"
             echo "IMAGE_DESCRIPTION        : ${IMAGE_DESCRIPTION}"
+            echo "IMAGE_LABELS             : ${IMAGE_LABELS}"
             echo ""
         fi
         ##
