@@ -129,7 +129,7 @@ jobs:
       - name: Install QEMU static binaries
         # Verified creator: https://github.com/marketplace/actions/docker-setup-qemu
         # GitHub Action to install QEMU static binaries
-        uses: docker/setup-qemu-action@v3.6.0
+        uses: docker/setup-qemu-action@v3.7.0
         id: setup-qemu
 
       - name: Setup Docker Buildx
@@ -167,7 +167,7 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         # Verified creator: https://github.com/marketplace/actions/docker-metadata-action
         # GitHub Action to extract metadata (tags, labels) from Git reference and GitHub events for Docker 
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           # https://github.com/docker/metadata-action#images-input
           images: |
