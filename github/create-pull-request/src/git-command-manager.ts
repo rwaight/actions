@@ -2,6 +2,7 @@ import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as utils from './utils'
 import * as path from 'path'
+import stream, {Writable} from 'stream'
 
 const tagsRefSpec = '+refs/tags/*:refs/tags/*'
 
@@ -19,6 +20,12 @@ export type Commit = {
     path: string
   }[]
   unparsedChanges: string[]
+}
+
+export type ExecOpts = {
+  allowAllExitCodes?: boolean
+  encoding?: 'utf8' | 'base64'
+  suppressGitCmdOutput?: boolean
 }
 
 export class GitCommandManager {
@@ -66,7 +73,7 @@ export class GitCommandManager {
       args.push(...options)
     }
 
-    return await this.exec(args, allowAllExitCodes)
+    return await this.exec(args, {allowAllExitCodes: allowAllExitCodes})
   }
 
   async commit(
@@ -82,7 +89,7 @@ export class GitCommandManager {
       args.push(...options)
     }
 
-    return await this.exec(args, allowAllExitCodes)
+    return await this.exec(args, {allowAllExitCodes: allowAllExitCodes})
   }
 
   async config(
@@ -113,7 +120,7 @@ export class GitCommandManager {
         configKey,
         configValue
       ],
-      true
+      {allowAllExitCodes: true}
     )
     return output.exitCode === 0
   }
@@ -156,15 +163,20 @@ export class GitCommandManager {
 
   async getCommit(ref: string): Promise<Commit> {
     const endOfBody = '###EOB###'
-    const output = await this.exec([
-      'show',
-      '--raw',
-      '--cc',
-      '--no-renames',
-      '--no-abbrev',
-      `--format=%H%n%T%n%P%n%G?%n%s%n%b%n${endOfBody}`,
-      ref
-    ])
+    const output = await this.exec(
+      [
+        '-c',
+        'core.quotePath=false',
+        'show',
+        '--raw',
+        '--cc',
+        '--no-renames',
+        '--no-abbrev',
+        `--format=%H%n%T%n%P%n%G?%n%s%n%b%n${endOfBody}`,
+        ref
+      ],
+      {suppressGitCmdOutput: true}
+    )
     const lines = output.stdout.split('\n')
     const endOfBodyIndex = lines.lastIndexOf(endOfBody)
     const detailLines = lines.slice(0, endOfBodyIndex)
@@ -220,7 +232,7 @@ export class GitCommandManager {
     if (options) {
       args.push(...options)
     }
-    const output = await this.exec(args, true)
+    const output = await this.exec(args, {allowAllExitCodes: true})
     return output.exitCode === 1
   }
 
@@ -276,6 +288,15 @@ export class GitCommandManager {
     return output.stdout.trim()
   }
 
+  async showFileAtRefBase64(ref: string, path: string): Promise<string> {
+    const args = ['show', `${ref}:${path}`]
+    const output = await this.exec(args, {
+      encoding: 'base64',
+      suppressGitCmdOutput: true
+    })
+    return output.stdout.trim()
+  }
+
   async stashPush(options?: string[]): Promise<boolean> {
     const args = ['stash', 'push']
     if (options) {
@@ -324,7 +345,7 @@ export class GitCommandManager {
         configKey,
         configValue
       ],
-      true
+      {allowAllExitCodes: true}
     )
     return output.exitCode === 0
   }
@@ -332,7 +353,7 @@ export class GitCommandManager {
   async tryGetRemoteUrl(): Promise<string> {
     const output = await this.exec(
       ['config', '--local', '--get', 'remote.origin.url'],
-      true
+      {allowAllExitCodes: true}
     )
 
     if (output.exitCode !== 0) {
@@ -347,16 +368,30 @@ export class GitCommandManager {
     return stdout
   }
 
-  async exec(args: string[], allowAllExitCodes = false): Promise<GitOutput> {
+  async exec(
+    args: string[],
+    {
+      encoding = 'utf8',
+      allowAllExitCodes = false,
+      suppressGitCmdOutput = false
+    }: ExecOpts = {}
+  ): Promise<GitOutput> {
     const result = new GitOutput()
+
+    if (process.env['CPR_SHOW_GIT_CMD_OUTPUT']) {
+      // debug mode overrides the suppressGitCmdOutput option
+      suppressGitCmdOutput = false
+    }
 
     const env = {}
     for (const key of Object.keys(process.env)) {
       env[key] = process.env[key]
     }
 
-    const stdout: string[] = []
-    const stderr: string[] = []
+    const stdout: Buffer[] = []
+    let stdoutLength = 0
+    const stderr: Buffer[] = []
+    let stderrLength = 0
 
     const options = {
       cwd: this.workingDirectory,
@@ -364,17 +399,21 @@ export class GitCommandManager {
       ignoreReturnCode: allowAllExitCodes,
       listeners: {
         stdout: (data: Buffer) => {
-          stdout.push(data.toString())
+          stdout.push(data)
+          stdoutLength += data.length
         },
         stderr: (data: Buffer) => {
-          stderr.push(data.toString())
+          stderr.push(data)
+          stderrLength += data.length
         }
-      }
+      },
+      outStream: outStreamHandler(process.stdout, suppressGitCmdOutput),
+      errStream: outStreamHandler(process.stderr, suppressGitCmdOutput)
     }
 
     result.exitCode = await exec.exec(`"${this.gitPath}"`, args, options)
-    result.stdout = stdout.join('')
-    result.stderr = stderr.join('')
+    result.stdout = Buffer.concat(stdout, stdoutLength).toString(encoding)
+    result.stderr = Buffer.concat(stderr, stderrLength).toString(encoding)
     return result
   }
 }
@@ -383,4 +422,25 @@ class GitOutput {
   stdout = ''
   stderr = ''
   exitCode = 0
+}
+
+const outStreamHandler = (
+  outStream: Writable,
+  suppressGitCmdOutput: boolean
+): Writable => {
+  return new stream.Writable({
+    write(chunk, _, next) {
+      if (suppressGitCmdOutput) {
+        const lines = chunk.toString().trimEnd().split('\n')
+        for (const line of lines) {
+          if (line.startsWith('[command]')) {
+            outStream.write(`${line}\n`)
+          }
+        }
+      } else {
+        outStream.write(chunk)
+      }
+      next()
+    }
+  })
 }

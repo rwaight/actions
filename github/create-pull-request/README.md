@@ -1,10 +1,10 @@
 # GitHub create-pull-request action
 
-The current version in this repo was based off of [**create-pull-request** v7.0.5](https://github.com/peter-evans/create-pull-request/releases/tag/v7.0.5)
-- Specifically [this commit](https://github.com/peter-evans/create-pull-request/commit/5e914681df9dc83aa4e4905692ca88beb2f9e91f)
+The current version in this repo was based off of [**create-pull-request** v7.0.9](https://github.com/peter-evans/create-pull-request/releases/tag/v7.0.9)
+- Specifically [this commit](https://github.com/peter-evans/create-pull-request/commit/84ae59a2cdc2258d6fa0732dd66352dddae2a412)
 - This action is from https://github.com/peter-evans/create-pull-request
 
-The [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request) has a (an) MIT License:
+The [`peter-evans/create-pull-request`](https://github.com/peter-evans/create-pull-request) has an MIT license:
 > A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
 
 ## Updates to the action

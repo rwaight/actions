@@ -25,7 +25,7 @@ This document covers terminology, how the action works, general usage guidelines
 
 ## Terminology
 
-[Pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#about-pull-requests) are proposed changes to a repository branch that can be reviewed by a repository's collaborators before being accepted or rejected. 
+[Pull requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#about-pull-requests) are proposed changes to a repository branch that can be reviewed by a repository's collaborators before being accepted or rejected.
 
 A pull request references two branches:
 
@@ -150,7 +150,7 @@ There are a number of workarounds with different pros and cons.
 
 - Use the default `GITHUB_TOKEN` and allow the action to create pull requests that have no checks enabled. Manually close pull requests and immediately reopen them. This will enable `on: pull_request` workflows to run and be added as checks. To prevent merging of pull requests without checks erroneously, use [branch protection rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests).
 
-- Create draft pull requests by setting the `draft: always-true` input, and configure your workflow to trigger `on: ready_for_review`. The workflow will run when users manually click the "Ready for review" button on the draft pull requests. If the pull request is updated by the action, the `always-true` mode ensures that the pull request will be converted back to a draft.
+- Create draft pull requests by setting the `draft: always-true` input, and configure your workflow to trigger `ready_for_review` in `on: pull_request`. The workflow will run when users manually click the "Ready for review" button on the draft pull requests. If the pull request is updated by the action, the `always-true` mode ensures that the pull request will be converted back to a draft.
 
 - Use a [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) created on an account that has write access to the repository that pull requests are being created in. This is the standard workaround and [recommended by GitHub](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow). It's advisable to use a dedicated [machine account](https://docs.github.com/en/github/site-policy/github-terms-of-service#3-account-requirements) that has collaborator access to the repository, rather than creating a PAT on a personal user account. Also note that because the account that owns the PAT will be the creator of pull requests, that user account will be unable to perform actions such as request changes or approve the pull request.
 
@@ -197,8 +197,9 @@ Checking out a branch from a different repository from where the workflow is exe
 Allowing the action to push with a configured deploy key will trigger `on: push` workflows. This makes it an alternative to using a PAT to trigger checks for pull requests.
 
 > [!NOTE]
-> You cannot use deploy keys alone to [create a pull request in a remote repository](#creating-pull-requests-in-a-remote-repository) because then using a PAT would become a requirement.
+> - You cannot use deploy keys alone to [create a pull request in a remote repository](#creating-pull-requests-in-a-remote-repository) because then using a PAT would become a requirement.
 > This method only makes sense if creating a pull request in the repository where the workflow is running.
+> - You cannot use deploy keys with [commit signature verification for bots](#commit-signature-verification-for-bots) (`sign-commits: true`).
 
 How to use SSH (deploy keys) with create-pull-request action:
 
@@ -231,7 +232,7 @@ It will use their own fork to push code and create the pull request.
 
 1. Create a new GitHub user and login.
 2. Fork the repository that you will be creating pull requests in.
-3. Create a Classic [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with `repo` scope.
+3. Create a Classic [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) with `repo` and `workflow` scopes.
 4. Logout and log back into your main user account.
 5. Add a secret to your repository containing the above PAT.
 6. As shown in the following example workflow, set the `push-to-fork` input to the full repository name of the fork.
@@ -271,7 +272,7 @@ The `token` input will then default to the repository's `GITHUB_TOKEN`, which wi
 
 The following is an example of pushing to a fork using GitHub App tokens.
 ```yaml
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: generate-token
         with:
           app-id: ${{ secrets.APP_ID }}
@@ -318,7 +319,7 @@ GitHub App generated tokens can be configured with fine-grained permissions and 
 
 ```yaml
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: generate-token
         with:
           app-id: ${{ secrets.APP_ID }}
@@ -341,7 +342,7 @@ For this case a token must be generated from the GitHub App installation of the 
 In the following example, a pull request is being created in remote repo `owner/repo`.
 ```yaml
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: generate-token
         with:
           app-id: ${{ secrets.APP_ID }}
@@ -373,7 +374,7 @@ The action supports two methods to sign commits, [commit signature verification 
 
 The action can sign commits as `github-actions[bot]` when using the repository's default `GITHUB_TOKEN`, or your own bot when using [GitHub App tokens](#authenticating-with-github-app-generated-tokens).
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > - When setting `sign-commits: true` the action will ignore the `committer` and `author` inputs.
 > - If you attempt to use a [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) the action will create the pull request, but commits will *not* be signed. Commit signing is only supported with bot generated tokens.
 > - The GitHub API has a 40MiB limit when creating git blobs. An error will be raised if there are files in the pull request larger than this. If you hit this limit, use [GPG commit signature verification](#gpg-commit-signature-verification) instead.
@@ -396,7 +397,7 @@ In this example, the `token` input is generated using a GitHub App. This will si
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: generate-token
         with:
           app-id: ${{ secrets.APP_ID }}

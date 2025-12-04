@@ -1,10 +1,5 @@
 name: 'Create Pull Request'
 description: 'Creates a pull request for changes to your repository in the actions workspace'
-branding:
-  icon: 'git-pull-request'
-  color: 'blue'
-  # Ref: https://haya14busa.github.io/github-action-brandings/
-  # fork: https://github.com/rwaight/github-action-brandings
 inputs:
   token:
     description: 'The token that the action will use to create and update the pull request.'
@@ -101,3 +96,8 @@ outputs:
 runs:
   using: 'node20'
   main: 'dist/index.js'
+branding:
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
+  icon: 'git-pull-request'
+  color: 'blue'
