@@ -37,7 +37,7 @@ check_for_updates() {
     group=$(yq e '.group' "$config_file")
     name=$(yq e '.name' "$config_file")
 
-    if [[ "$specify_action" == "yes" && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
+    if [[ "${specify_action,,}" =~ ^(yes|y)$ && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
         echo "Skipping $group/$name..."
         return
     fi
@@ -204,7 +204,7 @@ check_for_updates() {
 
                 # Clean up the temporary directory
                 read -p "Do you want to clean up the temporary directory $temp_dir? (y/n): " cleanup
-                if [[ $cleanup == "y" ]]; then
+                if [[ "${cleanup,,}" =~ ^(yes|y)$ ]]; then
                     rm -rf "$temp_dir"
                 fi
 
@@ -228,7 +228,7 @@ check_for_updates() {
 # Prompt to specify whether to specify an action or use the target_dirs config file
 read -p "Do you want to specify a group and action? (yes/no): " specify_action
 
-if [[ "$specify_action" == "yes" ]]; then
+if [[ "${specify_action,,}" =~ ^(yes|y)$ ]]; then
     read -p "Enter the group name: " specified_group
     read -p "Enter the action name: " specified_action
 fi
