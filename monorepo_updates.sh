@@ -155,8 +155,10 @@ check_for_updates() {
                 #cd "$local_action_dir" || exit
                 cd "$local_repo_dir" || exit
                 git checkout main
-                branch_name="updates/${group}_${name}_$(date +%Y%m)"
                 # date_branch_name="updates/${group}_${name}_$(date +%Y%m)"
+                # Convert version format from v1.2.1 to v1-2-1 for branch name
+                version_for_branch=$(echo "$latest_version" | tr '.' '-')
+                branch_name="updates/${group}_${name}_${version_for_branch}"
                 git checkout -b "$branch_name"
 
                 # Read exclusion list from import-config.yml
