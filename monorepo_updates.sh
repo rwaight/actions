@@ -178,13 +178,13 @@ check_for_updates() {
                     mv "$template_copied" "$new_readme"
 
                     # Place for find/replace commands
-                    sed -i "s/SED_GROUP/${group}/g" "$new_readme"
-                    sed -i "s/SED_NAME/${name}/g" "$new_readme"
-                    sed -i "s/SED_REPONAME/${source_repo_name}/g" "$new_readme"
-                    sed -i "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
-                    ##not used##sed -i "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
-                    sed -i "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
-                    sed -i "s/SED_NEWCOMMITSHA/${latest_tag_sha}/g" "$new_readme"
+                    sed -i '' "s/SED_GROUP/${group}/g" "$new_readme"
+                    sed -i '' "s/SED_NAME/${name}/g" "$new_readme"
+                    sed -i '' "s/SED_REPONAME/${source_repo_name}/g" "$new_readme"
+                    sed -i '' "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
+                    ##not used##sed -i '' "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
+                    sed -i '' "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
+                    sed -i '' "s/SED_NEWCOMMITSHA/${latest_tag_sha}/g" "$new_readme"
                     # Add additional find/replace commands as needed
                 fi
 
