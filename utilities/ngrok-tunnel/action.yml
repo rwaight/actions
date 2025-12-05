@@ -1,5 +1,5 @@
-name: 'Ngrok TCP Tunelling'
-description: 'A github action for tunelling TCP traffic from within Workflow environemt'
+name: 'Ngrok TCP Tunneling'
+description: 'A github action to tunnel traffic into Github Workflow pipeline using ngrok'
 author: 'apogiatzis'
 
 inputs:
