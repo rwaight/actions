@@ -41,7 +41,8 @@ check_for_updates() {
     group=$(yq e '.group' "$config_file")
     name=$(yq e '.name' "$config_file")
 
-    if [[ "$(echo "$specify_action" | tr '[:upper:]' '[:lower:]')" =~ ^(yes|y)$ && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
+    specify_action_lower=$(echo "$specify_action" | tr '[:upper:]' '[:lower:]')
+    if [[ "$specify_action_lower" =~ ^(yes|y)$ && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
         echo "Skipping $group/$name..."
         return
     fi
@@ -77,16 +78,16 @@ check_for_updates() {
             # use 'gh api' to fetch the reference from the latest tag
             # https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#get-a-reference
             # https://cli.github.com/manual/gh_api
-            # gh api command ##gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/git/ref/tags/${latest_version}"
+            # gh api command ##gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${latest_version}"
             # store the entire json response in a variable #
-            json_latest_ref=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/git/ref/tags/${latest_version}")
-            latest_tag_ref=$(echo $json_latest_ref | jq -r '. | .ref')
-            latest_tag_url=$(echo $json_latest_ref | jq -r '. | .url')
+            json_latest_ref=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${latest_version}")test_version}")
+            latest_tag_ref=$(echo "$json_latest_ref" | jq -r '.ref')
+            latest_tag_url=$(echo "$json_latest_ref" | jq -r '.url')
             #repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
-            latest_tag_type=$(echo $json_latest_ref | jq -r '. | .object.type')
+            latest_tag_type=$(echo "$json_latest_ref" | jq -r '.object.type')
             #repo_latest_sha=${repo_latest_tag_data##*$'\n'}
-            latest_tag_sha=$(echo $json_latest_ref | jq -r '. | .object.sha')
-            latest_tag_sha_url=$(echo $json_latest_ref | jq -r '. | .object.url')
+            latest_tag_sha=$(echo "$json_latest_ref" | jq -r '.object.sha')
+            latest_tag_sha_url=$(echo "$json_latest_ref" | jq -r '.object.url')
             #
             echo "Downloading updated source files for version $latest_version..."
             #
@@ -208,7 +209,8 @@ check_for_updates() {
 
                 # Clean up the temporary directory
                 read -p "Do you want to clean up the temporary directory $temp_dir? (y/n): " cleanup
-                if [[ "$(echo "$cleanup" | tr '[:upper:]' '[:lower:]')" =~ ^(yes|y)$ ]]; then
+                cleanup_lower=$(echo "$cleanup" | tr '[:upper:]' '[:lower:]')
+                if [[ "$cleanup_lower" =~ ^(yes|y)$ ]]; then
                     rm -rf "$temp_dir"
                 fi
 
@@ -231,8 +233,9 @@ check_for_updates() {
 
 # Prompt to specify whether to specify an action or use the target_dirs config file
 read -p "Do you want to specify a group and action? (yes/no): " specify_action
+specify_action_lower=$(echo "$specify_action" | tr '[:upper:]' '[:lower:]')
 
-if [[ "$(echo "$specify_action" | tr '[:upper:]' '[:lower:]')" =~ ^(yes|y)$ ]]; then
+if [[ "$specify_action_lower" =~ ^(yes|y)$ ]]; then
     read -p "Enter the group name: " specified_group
     read -p "Enter the action name: " specified_action
 fi
