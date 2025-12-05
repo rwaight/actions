@@ -222,11 +222,19 @@ check_for_updates() {
 
                 # Add changes to git and commit
                 git add "$local_action_dir"
-                echo "  Skipping running the 'git commit' command for now"
                 echo ""
-                echo "  Now you need to manually add the commit before continuing. "
-                echo "  Recommended message:    chore($group): update $name to version $latest_version "
-                #git commit -m "chore($group): update $name to version $latest_version"
+                commit_message="chore($group): update $name to version $latest_version"
+                echo "  Recommended commit message: $commit_message"
+                echo ""
+                read -p "Do you want to commit these changes to the branch? (y/n): " commit_changes
+                commit_changes_lower=$(echo "$commit_changes" | tr '[:upper:]' '[:lower:]')
+                
+                if [[ "$commit_changes_lower" =~ ^(yes|y)$ ]]; then
+                    git commit -m "$commit_message"
+                    echo "  Changes committed successfully"
+                else
+                    echo "  Skipping commit. You will need to manually commit changes before pushing."
+                fi
 
                 # Push the new branch to the remote repository
                 echo ""
