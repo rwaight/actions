@@ -5,7 +5,7 @@ error_log="monorepo_updates_errors.log"
 > "$error_log"  # Clear the log file at the start
 
 # Read target directories from the config file
-target_dirs=($(cat target_dirs.conf))
+mapfile -t target_dirs < target_dirs.conf
 
 # Function to fetch the latest version from GitHub API
 function fetch_latest_version() {
