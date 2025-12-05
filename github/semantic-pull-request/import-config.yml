@@ -15,7 +15,7 @@ source:
   repo_name: action-semantic-pull-request
   repo_url: https://github.com/amannn/action-semantic-pull-request
   current_version: v5.4.0
-  latest_version: v5.5.3
+  latest_version: v6.1.1
   update_available: true
 specs:
   action_file: action.yml

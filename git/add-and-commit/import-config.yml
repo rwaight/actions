@@ -19,7 +19,7 @@ source:
   update_available: false
 specs:
   action_file: action.yml
-  inputs: null
+  inputs: [add, author_name, author_email, commit, committer_name, committer_email, cwd, default_author, fetch, message, new_branch, pathspec_error_handling, pull, push, remove, tag, tag_push, github_token]
   outputs: [committed, commit_long_sha, commit_sha, pushed, tagged, tag_pushed]
   runs:
     using: node20

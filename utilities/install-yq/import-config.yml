@@ -15,16 +15,16 @@ source:
   repo_name: examples
   repo_url: https://github.com/instruqt/examples
   current_version: 1484e628103fe8dcf60a0b70130709429b97e2c7
-  latest_version: 90b782ae0fa40245140976937c69e73967799523
+  latest_version: error
   override:
     use_commits: true
     latest_version_commit: 1484e628103fe8dcf60a0b70130709429b97e2c7
     latest_repo_commit: 90b782ae0fa40245140976937c69e73967799523
-  update_available: false
+  update_available: true
 specs:
   action_file: action.yml
   inputs: [version, verbose]
-  outputs: []
+  outputs: [version]
   runs:
     using: composite
 tests:

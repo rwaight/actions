@@ -15,8 +15,8 @@ source:
   repo_name: find-pull-request-action
   repo_url: https://github.com/juliangruber/find-pull-request-action
   current_version: v1.9.0
-  latest_version: v1.9.0
-  update_available: false
+  latest_version: v1.10.0
+  update_available: true
 specs:
   action_file: action.yml
   inputs: [github-token, branch, base, author, state, repo, sort, direction, labels]

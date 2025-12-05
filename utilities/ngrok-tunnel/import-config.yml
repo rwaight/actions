@@ -1,10 +1,10 @@
-name: Ngrok Tunnel
+name: Ngrok TCP Tunneling
 author: apogiatzis
 description: A github action to tunnel traffic into Github Workflow pipeline using ngrok
 group: utilities
 imported: true
 local:
-  modifications: false
+  modifications: true
   update:
     exclusions:
       - README-examples.md

@@ -15,7 +15,7 @@ source:
   repo_name: create-pull-request
   repo_url: https://github.com/peter-evans/create-pull-request
   current_version: v7.0.5
-  latest_version: v7.0.8
+  latest_version: v7.0.9
   update_available: true
 specs:
   action_file: action.yml
