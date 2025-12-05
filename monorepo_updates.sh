@@ -238,9 +238,11 @@ check_for_updates() {
 
                 # Push the new branch to the remote repository
                 echo ""
-                echo "  Skipping running the 'git push origin \"$branch_name\"' command for now"
-                #git push origin "$branch_name"
-                echo "  you will need to push to origin later... "
+                # echo "  Skipping running the 'git push origin \"$branch_name\"' command for now"
+                # #git push origin "$branch_name"
+                # echo "  you will need to push to origin later... "
+                echo "  Note: Automatic push is disabled. You will need to push to origin manually."
+                echo "  To push, run: git push origin \"$branch_name\""
 
                 # Clean up the temporary directory
                 read -p "Do you want to clean up the temporary directory $temp_dir? (y/n): " cleanup
