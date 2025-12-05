@@ -1,7 +1,11 @@
 #!/bin/bash
 
+# Define the error log file
+error_log="monorepo_updates_errors.log"
+> "$error_log"  # Clear the log file at the start
+
 # Read target directories from the config file
-target_dirs=($(cat target_dirs.conf))
+mapfile -t target_dirs < target_dirs.conf
 
 # Function to fetch the latest version from GitHub API
 function fetch_latest_version() {
@@ -25,6 +29,18 @@ function fetch_latest_version() {
     echo "$latest_version"
 }
 
+# Function to read the action.yml or action.yaml file
+function read_action_file() {
+    local action_dir=$1
+    if [[ -f "${action_dir}/action.yml" ]]; then
+        echo "${action_dir}/action.yml"
+    elif [[ -f "${action_dir}/action.yaml" ]]; then
+        echo "${action_dir}/action.yaml"
+    else
+        echo ""
+    fi
+}
+
 # Function to read the import-config.yml file and check for updates
 check_for_updates() {
     local config_file=$1
@@ -37,7 +53,8 @@ check_for_updates() {
     group=$(yq e '.group' "$config_file")
     name=$(yq e '.name' "$config_file")
 
-    if [[ "$specify_action" == "yes" && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
+    specify_action_lower=$(echo "$specify_action" | tr '[:upper:]' '[:lower:]')
+    if [[ "$specify_action_lower" =~ ^(yes|y)$ && ( "$group" != "$specified_group" || "$name" != "$specified_action" ) ]]; then
         echo "Skipping $group/$name..."
         return
     fi
@@ -73,16 +90,16 @@ check_for_updates() {
             # use 'gh api' to fetch the reference from the latest tag
             # https://docs.github.com/en/rest/git/refs?apiVersion=2022-11-28#get-a-reference
             # https://cli.github.com/manual/gh_api
-            # gh api command ##gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/git/ref/tags/${latest_version}"
+            # gh api command ##gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${latest_version}"
             # store the entire json response in a variable #
-            json_latest_ref=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${repo_owner}/${repo_name}/git/ref/tags/${latest_version}")
-            latest_tag_ref=$(echo $json_latest_ref | jq -r '. | .ref')
-            latest_tag_url=$(echo $json_latest_ref | jq -r '. | .url')
+            json_latest_ref=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${latest_version}")test_version}")
+            latest_tag_ref=$(echo "$json_latest_ref" | jq -r '.ref')
+            latest_tag_url=$(echo "$json_latest_ref" | jq -r '.url')
             #repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
-            latest_tag_type=$(echo $json_latest_ref | jq -r '. | .object.type')
+            latest_tag_type=$(echo "$json_latest_ref" | jq -r '.object.type')
             #repo_latest_sha=${repo_latest_tag_data##*$'\n'}
-            latest_tag_sha=$(echo $json_latest_ref | jq -r '. | .object.sha')
-            latest_tag_sha_url=$(echo $json_latest_ref | jq -r '. | .object.url')
+            latest_tag_sha=$(echo "$json_latest_ref" | jq -r '.object.sha')
+            latest_tag_sha_url=$(echo "$json_latest_ref" | jq -r '.object.url')
             #
             echo "Downloading updated source files for version $latest_version..."
             #
@@ -138,7 +155,10 @@ check_for_updates() {
                 #cd "$local_action_dir" || exit
                 cd "$local_repo_dir" || exit
                 git checkout main
-                branch_name="updates/${group}_${name}_$(date +%Y%m)"
+                # date_branch_name="updates/${group}_${name}_$(date +%Y%m)"
+                # Convert version format from v1.2.1 to v1-2-1 for branch name
+                version_for_branch=$(echo "$latest_version" | tr '.' '-')
+                branch_name="updates/${group}_${name}_${version_for_branch}"
                 git checkout -b "$branch_name"
 
                 # Read exclusion list from import-config.yml
@@ -178,33 +198,59 @@ check_for_updates() {
                     mv "$template_copied" "$new_readme"
 
                     # Place for find/replace commands
-                    sed -i "s/SED_GROUP/${group}/g" "$new_readme"
-                    sed -i "s/SED_NAME/${name}/g" "$new_readme"
-                    sed -i "s/SED_REPONAME/${source_repo_name}/g" "$new_readme"
-                    sed -i "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
-                    ##not used##sed -i "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
-                    sed -i "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
-                    sed -i "s/SED_NEWCOMMITSHA/${latest_tag_sha}/g" "$new_readme"
+                    sed -i '' "s/SED_GROUP/${group}/g" "$new_readme"
+                    sed -i '' "s/SED_NAME/${name}/g" "$new_readme"
+                    sed -i '' "s/SED_REPONAME/${source_repo_name}/g" "$new_readme"
+                    sed -i '' "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
+                    ##not used##sed -i '' "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
+                    sed -i '' "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
+                    sed -i '' "s/SED_NEWCOMMITSHA/${latest_tag_sha}/g" "$new_readme"
                     # Add additional find/replace commands as needed
+                fi
+
+                # Step 8: Update branding color in action.yml file to always be 'blue'
+                action_file=$(read_action_file "${local_action_dir}")
+                if [[ -n "$action_file" ]]; then
+                    echo "Updating branding color in action file..."
+                    # Check if branding block exists
+                    branding_exists=$(yq e '.branding' "$action_file")
+                    if [[ "$branding_exists" != "null" ]]; then
+                        # Update color to blue, preserving the icon
+                        yq e -i '.branding.color = "blue"' "$action_file"
+                        echo "  Updated branding.color to 'blue' in $action_file"
+                    else
+                        echo "  No branding block found in $action_file, skipping branding update"
+                    fi
                 fi
 
                 # Add changes to git and commit
                 git add "$local_action_dir"
-                echo "  Skipping running the 'git commit' command for now"
                 echo ""
-                echo "  Now you need to manually add the commit before continuing. "
-                echo "  Recommended message:    chore($group): update $name to version $latest_version "
-                #git commit -m "chore($group): update $name to version $latest_version"
+                commit_message="chore($group): update $name to version $latest_version"
+                echo "  Recommended commit message: $commit_message"
+                echo ""
+                read -p "Do you want to commit these changes to the branch? (y/n): " commit_changes
+                commit_changes_lower=$(echo "$commit_changes" | tr '[:upper:]' '[:lower:]')
+                
+                if [[ "$commit_changes_lower" =~ ^(yes|y)$ ]]; then
+                    git commit -m "$commit_message"
+                    echo "  Changes committed successfully"
+                else
+                    echo "  Skipping commit. You will need to manually commit changes before pushing."
+                fi
 
                 # Push the new branch to the remote repository
                 echo ""
-                echo "  Skipping running the 'git push origin \"$branch_name\"' command for now"
-                #git push origin "$branch_name"
-                echo "  you will need to push to origin later... "
+                # echo "  Skipping running the 'git push origin \"$branch_name\"' command for now"
+                # #git push origin "$branch_name"
+                # echo "  you will need to push to origin later... "
+                echo "  Note: Automatic push is disabled. You will need to push to origin manually."
+                echo "  To push, run: git push origin \"$branch_name\""
 
                 # Clean up the temporary directory
                 read -p "Do you want to clean up the temporary directory $temp_dir? (y/n): " cleanup
-                if [[ $cleanup == "y" ]]; then
+                cleanup_lower=$(echo "$cleanup" | tr '[:upper:]' '[:lower:]')
+                if [[ "$cleanup_lower" =~ ^(yes|y)$ ]]; then
                     rm -rf "$temp_dir"
                 fi
 
@@ -227,8 +273,9 @@ check_for_updates() {
 
 # Prompt to specify whether to specify an action or use the target_dirs config file
 read -p "Do you want to specify a group and action? (yes/no): " specify_action
+specify_action_lower=$(echo "$specify_action" | tr '[:upper:]' '[:lower:]')
 
-if [[ "$specify_action" == "yes" ]]; then
+if [[ "$specify_action_lower" =~ ^(yes|y)$ ]]; then
     read -p "Enter the group name: " specified_group
     read -p "Enter the action name: " specified_action
 fi

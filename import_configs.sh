@@ -11,7 +11,7 @@ echo "Running yq version: $(yq --version 2>&1)" >> "$error_log"
 echo "Running jq version: $(jq --version 2>&1)" >> "$error_log"
 
 # Read target directories from the config file
-target_dirs=($(cat target_dirs.conf))
+mapfile -t target_dirs < target_dirs.conf
 
 # Default exclusions array
 default_exclusions=("README-examples.md" "example-custom-notes.md")
