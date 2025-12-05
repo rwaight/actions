@@ -155,6 +155,7 @@ check_for_updates() {
                 #cd "$local_action_dir" || exit
                 cd "$local_repo_dir" || exit
                 git checkout main
+                # branch_name="updates/${group}_${name}_$(date +%Y%m)"
                 branch_name="updates/${group}_${name}_$(date +%Y%m)"
                 git checkout -b "$branch_name"
 
