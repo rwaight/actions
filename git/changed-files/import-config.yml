@@ -15,7 +15,7 @@ source:
   repo_name: changed-files
   repo_url: https://github.com/tj-actions/changed-files
   current_version: v45.0.5
-  latest_version: v45.0.7
+  latest_version: v47
   update_available: true
 specs:
   action_file: action.yml
