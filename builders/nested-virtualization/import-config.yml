@@ -13,3 +13,4 @@ specs:
     using: composite
 tests:
   _comment: reserved for future use
+author: rwaight
