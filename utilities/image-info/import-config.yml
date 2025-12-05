@@ -21,7 +21,7 @@ source:
 specs:
   action_file: action.yml
   inputs: [cloud-provider, query-location, source-image, source-image-family, image-location, image-name-prefix, image-name-suffix, verbose]
-  outputs: [image-found, image-id, image-name, image-project, image-family, image-creation-timestamp, image-description, image-self-link]
+  outputs: [image-found, image-id, image-name, image-self-link, image-project, image-family, image-creation-timestamp, image-description]
   runs:
     using: composite
 tests:
