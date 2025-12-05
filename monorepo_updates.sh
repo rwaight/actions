@@ -29,6 +29,18 @@ function fetch_latest_version() {
     echo "$latest_version"
 }
 
+# Function to read the action.yml or action.yaml file
+function read_action_file() {
+    local action_dir=$1
+    if [[ -f "${action_dir}/action.yml" ]]; then
+        echo "${action_dir}/action.yml"
+    elif [[ -f "${action_dir}/action.yaml" ]]; then
+        echo "${action_dir}/action.yaml"
+    else
+        echo ""
+    fi
+}
+
 # Function to read the import-config.yml file and check for updates
 check_for_updates() {
     local config_file=$1
@@ -191,6 +203,21 @@ check_for_updates() {
                     sed -i '' "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
                     sed -i '' "s/SED_NEWCOMMITSHA/${latest_tag_sha}/g" "$new_readme"
                     # Add additional find/replace commands as needed
+                fi
+
+                # Step 8: Update branding color in action.yml file to always be 'blue'
+                action_file=$(read_action_file "${local_action_dir}")
+                if [[ -n "$action_file" ]]; then
+                    echo "Updating branding color in action file..."
+                    # Check if branding block exists
+                    branding_exists=$(yq e '.branding' "$action_file")
+                    if [[ "$branding_exists" != "null" ]]; then
+                        # Update color to blue, preserving the icon
+                        yq e -i '.branding.color = "blue"' "$action_file"
+                        echo "  Updated branding.color to 'blue' in $action_file"
+                    else
+                        echo "  No branding block found in $action_file, skipping branding update"
+                    fi
                 fi
 
                 # Add changes to git and commit
