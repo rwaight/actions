@@ -20,8 +20,8 @@ source:
   repo_url: https://github.com/rwaight/actions
 specs:
   action_file: action.yml
-  inputs: [cloud-provider, query-location, source-image, source-image-family, image-location, image-name-prefix, image-name-suffix, verbose]
-  outputs: [image-found, image-id, image-name, image-self-link, image-project, image-family, image-creation-timestamp, image-description]
+  inputs: [cloud-provider, filter-labels, query-location, source-image, source-image-family, image-location, image-name-prefix, image-name-suffix, verbose]
+  outputs: [image-found, image-id, image-labels, image-name, image-self-link, image-project, image-family, image-creation-timestamp, image-description]
   runs:
     using: composite
 tests:
