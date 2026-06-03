@@ -14,6 +14,7 @@ on:
       - unlabeled
       - ready_for_review
       - review_requested
+      - synchronize
   # workflow_dispatch:
   #   inputs:
   #     verbose_output:
@@ -25,7 +26,11 @@ on:
 env:
   VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
   # the bot name without the '[bot]' suffix
-  GH_LOCAL_BOT_NAME: 'rw-actions-bot'
+  GH_LOCAL_PRIMARY:   ${{ vars.GH_LOCAL_PRIMARY }}          # the GitHub account to use first, either 'user' or 'bot'
+  GH_LOCAL_BOT_NAME:  ${{ vars.GH_LOCAL_BOT_NAME || 'rw-actions-bot' }}         # the bot (GitHub app) name without the '[bot]' suffix
+  GH_LOCAL_BOT_UID:   ${{ vars.GH_LOCAL_BOT_UID }}          # the bot (GitHub app) UID
+  GH_LOCAL_USER_NAME: ${{ vars.GH_LOCAL_USER_NAME }}        # the GitHub machine account user name
+  GH_LOCAL_USER_UID:  ${{ vars.GH_LOCAL_USER_UID }}         # the GitHub machine account user ID
   # the owner of the repo, used in conditionals below
   GH_OWNER: rwaight
 
@@ -237,7 +242,7 @@ jobs:
       - name: Create an App Token
         # Verified creator: https://github.com/marketplace/actions/create-github-app-token
         # GitHub Action for creating a GitHub App installation access token.
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
@@ -253,7 +258,7 @@ jobs:
       - name: Checkout files from commit tree
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         id: checkout
         # Skip running on forks or Dependabot since neither has access to secrets
         if: steps.app-token.outcome != 'skipped'
@@ -275,7 +280,7 @@ jobs:
       - name: Checkout files from commit tree for dependabot
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         id: checkout-dependabot
         # Run for Dependabot with the default token
         if: |
@@ -299,13 +304,13 @@ jobs:
       - name: Apply non-versioning labels
         # Verified creator: https://github.com/marketplace/actions/labeler
         # An action for automatically labelling pull requests
-        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6.0.1
+        uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 # v6.1.0
         id: label-pull-request
         with:
           repo-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Autorelease | Check for semantic version labels
-        uses: rwaight/actions/github/check-semver-labels@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/github/check-semver-labels@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         id: check-version-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: startsWith(github.event.pull_request.head.ref, 'autorelease')
@@ -318,7 +323,7 @@ jobs:
           verbose: ${{ runner.debug == '1' && 'true' || 'false' }}
 
       - name: Check for type labels
-        uses: rwaight/actions/github/label-checker@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/github/label-checker@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         id: check-type-labels
         # use startsWith instead of contains ##if: ${{ ! contains('refs/heads/autorelease', github.ref) }}
         if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
@@ -330,6 +335,19 @@ jobs:
           #none_of: 'version:'
           one_of: 'type:'
           repo_token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+
+      - name: Infer and validate type label from commits
+        id: infer-type-from-commits
+        if: ${{ ! startsWith(github.event.pull_request.head.ref, 'autorelease') }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash assets/pr-labeler/infer-type-label-from-commits.sh
 
       - name: Write the check-${{ env.GHA_LABEL_SCOPE }}-labels results to the environment
         # https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
@@ -356,12 +374,21 @@ jobs:
           ##
           elif [ '${{ env.GHA_LABEL_SCOPE }}' == 'type' ]; then
               echo "The label scope is '${{ env.GHA_LABEL_SCOPE }}' (should be 'type'). "
-              label_check=${{ steps.check-type-labels.outputs.label_check }}
-              echo "label_check=${{ steps.check-type-labels.outputs.label_check }}" >> $GITHUB_ENV
-              echo "label_check=${{ steps.check-type-labels.outputs.label_check }}" >> "$GITHUB_OUTPUT"
-              step_outcome=${{ steps.check-type-labels.outcome }}
-              echo "step_outcome=${{ steps.check-type-labels.outcome }}" >> $GITHUB_ENV
-              echo "step_outcome=${{ steps.check-type-labels.outcome }}" >> "$GITHUB_OUTPUT"
+              infer_result='${{ steps.infer-type-from-commits.outputs.result }}'
+              if [ "${infer_result}" == 'success' ]; then
+                  label_check=success
+                  step_outcome=success
+              elif [ "${infer_result}" == 'failure' ]; then
+                  label_check=failure
+                  step_outcome=failure
+              else
+                  label_check=${{ steps.check-type-labels.outputs.label_check }}
+                  step_outcome=${{ steps.check-type-labels.outcome }}
+              fi
+              echo "label_check=${label_check}" >> $GITHUB_ENV
+              echo "label_check=${label_check}" >> "$GITHUB_OUTPUT"
+              echo "step_outcome=${step_outcome}" >> $GITHUB_ENV
+              echo "step_outcome=${step_outcome}" >> "$GITHUB_OUTPUT"
           else
               echo "::error::Unable to set 'label_check' and 'step_outcome' variables, exiting. "
               exit 1
@@ -392,7 +419,7 @@ jobs:
           echo "The 'write-results' step has finished. "
 
       - name: Look for a comment
-        uses: rwaight/actions/chatops/find-comment@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/chatops/find-comment@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         id: find-comment
         if: steps.write-results.outcome != 'skipped'
         #continue-on-error: true
@@ -409,12 +436,15 @@ jobs:
 
       - name: Generate comment template
         id: comment-template
-        uses: rwaight/actions/utilities/render-template@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/utilities/render-template@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
         #   if it exists, to replace a label check failure comment with a success comment
-        if: ${{ steps.find-comment.outputs.comment-id || steps.write-results.outputs.label_check == 'failure' }}
+        if: |
+          steps.find-comment.outputs.comment-id ||
+          steps.write-results.outputs.label_check == 'failure' ||
+          steps.infer-type-from-commits.outputs.auto_labeled == 'true'
         #ran when success# #if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
         #ran when success# #if: |
         #ran when success# #  (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||
@@ -432,15 +462,22 @@ jobs:
             label_scope: ${{ env.GHA_LABEL_SCOPE }}
             step_outcome: ${{ steps.write-results.outputs.step_outcome }}
             test_name: ${{ env.test_name }}
+            failure_reason: ${{ steps.infer-type-from-commits.outputs.failure_reason }}
+            commit_types_found: ${{ steps.infer-type-from-commits.outputs.commit_types_found }}
+            inferred_label: ${{ steps.infer-type-from-commits.outputs.inferred_label }}
+            auto_labeled: ${{ steps.infer-type-from-commits.outputs.auto_labeled == 'true' }}
 
       - name: Create or update comment
         id: comment-on-pr
-        uses: rwaight/actions/chatops/create-or-update-comment@9ba2ea55545de0856de6b8d565689285c8ed241b # v0.2.4
+        uses: rwaight/actions/chatops/create-or-update-comment@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         # old if was very noisy, always adds a comment## #if: steps.write-results.outcome != 'skipped'
         # updated 'if' to run if 'label_check: failure' or if 'comment-id' is found
         # this should mean a comment is only added if there is a label check failure, otherwise update a comment
         #   if it exists, to replace a label check failure comment with a success comment
-        if: ${{ steps.find-comment.outputs.comment-id || steps.write-results.outputs.label_check == 'failure' }}
+        if: |
+          steps.find-comment.outputs.comment-id ||
+          steps.write-results.outputs.label_check == 'failure' ||
+          steps.infer-type-from-commits.outputs.auto_labeled == 'true'
         #ran when success# #if: ${{ steps.find-comment.outputs.comment-id }} || ${{ steps.write-results.outputs.label_check == 'failure' }}
         #ran when success# #if: |
         #ran when success# #  (steps.write-results.outputs.step_outcome != 'skipped' && steps.write-results.outputs.label_check == 'failure') ||

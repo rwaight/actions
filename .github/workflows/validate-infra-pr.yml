@@ -1,0 +1,230 @@
+# validate-infra-pr.yml — validates infra-updater pull requests
+# Deployed by the infra-updater to downstream repos. Plain .yml — never .j2.
+# Source: rwaight/infra, path: infra/assets/gh_workflows/validate-infra-pr.yml
+#
+# IMPORTANT: This workflow only executes from the BASE branch (GitHub's rule for
+# pull_request triggers). The FIRST infra-updater PR that deploys this file to a
+# downstream repo will NOT be validated by it — that PR requires manual review.
+# Automated validation begins on the SECOND infra-updater run per repo (after this
+# file has merged to the default branch).
+
+name: Validate infra-updater PR
+run-name: "Validate infra-updater PR: ${{ github.head_ref }}"
+
+on:
+  pull_request:
+    branches: [main]
+    # 'closed' is added so the cleanup job can delete the branch after merge.
+    # Validate and auto-merge jobs guard against running on closed events via their if: conditions.
+    types: [opened, synchronize, reopened, closed]
+
+jobs:
+
+  validate-infra-pr:
+    name: Validate manifest and checksums
+    runs-on: ubuntu-latest
+    # Only run for open/updated PRs from the infra-updater (not on PR close).
+    if: |
+      github.event.action != 'closed' &&
+      startsWith(github.head_ref, 'ci/infra-update-')
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+
+      - name: Checkout PR branch
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Validate manifest and file checksums
+        id: validate
+        run: |
+          python3 - << 'PYEOF'
+          import hashlib
+          import json
+          import os
+          import subprocess
+          import sys
+
+          MANIFEST = "assets/infra-updater-manifest.json"
+
+          # ── Read manifest ──────────────────────────────────────────────────────
+
+          if not os.path.exists(MANIFEST):
+              print(f"::error::Manifest not found: {MANIFEST}")
+              print("The infra-updater manifest was not committed in this PR.")
+              print("This may mean the PR was opened by an older version of the updater.")
+              sys.exit(1)
+
+          with open(MANIFEST) as fh:
+              manifest = json.load(fh)
+
+          manifest_entries = manifest.get("files", [])
+          manifest_map = {e["path"]: e["sha256"] for e in manifest_entries}
+
+          print(f"Manifest: {len(manifest_entries)} files")
+          print(f"  source_sha:    {manifest.get('source_sha', 'unknown')}")
+          print(f"  source_run_id: {manifest.get('source_run_id', 'unknown')}")
+          print(f"  generated_at:  {manifest.get('generated_at', 'unknown')}")
+          print()
+
+          # ── Validate SHA256 checksums ──────────────────────────────────────────
+
+          errors = []
+
+          for rel_path, expected_sha in manifest_map.items():
+              if not os.path.exists(rel_path):
+                  errors.append(f"MISSING  {rel_path}")
+                  continue
+              actual = hashlib.sha256(open(rel_path, "rb").read()).hexdigest()
+              if actual != expected_sha:
+                  errors.append(
+                      f"MISMATCH {rel_path}\n"
+                      f"         expected: {expected_sha}\n"
+                      f"         actual:   {actual}"
+                  )
+              else:
+                  print(f"  OK  {rel_path}")
+
+          # ── Check no PR diff files are absent from manifest ────────────────────
+          # Every file changed in this PR (except the manifest itself) must appear
+          # in the manifest. An absent file indicates a stale or accumulated commit
+          # that was not part of the infra-updater run that generated the manifest.
+
+          result = subprocess.run(
+              ["git", "diff", "--name-only", "origin/main...HEAD"],
+              capture_output=True,
+              text=True,
+              check=True,
+          )
+          diff_files = [f.strip() for f in result.stdout.splitlines() if f.strip()]
+
+          for diff_path in diff_files:
+              # Normalize: strip only a leading './' prefix (two-char sequence).
+              # Do NOT use lstrip("./") — that strips characters from a set and would
+              # incorrectly convert '.github/...' → 'github/...' making comparisons fail.
+              if diff_path.startswith("./"):
+                  diff_path = diff_path[2:]
+              # Manifest file excludes itself — skip it here too.
+              if diff_path == MANIFEST:
+                  continue
+              if diff_path not in manifest_map:
+                  errors.append(f"NOT IN MANIFEST  {diff_path}")
+
+          # ── Report ─────────────────────────────────────────────────────────────
+
+          print()
+          if errors:
+              print(f"::error::Manifest validation FAILED ({len(errors)} error(s)):")
+              for err in errors:
+                  print(f"  {err}")
+              sys.exit(1)
+          else:
+              print(f"✓ Manifest validation passed: {len(manifest_entries)} files verified")
+          PYEOF
+
+      - name: Post validation result comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
+          if [[ "${{ steps.validate.outcome }}" == "success" ]]; then
+            body="✅ Manifest validated — ${run_link} \`${timestamp}\`"
+          else
+            body="❌ Manifest validation failed — ${run_link} \`${timestamp}\`"
+          fi
+          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
+
+  # ── Auto-merge (opt-in per repo) ──────────────────────────────────────────────
+  # Squash-merges the PR automatically after validation passes.
+  #
+  # REQUIRES: The downstream repo must have INFRA_AUTO_MERGE='true' set as a
+  # GitHub Actions repository variable. This variable is managed by Terraform —
+  # see infra/github/repos/<repo>.json ("infra-workflows": {"auto-merge": true}).
+  # If Terraform has not set this variable, the job is skipped (vars.INFRA_AUTO_MERGE
+  # evaluates to empty string, not 'true') — ordering is self-enforcing.
+
+  auto-merge:
+    name: Auto-merge if validation passed
+    needs: [validate-infra-pr]
+    runs-on: ubuntu-latest
+    if: |
+      github.event.action != 'closed' &&
+      needs.validate-infra-pr.result == 'success' &&
+      startsWith(github.head_ref, 'ci/infra-update-') &&
+      vars.INFRA_AUTO_MERGE == 'true'
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+
+      - name: Auto-merge downstream infra-updater PR
+        id: merge
+        # '--auto' waits for all required branch-protection checks before merging.
+        # '--squash' keeps the default branch history clean (one commit per updater run).
+        # '--delete-branch' cleans up the ci/infra-update-* branch after merge.
+        run: |
+          gh pr merge "${{ github.event.pull_request.number }}" \
+            --squash --delete-branch --auto \
+            --subject "ci: infra files update (auto-merge)"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post auto-merge triggered comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
+          if [[ "${{ steps.merge.outcome }}" == "success" ]]; then
+            body="🔀 Auto-merge triggered — ${run_link} \`${timestamp}\`"
+          else
+            body="⚠️ Auto-merge step failed — ${run_link} \`${timestamp}\`"
+          fi
+          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
+
+  # ── Cleanup (always) ──────────────────────────────────────────────────────────
+  # Deletes the ci/infra-update-* branch after the PR is merged, whether the
+  # merge was performed manually by a reviewer or via the auto-merge job above.
+  # This prevents stale remote tracking refs from causing --force-with-lease
+  # failures on the next infra-updater run targeting the same repo.
+
+  cleanup:
+    name: Delete infra-updater branch after merge
+    runs-on: ubuntu-latest
+    if: |
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      startsWith(github.head_ref, 'ci/infra-update-')
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+
+      - name: Delete branch ${{ github.head_ref }}
+        id: delete-branch
+        run: |
+          gh api \
+            --method DELETE \
+            "repos/${{ github.repository }}/git/refs/heads/${{ github.head_ref }}" \
+            || echo "Branch already deleted (auto-merge may have removed it)"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post branch cleanup comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
+          body="🧹 Branch \`${{ github.head_ref }}\` deleted — ${run_link} \`${timestamp}\`"
+          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
