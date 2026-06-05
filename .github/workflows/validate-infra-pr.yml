@@ -1,6 +1,7 @@
 # validate-infra-pr.yml — validates infra-updater pull requests
 # Deployed by the infra-updater to downstream repos. Plain .yml — never .j2.
 # Source: rwaight/infra, path: infra/assets/gh_workflows/validate-infra-pr.yml
+# Last-reviewed: 2026-06
 #
 # IMPORTANT: This workflow only executes from the BASE branch (GitHub's rule for
 # pull_request triggers). The FIRST infra-updater PR that deploys this file to a
@@ -35,7 +36,7 @@ jobs:
 
       - name: Checkout PR branch
         # Verified creator: https://github.com/marketplace/actions/checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
 
@@ -63,9 +64,23 @@ jobs:
               manifest = json.load(fh)
 
           manifest_entries = manifest.get("files", [])
-          manifest_map = {e["path"]: e["sha256"] for e in manifest_entries}
+          # Split into hashed (normal) and deleted entries.
+          # Older manifests have no "deleted" key — treat all entries as hashed.
+          manifest_hashed = {
+              e["path"]: e["sha256"]
+              for e in manifest_entries
+              if not e.get("deleted")
+          }
+          manifest_deleted = {
+              e["path"]
+              for e in manifest_entries
+              if e.get("deleted")
+          }
+          # manifest_all is used for "NOT IN MANIFEST" gate: both hashed and
+          # deleted files are expected changes authored by the infra-updater.
+          manifest_all = set(manifest_hashed) | manifest_deleted
 
-          print(f"Manifest: {len(manifest_entries)} files")
+          print(f"Manifest: {len(manifest_hashed)} files hashed, {len(manifest_deleted)} deleted")
           print(f"  source_sha:    {manifest.get('source_sha', 'unknown')}")
           print(f"  source_run_id: {manifest.get('source_run_id', 'unknown')}")
           print(f"  generated_at:  {manifest.get('generated_at', 'unknown')}")
@@ -75,7 +90,7 @@ jobs:
 
           errors = []
 
-          for rel_path, expected_sha in manifest_map.items():
+          for rel_path, expected_sha in manifest_hashed.items():
               if not os.path.exists(rel_path):
                   errors.append(f"MISSING  {rel_path}")
                   continue
@@ -88,6 +103,16 @@ jobs:
                   )
               else:
                   print(f"  OK  {rel_path}")
+
+          # ── Validate deleted entries are actually absent ───────────────────────
+          # If a manifest entry is marked deleted but the file still exists, that
+          # suggests the cleanup step did not run correctly.
+
+          for rel_path in manifest_deleted:
+              if os.path.exists(rel_path):
+                  errors.append(f"SHOULD BE DELETED BUT EXISTS  {rel_path}")
+              else:
+                  print(f"  DELETED  {rel_path}")
 
           # ── Check no PR diff files are absent from manifest ────────────────────
           # Every file changed in this PR (except the manifest itself) must appear
@@ -111,7 +136,7 @@ jobs:
               # Manifest file excludes itself — skip it here too.
               if diff_path == MANIFEST:
                   continue
-              if diff_path not in manifest_map:
+              if diff_path not in manifest_all:
                   errors.append(f"NOT IN MANIFEST  {diff_path}")
 
           # ── Report ─────────────────────────────────────────────────────────────
@@ -123,22 +148,56 @@ jobs:
                   print(f"  {err}")
               sys.exit(1)
           else:
-              print(f"✓ Manifest validation passed: {len(manifest_entries)} files verified")
+              print(
+                  f"✓ Manifest validation passed: {len(manifest_hashed)} files verified, "
+                  f"{len(manifest_deleted)} deletions confirmed"
+              )
           PYEOF
+
+      - name: Find existing PR log comment
+        if: always()
+        id: find-comment
+        uses: rwaight/actions/chatops/find-comment@v0.2.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<!-- infra-updater-pr-log -->"
+          direction: last
+
+      - name: Compute comment variables
+        if: always()
+        id: comment-vars
+        run: |
+          echo "timestamp=$(date -u +%Y-%m-%dT%H:%MZ)" >> "$GITHUB_OUTPUT"
+          if [[ -z "${{ steps.find-comment.outputs.comment-id }}" ]]; then
+            echo "is_new=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_new=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Render comment template
+        if: always()
+        id: comment-template
+        uses: rwaight/actions/utilities/render-template@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
+        with:
+          template: assets/validate-infra-pr/pr-log-validate.md
+          vars: |
+            is_new: ${{ steps.comment-vars.outputs.is_new }}
+            outcome: ${{ steps.validate.outcome }}
+            run_number: ${{ github.run_number }}
+            run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            timestamp: ${{ steps.comment-vars.outputs.timestamp }}
 
       - name: Post validation result comment
         if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
-          if [[ "${{ steps.validate.outcome }}" == "success" ]]; then
-            body="✅ Manifest validated — ${run_link} \`${timestamp}\`"
-          else
-            body="❌ Manifest validation failed — ${run_link} \`${timestamp}\`"
-          fi
-          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
+        uses: rwaight/actions/chatops/create-or-update-comment@v0.2.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          body: ${{ steps.comment-template.outputs.result }}
+          edit-mode: append
+          append-separator: newline
 
   # ── Auto-merge (opt-in per repo) ──────────────────────────────────────────────
   # Squash-merges the PR automatically after validation passes.
@@ -164,6 +223,9 @@ jobs:
 
     steps:
 
+      - name: Checkout repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
       - name: Auto-merge downstream infra-updater PR
         id: merge
         # '--auto' waits for all required branch-protection checks before merging.
@@ -176,19 +238,50 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Find existing PR log comment
+        if: always()
+        id: find-comment
+        uses: rwaight/actions/chatops/find-comment@v0.2.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<!-- infra-updater-pr-log -->"
+          direction: last
+
+      - name: Compute comment variables
+        if: always()
+        id: comment-vars
+        run: |
+          echo "timestamp=$(date -u +%Y-%m-%dT%H:%MZ)" >> "$GITHUB_OUTPUT"
+          if [[ -z "${{ steps.find-comment.outputs.comment-id }}" ]]; then
+            echo "is_new=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_new=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Render comment template
+        if: always()
+        id: comment-template
+        uses: rwaight/actions/utilities/render-template@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
+        with:
+          template: assets/validate-infra-pr/pr-log-merge.md
+          vars: |
+            is_new: ${{ steps.comment-vars.outputs.is_new }}
+            outcome: ${{ steps.merge.outcome }}
+            run_number: ${{ github.run_number }}
+            run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            timestamp: ${{ steps.comment-vars.outputs.timestamp }}
+
       - name: Post auto-merge triggered comment
         if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
-          if [[ "${{ steps.merge.outcome }}" == "success" ]]; then
-            body="🔀 Auto-merge triggered — ${run_link} \`${timestamp}\`"
-          else
-            body="⚠️ Auto-merge step failed — ${run_link} \`${timestamp}\`"
-          fi
-          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
+        uses: rwaight/actions/chatops/create-or-update-comment@v0.2.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          body: ${{ steps.comment-template.outputs.result }}
+          edit-mode: append
+          append-separator: newline
 
   # ── Cleanup (always) ──────────────────────────────────────────────────────────
   # Deletes the ci/infra-update-* branch after the PR is merged, whether the
@@ -209,6 +302,9 @@ jobs:
 
     steps:
 
+      - name: Checkout repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
       - name: Delete branch ${{ github.head_ref }}
         id: delete-branch
         run: |
@@ -219,12 +315,47 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Find existing PR log comment
+        if: always()
+        id: find-comment
+        uses: rwaight/actions/chatops/find-comment@v0.2.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<!-- infra-updater-pr-log -->"
+          direction: last
+
+      - name: Compute comment variables
+        if: always()
+        id: comment-vars
+        run: |
+          echo "timestamp=$(date -u +%Y-%m-%dT%H:%MZ)" >> "$GITHUB_OUTPUT"
+          if [[ -z "${{ steps.find-comment.outputs.comment-id }}" ]]; then
+            echo "is_new=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_new=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Render comment template
+        if: always()
+        id: comment-template
+        uses: rwaight/actions/utilities/render-template@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
+        with:
+          template: assets/validate-infra-pr/pr-log-cleanup.md
+          vars: |
+            is_new: ${{ steps.comment-vars.outputs.is_new }}
+            branch_name: ${{ github.head_ref }}
+            run_number: ${{ github.run_number }}
+            run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            timestamp: ${{ steps.comment-vars.outputs.timestamp }}
+
       - name: Post branch cleanup comment
         if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          run_link="[run #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          timestamp="$(date -u +%Y-%m-%dT%H:%MZ)"
-          body="🧹 Branch \`${{ github.head_ref }}\` deleted — ${run_link} \`${timestamp}\`"
-          gh pr comment "${{ github.event.pull_request.number }}" --body "${body}"
+        uses: rwaight/actions/chatops/create-or-update-comment@v0.2.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          body: ${{ steps.comment-template.outputs.result }}
+          edit-mode: append
+          append-separator: newline

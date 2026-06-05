@@ -250,7 +250,7 @@ jobs:
           startsWith(github.event.pull_request.head.ref, 'dependabot') == false)
         with:
           # required
-          app-id: ${{ secrets.GH_APP_ID }}
+          client-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_KEY }}
           # create a token for all repositories in the current owner's installation
           owner: ${{ github.repository_owner }}
@@ -258,7 +258,7 @@ jobs:
       - name: Checkout files from commit tree
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         id: checkout
         # Skip running on forks or Dependabot since neither has access to secrets
         if: steps.app-token.outcome != 'skipped'
@@ -280,7 +280,7 @@ jobs:
       - name: Checkout files from commit tree for dependabot
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         id: checkout-dependabot
         # Run for Dependabot with the default token
         if: |
