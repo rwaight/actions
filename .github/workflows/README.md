@@ -7,5 +7,6 @@ The following GitHub workflows are sourced from the 'infra' repo in the `infra/a
 ├── check-commits.yml
 ├── label-manager.yml
 ├── pr-labeler.yml
-└── triage-stale.yml
+├── triage-stale.yml
+└── validate-infra-pr.yml
 ```

@@ -1,52 +1,49 @@
 {
-  "source_sha": "5da649d",
-  "source_run_id": "26914377638",
-  "generated_at": "2026-06-03T21:36:00Z",
-  "file_count": 11,
+  "source_sha": "7ace089",
+  "source_run_id": "26990998359",
+  "generated_at": "2026-06-05T02:08:51Z",
+  "file_count": 10,
+  "deleted_count": 0,
   "files": [
     {
+      "path": ".github/workflows/README.md",
+      "sha256": "344440e3047e16951a60ddd7bd3739a5f84519b6c758b4a763dead76bc7af2af"
+    },
+    {
       "path": ".github/workflows/check-commits.yml",
-      "sha256": "cef15204854515f8b8ac7a8b68f37538d05220378756ff88ecd3f41eadac883c"
+      "sha256": "15ff366f66285484f71db02f2a1777b1069bcb39245d2df0e6218a3c546f5c29"
     },
     {
       "path": ".github/workflows/label-manager.yml",
-      "sha256": "8d918a487154fec183afd4ca8a52f5ba08fca50abe5c8eb49da5cf5fa7873d2f"
+      "sha256": "8074c9aa4a7d4f9032fa507021c803d702df1162d196ec458c00ac681b7401e2"
     },
     {
       "path": ".github/workflows/pr-labeler.yml",
-      "sha256": "ef52280e82f3d3746360f618833efb90110bdd278db2af70891c7824a420d1d1"
-    },
-    {
-      "path": ".github/workflows/triage-stale.yml",
-      "sha256": "8a5d2200696d83aab2a382665a8172574a4e41cf360870e92ef0da57c477adad"
+      "sha256": "62d64d261745e3e1e0c2ca77963853ec9ceefbc848a9c3df02076078f53e9c4f"
     },
     {
       "path": ".github/workflows/validate-infra-pr.yml",
-      "sha256": "e1b697b27ff3112dc008df515917f2d842bbae739e7316e894b95305e48d4c20"
-    },
-    {
-      "path": "assets/labels/my-labels-actions.yml",
-      "sha256": "f3214519b17ee3017b5979aae27008fb8f91741ef3597d0a2c87513f23a3c250"
+      "sha256": "54d8e5d071b4c83fe961c1fbe8b168831711e8d39321ad16aa53025c08c794a2"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "3cd1133c86fd05145c47736c8913fdd0fa66bdc8fd721e6da803cd335e75399d"
+      "sha256": "f1be94ece114130eb01497a7051d25c883ada1987bc89462f2f78385471c2abf"
     },
     {
-      "path": "assets/pr-labeler/README.md",
-      "sha256": "e6fbcbe9000bc9009f5ae4a1c1abb6bece89e96fc9811819f467cb37e4a45d5b"
+      "path": "assets/validate-infra-pr/README.md",
+      "sha256": "5f3c1c8767415a05e8f63f9424b252f2d154af1288aa2137e011ccf980d18f9b"
     },
     {
-      "path": "assets/pr-labeler/comment-checks-failure.md",
-      "sha256": "155a4774c17a47e9fbaff0ac655f7019dd18d8991e225449bd7d7cc9bdb307f0"
+      "path": "assets/validate-infra-pr/pr-log-cleanup.md",
+      "sha256": "e7bb2c2de6c0bb44ea1ccf3e9e19874b942a46d696ab7e6c95461d154b1ab792"
     },
     {
-      "path": "assets/pr-labeler/comment-checks-success.md",
-      "sha256": "2b00d5725717ea9919838beae9982f2a0e4d5994afdb248040d3457fee1a3eea"
+      "path": "assets/validate-infra-pr/pr-log-merge.md",
+      "sha256": "67996cd5454bdb6e1835d0982d500950e9a003094c0b2a724102e51169544f5e"
     },
     {
-      "path": "assets/pr-labeler/infer-type-label-from-commits.sh",
-      "sha256": "39bd64a36b4e3ecf89679666800fb628fedf1d6d7f1cedba8c998872252e2d1e"
+      "path": "assets/validate-infra-pr/pr-log-validate.md",
+      "sha256": "14d5ed96f105e4df55735fe22ba112281b3c4bd961778a83108f7b137800c7a4"
     }
   ]
 }
