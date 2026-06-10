@@ -129,13 +129,13 @@ jobs:
       - name: Install QEMU static binaries
         # Verified creator: https://github.com/marketplace/actions/docker-setup-qemu
         # GitHub Action to install QEMU static binaries
-        uses: docker/setup-qemu-action@v3.6.0
+        uses: docker/setup-qemu-action@v4.1.0
         id: setup-qemu
 
       - name: Setup Docker Buildx
         # Verified creator: https://github.com/marketplace/actions/docker-setup-buildx
         # GitHub Action to set up Docker Buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
         id: setup-buildx
 
       - name: Login to the GitHub Container Registry
@@ -143,7 +143,7 @@ jobs:
         if: matrix.registry == 'ghcr.io'
         # Verified creator: https://github.com/marketplace/actions/docker-login
         # GitHub Action to login against a Docker registry
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
           #username: ${{ github.actor }}
@@ -153,7 +153,7 @@ jobs:
 
       - name: Login to the GCP Artifact Registry
         if: matrix.registry == 'gcp'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         # Verified creator: https://github.com/marketplace/actions/docker-login
         # GitHub Action to login against a Docker registry
         with:
@@ -167,7 +167,7 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         # Verified creator: https://github.com/marketplace/actions/docker-metadata-action
         # GitHub Action to extract metadata (tags, labels) from Git reference and GitHub events for Docker 
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
           # https://github.com/docker/metadata-action#images-input
           images: |
@@ -229,7 +229,7 @@ jobs:
       - name: Load the container image
         # Verified creator: https://github.com/marketplace/actions/build-and-push-docker-images
         # GitHub Action to build and push Docker images with Buildx
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
           (github.repository == 'rwaight/actions') &&
@@ -262,7 +262,7 @@ jobs:
       - name: Build and push the ${{ matrix.name }} container image
         # Verified creator: https://github.com/marketplace/actions/build-and-push-docker-images
         # GitHub Action to build and push Docker images with Buildx
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         # Skip running on forks or Dependabot since neither has access to secrets
         if: |
           (github.repository == 'rwaight/actions') &&
