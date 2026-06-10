@@ -1,49 +1,17 @@
 {
-  "source_sha": "7ace089",
-  "source_run_id": "26990998359",
-  "generated_at": "2026-06-05T02:08:51Z",
-  "file_count": 10,
+  "source_sha": "7e8f028",
+  "source_run_id": "27297939389",
+  "generated_at": "2026-06-10T18:41:23Z",
+  "file_count": 2,
   "deleted_count": 0,
   "files": [
     {
-      "path": ".github/workflows/README.md",
-      "sha256": "344440e3047e16951a60ddd7bd3739a5f84519b6c758b4a763dead76bc7af2af"
-    },
-    {
-      "path": ".github/workflows/check-commits.yml",
-      "sha256": "15ff366f66285484f71db02f2a1777b1069bcb39245d2df0e6218a3c546f5c29"
-    },
-    {
-      "path": ".github/workflows/label-manager.yml",
-      "sha256": "8074c9aa4a7d4f9032fa507021c803d702df1162d196ec458c00ac681b7401e2"
-    },
-    {
-      "path": ".github/workflows/pr-labeler.yml",
-      "sha256": "62d64d261745e3e1e0c2ca77963853ec9ceefbc848a9c3df02076078f53e9c4f"
-    },
-    {
-      "path": ".github/workflows/validate-infra-pr.yml",
-      "sha256": "54d8e5d071b4c83fe961c1fbe8b168831711e8d39321ad16aa53025c08c794a2"
+      "path": "assets/labels/README.md",
+      "sha256": "ad91a2dc93b6ac2d6f634ed4c625e8873ae88847bf87a73ed189ba3640c7b56b"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "f1be94ece114130eb01497a7051d25c883ada1987bc89462f2f78385471c2abf"
-    },
-    {
-      "path": "assets/validate-infra-pr/README.md",
-      "sha256": "5f3c1c8767415a05e8f63f9424b252f2d154af1288aa2137e011ccf980d18f9b"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-cleanup.md",
-      "sha256": "e7bb2c2de6c0bb44ea1ccf3e9e19874b942a46d696ab7e6c95461d154b1ab792"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-merge.md",
-      "sha256": "67996cd5454bdb6e1835d0982d500950e9a003094c0b2a724102e51169544f5e"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-validate.md",
-      "sha256": "14d5ed96f105e4df55735fe22ba112281b3c4bd961778a83108f7b137800c7a4"
+      "sha256": "6085fe5079c6866f92f1a70679859b6f61d2d3ef271c693f8051ae86a2c4f2c3"
     }
   ]
 }
