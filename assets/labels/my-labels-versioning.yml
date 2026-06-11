@@ -3,7 +3,7 @@
 ## These labels should be used in repos where release-drafter
 ##   is in use and where versioning is in place.
 #
-# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/labels/my-labels-versioning.yml'
+# This file is sourced from the 'infra' repo, the file location is: 'infra/file-sync/assets/labels/my-labels-versioning.yml.j2'
 #
 ##### triage: labels
 -

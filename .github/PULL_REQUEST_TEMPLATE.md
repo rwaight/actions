@@ -1,5 +1,4 @@
 # GitHub Actions Monorepo - Pull Request
-<!--- Please remove all comments prior to opening the pull request with this template --->
 
 ## Items required before submitting the pull request
 1. A very clear and concise title
@@ -9,11 +8,7 @@
     - Use [one of the **commit types** from this list](https://github.com/rwaight/actions/blob/main/commitlint.config.js).
 
 ## Why are you opening this PR?
-<!--- What are the proposed changes? --->
-<!--- In your own words, describe the big picture of your changes here. --->
 
 
 ## Related issues
-<!--- Are there any related issues? --->
-<!--- Please include the URL to the related issue(s). If the PR fixes a bug or resolves a feature request, be sure to link to that issue. --->
 **Issue URL(s)**: 

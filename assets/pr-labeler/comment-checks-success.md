@@ -1,3 +1,4 @@
+
 :rocket: The PR labeler checks have passed!
 
 The PR labeler enforces a single `type:` label on every pull request because we use commit types to drive our **software release process**—consistent typing on standard PRs keeps changelogs, versioning, and release automation accurate.
