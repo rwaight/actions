@@ -1,17 +1,101 @@
 {
-  "source_sha": "7e8f028",
-  "source_run_id": "27297939389",
-  "generated_at": "2026-06-10T18:41:23Z",
-  "file_count": 2,
+  "source_sha": "4c8057f",
+  "source_run_id": "27363693769",
+  "generated_at": "2026-06-11T17:05:39Z",
+  "file_count": 23,
   "deleted_count": 0,
   "files": [
     {
-      "path": "assets/labels/README.md",
-      "sha256": "ad91a2dc93b6ac2d6f634ed4c625e8873ae88847bf87a73ed189ba3640c7b56b"
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "sha256": "dac2c2d91c126458d26f4be22810140e1e43fbce58c9900912d9bd9380d91b2f"
+    },
+    {
+      "path": ".github/README_gh-configs.md",
+      "sha256": "880980291677e0dc45b8bfc74e40a1a581cc0d9b694395eeadef20408cd48306"
+    },
+    {
+      "path": ".github/labeler.yml",
+      "sha256": "c89b5e6880c15a923e71bf33b79b0ecec26ea58a14e8763d8b0ed44a492d554c"
+    },
+    {
+      "path": ".github/workflows/check-commits.yml",
+      "sha256": "5645a47a206f75fe3617987d3646812d6cd54ac694690c023f3d3cb21a5ac4ba"
+    },
+    {
+      "path": ".github/workflows/label-manager.yml",
+      "sha256": "0de8965550e96895a87ea3e2a42ee1afc368cafe30224d09c33186a6d35fea27"
+    },
+    {
+      "path": ".github/workflows/pr-labeler.yml",
+      "sha256": "c8769b81c2e825c58ba5f90849a7674978d63a219866e456c09224e02a9d100a"
+    },
+    {
+      "path": ".github/workflows/source_README.md.j2",
+      "sha256": "b36143a15a658cc2d848bd7ebe342d665053b97229d14173afe9e96ba4173bcc"
+    },
+    {
+      "path": ".github/workflows/triage-stale.yml",
+      "sha256": "edb7af6fa9a24067f35a54de9674ae74d0966a27757eaf9f760cbe2d976b0588"
+    },
+    {
+      "path": ".github/workflows/validate-infra-pr.yml",
+      "sha256": "07a35c8374d7aa5bcce599cd4fa5445ea1fa6ac364ce9de4ad02c9cb9d859cd5"
+    },
+    {
+      "path": "assets/labels/my-labels-actions.yml",
+      "sha256": "60774a6b90ff7bf98742e62882077c3e14ebfff4b9d3396e4f38ca2e5c103923"
+    },
+    {
+      "path": "assets/labels/my-labels-core.yml",
+      "sha256": "e6c4bc26b8a6cc68f8a2a762594b1eabae6ff87e2e75c3e92825881a0e4b90f5"
+    },
+    {
+      "path": "assets/labels/my-labels-versioning.yml",
+      "sha256": "33f9fe88b81eabc427006327cdda1a51304cb83dabfebb528988d8145e907149"
+    },
+    {
+      "path": "assets/labels/source_README.md.j2",
+      "sha256": "5dbfa20a2c8a6ec2df91ba47a4af163ddd82c9c7183f0007673fc87b61b86fbc"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "6085fe5079c6866f92f1a70679859b6f61d2d3ef271c693f8051ae86a2c4f2c3"
+      "sha256": "2425646926d56d78a6816311e0e26931897cb80abbeae3f69802b50d257bae58"
+    },
+    {
+      "path": "assets/pr-labeler/comment-checks-failure.md",
+      "sha256": "dc1e6600de87181e08d222e41b91ad75e8d5199c8b51fdd0ad6597c3fe8cc4f7"
+    },
+    {
+      "path": "assets/pr-labeler/comment-checks-success.md",
+      "sha256": "1c5dbdce0600e1d6e843323a402d1d001bf03dcb133d959e2bd46cc8a00cbcb0"
+    },
+    {
+      "path": "assets/pr-labeler/infer-type-label-from-commits.sh",
+      "sha256": "973d831553605416e0daa4fc6e9917065fcd11c4789c512431a256da78e9a4fc"
+    },
+    {
+      "path": "assets/pr-labeler/source_README.md.j2",
+      "sha256": "657d34c9c640d3cb161d1fa9ddf801c6ae2bac29873b0e7ebfbbcfa03ffd4fe1"
+    },
+    {
+      "path": "assets/validate-infra-pr/pr-log-cleanup.md",
+      "sha256": "c302165977bf5cc43cf9e67d178d12808f52d99ec13c82616ecf4985c74349bc"
+    },
+    {
+      "path": "assets/validate-infra-pr/pr-log-merge.md",
+      "sha256": "0edc239eaa890a13c6cec12a09774ffd7a2d9f8c7bd4e675627a6c3192318853"
+    },
+    {
+      "path": "assets/validate-infra-pr/pr-log-validate.md",
+      "sha256": "72c029ec1950df0a4d233ad7b410aa6493fefd06c1e5b1c7624dbe67a42352cf"
+    },
+    {
+      "path": "assets/validate-infra-pr/source_README.md.j2",
+      "sha256": "6f11c1ae25eb1f5a1903cbeddce5440947282da7adda9d367ee8c17ce37e038c"
+    },
+    {
+      "path": "commitlint.config.js",
+      "sha256": "ba06c91033100063379c5d85abd340bf389fcfa9c56ba7c7df0f272a53adbd17"
     }
   ]
 }

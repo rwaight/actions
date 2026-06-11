@@ -1,6 +1,6 @@
 # This configuration is used in the 'label-manager' workflow
 # Examples from https://github.com/actions/labeler?tab=readme-ov-file#basic-examples
-# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/dot_gh/labeler.yml'
+# This file is sourced from the 'infra' repo, the file location is: 'infra/file-sync/dot_gh/labeler.yml.j2'
 
 actions:autorelease:
 - any:
@@ -71,11 +71,11 @@ impacts:actions:
   - changed-files:
     - any-glob-to-any-file: ['builders/**', 'chatops/**', 'composite/**', 'git/**', 'github/**', 'releases/**', 'utilities/**']
 
-# Add 'impacts:assets' label to any file changes within the 'assets' folder or 'infra/assets' folder
+# Add 'impacts:assets' label to any file changes within the 'assets' folder or 'infra/file-sync' folder
 impacts:assets:
 - any:
   - changed-files:
-    - any-glob-to-any-file: ['assets/**', 'infra/assets/**']
+    - any-glob-to-any-file: ['assets/**', 'infra/file-sync/**']
 
 # Add 'impacts:examples' label to any file changes within the 'examples' folder
 impacts:examples:

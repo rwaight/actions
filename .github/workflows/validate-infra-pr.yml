@@ -1,6 +1,6 @@
 # validate-infra-pr.yml — validates infra-updater pull requests
 # Deployed by the infra-updater to downstream repos. Plain .yml — never .j2.
-# Source: rwaight/infra, path: infra/assets/gh_workflows/validate-infra-pr.yml
+# Source: rwaight/infra, path: infra/file-sync/gh_workflows/validate-infra-pr.yml
 # Last-reviewed: 2026-06
 #
 # IMPORTANT: This workflow only executes from the BASE branch (GitHub's rule for

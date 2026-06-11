@@ -1,5 +1,5 @@
 # This workflow currently runs the 'pr-labeler' action
-# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/gh_workflows/pr-labeler.yml'
+# This file is sourced from the 'infra' repo, the file location is: 'infra/file-sync/gh_workflows/pr-labeler.yml'
 
 name: PR Labeler
 run-name: Label PR ${{ github.event.number }} on ${{ github.head_ref || github.ref_name }}
