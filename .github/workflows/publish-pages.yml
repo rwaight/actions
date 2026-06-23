@@ -12,8 +12,6 @@ on:
       - '.github/workflows/publish-pages.yml'
     tags:
       - 'v*.*.*'
-      - '!v*.*'
-      - '!v*'
 
 permissions:
   contents: write
@@ -103,6 +101,11 @@ jobs:
 
       - name: Run mkdocs gh-deploy
         run: mkdocs gh-deploy --force
+        env:
+          # https://github.com/ojacques/mkdocs-git-committers-plugin-2#setup
+          # GITHUB_TOKEN is always available; this env var is only used if
+          # mkdocs-git-committers-plugin-2 is configured in mkdocs.yml.
+          MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: build

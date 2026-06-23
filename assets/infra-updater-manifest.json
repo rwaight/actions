@@ -1,73 +1,33 @@
 {
-  "source_sha": "29fed35",
-  "source_run_id": "28037681101",
-  "generated_at": "2026-06-23T15:41:26Z",
-  "file_count": 16,
+  "source_sha": "8786f87",
+  "source_run_id": "28052087721",
+  "generated_at": "2026-06-23T19:42:38Z",
+  "file_count": 6,
   "deleted_count": 0,
   "files": [
     {
-      "path": ".github/CODEOWNERS",
-      "sha256": "8df1a218395f3bca577fc95752461ddb88001d41f52548a9c8f04838c52b7a45"
-    },
-    {
-      "path": ".github/README_gh-configs.md",
-      "sha256": "a2fd904b2219c3fd458d4b5ea277a41a6da362cccfbefaad66bf40a3701a6cbe"
-    },
-    {
-      "path": ".github/labeler.yml",
-      "sha256": "9db0328787da9d9b3c8f36c909cf7ea9e6dbe9024da1e4cdbfaaac8f0cb0b682"
-    },
-    {
-      "path": ".github/workflows/check-commits.yml",
-      "sha256": "5645a47a206f75fe3617987d3646812d6cd54ac694690c023f3d3cb21a5ac4ba"
-    },
-    {
-      "path": ".github/workflows/label-manager.yml",
-      "sha256": "8fc92740fd44fd8e221a1cec992d04b80e47e66956194633bd122bce87702373"
-    },
-    {
-      "path": ".github/workflows/pr-labeler.yml",
-      "sha256": "c8769b81c2e825c58ba5f90849a7674978d63a219866e456c09224e02a9d100a"
-    },
-    {
-      "path": ".github/workflows/triage-stale.yml",
-      "sha256": "edb7af6fa9a24067f35a54de9674ae74d0966a27757eaf9f760cbe2d976b0588"
-    },
-    {
-      "path": ".github/workflows/validate-infra-pr.yml",
-      "sha256": "07a35c8374d7aa5bcce599cd4fa5445ea1fa6ac364ce9de4ad02c9cb9d859cd5"
-    },
-    {
-      "path": "assets/labels/my-labels-core.yml",
-      "sha256": "2600068bb8bd0695bea965c0dcec4d86c86c438ae958895fe4871dd8ff0a20ac"
+      "path": ".github/workflows/publish-pages.yml",
+      "sha256": "e0e0ae3fab19da1a0360bf6fd5dc1d7e1ae8f6fd6382a0c4d72191bfeb71ace3"
     },
     {
       "path": "assets/labels/my-labels-custom.yml",
-      "sha256": "41b4bbf8f05e9f6504e94d59d94f103680cade6c59814817ed00f59e7c5c12a4"
-    },
-    {
-      "path": "assets/labels/my-labels-versioning.yml",
-      "sha256": "acaea30eba635b611508b699222bf8f4cebaf59a53ab87c9658f30318fd485d3"
+      "sha256": "0d56f9c0ad52f09453cab98e3304c51ca78dde8cbd67fe928ed193a9495cdbd6"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "9facd8620cc617784d4909828b1a9bea989185179a4336184c443cf35a6b742f"
+      "sha256": "ffd7f2f21edf77f30d08a6f48037045c96d27647cea3dfde5d8de36f2075edc7"
     },
     {
       "path": "assets/validate-infra-pr/pr-log-cleanup.md",
-      "sha256": "c302165977bf5cc43cf9e67d178d12808f52d99ec13c82616ecf4985c74349bc"
+      "sha256": "e7bb2c2de6c0bb44ea1ccf3e9e19874b942a46d696ab7e6c95461d154b1ab792"
     },
     {
       "path": "assets/validate-infra-pr/pr-log-merge.md",
-      "sha256": "0edc239eaa890a13c6cec12a09774ffd7a2d9f8c7bd4e675627a6c3192318853"
+      "sha256": "67996cd5454bdb6e1835d0982d500950e9a003094c0b2a724102e51169544f5e"
     },
     {
       "path": "assets/validate-infra-pr/pr-log-validate.md",
-      "sha256": "72c029ec1950df0a4d233ad7b410aa6493fefd06c1e5b1c7624dbe67a42352cf"
-    },
-    {
-      "path": "commitlint.config.js",
-      "sha256": "361928fc0fa36a80e33f92ebc067bb419fe6aa648b29074bfb99b2a5b12a9da7"
+      "sha256": "14d5ed96f105e4df55735fe22ba112281b3c4bd961778a83108f7b137800c7a4"
     }
   ]
 }

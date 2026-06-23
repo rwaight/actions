@@ -1,4 +1,3 @@
-
 {{ if .is_new }}<!-- infra-updater-pr-log -->
 **Infra-updater PR log**
 
