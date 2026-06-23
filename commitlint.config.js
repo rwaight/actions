@@ -1,5 +1,4 @@
 module.exports = {
-    // This file is sourced from the 'infra' repo, the file location is: 'infra/assets/repo_root/commitlint.config.js'
     extends: [
         '@commitlint/config-conventional'
     ],

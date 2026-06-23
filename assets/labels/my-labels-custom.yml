@@ -1,4 +1,7 @@
-## Actions GitHub Labels
+## Custom GitHub Labels
+##
+## Conditionals control which labels appear in which repos.
+## The 'repo:managed' label appears in ALL repos to prevent empty files.
 ##
 ## Note: When planning to migrate an old label to a new label,
 ##       you should first add the old label to the 'aliases'
@@ -7,10 +10,15 @@
 ##       has been migrated to the new label, across all repos,
 ##       it can then be deleted in this file.
 #
-# This file is sourced from the 'infra' repo, the file location is: 'infra/assets/labels/my-labels-actions.yml'
-#
-##### group: labels
-# The group: labels have not been formally defined
+
+##### Universal labels (ALL repos)
+-
+  name: 'repo:managed'
+  color: '0E8A16'
+  description: 'This repo is managed by the infra-updater'
+  aliases: []
+
+##### Actions group labels (actions + test-actions only)
 -
   name: 'group:builders'
   color: '50790C'
@@ -51,4 +59,9 @@
   color: '50790C'
   description: 'Actions in the ''utilities'' group'
   aliases: []
+
+
+
+
+
 #

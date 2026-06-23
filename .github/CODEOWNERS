@@ -1,0 +1,13 @@
+# CODEOWNERS
+# This file is managed by the 'infra' repo. The source template is:
+# 'infra/file-sync/dot_gh/CODEOWNERS.j2'
+#
+# Defines code ownership for actions. GitHub uses this file to
+# automatically request reviews from owners when a pull request
+# changes files they own.
+#
+# Syntax: <pattern> <owner> [<owner> ...]
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for all files
+* @rwaight
