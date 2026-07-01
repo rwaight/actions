@@ -33,10 +33,11 @@ jobs:
   # Run 'Triage Issues and PRs', but only: At 2:15pm UTC every Tuesday; or manual (workflow_dispatch)
   stale-issue-and-pr:
     name: Check for stale issues and PRs
-    if: | 
-      (github.event_name=='schedule' && github.event.schedule=='15 14 1 */1 *') || 
+    if: |
+      (github.event_name=='schedule' && github.event.schedule=='15 14 1 */1 *') ||
       (github.event_name=='workflow_dispatch' && inputs.triage_issues==true)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # https://github.com/actions/stale?tab=readme-ov-file#recommended-permissions
     permissions:
       issues: write

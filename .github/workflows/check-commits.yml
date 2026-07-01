@@ -6,12 +6,34 @@ name: Check commits
 run-name: Check commit conventions on ${{ github.event_name }}
 
 on:
-  push:
-    tags:
-      - '!v*.*.*'
-      - '!v*.*'
-      - '!v*'
+  # push trigger intentionally disabled:
+  # The negative-only tag patterns below ('!v*.*.*') produce no matches in GitHub Actions —
+  # negative filters require at least one positive pattern to match against. This trigger
+  # was effectively dead and is commented out to prevent accidental activation.
+  # Commit hygiene is checked on 'pull_request' (opened/synchronize/reopened), which covers
+  # all commits before they merge to main without double-billing push events.
+  # push:
+  #   tags:
+  #     - '!v*.*.*'
+  #     - '!v*.*'
+  #     - '!v*'
   pull_request:
+    # Explicit types (default is [opened, synchronize, reopened]):
+    types:
+      - opened
+      - synchronize  # new commits pushed to the PR branch
+      - reopened
+    # Skip doc-only PRs — paths-ignore is evaluated server-side before any runner spins up (0 cost).
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'notes/**'
+      - 'assets/labels/**'
+
+# Cancel in-progress runs on rapid re-pushes; let bot runs complete uninterrupted.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.actor != 'rw-actions-bot[bot]' }}
 
 env:
   VERBOSE_WORKFLOW: ${{ inputs.verbose_output || 'true' }}
@@ -24,6 +46,7 @@ jobs:
 
   commitlint:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: (github.repository_owner == 'rwaight')
     permissions:
       contents: write
@@ -125,6 +148,7 @@ jobs:
   not-repo-owner:
     #name: Exit on forked repo
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     if: (github.repository_owner != 'rwaight')
     env:
       MY_WORKFLOW_DEBUG: ${{ inputs.debug_output || 'false' }}
