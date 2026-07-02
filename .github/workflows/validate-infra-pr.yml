@@ -19,17 +19,26 @@ on:
     # Validate and auto-merge jobs guard against running on closed events via their if: conditions.
     types: [opened, synchronize, reopened, closed]
 
+# Cancel in-progress runs on rapid re-pushes; let bot runs complete uninterrupted.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.actor != 'rw-actions-bot[bot]' }}
+
 jobs:
 
   validate-infra-pr:
     name: Validate manifest and checksums
     runs-on: ubuntu-latest
+    # ~10 min validate + auto-merge registration (fast API call, not blocking); 15 for headroom.
+    timeout-minutes: 15
     # Only run for open/updated PRs from the infra-updater (not on PR close).
     if: |
       github.event.action != 'closed' &&
       startsWith(github.head_ref, 'ci/infra-update-')
     permissions:
-      contents: read
+      # contents: write required for the auto-merge step (gh pr merge).
+      # Elevated from 'read' because auto-merge is opt-in via vars.INFRA_AUTO_MERGE.
+      contents: write
       pull-requests: write
 
     steps:
@@ -200,34 +209,15 @@ jobs:
           append-separator: newline
 
   # ── Auto-merge (opt-in per repo) ──────────────────────────────────────────────
-  # Squash-merges the PR automatically after validation passes.
-  #
+  # Steps below are skipped when vars.INFRA_AUTO_MERGE != 'true'.
+  # Merged into this job (was a separate job) to save one runner startup per run.
   # REQUIRES: The downstream repo must have INFRA_AUTO_MERGE='true' set as a
   # GitHub Actions repository variable. This variable is managed by Terraform —
   # see infra/github/repos/<repo>.json ("infra-workflows": {"auto-merge": true}).
-  # If Terraform has not set this variable, the job is skipped (vars.INFRA_AUTO_MERGE
-  # evaluates to empty string, not 'true') — ordering is self-enforcing.
-
-  auto-merge:
-    name: Auto-merge if validation passed
-    needs: [validate-infra-pr]
-    runs-on: ubuntu-latest
-    if: |
-      github.event.action != 'closed' &&
-      needs.validate-infra-pr.result == 'success' &&
-      startsWith(github.head_ref, 'ci/infra-update-') &&
-      vars.INFRA_AUTO_MERGE == 'true'
-    permissions:
-      contents: write
-      pull-requests: write
-
-    steps:
-
-      - name: Checkout repo
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Auto-merge downstream infra-updater PR
         id: merge
+        if: vars.INFRA_AUTO_MERGE == 'true'
         # '--auto' waits for all required branch-protection checks before merging.
         # '--squash' keeps the default branch history clean (one commit per updater run).
         # '--delete-branch' cleans up the ci/infra-update-* branch after merge.
@@ -238,9 +228,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Find existing PR log comment
-        if: always()
-        id: find-comment
+      - name: Find existing PR log comment (merge)
+        if: always() && vars.INFRA_AUTO_MERGE == 'true'
+        id: find-comment-merge
         uses: rwaight/actions/chatops/find-comment@v0.2.6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -248,38 +238,38 @@ jobs:
           body-includes: "<!-- infra-updater-pr-log -->"
           direction: last
 
-      - name: Compute comment variables
-        if: always()
-        id: comment-vars
+      - name: Compute comment variables (merge)
+        if: always() && vars.INFRA_AUTO_MERGE == 'true'
+        id: comment-vars-merge
         run: |
           echo "timestamp=$(date -u +%Y-%m-%dT%H:%MZ)" >> "$GITHUB_OUTPUT"
-          if [[ -z "${{ steps.find-comment.outputs.comment-id }}" ]]; then
+          if [[ -z "${{ steps.find-comment-merge.outputs.comment-id }}" ]]; then
             echo "is_new=yes" >> "$GITHUB_OUTPUT"
           else
             echo "is_new=" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Render comment template
-        if: always()
-        id: comment-template
+      - name: Render comment template (merge)
+        if: always() && vars.INFRA_AUTO_MERGE == 'true'
+        id: comment-template-merge
         uses: rwaight/actions/utilities/render-template@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         with:
           template: assets/validate-infra-pr/pr-log-merge.md
           vars: |
-            is_new: ${{ steps.comment-vars.outputs.is_new }}
+            is_new: ${{ steps.comment-vars-merge.outputs.is_new }}
             outcome: ${{ steps.merge.outcome }}
             run_number: ${{ github.run_number }}
             run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            timestamp: ${{ steps.comment-vars.outputs.timestamp }}
+            timestamp: ${{ steps.comment-vars-merge.outputs.timestamp }}
 
       - name: Post auto-merge triggered comment
-        if: always()
+        if: always() && vars.INFRA_AUTO_MERGE == 'true'
         uses: rwaight/actions/chatops/create-or-update-comment@v0.2.6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          body: ${{ steps.comment-template.outputs.result }}
+          comment-id: ${{ steps.find-comment-merge.outputs.comment-id }}
+          body: ${{ steps.comment-template-merge.outputs.result }}
           edit-mode: append
           append-separator: newline
 
@@ -292,6 +282,7 @@ jobs:
   cleanup:
     name: Delete infra-updater branch after merge
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     if: |
       github.event.action == 'closed' &&
       github.event.pull_request.merged == true &&

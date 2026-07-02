@@ -10,11 +10,14 @@ on:
     types:
       - opened
       - reopened
-      - labeled
-      - unlabeled
-      - ready_for_review
-      - review_requested
-      - synchronize
+      - ready_for_review   # convert from draft → PR (labels may differ)
+      - synchronize        # new commits pushed to PR branch (re-infer type label)
+      - labeled            # re-run after manual label change; self-trigger loop is mitigated by
+      #                    #   cancel-in-progress (bot-applied labels won't cancel the in-progress run)
+      # Intentionally excluded:
+      # - unlabeled        # disabled: same self-trigger concern as 'labeled', but unlabeled events
+      #                    #   are rare and add no validation value — removal is intentional
+      # - review_requested # disabled: reviewer assignment does not affect PR labels
   # workflow_dispatch:
   #   inputs:
   #     verbose_output:
@@ -48,6 +51,7 @@ jobs:
   pr-labeler:
     #name: Label pull request ${{ github.event.number }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     # the 'if' statement below is not needed at this time, but would be if the 'on' section above changes
     if: github.event_name == 'pull_request'
     permissions:
