@@ -52,6 +52,7 @@ jobs:
   export-and-sync-labels:
     name: Export and sync repo labels
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     #env:
     #  MY_WORKFLOW_DEBUG: ${{ inputs.verbose_output || 'false' }}
     permissions:
