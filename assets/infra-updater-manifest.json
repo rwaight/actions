@@ -1,53 +1,33 @@
 {
-  "source_sha": "61cccf1",
-  "source_run_id": "28560748133",
-  "generated_at": "2026-07-02T02:20:53Z",
-  "file_count": 11,
+  "source_sha": "9b269e8",
+  "source_run_id": "28980959280",
+  "generated_at": "2026-07-08T22:48:06Z",
+  "file_count": 6,
   "deleted_count": 0,
   "files": [
     {
       "path": ".github/workflows/check-commits.yml",
-      "sha256": "c2b3ae32ec27305a26357d4c470fd0db04930c65650a79325f12fd1f452e6f53"
+      "sha256": "de1dd4698cdd7825f004ba7cbb6551caeb286ee0aae1010e73765b558aa05d58"
     },
     {
       "path": ".github/workflows/label-manager.yml",
-      "sha256": "643167dba1b799c6a52ed29d9053559feea3e68fb45a1632eef11814e7e08fdc"
+      "sha256": "d760355d39983c4bbe9a21891c2d975ca1b8c97f927b660f032900d0ac72517f"
     },
     {
       "path": ".github/workflows/pr-labeler.yml",
-      "sha256": "07526c96aa9026b1e54d2c9910a5216d417b59683a148f877dc9db4d4fc72c53"
+      "sha256": "e8d9a549377f84555444ee4613f5e410d6dc1866d941c9fb3edcaa43fe61dbb4"
     },
     {
       "path": ".github/workflows/publish-pages.yml",
-      "sha256": "c963e01e86f9f17acd5b23c5f16688ccf50d04a4b174f6db97c23657979cfe26"
-    },
-    {
-      "path": ".github/workflows/triage-stale.yml",
-      "sha256": "d73564dbb31236e58212c533ab275fdeb4eac3b01a2ce2f424dc49ec3769a65f"
+      "sha256": "551c3f15b87f8245652cc76746105856d33d0fed76085d9018f36e8428d8f13d"
     },
     {
       "path": ".github/workflows/validate-infra-pr.yml",
-      "sha256": "23be367a6f343b859e68f16f0997c82e10d1a9a5ec5cae9385cdf91e03ff56bf"
-    },
-    {
-      "path": "assets/labels/my-labels-custom.yml",
-      "sha256": "0d56f9c0ad52f09453cab98e3304c51ca78dde8cbd67fe928ed193a9495cdbd6"
+      "sha256": "c798f7dd788e9d7b53860e6a5f13d6fcd45315ef4fa5db092f651a3d45aa9ab0"
     },
     {
       "path": "assets/last-updated.txt",
-      "sha256": "1bfe1fd97957a91ea50ca4dbd88f4756cbfde43b22e5dd33b60d42dc18e6628f"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-cleanup.md",
-      "sha256": "e7bb2c2de6c0bb44ea1ccf3e9e19874b942a46d696ab7e6c95461d154b1ab792"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-merge.md",
-      "sha256": "67996cd5454bdb6e1835d0982d500950e9a003094c0b2a724102e51169544f5e"
-    },
-    {
-      "path": "assets/validate-infra-pr/pr-log-validate.md",
-      "sha256": "14d5ed96f105e4df55735fe22ba112281b3c4bd961778a83108f7b137800c7a4"
+      "sha256": "564c088d66805d86d1f23456ffa1187841ee2eb617a203d1337e699628f5e163"
     }
   ]
 }
