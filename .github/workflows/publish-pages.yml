@@ -52,7 +52,7 @@ jobs:
       - name: Cache dependencies and build outputs
         # Verified creator: https://github.com/marketplace/actions/cache
         # Cache dependencies and build outputs in GitHub Actions
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: mkdocs-material-${{ env.cache_id }}
           path: .cache
@@ -125,17 +125,18 @@ jobs:
       - name: Setup Pages
         # Verified creator: https://github.com/marketplace/actions/configure-github-pages
         # A GitHub Action to enable Pages and extract various metadata about a site.
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: Upload artifact
         # Verified creator: https://github.com/marketplace/actions/upload-github-pages-artifact
         # A composite action for packaging and uploading an artifact that can be deployed to GitHub Pages.
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: '.'
+          include-hidden-files: true
 
       - name: Deploy to GitHub Pages
         id: deployment
         # Verified creator: https://github.com/marketplace/actions/deploy-github-pages-site
         # GitHub Action to publish artifacts to GitHub Pages for deployments
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
