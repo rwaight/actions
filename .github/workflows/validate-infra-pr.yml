@@ -93,6 +93,12 @@ jobs:
           print(f"  source_sha:    {manifest.get('source_sha', 'unknown')}")
           print(f"  source_run_id: {manifest.get('source_run_id', 'unknown')}")
           print(f"  generated_at:  {manifest.get('generated_at', 'unknown')}")
+          if manifest.get('updater_version'):
+              print(f"  updater_version: {manifest.get('updater_version')}")
+          if manifest.get('breaking_change_ids'):
+              print(f"  breaking_change_ids: {manifest.get('breaking_change_ids')}")
+          if manifest.get('suppress_auto_merge'):
+              print("  suppress_auto_merge: true")
           print()
 
           # ── Validate SHA256 checksums ──────────────────────────────────────────
@@ -161,6 +167,16 @@ jobs:
                   f"✓ Manifest validation passed: {len(manifest_hashed)} files verified, "
                   f"{len(manifest_deleted)} deletions confirmed"
               )
+
+          # Expose suppress_auto_merge for the auto-merge step (manifest schema v2+).
+          suppress_auto_merge = bool(manifest.get("suppress_auto_merge"))
+          breaking_ids = manifest.get("breaking_change_ids") or []
+          out_path = os.environ.get("GITHUB_OUTPUT")
+          if out_path:
+              with open(out_path, "a") as out:
+                  out.write(f"suppress_auto_merge={'true' if suppress_auto_merge else 'false'}\n")
+                  if breaking_ids:
+                      out.write("breaking_change_ids=" + ",".join(str(i) for i in breaking_ids) + "\n")
           PYEOF
 
       - name: Find existing PR log comment
@@ -215,9 +231,54 @@ jobs:
   # GitHub Actions repository variable. This variable is managed by Terraform —
   # see infra/github/repos/<repo>.json ("infra-workflows": {"auto-merge": true}).
 
+      - name: Find existing PR log comment (merge suppressed)
+        if: always() && vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge == 'true'
+        id: find-comment-merge-suppressed
+        uses: rwaight/actions/chatops/find-comment@v0.2.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: "<!-- infra-updater-pr-log -->"
+          direction: last
+
+      - name: Compute comment variables (merge suppressed)
+        if: always() && vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge == 'true'
+        id: comment-vars-merge-suppressed
+        run: |
+          echo "timestamp=$(date -u +%Y-%m-%dT%H:%MZ)" >> "$GITHUB_OUTPUT"
+          if [[ -z "${{ steps.find-comment-merge-suppressed.outputs.comment-id }}" ]]; then
+            echo "is_new=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_new=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Render comment template (merge suppressed)
+        if: always() && vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge == 'true'
+        id: comment-template-merge-suppressed
+        uses: rwaight/actions/utilities/render-template@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
+        with:
+          template: assets/validate-infra-pr/pr-log-merge-suppressed.md
+          vars: |
+            is_new: ${{ steps.comment-vars-merge-suppressed.outputs.is_new }}
+            breaking_change_ids: ${{ steps.validate.outputs.breaking_change_ids }}
+            run_number: ${{ github.run_number }}
+            run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            timestamp: ${{ steps.comment-vars-merge-suppressed.outputs.timestamp }}
+
+      - name: Post auto-merge suppressed comment
+        if: always() && vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge == 'true'
+        uses: rwaight/actions/chatops/create-or-update-comment@v0.2.6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment-merge-suppressed.outputs.comment-id }}
+          body: ${{ steps.comment-template-merge-suppressed.outputs.result }}
+          edit-mode: append
+          append-separator: newline
+
       - name: Auto-merge downstream infra-updater PR
         id: merge
-        if: vars.INFRA_AUTO_MERGE == 'true'
+        if: vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge != 'true'
         # '--auto' waits for all required branch-protection checks before merging.
         # '--squash' keeps the default branch history clean (one commit per updater run).
         # '--delete-branch' cleans up the ci/infra-update-* branch after merge.
@@ -229,7 +290,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Find existing PR log comment (merge)
-        if: always() && vars.INFRA_AUTO_MERGE == 'true'
+        if: always() && vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge != 'true'
         id: find-comment-merge
         uses: rwaight/actions/chatops/find-comment@v0.2.6
         with:
@@ -239,7 +300,7 @@ jobs:
           direction: last
 
       - name: Compute comment variables (merge)
-        if: always() && vars.INFRA_AUTO_MERGE == 'true'
+        if: always() && vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge != 'true'
         id: comment-vars-merge
         run: |
           echo "timestamp=$(date -u +%Y-%m-%dT%H:%MZ)" >> "$GITHUB_OUTPUT"
@@ -250,7 +311,7 @@ jobs:
           fi
 
       - name: Render comment template (merge)
-        if: always() && vars.INFRA_AUTO_MERGE == 'true'
+        if: always() && vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge != 'true'
         id: comment-template-merge
         uses: rwaight/actions/utilities/render-template@df0be96950b731ff07e32af1c7f72e2deb38539b # v0.2.6
         with:
@@ -263,7 +324,7 @@ jobs:
             timestamp: ${{ steps.comment-vars-merge.outputs.timestamp }}
 
       - name: Post auto-merge triggered comment
-        if: always() && vars.INFRA_AUTO_MERGE == 'true'
+        if: always() && vars.INFRA_AUTO_MERGE == 'true' && steps.validate.outputs.suppress_auto_merge != 'true'
         uses: rwaight/actions/chatops/create-or-update-comment@v0.2.6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
