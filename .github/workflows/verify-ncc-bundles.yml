@@ -81,8 +81,6 @@ jobs:
           set -euo pipefail
           echo "::group::starting the 'rebuild-bundles' step... "
           echo "rebuilding each allowlisted action and comparing the committed output. "
-          echo "::endgroup::"
-          echo ""
           python3 - <<'PY'
           import json, os, subprocess
 
@@ -94,13 +92,12 @@ jobs:
               path = item["path"]
               script = item.get("script", "package")
               output = item.get("output", "dist")
-              print(f"::group::starting verify for '{path}' ")
-              print(f"running 'npm ci' then 'npm run {script}' and comparing '{path}/{output}/'. ")
+              print(f"verifying '{path}' via 'npm run {script}' and comparing '{path}/{output}/'. ")
               if not os.path.exists(os.path.join(path, "package-lock.json")):
                   raise SystemExit(f"{path} is missing package-lock.json")
               subprocess.check_call(["npm", "ci"], cwd=path)
               subprocess.check_call(["npm", "run", script], cwd=path)
               subprocess.check_call(["git", "diff", "--exit-code", "--", f"{path}/{output}"])
-              print("::endgroup::")
-              print("")
           PY
+          echo "::endgroup::"
+          echo ""
