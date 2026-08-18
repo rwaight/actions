@@ -1,0 +1,8 @@
+# Actions that must rebuild their committed JS bundle in CI.
+# Start empty. An action joins this list in the same PR that first
+# rebuilds it (lockfile + the script that emits dist/ or lib/).
+actions: []
+# Example entry:
+# - path: git/changed-files
+#   script: package
+#   output: dist

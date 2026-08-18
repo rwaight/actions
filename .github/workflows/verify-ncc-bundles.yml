@@ -1,0 +1,103 @@
+# Rebuild committed JS bundles (ncc / similar) and fail if the output differs.
+# Allowlist starts empty. An action joins the list in the same PR that first
+# rebuilds it (lockfile + the script that emits dist/ or lib/).
+# This check is not required. Later action-update PRs add themselves.
+
+name: Verify ncc bundles
+run-name: Rebuild committed JS bundles on ${{ github.event_name }}
+
+on:
+  pull_request:
+    # Explicit types (default is [opened, synchronize, reopened]):
+    types:
+      - opened
+      - synchronize  # new commits pushed to the PR branch
+      - reopened
+    paths:
+      - '.github/workflows/verify-ncc-bundles.yml'
+      - '.github/ncc-verify-allowlist.yml'
+      - 'git/changed-files/**'
+      - 'github/export-label-config/**'
+
+permissions:
+  contents: read
+
+# Cancel in-progress runs on rapid re-pushes.
+# https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.actor != 'rw-actions-bot[bot]' }}
+
+jobs:
+
+  verify:
+    name: Rebuild allowlisted bundles
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Not a required check. Allowlist starts empty, so this job often only
+    # reports that there is nothing to verify.
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read ncc verify allowlist
+        id: allowlist
+        run: |
+          echo "::group::starting the 'allowlist' step... "
+          set -euo pipefail
+          echo "reading '.github/ncc-verify-allowlist.yml' with yq. "
+          count="$(yq e '.actions | length' .github/ncc-verify-allowlist.yml)"
+          echo "allowlist action count is ${count}. "
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+          echo "::endgroup::"
+          echo ""
+
+      - name: Skip empty allowlist
+        id: skip-empty
+        if: steps.allowlist.outputs.count == '0'
+        run: |
+          echo "::group::starting the 'skip-empty' step... "
+          echo "the allowlist is empty; no bundles to verify. "
+          echo "an action joins this list in the same PR that first rebuilds it. "
+          echo "::endgroup::"
+          echo ""
+
+      - name: Setup Node.js environment
+        id: setup-node
+        if: steps.allowlist.outputs.count != '0'
+        # Verified creator: https://github.com/marketplace/actions/setup-node-js-environment
+        # Set up your GitHub Actions workflow with a specific version of node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      - name: Rebuild each allowlisted action
+        id: rebuild-bundles
+        if: steps.allowlist.outputs.count != '0'
+        run: |
+          set -euo pipefail
+          echo "::group::starting the 'rebuild-bundles' step... "
+          echo "rebuilding each allowlisted action and comparing the committed output. "
+          python3 - <<'PY'
+          import json, os, subprocess
+
+          actions = json.loads(subprocess.check_output(
+              ["yq", "e", "-o=json", ".actions", ".github/ncc-verify-allowlist.yml"],
+              text=True,
+          ))
+          for item in actions:
+              path = item["path"]
+              script = item.get("script", "package")
+              output = item.get("output", "dist")
+              print(f"verifying '{path}' via 'npm run {script}' and comparing '{path}/{output}/'. ")
+              if not os.path.exists(os.path.join(path, "package-lock.json")):
+                  raise SystemExit(f"{path} is missing package-lock.json")
+              subprocess.check_call(["npm", "ci"], cwd=path)
+              subprocess.check_call(["npm", "run", script], cwd=path)
+              subprocess.check_call(["git", "diff", "--exit-code", "--", f"{path}/{output}"])
+          PY
+          echo "::endgroup::"
+          echo ""
