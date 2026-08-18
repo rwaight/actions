@@ -92,14 +92,20 @@ check_for_updates() {
             # https://cli.github.com/manual/gh_api
             # gh api command ##gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${latest_version}"
             # store the entire json response in a variable #
-            json_latest_ref=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${latest_version}")test_version}")
+            json_latest_ref=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${source_repo_author}/${source_repo_name}/git/ref/tags/${latest_version}")
             latest_tag_ref=$(echo "$json_latest_ref" | jq -r '.ref')
             latest_tag_url=$(echo "$json_latest_ref" | jq -r '.url')
-            #repo_latest_sha_type=${repo_latest_tag_data%$'\n'*}
             latest_tag_type=$(echo "$json_latest_ref" | jq -r '.object.type')
-            #repo_latest_sha=${repo_latest_tag_data##*$'\n'}
             latest_tag_sha=$(echo "$json_latest_ref" | jq -r '.object.sha')
             latest_tag_sha_url=$(echo "$json_latest_ref" | jq -r '.object.url')
+            # Annotated tags point at a tag object; peel to the commit SHA.
+            if [[ "$latest_tag_type" == "tag" ]]; then
+                latest_tag_sha=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/${source_repo_author}/${source_repo_name}/git/tags/${latest_tag_sha}" | jq -r '.object.sha')
+            fi
+            if [[ -z "$latest_tag_sha" || "$latest_tag_sha" == "null" ]]; then
+                echo "[ERROR] Unable to resolve commit SHA for ${source_repo_author}/${source_repo_name} ${latest_version}" >> "$error_log"
+                return
+            fi
             #
             echo "Downloading updated source files for version $latest_version..."
             #
@@ -113,10 +119,25 @@ check_for_updates() {
             # Navigate to the temporary directory
             cd "$temp_dir" || exit
 
-            # Clone the specific version of the repository
-            git clone --branch "$latest_version" --depth 1 "$source_repo_url" .
+            # Fetch the resolved commit SHA. Do not clone by mutable tag.
+            git init -q .
+            git remote add origin "$source_repo_url"
+            if ! git fetch --depth 1 origin "$latest_tag_sha"; then
+                echo "[ERROR] git fetch of SHA $latest_tag_sha failed for $source_repo_url" >> "$error_log"
+                cd "$local_repo_dir" || exit
+                rm -rf "$temp_dir"
+                return
+            fi
+            git checkout --detach FETCH_HEAD
+            fetched_sha=$(git rev-parse HEAD)
+            if [[ "$fetched_sha" != "$latest_tag_sha" ]]; then
+                echo "[ERROR] HEAD $fetched_sha does not match resolved SHA $latest_tag_sha" >> "$error_log"
+                cd "$local_repo_dir" || exit
+                rm -rf "$temp_dir"
+                return
+            fi
 
-            if [[ $? -eq 0 ]]; then
+            if [[ -n "$fetched_sha" ]]; then
                 echo "Downloaded updated source files to $temp_dir"
 
                 # Copy the template file to the temp directory
@@ -151,15 +172,19 @@ check_for_updates() {
                 # Set the local action directory variable
                 local_action_dir=$(dirname "$config_file")
 
-                # Checkout main branch and create a new branch for the update
-                #cd "$local_action_dir" || exit
+                # Stay on the current branch. Never checkout main in this working tree.
                 cd "$local_repo_dir" || exit
-                git checkout main
-                # date_branch_name="updates/${group}_${name}_$(date +%Y%m)"
-                # Convert version format from v1.2.1 to v1-2-1 for branch name
+                current_branch=$(git branch --show-current)
+                if [[ -z "$current_branch" || "$current_branch" == "main" || "$current_branch" == "master" ]]; then
+                    echo "[ERROR] Refusing to apply an update from main/master or a detached HEAD. Use a worktree on a feature branch." >> "$error_log"
+                    rm -rf "$temp_dir"
+                    return
+                fi
                 version_for_branch=$(echo "$latest_version" | tr '.' '-')
                 branch_name="updates/${group}_${name}_${version_for_branch}"
-                git checkout -b "$branch_name"
+                if [[ "$current_branch" != "$branch_name" ]]; then
+                    git checkout -b "$branch_name"
+                fi
 
                 # Read exclusion list from import-config.yml
                 exclusion_list=($(yq e '.local.update.exclusions[]' "$config_file" 2>/dev/null))
@@ -167,17 +192,17 @@ check_for_updates() {
                 # Always exclude import-config.yml
                 exclusion_list+=("import-config.yml")
                 
-                # Convert the array into a pattern for `rm` exclusion
-                exclusion_pattern=$(printf "! -name %s " "${exclusion_list[@]}")
-                
-                # print the list of files that will be excluded
                 echo "The following files SHOULD BE excluded:"
                 printf "%s\n" "${exclusion_list[@]}"
                 echo ""
 
                 # Clean up the $local_action_dir while keeping excluded files
                 echo "Cleaning up $local_action_dir while keeping excluded files..."
-                find "$local_action_dir" -mindepth 1 $exclusion_pattern -exec rm -rf {} +
+                find_args=("$local_action_dir" -mindepth 1)
+                for excluded in "${exclusion_list[@]}"; do
+                    find_args+=(! -name "$excluded")
+                done
+                find "${find_args[@]}" -exec rm -rf {} +
 
                 # print the list of excluded files
                 echo "Cleanup completed. The following files were excluded:"
@@ -204,7 +229,7 @@ check_for_updates() {
                     sed -i '' "s/SED_REPOAUTH/${source_repo_author}/g" "$new_readme"
                     ##not used##sed -i '' "s/SED_REPOURL/${source_repo_url}/g" "$new_readme"
                     sed -i '' "s/SED_NEWVERSION/${latest_version}/g" "$new_readme"
-                    sed -i '' "s/SED_NEWCOMMITSHA/${latest_tag_sha}/g" "$new_readme"
+                    sed -i '' "s/SED_NEWCOMMITSHA/${fetched_sha}/g" "$new_readme"
                     # Add additional find/replace commands as needed
                 fi
 
@@ -256,6 +281,8 @@ check_for_updates() {
 
                 # Update the current version in import-config.yml
                 yq e -i ".source.current_version = \"$latest_version\"" "$config_file"
+                yq e -i ".source.current_commit_sha = \"$fetched_sha\"" "$config_file"
+                yq e -i ".source.last_reviewed = \"$(date -u +%Y-%m-%d)\"" "$config_file"
                 yq e -i ".source.update_available = false" "$config_file"
 
                 echo "Updated local version of the action in $local_action_dir"

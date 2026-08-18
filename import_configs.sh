@@ -328,6 +328,7 @@ function create_or_update_import_config() {
             yq e -i ".source.repo_name = \"$source_repo_name\"" "$import_config_file"
             yq e -i ".source.repo_url = \"$source_repo_url\"" "$import_config_file"
             yq e -i ".source.current_version = \"$current_version\"" "$import_config_file"
+            yq e -i ".source.current_commit_sha = \"\"" "$import_config_file"
             yq e -i ".source.latest_version = \"$latest_version\"" "$import_config_file"
             yq e -i ".source.update_available = $update_available" "$import_config_file"
             # end of # if [[ $action_type == "imported" ]]; then # block
