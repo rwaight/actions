@@ -1,7 +1,7 @@
 # Rebuild committed JS bundles (ncc / similar) and fail if the output differs.
-# Allowlist starts empty. An action joins the list in the same PR that first
-# rebuilds it (lockfile + the script that emits dist/ or lib/).
-# This check is not required. Later action-update PRs add themselves.
+# An action joins the allowlist in the same PR that first rebuilds it
+# (lockfile + the script that emits dist/ or lib/).
+# This check is not required.
 
 name: Verify ncc bundles
 run-name: Rebuild committed JS bundles on ${{ github.event_name }}
@@ -34,8 +34,7 @@ jobs:
     name: Rebuild allowlisted bundles
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Not a required check. Allowlist starts empty, so this job often only
-    # reports that there is nothing to verify.
+    # Not a required check. The allowlist names the bundles this job rebuilds.
     steps:
 
       - name: Checkout files from commit tree
@@ -74,6 +73,17 @@ jobs:
         with:
           node-version: '24'
 
+      # Yarn Classic in changed-files needs Corepack so `yarn` matches the lockfile.
+      - name: Enable Corepack
+        id: enable-corepack
+        if: steps.allowlist.outputs.count != '0'
+        run: |
+          echo "::group::starting the 'enable-corepack' step... "
+          echo "enabling Corepack so yarn and npm match the action lockfiles. "
+          corepack enable
+          echo "::endgroup::"
+          echo ""
+
       - name: Rebuild each allowlisted action
         id: rebuild-bundles
         if: steps.allowlist.outputs.count != '0'
@@ -92,11 +102,20 @@ jobs:
               path = item["path"]
               script = item.get("script", "package")
               output = item.get("output", "dist")
-              print(f"verifying '{path}' via 'npm run {script}' and comparing '{path}/{output}/'. ")
-              if not os.path.exists(os.path.join(path, "package-lock.json")):
-                  raise SystemExit(f"{path} is missing package-lock.json")
-              subprocess.check_call(["npm", "ci"], cwd=path)
-              subprocess.check_call(["npm", "run", script], cwd=path)
+              installer = item.get("installer")
+              if installer is None:
+                  installer = "yarn" if os.path.exists(os.path.join(path, "yarn.lock")) else "npm"
+              print(f"verifying '{path}' via '{installer} run {script}' and comparing '{path}/{output}/'. ")
+              if installer == "yarn":
+                  if not os.path.exists(os.path.join(path, "yarn.lock")):
+                      raise SystemExit(f"{path} is missing yarn.lock")
+                  subprocess.check_call(["yarn", "install", "--frozen-lockfile"], cwd=path)
+                  subprocess.check_call(["yarn", "run", script], cwd=path)
+              else:
+                  if not os.path.exists(os.path.join(path, "package-lock.json")):
+                      raise SystemExit(f"{path} is missing package-lock.json")
+                  subprocess.check_call(["npm", "ci"], cwd=path)
+                  subprocess.check_call(["npm", "run", script], cwd=path)
               subprocess.check_call(["git", "diff", "--exit-code", "--", f"{path}/{output}"])
           PY
           echo "::endgroup::"
