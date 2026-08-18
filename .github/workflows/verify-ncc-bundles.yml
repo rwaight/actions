@@ -1,0 +1,57 @@
+name: Verify ncc bundles
+run-name: Rebuild committed JS bundles on ${{ github.event_name }}
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-ncc-bundles.yml'
+      - '.github/ncc-verify-allowlist.yml'
+      - 'git/changed-files/**'
+      - 'github/export-label-config/**'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Rebuild allowlisted bundles
+    runs-on: ubuntu-latest
+    # Not a required check. Allowlist starts empty.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Read allowlist
+        id: allowlist
+        run: |
+          set -euo pipefail
+          count="$(yq e '.actions | length' .github/ncc-verify-allowlist.yml)"
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+      - name: Skip empty allowlist
+        if: steps.allowlist.outputs.count == '0'
+        run: echo "Allowlist is empty; no bundles to verify."
+      - name: Setup Node
+        if: steps.allowlist.outputs.count != '0'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Rebuild each allowlisted action
+        if: steps.allowlist.outputs.count != '0'
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess
+          actions = json.loads(subprocess.check_output(
+              ["yq", "e", "-o=json", ".actions", ".github/ncc-verify-allowlist.yml"],
+              text=True,
+          ))
+          for item in actions:
+              path = item["path"]
+              script = item.get("script", "package")
+              output = item.get("output", "dist")
+              print(f"Verifying {path} via npm run {script} -> {output}/")
+              if not os.path.exists(os.path.join(path, "package-lock.json")):
+                  raise SystemExit(f"{path} is missing package-lock.json")
+              subprocess.check_call(["npm", "ci"], cwd=path)
+              subprocess.check_call(["npm", "run", script], cwd=path)
+              subprocess.check_call(["git", "diff", "--exit-code", "--", f"{path}/{output}"])
+          PY
