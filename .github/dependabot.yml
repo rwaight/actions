@@ -31,3 +31,28 @@ updates:
         - "rwaight*"
     reviewers:
       - "rwaight"
+
+  # Composite action.yml files live outside .github/workflows/.
+  # Dependabot only scans those directories when they are listed here.
+  - package-ecosystem: "github-actions"
+    commit-message:
+      prefix: "chore(actions): "
+    directories:
+      - "/github/check-semver-labels"
+      - "/test/build-matrix"
+      - "/test/bump-json-version"
+      - "/test/config-gh-cli"
+      - "/test/get-commit-hash"
+      - "/vars/build-method"
+      - "/vars/build-type"
+      - "/vars/build-version"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "actions:dependabot"
+      - "type:chore"
+      - "impacts:workflows"
+    pull-request-branch-name:
+      separator: "-"
+    reviewers:
+      - "rwaight"

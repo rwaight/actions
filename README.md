@@ -17,14 +17,16 @@ The actions are currently organized by the following categories:
 .
 ├── builders
 ├── chatops
-├── composite
 ├── git
 ├── github
 ├── instruqt
 ├── releases
+├── test
 ├── utilities
 └── vars
 ```
+
+There is no `composite/` directory. `builders/set-version` was renamed to `vars/build-version`.
 
 #### Actions by category
 
@@ -62,6 +64,9 @@ Here is a current list of actions by category
 │   ├── runner-debug
 │   └── semantic-pull-request
 ├── instruqt
+│   ├── api-get-tracks
+│   ├── api-get-users
+│   ├── install-cli
 │   ├── track-delete
 │   ├── track-dev
 │   ├── track-promote
@@ -74,9 +79,21 @@ Here is a current list of actions by category
 │   ├── release-drafter
 │   ├── release-tag-updater
 │   └── semantic-release
+├── test
+│   ├── build-matrix
+│   ├── bump-json-version
+│   ├── config-gh-cli
+│   ├── get-commit-hash
+│   ├── get-next-semver
+│   ├── get-tag-version
+│   ├── set-build-type
+│   ├── template-composite
+│   └── update-json-field
 ├── utilities
 │   ├── copycat
+│   ├── image-info
 │   ├── install-yq
+│   ├── ngrok-tunnel
 │   ├── paths-filter
 │   ├── public-ip
 │   └── render-template
@@ -84,6 +101,7 @@ Here is a current list of actions by category
     ├── build-method
     ├── build-type
     ├── build-version
+    ├── multiline-entries
     └── packer-skip-create
 ```
 
