@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1056,13 +1056,13 @@
 <details><summary>commands to list directories (click to expand)</summary>
 
 #### Get the categories from the root directory
-<div class="highlight"><pre><span></span><code><span class="c1"># use the &#39;-I&#39; option to exclude the non-category directories</span>
-tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-L<span class="w"> </span><span class="m">1</span><span class="w"> </span>-I<span class="w"> </span><span class="s1">&#39;.git|.github|archive|assets|composite|docs|examples|test&#39;</span><span class="w"> </span>--noreport
+<div class="highlight"><pre><span></span><code><span class="c1"># use the '-I' option to exclude the non-category directories</span>
+tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-L<span class="w"> </span><span class="m">1</span><span class="w"> </span>-I<span class="w"> </span><span class="s1">'.git|.github|archive|assets|composite|docs|examples|test'</span><span class="w"> </span>--noreport
 </code></pre></div>
 
 #### Get the actions by category
-<div class="highlight"><pre><span></span><code><span class="c1"># use the &#39;-I&#39; option to exclude the non-category directories</span>
-tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-L<span class="w"> </span><span class="m">2</span><span class="w"> </span>-I<span class="w"> </span><span class="s1">&#39;.git|.github|archive|assets|composite|docs|examples|test&#39;</span><span class="w"> </span>--noreport
+<div class="highlight"><pre><span></span><code><span class="c1"># use the '-I' option to exclude the non-category directories</span>
+tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-L<span class="w"> </span><span class="m">2</span><span class="w"> </span>-I<span class="w"> </span><span class="s1">'.git|.github|archive|assets|composite|docs|examples|test'</span><span class="w"> </span>--noreport
 </code></pre></div>
 
 
@@ -1085,10 +1085,10 @@ tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-
 <span class="k">for</span><span class="w"> </span>item<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">categories</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>find<span class="w"> </span><span class="nv">$item</span><span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
 
 <span class="c1"># not fancy way, using cut, to get the action names below their category</span>
-<span class="k">for</span><span class="w"> </span>item<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">categories</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>find<span class="w"> </span><span class="nv">$item</span><span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">&#39;/&#39;</span><span class="w"> </span>-f2-<span class="p">;</span><span class="w"> </span><span class="k">done</span>
+<span class="k">for</span><span class="w"> </span>item<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">categories</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>find<span class="w"> </span><span class="nv">$item</span><span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">'/'</span><span class="w"> </span>-f2-<span class="p">;</span><span class="w"> </span><span class="k">done</span>
 
 <span class="c1"># similar to above, but with sed</span>
-<span class="k">for</span><span class="w"> </span>item<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">categories</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>find<span class="w"> </span><span class="nv">$item</span><span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s,^[^/]*/,,&#39;</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+<span class="k">for</span><span class="w"> </span>item<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">categories</span><span class="p">[@]</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>find<span class="w"> </span><span class="nv">$item</span><span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-maxdepth<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s,^[^/]*/,,'</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
 </code></pre></div>
 
 #### Get the directories by category with `tree`
@@ -1100,8 +1100,8 @@ tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-
 </code></pre></div>
 
 #### Filter out the non-category directories with `tree`
-<div class="highlight"><pre><span></span><code><span class="c1"># use the &#39;-I&#39; option to exclude the non-category directories</span>
-tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-L<span class="w"> </span><span class="m">2</span><span class="w"> </span>-I<span class="w"> </span><span class="s1">&#39;.git|.github|archive|assets|composite|docs|examples|test&#39;</span><span class="w"> </span>--noreport
+<div class="highlight"><pre><span></span><code><span class="c1"># use the '-I' option to exclude the non-category directories</span>
+tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-L<span class="w"> </span><span class="m">2</span><span class="w"> </span>-I<span class="w"> </span><span class="s1">'.git|.github|archive|assets|composite|docs|examples|test'</span><span class="w"> </span>--noreport
 </code></pre></div>
 
 </details>
@@ -1159,7 +1159,7 @@ tree<span class="w"> </span>.<span class="w"> </span>-d<span class="w"> </span>-
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "content.action.edit", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

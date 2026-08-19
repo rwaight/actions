@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1266,14 +1266,14 @@
 </blockquote>
 <p>That’s a great question! The way we currently attribute commits made by GitHub Apps isn’t currently publicly documented in our <a href="https://help.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address"><code>Setting your commit email address</code></a> article and is subject to change at anytime without notice. If it’s helpful in the meantime, here’s something you could try (though your mileage may vary over time).</p>
 <p>You could set the Git username is the name of your application with <code>[bot]</code> appended at the end. For example, if your bot’s name is <code>machina</code>, then the Git username is <code>machina[bot]</code>:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>user.name<span class="w"> </span><span class="s2">&quot;machina[bot]&quot;</span>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>user.name<span class="w"> </span><span class="s2">"machina[bot]"</span>
 </code></pre></div></p>
 <p>For the email, you could set it to the GitHub App’s user <code>id</code>, a plus sign (<code>+</code>), and its name with <code>[bot]</code> appended, followed by the Users No Reply GitHub email address. For example, if the app’s user <code>id</code> is <code>123456789</code>, then the email would be:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>user.email<span class="w"> </span><span class="s2">&quot;123456789+machina[bot]@users.noreply.github.com&quot;</span>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>user.email<span class="w"> </span><span class="s2">"123456789+machina[bot]@users.noreply.github.com"</span>
 </code></pre></div>
 Here’s an example commit showing the GitHub Actions installation committing to a repository: <a href="https://github.com/actions-packages-examples/github-script__playground/commit/f75a13b585d89017ab76a163e3fade61a051420f"><code>actions-packages-examples/github-script__playground@f75a13b</code></a></p>
 <p>In its <a href="https://github.com/actions-packages-examples/github-script__playground/commit/f75a13b585d89017ab76a163e3fade61a051420f.patch">patch file</a>, observe the second line’s contents:
-<div class="highlight"><pre><span></span><code>From:<span class="w"> </span><span class="s2">&quot;github-actions[bot]&quot;</span>
+<div class="highlight"><pre><span></span><code>From:<span class="w"> </span><span class="s2">"github-actions[bot]"</span>
 <span class="w"> </span>&lt;<span class="m">41898282</span>+github-actions<span class="o">[</span>bot<span class="o">]</span>@users.noreply.github.com&gt;
 </code></pre></div>
 One approach for obtaining the GitHub App’s user ID is to <a href="https://developer.github.com/v3/repos/contents/#create-or-update-file-contents">create a new file using the Contents API</a>, navigating to the commit on <a href="http://github.com/">GitHub.com</a>, and appending <code>.patch</code> to the end of that commit URL to reveal the patch information showcasing the actor name and email address we use. I hope this helps!</p>
@@ -1304,48 +1304,48 @@ Not to be confused with GitHub App ID. This must be the <strong>UID for the GitH
 <p>See the differences between these two 'users' here: <a href="https://github.com/actions/checkout/issues/13#issuecomment-724415212">actions/checkout#13 (comment)</a></p>
 <p>As well as some investigation here: https://github.community/t/github-actions-bot-email-address/17204</p>
 <p>Also changing the <code>default</code> in the docs to reflect the actual default specified in the <code>actions.yml</code> file.
-<div class="highlight"><pre><span></span><code>    - name: Commit files
-      run: |
-        git config --local user.email &quot;41898282+github-actions[bot]@users.noreply.github.com&quot;
-        git config --local user.name &quot;github-actions[bot]&quot;
-        git commit -m &quot;Add changes&quot; -a
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Commit files</span>
+<span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"</span>
+<span class="w">        </span><span class="no">git config --local user.name "github-actions[bot]"</span>
+<span class="w">        </span><span class="no">git commit -m "Add changes" -a</span>
 </code></pre></div></p>
 <h4 id="squidfunkmkdocs-material">squidfunk/mkdocs-material<a class="headerlink" href="#squidfunkmkdocs-material" title="Permanent link">&para;</a></h4>
 <p>From https://github.com/squidfunk/mkdocs-material/pull/6335</p>
 <p>Workflow for "Material for MkDocs"
-<div class="highlight"><pre><span></span><code>    jobs:
-      deploy:
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v4
-          - name: Configure Git Credentials
-            run: |
-              git config user.name github-actions[bot]
-              git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nt">jobs</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">deploy</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">        </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure Git Credentials</span>
+<span class="w">            </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">              </span><span class="no">git config user.name github-actions[bot]</span>
+<span class="w">              </span><span class="no">git config user.email 41898282+github-actions[bot]@users.noreply.github.com</span>
 </code></pre></div></p>
 <p>Workflow for "Insiders"
-<div class="highlight"><pre><span></span><code>    jobs:
-      deploy:
-        runs-on: ubuntu-latest
-        if: github.event.repository.fork == false
-        steps:
-          - uses: actions/checkout@v4
-          - name: Configure Git Credentials
-            run: |
-              git config user.name github-actions[bot]
-              git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nt">jobs</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">deploy</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">        </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github.event.repository.fork == false</span>
+<span class="w">        </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Configure Git Credentials</span>
+<span class="w">            </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">              </span><span class="no">git config user.name github-actions[bot]</span>
+<span class="w">              </span><span class="no">git config user.email 41898282+github-actions[bot]@users.noreply.github.com</span>
 </code></pre></div></p>
 <h4 id="idkbrowbygamingrealm-frontend">idkbrowby/gamingrealm-frontend<a class="headerlink" href="#idkbrowbygamingrealm-frontend" title="Permanent link">&para;</a></h4>
 <p>From: https://github.com/idkbrowby/gamingrealm-frontend/pull/17</p>
-<div class="highlight"><pre><span></span><code>      - name: Commit file
-        run: |
-          git config --global user.name github-actions[bot]
-          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Commit file</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">git config --global user.name github-actions[bot]</span>
+<span class="w">          </span><span class="no">git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com</span>
 </code></pre></div>
 <h4 id="ownerrepo">owner/repo<a class="headerlink" href="#ownerrepo" title="Permanent link">&para;</a></h4>
 <p>From: https://github.com/northy/pdf-to-markdown-workflow/pull/2</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.email<span class="w"> </span><span class="s2">&quot;41898282+github-actions[bot]@users.noreply.github.com&quot;</span>
-git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.name<span class="w"> </span><span class="s2">&quot;github-actions[bot]&quot;</span>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.email<span class="w"> </span><span class="s2">"41898282+github-actions[bot]@users.noreply.github.com"</span>
+git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.name<span class="w"> </span><span class="s2">"github-actions[bot]"</span>
 </code></pre></div>
 <h4 id="ownerrepo_1">owner/repo<a class="headerlink" href="#ownerrepo_1" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code>
@@ -1407,7 +1407,7 @@ git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "content.action.edit", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

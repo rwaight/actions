@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1114,19 +1114,19 @@
 <p>So basically, you are provided with a kind of GitHub App token that you can use during the workflow execution.</p>
 <p>You can use that token directly like this:</p>
 <p><a href="https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token">https://github.com/marketplace/actions/checkout#push-a-commit-using-the-built-in-token</a></p>
-<div class="highlight"><pre><span></span><code>on: push
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: |
-          date &gt; generated.txt
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add .
-          git commit -m &quot;generated&quot;
-          git push
+<div class="highlight"><pre><span></span><code><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">push</span>
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">build</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v2</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">date &gt; generated.txt</span>
+<span class="w">          </span><span class="no">git config user.name github-actions</span>
+<span class="w">          </span><span class="no">git config user.email github-actions@github.com</span>
+<span class="w">          </span><span class="no">git add .</span>
+<span class="w">          </span><span class="no">git commit -m "generated"</span>
+<span class="w">          </span><span class="no">git push</span>
 </code></pre></div>
 <p>But the problem with that solution is the commit is not going to be signed. The other option is to use the token to make a request to the GitHub API to create the commit. There is an example in this repo using a GitHub API Python wrapper:</p>
 <p><a href="./../src/01_sign_commit_using_github_api.py">01_sign_commit_using_github_api.py</a></p>
@@ -1237,7 +1237,7 @@ jobs:
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "content.action.edit", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

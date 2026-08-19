@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1360,7 +1360,7 @@ v0.2.1
 ### Other examples using git describe
 
 Get the latest tagged version and remove the `v` prefix:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;[0-9]&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-1<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-b<span class="w"> </span><span class="m">2</span>-7
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">'[0-9]'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-1<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-b<span class="w"> </span><span class="m">2</span>-7
 <span class="c1">## output</span>
 <span class="m">0</span>.2.1
 </code></pre></div>
@@ -1394,25 +1394,25 @@ git<span class="w"> </span>tag<span class="w"> </span>foo1.10
 </code></pre></div></p>
 <p>Here is what you would get:
 <div class="highlight"><pre><span></span><code><span class="c1"># lexical sort</span>
-git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span>--sort<span class="o">=</span>refname<span class="w"> </span><span class="s2">&quot;foo*&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span>--sort<span class="o">=</span>refname<span class="w"> </span><span class="s2">"foo*"</span>
 foo1.10
 foo1.3
 foo1.6
 
 <span class="c1"># version sort</span>
-git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span>--sort<span class="o">=</span>version:refname<span class="w"> </span><span class="s2">&quot;foo*&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span>--sort<span class="o">=</span>version:refname<span class="w"> </span><span class="s2">"foo*"</span>
 foo1.3
 foo1.6
 foo1.10
 
 <span class="c1"># reverse version sort</span>
-git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span>--sort<span class="o">=</span>-version:refname<span class="w"> </span><span class="s2">&quot;foo*&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span>--sort<span class="o">=</span>-version:refname<span class="w"> </span><span class="s2">"foo*"</span>
 foo1.10
 foo1.6
 foo1.3
 
 <span class="c1"># reverse lexical sort</span>
-git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span>--sort<span class="o">=</span>-refname<span class="w"> </span><span class="s2">&quot;foo*&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span>--sort<span class="o">=</span>-refname<span class="w"> </span><span class="s2">"foo*"</span>
 foo1.6
 foo1.3
 foo1.10
@@ -1466,7 +1466,7 @@ v0.2.1
 <p>You can use any of the following commands to get the latest tag</p>
 <h4 id="using-git-ls-remote">Using <code>git ls-remote</code><a class="headerlink" href="#using-git-ls-remote" title="Permanent link">&para;</a></h4>
 <p>Using <code>git ls-remote --tags --sort=committerdate</code>:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-remote<span class="w"> </span>--tags<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">&#39;v.*&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-r
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-remote<span class="w"> </span>--tags<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">'v.*'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-r
 <span class="c1">## output</span>
 From<span class="w"> </span>https://github.com/rwaight/actions.git
 v0.2.1
@@ -1480,7 +1480,7 @@ v0.1.0
 v0
 </code></pre></div></p>
 <p>Using <code>git ls-remote --tags --sort=committerdate | grep -o 'v.*'</code>:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-remote<span class="w"> </span>--tags<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">&#39;v.*&#39;</span>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-remote<span class="w"> </span>--tags<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">'v.*'</span>
 <span class="c1">## output</span>
 v0.1.1
 v0.1.2
@@ -1493,7 +1493,7 @@ v0.2
 v0.2.1
 </code></pre></div></p>
 <p>Using <code>git ls-remote --tags --sort=taggerdate | grep -o 'v.*' | sort -r</code>:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-remote<span class="w"> </span>--tags<span class="w"> </span>--sort<span class="o">=</span>taggerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">&#39;v.*&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-r
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>ls-remote<span class="w"> </span>--tags<span class="w"> </span>--sort<span class="o">=</span>taggerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">'v.*'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-r
 <span class="c1">## output</span>
 From<span class="w"> </span>https://github.com/rwaight/actions.git
 v0.2.1
@@ -1513,7 +1513,7 @@ v0
 v0.2.1
 </code></pre></div></p>
 <p>Using <code>git tag --sort=committerdate | grep -o 'v.*' | sort -r</code>:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">&#39;v.*&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-r
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">'v.*'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-r
 <span class="c1">## output</span>
 v0.2.1
 v0.2.0
@@ -1524,13 +1524,13 @@ v0.1.0
 v0
 </code></pre></div></p>
 <p>Using <code>git tag --sort=committerdate | grep -o 'v.*' | sort -r | head -1</code>:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">&#39;v.*&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-r<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-1
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>--sort<span class="o">=</span>committerdate<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">'v.*'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-r<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-1
 <span class="c1">## output</span>
 v0.2.1
 </code></pre></div></p>
 <h4 id="using-git-for-each-ref">Using <code>git for-each-ref</code><a class="headerlink" href="#using-git-for-each-ref" title="Permanent link">&para;</a></h4>
 <p>Using <code>git for-each-ref --sort=creatordate --format '%(refname) %(creatordate)' refs/tags</code>:
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span><span class="k">for</span>-each-ref<span class="w"> </span>--sort<span class="o">=</span>creatordate<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;%(refname) %(creatordate)&#39;</span><span class="w"> </span>refs/tags
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>for-each-ref<span class="w"> </span>--sort<span class="o">=</span>creatordate<span class="w"> </span>--format<span class="w"> </span><span class="s1">'%(refname) %(creatordate)'</span><span class="w"> </span>refs/tags
 <span class="c1">## output</span>
 refs/tags/v0.1.0<span class="w"> </span>Mon<span class="w"> </span>Mar<span class="w"> </span><span class="m">11</span><span class="w"> </span><span class="m">12</span>:10:23<span class="w"> </span><span class="m">2024</span><span class="w"> </span>-0500
 refs/tags/v0.1.1<span class="w"> </span>Mon<span class="w"> </span>Mar<span class="w"> </span><span class="m">11</span><span class="w"> </span><span class="m">13</span>:37:32<span class="w"> </span><span class="m">2024</span><span class="w"> </span>-0500
@@ -1654,7 +1654,7 @@ output_here
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "content.action.edit", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

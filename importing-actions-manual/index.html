@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1120,27 +1120,27 @@
 <p><strong>Note</strong>: Once the action has been imported, be sure to <a href="../actions-repo-update-readme/">keep the repo README updated</a></p>
 <h3 id="branding-imported-actions">Branding Imported Actions<a class="headerlink" href="#branding-imported-actions" title="Permanent link">&para;</a></h3>
 <p>Use the code block below to add <code>branding</code> to the imported actions.
-<div class="highlight"><pre><span></span><code>branding:
-  icon: &#39;copy&#39;
-  color: &#39;blue&#39;
-  # Ref: https://haya14busa.github.io/github-action-brandings/
-  # fork: https://github.com/rwaight/github-action-brandings
+<div class="highlight"><pre><span></span><code><span class="nt">branding</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">icon</span><span class="p">:</span><span class="w"> </span><span class="s">'copy'</span>
+<span class="w">  </span><span class="nt">color</span><span class="p">:</span><span class="w"> </span><span class="s">'blue'</span>
+<span class="w">  </span><span class="c1"># Ref: https://haya14busa.github.io/github-action-brandings/</span>
+<span class="w">  </span><span class="c1"># fork: https://github.com/rwaight/github-action-brandings</span>
 </code></pre></div></p>
 <h3 id="copying-documentation-in-place">Copying documentation in place<a class="headerlink" href="#copying-documentation-in-place" title="Permanent link">&para;</a></h3>
 <p>When importing a new action, <code>cd</code> into the directory then run the following commands to keep an original copy of specific files:
 <div class="highlight"><pre><span></span><code><span class="nv">import</span><span class="o">=</span>example-action
 <span class="c1"># cd into the directory</span>
 <span class="nb">cd</span><span class="w"> </span><span class="nv">$import</span>
-<span class="c1"># rename the &#39;.github&#39; directory</span>
+<span class="c1"># rename the '.github' directory</span>
 mv<span class="w"> </span>.github<span class="w"> </span>__dot_github
-<span class="c1"># copy and rename the &#39;.yml&#39; file(s) in the &#39;__dot_github&#39; directory</span>
-<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>__dot_github/*.yml<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">.disabled&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
-<span class="c1"># copy and rename the &#39;.yml&#39; file(s) in the &#39;__dot_github/workflows&#39; directory</span>
-<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>__dot_github/workflows/*.yml<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">.disabled&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
-<span class="c1"># copy and rename the &#39;.md&#39; file(s)</span>
-<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>*.md<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>cp<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">import</span><span class="si">}</span><span class="s2">__</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
-<span class="c1"># copy and rename the &#39;.yml&#39; file(s)</span>
-<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>*.yml<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>cp<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">import</span><span class="si">}</span><span class="s2">__</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+<span class="c1"># copy and rename the '.yml' file(s) in the '__dot_github' directory</span>
+<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>__dot_github/*.yml<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>mv<span class="w"> </span><span class="s2">"</span><span class="nv">$f</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$f</span><span class="s2">.disabled"</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+<span class="c1"># copy and rename the '.yml' file(s) in the '__dot_github/workflows' directory</span>
+<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>__dot_github/workflows/*.yml<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>mv<span class="w"> </span><span class="s2">"</span><span class="nv">$f</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="nv">$f</span><span class="s2">.disabled"</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+<span class="c1"># copy and rename the '.md' file(s)</span>
+<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>*.md<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>cp<span class="w"> </span><span class="s2">"</span><span class="nv">$f</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">import</span><span class="si">}</span><span class="s2">__</span><span class="nv">$f</span><span class="s2">"</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+<span class="c1"># copy and rename the '.yml' file(s)</span>
+<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>*.yml<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>cp<span class="w"> </span><span class="s2">"</span><span class="nv">$f</span><span class="s2">"</span><span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">import</span><span class="si">}</span><span class="s2">__</span><span class="nv">$f</span><span class="s2">"</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
 </code></pre></div></p>
 <h3 id="documentation-for-imported-actions">Documentation for imported actions<a class="headerlink" href="#documentation-for-imported-actions" title="Permanent link">&para;</a></h3>
 <p>The source actions repository README should be <strong>renamed</strong> to <code>&lt;reponame&gt;__README.md</code> and a new README should be created, using the following as a template:
@@ -1174,23 +1174,23 @@ ACTION_OUTPUTS_SUMMARY_HERE
 
 Example workflow:
 <span class="sb">```yml</span>
-<span class="s">name: EXAMPLE_WORKFLOW_NAME_HERE</span>
-<span class="s">run-name: EXAMPLE_WORKFLOW_RUN_NAME_HERE</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EXAMPLE_WORKFLOW_NAME_HERE</span>
+<span class="nt">run-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EXAMPLE_WORKFLOW_RUN_NAME_HERE</span>
 
-<span class="s">on:</span>
-<span class="s">  push:</span>
-<span class="s">    branches:</span>
-<span class="s">        - &#39;main&#39;</span>
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">'main'</span>
 
-<span class="s">jobs:</span>
-<span class="s">  EXAMPLE_JOB_NAME:</span>
-<span class="s">    runs-on: ubuntu-latest</span>
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">EXAMPLE_JOB_NAME</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
 
-<span class="s">    steps:</span>
-<span class="s">      - name: EXAMPLE_STEP_WITH_ACTION</span>
-<span class="s">        id: example_step_id</span>
-<span class="s">        #uses: rwaight/actions/ACTION_CATEGORY/ACTION_DIRECTORY@main # can use version specific or main</span>
-<span class="s">        uses: rwaight/actions/ACTION_CATEGORY/ACTION_DIRECTORY@v1</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EXAMPLE_STEP_WITH_ACTION</span>
+<span class="w">        </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example_step_id</span>
+<span class="w">        </span><span class="c1">#uses: rwaight/actions/ACTION_CATEGORY/ACTION_DIRECTORY@main # can use version specific or main</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rwaight/actions/ACTION_CATEGORY/ACTION_DIRECTORY@v1</span>
 
 <span class="sb">```</span>
 </code></pre></div></p>
@@ -1250,7 +1250,7 @@ Example workflow:
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["header.autohide", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tracking", "content.action.edit", "content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
