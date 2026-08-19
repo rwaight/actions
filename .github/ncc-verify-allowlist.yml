@@ -1,12 +1,18 @@
 # Actions that must rebuild their committed JS bundle in CI.
 # An action joins this list in the same PR that first rebuilds it
 # (lockfile + the script that emits dist/ or lib/).
+# Also add the action glob to on.paths in .github/workflows/verify-ncc-bundles.yml.
 actions:
   - path: github/export-label-config
     script: build
     output: lib
     installer: npm
-# Example entry:
-# - path: git/changed-files
-#   script: package
-#   output: dist
+  - path: git/changed-files
+    scripts: [build, package]
+    output: dist
+    installer: yarn
+# Example additional entry (do not reuse a path that is already listed):
+# - path: group/example-action
+#   script: build
+#   output: lib
+#   installer: npm

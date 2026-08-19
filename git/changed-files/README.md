@@ -1,7 +1,7 @@
 # GitHub changed-files action
 
-The current version in this repo was based off of [**changed-files** v45.0.5](https://github.com/tj-actions/changed-files/releases/tag/v45.0.5)
-- Specifically [this commit](https://github.com/tj-actions/changed-files/commit/bab30c2299617f6615ec02a68b9a40d10bd21366)
+The current version in this repo was based off of [**changed-files** v47.0.6](https://github.com/tj-actions/changed-files/releases/tag/v47.0.6)
+- Specifically [this commit](https://github.com/tj-actions/changed-files/commit/9426d40962ed5378910ee2e21d5f8c6fcbf2dd96)
 - This action is from https://github.com/tj-actions/changed-files
 
 The [`tj-actions/changed-files`](https://github.com/tj-actions/changed-files) has an MIT license:
@@ -9,7 +9,7 @@ The [`tj-actions/changed-files`](https://github.com/tj-actions/changed-files) ha
 
 ## Updates to the action
 
-None at this time.
+Imported from upstream tag `v47.0.6` at commit `9426d40962ed5378910ee2e21d5f8c6fcbf2dd96` (immutable release). The known-bad tag-mutation commit is not in that object graph. `dist/` was rebuilt locally from `yarn.lock`; the shipped and rebuilt bundles can differ across Node versions.
 
 # changed-files
 
