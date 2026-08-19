@@ -58,7 +58,7 @@ jobs:
       - name: Triage issues using actions/stale
         # Verified creator: https://github.com/marketplace/actions/close-stale-issues
         # Marks issues and pull requests that have not had recent interaction
-        uses: actions/stale@1e223db275d687790206a7acac4d1a11bd6fe629 # v10.4.0
+        uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
         with:
           days-before-close: -1 # do not close issues or PRs
           days-before-issue-stale: 90
