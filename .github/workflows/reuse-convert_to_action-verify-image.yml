@@ -5,6 +5,9 @@ run-name: verify-id
 # NOTE: Because of how re-usable workflows handle inputs, all of the booleans must be treated as strings
 # see https://github.com/actions/runner/issues/1483 and https://github.com/actions/runner/issues/1483#issuecomment-1031671517
 
+permissions:
+  contents: read
+
 on:
   # 'workflow_call' will allow other GitHub workflows to call this workflow
   # https://docs.github.com/en/actions/using-workflows/reusing-workflows#creating-a-reusable-workflow

@@ -81,7 +81,7 @@ jobs:
         run: |
           echo "starting commitlint installation. "
           npm install conventional-changelog-conventionalcommits
-          npm install commitlint@latest
+          npm install commitlint@21.2.2
           npm install --save-dev @commitlint/{cli,config-conventional}
           echo "commitlint has been installed"
         # old commands to create the default commitlint configuration
