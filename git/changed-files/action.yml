@@ -338,5 +338,7 @@ runs:
   main: 'dist/index.js'
 
 branding:
-  icon: file-text
-  color: white
+  icon: 'file-text'
+  color: 'blue'
+  # Ref: https://haya14busa.github.io/github-action-brandings/
+  # fork: https://github.com/rwaight/github-action-brandings
