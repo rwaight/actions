@@ -57,7 +57,6 @@ Here is a current list of actions by category
 │   ├── label-checker
 │   ├── label-manager
 │   ├── label-sync
-│   ├── projectnext-label-assigner
 │   ├── repository-dispatch
 │   ├── runner-debug
 │   └── semantic-pull-request
