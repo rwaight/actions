@@ -2,6 +2,8 @@
 
 This directory contains actions that are used for building packages, images, etc.
 
+Version selection lives in `vars/`, not here: `builders/set-version` is `vars/build-version`, and `builders/set-method` is `vars/build-method`. Pin consumers to a commit SHA, not `@main`.
+
 ###
 
 ### Using KVM (Nested virtualization) in GitHub Actions
@@ -45,9 +47,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get the build version using rwaight/actions builders/set-version
+      - name: Get the build version using rwaight/actions vars/build-version
         id: get-version
-        uses: rwaight/actions/builders/set-version@main
+        uses: rwaight/actions/vars/build-version@<sha>
         with:
           checkout: false
           #event-name: ${{ github.event_name }}
@@ -75,9 +77,9 @@ jobs:
             echo "completing the 'print-build-version' step. "
             echo "::endgroup::"
 
-      - name: Get the build method using rwaight/actions builders/set-method
+      - name: Get the build method using rwaight/actions vars/build-method
         id: get-method
-        uses: rwaight/actions/builders/set-method@main
+        uses: rwaight/actions/vars/build-method@<sha>
         with:
           checkout: false
           #event-name: ${{ github.event_name }}
