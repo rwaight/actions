@@ -41,6 +41,10 @@ jobs:
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Install and build scripts come from the PR. Do not leave the
+          # GITHUB_TOKEN in .git/config while those scripts run.
+          persist-credentials: false
 
       - name: Read ncc verify allowlist
         id: allowlist
@@ -73,14 +77,16 @@ jobs:
         with:
           node-version: '24'
 
-      # Yarn Classic in changed-files needs Corepack so `yarn` matches the lockfile.
-      - name: Enable Corepack
+      # Yarn Classic for changed-files. Do not shim npm; setup-node already provides it.
+      - name: Enable Corepack Yarn
         id: enable-corepack
         if: steps.allowlist.outputs.count != '0'
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
         run: |
           echo "::group::starting the 'enable-corepack' step... "
-          echo "enabling Corepack so yarn and npm match the action lockfiles. "
-          corepack enable
+          echo "enabling the Corepack yarn shim only. "
+          corepack enable yarn
           echo "::endgroup::"
           echo ""
 
@@ -100,23 +106,45 @@ jobs:
           ))
           for item in actions:
               path = item["path"]
-              script = item.get("script", "package")
+              scripts = item.get("scripts")
+              if scripts is None:
+                  scripts = [item.get("script", "package")]
+              if not isinstance(scripts, list) or not scripts:
+                  raise SystemExit(f"{path}: set script: or a non-empty scripts: list")
               output = item.get("output", "dist")
               installer = item.get("installer")
               if installer is None:
                   installer = "yarn" if os.path.exists(os.path.join(path, "yarn.lock")) else "npm"
-              print(f"verifying '{path}' via '{installer} run {script}' and comparing '{path}/{output}/'. ")
+              if installer not in ("npm", "yarn"):
+                  raise SystemExit(f"{path}: unknown installer {installer!r} (expected npm or yarn)")
+              print(
+                  f"verifying '{path}' via '{installer} run {' && '.join(scripts)}' "
+                  f"and comparing '{path}/{output}/'. "
+              )
               if installer == "yarn":
                   if not os.path.exists(os.path.join(path, "yarn.lock")):
                       raise SystemExit(f"{path} is missing yarn.lock")
                   subprocess.check_call(["yarn", "install", "--frozen-lockfile"], cwd=path)
-                  subprocess.check_call(["yarn", "run", script], cwd=path)
+                  for name in scripts:
+                      subprocess.check_call(["yarn", "run", name], cwd=path)
               else:
                   if not os.path.exists(os.path.join(path, "package-lock.json")):
                       raise SystemExit(f"{path} is missing package-lock.json")
                   subprocess.check_call(["npm", "ci"], cwd=path)
-                  subprocess.check_call(["npm", "run", script], cwd=path)
-              subprocess.check_call(["git", "diff", "--exit-code", "--", f"{path}/{output}"])
+                  for name in scripts:
+                      subprocess.check_call(["npm", "run", name], cwd=path)
+              output_path = f"{path}/{output}"
+              dirty = subprocess.check_output(
+                  ["git", "status", "--porcelain", "-uall", "--", output_path],
+                  text=True,
+              )
+              if dirty:
+                  subprocess.call(["git", "diff", "--", output_path])
+                  raise SystemExit(
+                      f"{output_path} does not match the rebuild:\n{dirty}"
+                      f"run '{' && '.join([installer+' run '+s for s in scripts])}' "
+                      f"and commit {output_path}/"
+                  )
           PY
           echo "::endgroup::"
           echo ""

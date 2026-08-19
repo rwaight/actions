@@ -7,7 +7,7 @@ actions:
     output: lib
     installer: npm
   - path: git/changed-files
-    script: package
+    scripts: [build, package]
     output: dist
     installer: yarn
 # Example entry:
