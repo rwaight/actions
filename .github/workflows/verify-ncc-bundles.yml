@@ -1,7 +1,7 @@
 # Rebuild committed JS bundles (ncc / similar) and fail if the output differs.
-# Allowlist starts empty. An action joins the list in the same PR that first
-# rebuilds it (lockfile + the script that emits dist/ or lib/).
-# This check is not required. Later action-update PRs add themselves.
+# An action joins the allowlist in the same PR that first rebuilds it
+# (lockfile + the script that emits dist/ or lib/).
+# This check is not required.
 
 name: Verify ncc bundles
 run-name: Rebuild committed JS bundles on ${{ github.event_name }}
@@ -13,6 +13,8 @@ on:
       - opened
       - synchronize  # new commits pushed to the PR branch
       - reopened
+    # Keep this list in sync with .github/ncc-verify-allowlist.yml.
+    # A new allowlist path that is missing here will not trigger this workflow.
     paths:
       - '.github/workflows/verify-ncc-bundles.yml'
       - '.github/ncc-verify-allowlist.yml'
@@ -30,18 +32,21 @@ concurrency:
 
 jobs:
 
-  verify:
-    name: Rebuild allowlisted bundles
+  read-allowlist:
+    name: Read ncc verify allowlist
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    # Not a required check. Allowlist starts empty, so this job often only
-    # reports that there is nothing to verify.
+    timeout-minutes: 5
+    outputs:
+      count: ${{ steps.allowlist.outputs.count }}
+      actions: ${{ steps.allowlist.outputs.actions }}
     steps:
 
       - name: Checkout files from commit tree
         # Verified creator: https://github.com/marketplace/actions/checkout
         # GitHub Action for checking out a repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Read ncc verify allowlist
         id: allowlist
@@ -52,12 +57,24 @@ jobs:
           count="$(yq e '.actions | length' .github/ncc-verify-allowlist.yml)"
           echo "allowlist action count is ${count}. "
           echo "count=${count}" >> "$GITHUB_OUTPUT"
+          {
+            echo "actions<<EOF"
+            yq e -o=json '.actions' .github/ncc-verify-allowlist.yml
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
           echo "::endgroup::"
           echo ""
 
+  skip-empty:
+    name: Skip empty allowlist
+    needs: read-allowlist
+    if: needs.read-allowlist.outputs.count == '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+
       - name: Skip empty allowlist
         id: skip-empty
-        if: steps.allowlist.outputs.count == '0'
         run: |
           echo "::group::starting the 'skip-empty' step... "
           echo "the allowlist is empty; no bundles to verify. "
@@ -65,39 +82,123 @@ jobs:
           echo "::endgroup::"
           echo ""
 
+  verify:
+    name: Rebuild ${{ matrix.action.path }}
+    needs: read-allowlist
+    if: needs.read-allowlist.outputs.count != '0'
+    runs-on: ubuntu-latest
+    # 15 minutes is enough for one uncached install plus ncc. Matrix runs
+    # one action per job, so two allowlist entries do not share this budget.
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        action: ${{ fromJSON(needs.read-allowlist.outputs.actions) }}
+    steps:
+
+      - name: Checkout files from commit tree
+        # Verified creator: https://github.com/marketplace/actions/checkout
+        # GitHub Action for checking out a repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Install and build scripts come from the PR. Do not leave the
+          # GITHUB_TOKEN in .git/config while those scripts run.
+          persist-credentials: false
+
       - name: Setup Node.js environment
         id: setup-node
-        if: steps.allowlist.outputs.count != '0'
         # Verified creator: https://github.com/marketplace/actions/setup-node-js-environment
         # Set up your GitHub Actions workflow with a specific version of node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
 
-      - name: Rebuild each allowlisted action
-        id: rebuild-bundles
-        if: steps.allowlist.outputs.count != '0'
+      # Yarn Classic for changed-files. Do not shim npm; setup-node already provides it.
+      - name: Enable Corepack Yarn
+        id: enable-corepack
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          echo "::group::starting the 'enable-corepack' step... "
+          echo "enabling the Corepack yarn shim only. "
+          corepack enable yarn
+          echo "::endgroup::"
+          echo ""
+
+      - name: Rebuild allowlisted action
+        id: rebuild-bundle
+        env:
+          NCC_ITEM: ${{ toJSON(matrix.action) }}
         run: |
           set -euo pipefail
-          echo "::group::starting the 'rebuild-bundles' step... "
-          echo "rebuilding each allowlisted action and comparing the committed output. "
+          echo "::group::starting the 'rebuild-bundle' step... "
+          echo "rebuilding the allowlisted action and comparing the committed output. "
           python3 - <<'PY'
           import json, os, subprocess
 
-          actions = json.loads(subprocess.check_output(
-              ["yq", "e", "-o=json", ".actions", ".github/ncc-verify-allowlist.yml"],
-              text=True,
-          ))
-          for item in actions:
-              path = item["path"]
-              script = item.get("script", "package")
-              output = item.get("output", "dist")
-              print(f"verifying '{path}' via 'npm run {script}' and comparing '{path}/{output}/'. ")
+          def run(cmd, cwd):
+              print(f"running {' '.join(cmd)} in {cwd}. ")
+              try:
+                  subprocess.check_call(cmd, cwd=cwd)
+              except subprocess.CalledProcessError as exc:
+                  raise SystemExit(
+                      f"command failed ({exc.returncode}): {' '.join(cmd)} in {cwd}. "
+                  ) from None
+
+          def assert_safe_path(path):
+              parts = path.split("/")
+              if (
+                  not path
+                  or os.path.isabs(path)
+                  or path.startswith("/")
+                  or ".." in parts
+              ):
+                  raise SystemExit(
+                      f"refusing path {path!r}: must be a relative workspace path with no '..'. "
+                  )
+
+          item = json.loads(os.environ["NCC_ITEM"])
+          path = item["path"]
+          assert_safe_path(path)
+          scripts = item.get("scripts")
+          if scripts is None:
+              scripts = [item.get("script", "package")]
+          if not isinstance(scripts, list) or not scripts:
+              raise SystemExit(f"{path}: set script: or a non-empty scripts: list. ")
+          output = item.get("output", "dist")
+          assert_safe_path(f"{path}/{output}")
+          installer = item.get("installer")
+          if installer is None:
+              installer = "yarn" if os.path.exists(os.path.join(path, "yarn.lock")) else "npm"
+          if installer not in ("npm", "yarn"):
+              raise SystemExit(
+                  f"{path}: unknown installer {installer!r} (expected npm or yarn). "
+              )
+          how = " && ".join(f"{installer} run {name}" for name in scripts)
+          print(f"verifying '{path}' via '{how}' and comparing '{path}/{output}/'. ")
+          if installer == "yarn":
+              if not os.path.exists(os.path.join(path, "yarn.lock")):
+                  raise SystemExit(f"{path} is missing yarn.lock. ")
+              run(["yarn", "install", "--frozen-lockfile"], path)
+              for name in scripts:
+                  run(["yarn", "run", name], path)
+          else:
               if not os.path.exists(os.path.join(path, "package-lock.json")):
-                  raise SystemExit(f"{path} is missing package-lock.json")
-              subprocess.check_call(["npm", "ci"], cwd=path)
-              subprocess.check_call(["npm", "run", script], cwd=path)
-              subprocess.check_call(["git", "diff", "--exit-code", "--", f"{path}/{output}"])
+                  raise SystemExit(f"{path} is missing package-lock.json. ")
+              run(["npm", "ci"], path)
+              for name in scripts:
+                  run(["npm", "run", name], path)
+          output_path = f"{path}/{output}"
+          dirty = subprocess.check_output(
+              ["git", "status", "--porcelain", "-uall", "--", output_path],
+              text=True,
+          )
+          if dirty:
+              subprocess.call(["git", "diff", "--", output_path])
+              raise SystemExit(
+                  f"{output_path} does not match the rebuild:\n{dirty}"
+                  f"run '{how}' and commit {output_path}/. "
+              )
           PY
           echo "::endgroup::"
           echo ""

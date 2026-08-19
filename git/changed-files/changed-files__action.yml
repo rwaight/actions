@@ -227,6 +227,14 @@ inputs:
     description: "Exclude changes to submodules."
     required: false
     default: "false"
+  exclude_symlinks:
+    description: "Exclude symlinks from changed files."
+    required: false
+    default: "false"
+  skip_same_sha:
+    description: "Do not fail when base and head SHAs are identical."
+    required: false
+    default: "false"
   fetch_missing_history_max_retries:
     description: "Maximum number of retries to fetch missing history."
     required: false
@@ -250,6 +258,8 @@ outputs:
     description: "Returns only files that are Added (A)."
   added_files_count:
     description: "Returns the number of `added_files`"
+  any_added:
+    description: "Returns `true` when any of the filenames provided using the `files*` or `files_ignore*` inputs have been added."
   copied_files:
     description: "Returns only files that are Copied (C)."
   copied_files_count:
@@ -324,7 +334,7 @@ outputs:
     description: "Returns all changed YAML keys when the `files_yaml` input is used. i.e. key that contains any path that has either been added, copied, modified, and renamed (ACMR)"
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
 
 branding:
