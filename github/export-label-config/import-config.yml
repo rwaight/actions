@@ -15,7 +15,10 @@ source:
   repo_name: export-label-config
   repo_url: https://github.com/EndBug/export-label-config
   current_version: v1.0.1
+  current_commit_sha: 006dc66313a93352fb0b7958e4152dce7152d285
   latest_version: v1.0.1
+  last_reviewed: "2026-08-18"
+  upstream_status: abandoned
   override:
     use_commits: true
     latest_version_commit: dd7608994f61774a59e9011a8386ee98976328c9
@@ -26,7 +29,7 @@ specs:
   inputs: [token, raw-result, add-aliases]
   outputs: []
   runs:
-    using: node20
+    using: node24
     main: lib/index.js
 tests:
   _comment: reserved for future use

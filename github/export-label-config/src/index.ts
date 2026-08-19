@@ -1,10 +1,9 @@
 import * as core from '@actions/core'
-import * as artifact from '@actions/artifact'
-import axios from 'axios'
-import tmp from 'tmp'
-import yamljs from 'yamljs'
-import fs from 'fs'
-import path from 'path'
+import { DefaultArtifactClient } from '@actions/artifact'
+import * as yaml from 'js-yaml'
+import * as fs from 'fs'
+import * as os from 'os'
+import * as path from 'path'
 
 const { endGroup, getInput, startGroup } = core
 const log = {
@@ -17,6 +16,8 @@ const log = {
   fatal: (str: string) => core.setFailed('✗ ' + str)
 }
 
+type GitHubLabel = Record<string, string | boolean | null | undefined>
+
 ;(async () => {
   try {
     checkInputs()
@@ -24,6 +25,11 @@ const log = {
     const labels = await fetchLabels()
 
     await uploadResult(labels)
+
+    await core.summary
+      .addHeading('Exported label config')
+      .addRaw(`Exported ${labels.length} labels.`)
+      .write()
 
     log.success(
       'Upload complete! You can find the results in the artifacts of this workflow run.'
@@ -47,26 +53,62 @@ function checkInputs() {
     throw 'The only values you can use for the `add-aliases` option are `true` and `false`'
 }
 
+function nextPageUrl(linkHeader: string | null): string | null {
+  if (!linkHeader) return null
+  for (const part of linkHeader.split(',')) {
+    const match = part.match(/<([^>]+)>\s*;\s*rel="next"/)
+    if (match) return match[1]
+  }
+  return null
+}
+
+async function fetchAllGitHubLabels(): Promise<GitHubLabel[]> {
+  const token = getInput('token')
+  const repo = process.env.GITHUB_REPOSITORY
+  if (!repo) throw 'GITHUB_REPOSITORY is not set'
+
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'rwaight-actions-export-label-config'
+  }
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  const labels: GitHubLabel[] = []
+  let url: string | null =
+    `https://api.github.com/repos/${repo}/labels?per_page=100`
+  let page = 1
+
+  while (url) {
+    log.info(`Fetching labels page ${page}: ${url}`)
+    const response = await fetch(url, { headers })
+    if (!response.ok) {
+      const body = await response.text()
+      throw `GitHub labels API failed with ${response.status}: ${body}`
+    }
+    const data = await response.json()
+    if (!Array.isArray(data)) throw "Can't get label data from GitHub API"
+    labels.push(...(data as GitHubLabel[]))
+    url = nextPageUrl(response.headers.get('link'))
+    page += 1
+  }
+
+  return labels
+}
+
 async function fetchLabels() {
   startGroup('Labels fetching')
 
-  const token = getInput('token'),
-    rawResult = getInput('raw-result') == 'true',
+  const rawResult = getInput('raw-result') == 'true',
     addAliases = getInput('add-aliases') == 'true'
 
-  const url = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/labels`,
-    headers = token ? { Authorization: `token ${token}` } : undefined
-  log.info(`Using following URL: ${url}`)
-
-  const { data } = await axios.get(url, { headers, params: { per_page: 1000 } })
-  if (!data || !(data instanceof Array))
-    throw "Can't get label data from GitHub API"
+  const data = await fetchAllGitHubLabels()
 
   log.success(`${data.length} labels fetched.`)
   endGroup()
 
   return rawResult
-    ? (data as Record<string, string | boolean>[])
+    ? data
     : data.map((element) => ({
         name: element.name as string,
         color: element.color as string,
@@ -75,20 +117,19 @@ async function fetchLabels() {
       }))
 }
 
-async function uploadResult(labels: Record<string, any>[]) {
-  // #region File generation
+async function uploadResult(labels: Record<string, unknown>[]) {
   startGroup('Files generation')
 
-  const tempDir = tmp.dirSync()
-  log.info(`Using temp directory: ${tempDir.name}`)
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'export-label-config-'))
+  log.info(`Using temp directory: ${tempDir}`)
 
   const json = JSON.stringify(labels, null, 2),
-    yaml = yamljs.stringify(labels, 2, 2),
+    yamlText = yaml.dump(labels, { indent: 2, noRefs: true }),
     errors: ('json' | 'yaml')[] = []
 
   log.info('Writing JSON file...')
   try {
-    fs.writeFileSync(path.join(tempDir.name, 'labels.json'), json)
+    fs.writeFileSync(path.join(tempDir, 'labels.json'), json)
     log.success('Successfully wrote JSON file.')
   } catch {
     errors.push('json')
@@ -96,7 +137,7 @@ async function uploadResult(labels: Record<string, any>[]) {
 
   log.info('Writing YAML file...')
   try {
-    fs.writeFileSync(path.join(tempDir.name, 'labels.yaml'), yaml)
+    fs.writeFileSync(path.join(tempDir, 'labels.yaml'), yamlText)
     log.success('Successfully wrote YAML file.')
   } catch {
     errors.push('yaml')
@@ -107,12 +148,10 @@ async function uploadResult(labels: Record<string, any>[]) {
     log.error(`Couldn't write ${errors[0].toUpperCase()} file.`)
 
   endGroup()
-  // #endregion
 
-  // #region Artifact upload
   startGroup('Artifact upload')
   const files = ['labels.json', 'labels.yaml'].filter(
-    (f) => !f.endsWith(errors[0])
+    (f) => !errors.includes(f.replace('labels.', '') as 'json' | 'yaml')
   )
   log.info(
     `Uploading ${files.length} file${
@@ -120,27 +159,23 @@ async function uploadResult(labels: Record<string, any>[]) {
     }: ${files.join(', ')}`
   )
 
+  const artifact = new DefaultArtifactClient()
   const response = await artifact
-    .create()
     .uploadArtifact(
       'Label config',
-      files.map((f) => path.join(tempDir.name, f)),
-      tempDir.name
+      files.map((f) => path.join(tempDir, f)),
+      tempDir
     )
     .catch(() => {
       throw "Couldn't upload any file as artifact."
     })
 
-  if (response) {
-    log.info('Artifact result: ' + JSON.stringify(response, null, 2))
+  if (!response || response.id === undefined)
+    throw "Couldn't upload any file as artifact."
 
-    if (response.failedItems.length >= files.length)
-      throw "Couldn't upload any file as artifact."
-    else if (response.failedItems.length == 1)
-      log.error(`Couldn't upload ${response.failedItems[0]} as artifact.`)
-    else log.success('Successfully uploaded files.')
-  } else {
-    log.error("Can't read upload results.", false)
-  }
+  log.info('Artifact result: ' + JSON.stringify(response, null, 2))
+  log.success(
+    `Successfully uploaded files as artifact ${response.id} (${response.size} bytes).`
+  )
   endGroup()
 }
