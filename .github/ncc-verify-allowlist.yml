@@ -6,3 +6,7 @@ actions:
     script: build
     output: lib
     installer: npm
+# Example entry:
+# - path: git/changed-files
+#   script: package
+#   output: dist
