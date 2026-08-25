@@ -48,11 +48,11 @@ concurrency:
   #cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
 
 jobs:
-  pr-labeler:
-    # Job id stays `pr-labeler`. Check name is `pr-labeler` for meaningful events
-    # so required status checks still match (e.g. rwaight/actions). Ignored
-    # bot-labeled runs use a different name: GitHub treats a skipped job as
-    # success, and a later skipped `pr-labeler` check would mask an earlier fail.
+  # Job id must not be `pr-labeler`. A skipped job is success for required checks,
+  # and GitHub may publish the job id (or an unevaluated `name:` expression) as
+  # the check name. Meaningful runs set name `pr-labeler` so branch protection
+  # still matches. Ignored bot-labeled runs must never publish that name.
+  pr-labeler-bot-labeled-skip:
     name: ${{ github.event.action == 'labeled' && (github.actor == format('{0}[bot]', vars.GH_LOCAL_BOT_NAME || 'rw-actions-bot') || github.actor == 'github-actions[bot]' || github.actor == 'dependabot[bot]' || (vars.GH_LOCAL_USER_NAME != '' && github.actor == vars.GH_LOCAL_USER_NAME)) && 'pr-labeler-bot-labeled-skip' || 'pr-labeler' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
