@@ -12,8 +12,7 @@ on:
       - reopened
       - ready_for_review   # convert from draft → PR (labels may differ)
       - synchronize        # new commits pushed to PR branch (re-infer type label)
-      - labeled            # re-run after manual label change; self-trigger loop is mitigated by
-      #                    #   cancel-in-progress (bot-applied labels won't cancel the in-progress run)
+      - labeled            # human type:/version: recovery; bot labeled is skipped (job if + isolated group)
       # Intentionally excluded:
       # - unlabeled        # disabled: same self-trigger concern as 'labeled', but unlabeled events
       #                    #   are rare and add no validation value — removal is intentional
@@ -37,23 +36,41 @@ env:
   # the owner of the repo, used in conditionals below
   GH_OWNER: rwaight
 
+# Bot-generated labeled events still create a workflow run before the job if skips.
+# Put those runs in a separate group so they cannot cancel a running useful job or
+# replace a pending useful run (default queue is one pending slot per group).
 # https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
   # https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-or-runs-for-the-current-workflow
-  group: ${{ github.workflow }}-${{ github.ref }}
-  #cancel-in-progress: true
-  # to-do: use 'GH_LOCAL_BOT_NAME' ##cancel-in-progress: ${{ github.actor != '${{ env.GH_LOCAL_BOT_NAME }}[bot]' }}
-  cancel-in-progress: ${{ github.actor != 'rw-actions-bot[bot]' }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.action == 'labeled' && (github.actor == format('{0}[bot]', vars.GH_LOCAL_BOT_NAME || 'rw-actions-bot') || github.actor == 'github-actions[bot]' || github.actor == 'dependabot[bot]' || (vars.GH_LOCAL_USER_NAME != '' && github.actor == vars.GH_LOCAL_USER_NAME)) && 'bot-labeled' || 'work' }}
+  cancel-in-progress: true
   #https://docs.github.com/en/actions/using-jobs/using-concurrency#example-only-cancel-in-progress-jobs-on-specific-branches
   #cancel-in-progress: ${{ !contains(github.ref, 'release/')}}
 
 jobs:
-  pr-labeler:
-    #name: Label pull request ${{ github.event.number }}
+  # Job id is `pr-labeler-evaluation` and must not be `pr-labeler`. A skipped
+  # job is success for required checks. GitHub may publish the job id or an
+  # unevaluated `name:` expression as the check name. Meaningful runs set
+  # name `pr-labeler` so branch protection still matches. Ignored bot-labeled
+  # runs must never publish that required name.
+  pr-labeler-evaluation:
+    name: ${{ github.event.action == 'labeled' && (github.actor == format('{0}[bot]', vars.GH_LOCAL_BOT_NAME || 'rw-actions-bot') || github.actor == 'github-actions[bot]' || github.actor == 'dependabot[bot]' || (vars.GH_LOCAL_USER_NAME != '' && github.actor == vars.GH_LOCAL_USER_NAME)) && 'pr-labeler-bot-labeled-skip' || 'pr-labeler' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    # the 'if' statement below is not needed at this time, but would be if the 'on' section above changes
-    if: github.event_name == 'pull_request'
+    # Skip bot-generated labeled events before a runner is allocated (0 billed minutes).
+    # Also skip labeled from vars.GH_LOCAL_USER_NAME: when GH_LOCAL_PRIMARY=user the
+    # updater PAT is not a [bot] login, but those label mutations still retrigger.
+    # github-actions[bot] is defensive: GITHUB_TOKEN label mutations do not create
+    # new workflow runs, so that actor cannot self-trigger labeled.
+    # Keep human labeled (type:/version: recovery) and all opened/synchronize/reopened/ready_for_review
+    # including Dependabot. Do not use workflow-level paths: for this skip (required checks would stay pending).
+    if: |
+      github.event_name == 'pull_request' &&
+      !(github.event.action == 'labeled' &&
+        (github.actor == format('{0}[bot]', vars.GH_LOCAL_BOT_NAME || 'rw-actions-bot') ||
+         github.actor == 'github-actions[bot]' ||
+         github.actor == 'dependabot[bot]' ||
+         (vars.GH_LOCAL_USER_NAME != '' && github.actor == vars.GH_LOCAL_USER_NAME)))
     permissions:
       # the `actions: write` permission might need to be added if
       #   the `gh run cancel` does not work
